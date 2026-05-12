@@ -1,0 +1,51 @@
+assets/
+  ├── Scenes/           # 僅存放主入口與核心場景 (盡量少動)
+  ├── Prefabs/          # 所有的遊戲物件 (Player, NPC, Items, Tiles)
+  ├── Scripts/          # 程式碼
+  │   ├── Core/         # 核心邏輯 (GameManager, EventCenter)
+  │   ├── Player/       # 玩家控制、進化邏輯
+  │   ├── Entity/       # NPC 基類與三種行為 AI
+  │   ├── Map/          # 地圖生成、區塊管理 (Land, Sea, Underground)
+  │   ├── UI/           # 排行榜、道具欄、血條
+  │   └── Utils/        # 工具類 (Physics, Math)
+  ├── Resources/        # 需要動態加載的資源
+  └── Textures/         # 靜圖、貼圖集 (Atlas)
+
+這四個檔案在 Scripts/Core/ 裡面，是整個遊戲的地基。
+
+1. Constants.ts (全域常數字典)
+功能：統一定義遊戲中的「事件名稱」和「實體種類」。
+
+為什麼需要：避免有人打錯字（例如把 PLAYER_DIED 打成 Player_Die 導致收不到事件）。要新增事件或 NPC 種類，統一來這邊加。
+
+2. EventCenter.ts (廣播中心)
+功能：負責傳遞資料。它是標準的觀察者模式（Observer Pattern）實作。
+
+用法：
+
+發送資料（例如玩家扣血了）：EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 目前血量);
+
+接收資料（例如 UI 要更新血條）：EventCenter.on(GameEvent.PLAYER_HP_CHANGED, 更新UI的Function, this);
+
+3. BaseEntity.ts (實體通用藍圖)
+功能：所有在畫面上會動、有血量的東西（Player、NPC）都要 繼承 它，而不是繼承 cc.Component。
+
+為什麼需要：它已經幫你寫好了 maxHp、currentHp、takeDamage() (受傷) 和 die() (死亡) 的基礎邏輯。你只要在自己的腳本裡 override 這些 function 加上特效或音效就好。
+
+層級管理器：
+Canvas
+ ├── Main Camera
+ │
+ ├── [Core_Controllers]    // 系統大腦區 (不可見)
+ │    └── GameManager      // 掛載 GameManager.ts
+ │
+ ├── [World_Root]          // 遊戲世界區 (所有有座標的東西都在這)
+ │    ├── Map_Layer        // 地圖層：NTHU校園、海洋、地下的 TileMap 放這裡
+ │    ├── Item_Layer       // 掉落物層：被砍掉的椰子、挖出的礦石動態生成在這
+ │    ├── Entity_Layer     // 實體層：所有的玩家、NPC 都動態生成在這一層
+ │    └── Bullet_Layer     // 投射物層：弓箭、遠程攻擊的子彈
+ │
+ └── [UI_Root]             // 介面區 (永遠擋在世界畫面的最上層)
+      ├── HUD_Layer        // 常駐介面：血條、氧氣條、道具欄 (掛載 UIManager.ts)
+      ├── PopUp_Layer      // 彈出介面：排行榜、升級進化提示
+      └── Screen_Layer     // 全螢幕介面：死亡結算畫面
