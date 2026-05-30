@@ -1,5 +1,0 @@
-Master/main要確定沒問題的版本再放上去
-Develop就是平常開發的主分支
-要寫功能就自己再拉分支出來寫
-寫完merge到develop
-最後沒問題再merge回main/master
