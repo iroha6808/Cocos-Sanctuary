@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "4502d030-9ebd-426c-ab89-c8bced08972f",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 40,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "SlipperyIceTiles": {
+      "ver": "1.0.6",
+      "uuid": "2717b648-b6a4-4a36-a96c-5bd7c50ebe21",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "4502d030-9ebd-426c-ab89-c8bced08972f",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 8,
+      "trimY": 8,
+      "width": 24,
+      "height": 48,
+      "rawWidth": 40,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

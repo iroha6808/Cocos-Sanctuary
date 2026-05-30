@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "74d49035-2a5c-46d7-b840-4cb1a2179244",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 256,
+  "height": 256,
+  "platformSettings": {},
+  "subMetas": {
+    "Icon_PictoIcon_Appstore": {
+      "ver": "1.0.6",
+      "uuid": "2ec4d038-6c7a-4937-b684-381c2b951146",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "74d49035-2a5c-46d7-b840-4cb1a2179244",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 1.5,
+      "offsetY": 10,
+      "trimX": 61,
+      "trimY": 36,
+      "width": 137,
+      "height": 164,
+      "rawWidth": 256,
+      "rawHeight": 256,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

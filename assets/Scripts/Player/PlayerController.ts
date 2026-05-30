@@ -1,5 +1,5 @@
 import BaseEntity from "../Core/BaseEntity";
-import EventCenter from "../Core/EventCenter"; // 注意這裡改為 Default Import
+import EventCenter from "../Core/EventCenter"; 
 import { GameEvent, EntityType } from "../Core/Constants";
 
 const { ccclass, property } = cc._decorator;
@@ -11,8 +11,10 @@ export default class PlayerController extends BaseEntity {
     moveSpeed: number = 200;
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
-    private exp: number = 0;
-    private level: number = 1;
+    
+    private anim: cc.Animation = null;
+    private currentAnimName: string = "";
+    private bodyNode: cc.Node = null;
 
     onLoad() {
         super.onLoad(); 
@@ -20,6 +22,11 @@ export default class PlayerController extends BaseEntity {
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+
+        this.bodyNode = this.node.getChildByName("Sprite_Body");
+        if (this.bodyNode) {
+            this.anim = this.bodyNode.getComponent(cc.Animation);
+        }
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
@@ -41,34 +48,31 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
-        if (this.moveDir.x !== 0 || this.moveDir.y !== 0) {
+        let isMoving = this.moveDir.x !== 0 || this.moveDir.y !== 0;
+
+        if (isMoving) {
             let velocity = this.moveDir.normalize().mul(this.moveSpeed * dt);
             this.node.x += velocity.x;
             this.node.y += velocity.y;
+
+            if (this.moveDir.x !== 0 && this.bodyNode) {
+                this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
+            }
+
+            this.playAnimation("PlayerRun"); 
+        } else {
+            this.playAnimation("PlayerIdle");
         }
     }
 
-    public gainExp(amount: number) {
-        this.exp += amount;
-        EventCenter.emit(GameEvent.PLAYER_EXP_CHANGED, this.exp);
+    private playAnimation(animName: string) {
+        if (!this.anim) return;
         
-        if (this.exp > 1000 && this.level === 1) {
-            this.evolveToUltimate();
-        }
+        if (this.currentAnimName === animName) return;
+
+        this.anim.play(animName);
+        this.currentAnimName = animName;
     }
 
-    private evolveToUltimate() {
-        this.level = 2;
-        this.moveSpeed += 100;
-        console.log("進化！最終型態：朱宏國！ - PlayerController.ts:63");
-    }
-
-    protected onDamaged() {
-        EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
-    }
-
-    protected die() {
-        EventCenter.emit(GameEvent.PLAYER_DIED);
-        this.node.active = false; 
-    }
+    // TODO: other functions like mining or attacking
 }

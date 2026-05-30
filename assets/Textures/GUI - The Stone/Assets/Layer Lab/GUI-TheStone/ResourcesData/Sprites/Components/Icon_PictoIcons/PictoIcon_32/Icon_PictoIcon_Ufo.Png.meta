@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "e765e864-6d0f-4a26-ae1f-9638d6ac43c9",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 32,
+  "height": 32,
+  "platformSettings": {},
+  "subMetas": {
+    "Icon_PictoIcon_Ufo": {
+      "ver": "1.0.6",
+      "uuid": "89eb833f-1de2-46ec-b9f2-68fc340d9bb6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "e765e864-6d0f-4a26-ae1f-9638d6ac43c9",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0.5,
+      "trimX": 3,
+      "trimY": 6,
+      "width": 26,
+      "height": 19,
+      "rawWidth": 32,
+      "rawHeight": 32,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

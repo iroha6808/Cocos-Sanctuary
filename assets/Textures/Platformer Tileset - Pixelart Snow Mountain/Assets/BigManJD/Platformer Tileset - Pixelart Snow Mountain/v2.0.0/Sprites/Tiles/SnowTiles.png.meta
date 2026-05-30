@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "77c79d9f-d052-48bc-92e8-ea5fa3618cce",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 144,
+  "height": 32,
+  "platformSettings": {},
+  "subMetas": {
+    "SnowTiles": {
+      "ver": "1.0.6",
+      "uuid": "5c674d03-dac1-43a0-8049-2a78f94ff516",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "77c79d9f-d052-48bc-92e8-ea5fa3618cce",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 1.5,
+      "offsetY": 0,
+      "trimX": 12,
+      "trimY": 1,
+      "width": 123,
+      "height": 30,
+      "rawWidth": 144,
+      "rawHeight": 32,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

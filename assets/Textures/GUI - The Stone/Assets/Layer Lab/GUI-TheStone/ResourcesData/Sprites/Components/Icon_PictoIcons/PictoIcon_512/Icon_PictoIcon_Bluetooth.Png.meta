@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "e83f7d30-6067-405f-a6d8-cf6d638d2287",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 512,
+  "platformSettings": {},
+  "subMetas": {
+    "Icon_PictoIcon_Bluetooth": {
+      "ver": "1.0.6",
+      "uuid": "a4d176d0-beac-4a8a-84f7-91a4c57ff1b6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "e83f7d30-6067-405f-a6d8-cf6d638d2287",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -2.5,
+      "offsetY": 2.5,
+      "trimX": 138,
+      "trimY": 82,
+      "width": 231,
+      "height": 343,
+      "rawWidth": 512,
+      "rawHeight": 512,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

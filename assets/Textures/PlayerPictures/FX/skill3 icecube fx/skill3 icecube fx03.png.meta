@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "9d18f2ef-d8fc-48bd-846b-044b0b4b5bdf",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 64,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "skill3 icecube fx03": {
+      "ver": "1.0.6",
+      "uuid": "0c6e0094-f93c-4b79-bb1b-5d3c1182a13e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "9d18f2ef-d8fc-48bd-846b-044b0b4b5bdf",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -1.5,
+      "offsetY": 0.5,
+      "trimX": 23,
+      "trimY": 23,
+      "width": 15,
+      "height": 17,
+      "rawWidth": 64,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

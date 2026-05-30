@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "a012a09e-f258-4bba-a0ad-5f6614fe04b8",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 512,
+  "height": 512,
+  "platformSettings": {},
+  "subMetas": {
+    "Icon_PictoIcon_Sword": {
+      "ver": "1.0.6",
+      "uuid": "5ecf95b0-49f7-496e-88b3-787fb767ea19",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "a012a09e-f258-4bba-a0ad-5f6614fe04b8",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 1.5,
+      "offsetY": 1,
+      "trimX": 100,
+      "trimY": 98,
+      "width": 315,
+      "height": 314,
+      "rawWidth": 512,
+      "rawHeight": 512,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

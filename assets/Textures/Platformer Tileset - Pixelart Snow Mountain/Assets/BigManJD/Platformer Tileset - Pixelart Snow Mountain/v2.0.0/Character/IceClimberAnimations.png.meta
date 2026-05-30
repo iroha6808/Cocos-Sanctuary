@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "f9afee6b-5fdf-4931-94b7-7a8ef1148d84",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 128,
+  "height": 128,
+  "platformSettings": {},
+  "subMetas": {
+    "IceClimberAnimations": {
+      "ver": "1.0.6",
+      "uuid": "9bbc66c1-a8b0-4c45-897d-9f9c6daed2bd",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "f9afee6b-5fdf-4931-94b7-7a8ef1148d84",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -0.5,
+      "offsetY": -6,
+      "trimX": 0,
+      "trimY": 12,
+      "width": 127,
+      "height": 116,
+      "rawWidth": 128,
+      "rawHeight": 128,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

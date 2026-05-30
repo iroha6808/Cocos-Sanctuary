@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "776be33b-7f2a-462f-ae09-5d8c802fa8bb",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 64,
+  "height": 64,
+  "platformSettings": {},
+  "subMetas": {
+    "Wall Slide FX05": {
+      "ver": "1.0.6",
+      "uuid": "bde4e265-176d-4e3d-92ac-3cec360b80fd",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "776be33b-7f2a-462f-ae09-5d8c802fa8bb",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 2.5,
+      "offsetY": 18,
+      "trimX": 33,
+      "trimY": 12,
+      "width": 3,
+      "height": 4,
+      "rawWidth": 64,
+      "rawHeight": 64,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
