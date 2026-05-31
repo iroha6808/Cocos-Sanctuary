@@ -128,9 +128,98 @@ assets/Textures/
 
 ### 2. 核心腳本
 
-- [ ] 修正 `GameManager.ts` 和 `UIManager.ts` 的 `EventCenter` import 寫法。
-- [ ] 改善 `EventCenter.off()`，避免事件取消失敗。
-- [ ] 確認 `BaseEntity.takeDamage()`、玩家死亡事件、UI 更新事件能正常串起來。
+核心腳本位置：`assets/Scripts/Core/`
+
+#### Constants.ts
+
+職責：集中管理遊戲共用常數，避免事件名稱和實體類型散落在各腳本。
+
+目前內容：
+
+- `GameEvent.PLAYER_HP_CHANGED`：玩家血量改變時通知 UI。
+- `GameEvent.PLAYER_EXP_CHANGED`：玩家經驗值改變時通知 UI。
+- `GameEvent.PLAYER_DIED`：玩家死亡時通知 GameManager。
+- `GameEvent.NPC_MOCKED`：預留給 NPC 被嘲諷或觸發敵意。
+- `GameEvent.SPAWN_ITEM`：預留給掉落物或生成道具。
+- `EntityType`：玩家、和平 NPC、中立 NPC、敵對 NPC。
+
+下一步：
+
+- [ ] 新增功能前先確認事件是否已存在，不要在其他腳本硬打字串。
+- [ ] 之後若加入道具、地圖、結算，可在這裡擴充 `GameEvent`。
+
+#### EventCenter.ts
+
+職責：全域事件中心，讓 Player、UI、GameManager 不需要直接互相抓節點也能溝通。
+
+目前流程：
+
+```text
+EventCenter.on(...)   註冊監聽
+EventCenter.emit(...) 發送事件
+EventCenter.off(...)  移除監聽
+```
+
+目前問題：
+
+- `on()` 內部存的是 `callback.bind(target)` 產生的新 function。
+- `off()` 卻拿原本的 `callback` 去比對，所以可能移除不到監聽。
+- 場景切換或節點銷毀後，事件可能殘留。
+
+下一步：
+
+- [ ] 調整事件資料結構，記錄 `callback`、`target`、`handler`。
+- [ ] 讓 `off(eventName, callback, target)` 可以正確找到並移除同一筆監聽。
+- [ ] 在 `onDestroy()` 中確認 GameManager、UIManager 都會取消事件。
+
+#### BaseEntity.ts
+
+職責：所有可受傷實體的基底，例如 Player、NPC。
+
+目前內容：
+
+- `type`：實體類型，可在 Inspector 下拉選。
+- `maxHp`：最大生命值，可在 Inspector 調整。
+- `currentHp`：目前生命值，`onLoad()` 時設為 `maxHp`。
+- `takeDamage(amount)`：扣血、呼叫 `onDamaged()`、血量小於等於 0 時呼叫 `die()`。
+- `onDamaged()`：給子類覆寫，例如玩家受傷時通知 UI。
+- `die()`：給子類覆寫，預設直接 destroy node。
+
+下一步：
+
+- [ ] 確認扣血不會變成負數，必要時 clamp 到 0。
+- [ ] 視需求加入 `heal(amount)`、`isDead`，避免死亡邏輯重複觸發。
+- [ ] Player 和 NPC 的死亡特效、掉落物、分數等都由子類覆寫處理。
+
+#### GameManager.ts
+
+職責：遊戲流程總管理器，負責初始化、全域事件反應、Game Over 流程。
+
+目前內容：
+
+- 使用 `GameManager.instance` 做簡單 Singleton。
+- Inspector 欄位 `playerNode` 用來掛玩家節點。
+- `onLoad()` 註冊 `PLAYER_DIED`。
+- `onGameOver()` 目前只印 log，之後接死亡結算 UI。
+- `start()` 預留 MapManager 初始化。
+
+目前問題：
+
+- `EventCenter.ts` 是 default export，但 `GameManager.ts` 現在寫 `import { EventCenter } from "./EventCenter";`，可能編譯失敗。
+- `onDestroy()` 呼叫 `EventCenter.off(GameEvent.PLAYER_DIED, this.onGameOver)`，但目前 `EventCenter.off()` 還不能正確處理 bind 後的 function。
+
+下一步：
+
+- [ ] 改成 `import EventCenter from "./EventCenter";`。
+- [ ] 等 `EventCenter.off()` 修好後，確認 `onDestroy()` 能正確取消 `PLAYER_DIED`。
+- [ ] 補 `onGameOver()`：暫停玩家/NPC、顯示結算 UI、必要時切換場景。
+
+#### 相關非 Core 腳本
+
+- [ ] `assets/Scripts/UI/UIManager.ts` 也要把 `import { EventCenter } from "../Core/EventCenter";` 改成 default import。
+- [ ] `assets/Scripts/Player/PlayerController.ts` 目前已使用 default import，是正確方向。
+- [ ] 核心腳本修完後，測試 `PlayerController.takeDamage()` -> `PLAYER_HP_CHANGED` -> `UIManager` 更新血條。
+- [ ] 測試玩家死亡時 `PLAYER_DIED` -> `GameManager.onGameOver()` 是否觸發。
 
 ### 3. 場景與 Inspector
 
