@@ -11,6 +11,7 @@ export default class PlayerController extends BaseEntity {
     moveSpeed: number = 200;
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
+    private keyStates: { [key: number]: boolean } = {};
     
     private anim: cc.Animation = null;
     private currentAnimName: string = "";
@@ -30,20 +31,35 @@ export default class PlayerController extends BaseEntity {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
-        switch (event.keyCode) {
-            case cc.macro.KEY.w: this.moveDir.y = 1; break;
-            case cc.macro.KEY.s: this.moveDir.y = -1; break;
-            case cc.macro.KEY.a: this.moveDir.x = -1; break;
-            case cc.macro.KEY.d: this.moveDir.x = 1; break;
-        }
+        this.applyMoveKey(event.keyCode, true);
     }
 
     onKeyUp(event: cc.Event.EventKeyboard) {
-        switch (event.keyCode) {
+        this.applyMoveKey(event.keyCode, false);
+    }
+
+    private applyMoveKey(keyCode: number, isDown: boolean) {
+        const wasDown = !!this.keyStates[keyCode];
+        if (wasDown === isDown) {
+            return;
+        }
+
+        this.keyStates[keyCode] = isDown;
+        const amount = isDown ? 1 : -1;
+
+        switch (keyCode) {
             case cc.macro.KEY.w:
-            case cc.macro.KEY.s: this.moveDir.y = 0; break;
+                this.moveDir.y += amount;
+                break;
+            case cc.macro.KEY.s:
+                this.moveDir.y -= amount;
+                break;
             case cc.macro.KEY.a:
-            case cc.macro.KEY.d: this.moveDir.x = 0; break;
+                this.moveDir.x -= amount;
+                break;
+            case cc.macro.KEY.d:
+                this.moveDir.x += amount;
+                break;
         }
     }
 
@@ -51,7 +67,7 @@ export default class PlayerController extends BaseEntity {
         let isMoving = this.moveDir.x !== 0 || this.moveDir.y !== 0;
 
         if (isMoving) {
-            let velocity = this.moveDir.normalize().mul(this.moveSpeed * dt);
+            let velocity = this.moveDir.clone().normalize().mul(this.moveSpeed * dt);
             this.node.x += velocity.x;
             this.node.y += velocity.y;
 
@@ -75,4 +91,9 @@ export default class PlayerController extends BaseEntity {
     }
 
     // TODO: other functions like mining or attacking
+
+    onDestroy() {
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+    }
 }

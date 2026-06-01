@@ -1,4 +1,4 @@
-import { EventCenter } from "./EventCenter";
+import EventCenter from "./EventCenter";
 import { GameEvent } from "./Constants";
 
 const { ccclass, property } = cc._decorator;
@@ -35,6 +35,6 @@ export default class GameManager extends cc.Component {
     }
 
     onDestroy() {
-        EventCenter.off(GameEvent.PLAYER_DIED, this.onGameOver);
+        EventCenter.off(GameEvent.PLAYER_DIED, this.onGameOver, this);
     }
 }

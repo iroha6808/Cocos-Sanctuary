@@ -1,195 +1,189 @@
-# Cocos Sanctuary 簡單規劃
+# Cocos Sanctuary Plan
 
-## 目標
+> PLAN.md 盡量維持 300 行內。本檔只放高層規劃、目前進度與下一步。
 
-先做出一個可以在 Cocos Creator 2.4.8 跑起來的 2D 生存 / 探索雛形：
+## 專案目標
 
-- 玩家可以移動、受傷、死亡、累積經驗。
-- NPC 有基礎敵對 / 中立行為。
-- UI 可以顯示血量與經驗。
-- 地圖、素材、音效先整理乾淨，再逐步擴充。
+使用 Cocos Creator 2.4.8 製作 2D 生存 / 探索雛形，暫定遊戲名為 `Coconut Sanctuary`。
 
-## 開發順序
+- 玩家可移動、受傷、累積 EXP / Score，並逐步接上工具與攻擊。
+- NPC 分為 Peace / Neutral / Hostile，能根據狀態偵測與攻擊玩家。
+- UI 顯示 HP、EXP、Score、Item bar 與 Game Over。
+- 地圖先用簡單背景與碰撞完成 MVP，再逐步導入 TileMap / 素材。
 
-- [ ] 1. 整理素材資料夾
-- [ ] 2. 修正核心腳本可編譯問題
-- [ ] 3. 建立基本場景層級
-- [ ] 4. 接上玩家移動與血量 UI
-- [ ] 5. 實作 NPC 偵測與攻擊
-- [ ] 6. 加入地圖 / Tile / 障礙物
-- [ ] 7. 加入音效、動畫與死亡結算
+## MVP 範圍
 
-## 近期優先事項
+- [ ] 玩家 WASD 移動
+- [ ] 玩家 HP / EXP / Score 資料流
+- [ ] HUD 顯示 HP / EXP / Score
+- [ ] 玩家受傷與死亡事件
+- [ ] Game Over 流程
+- [ ] 基礎 NPC 偵測與攻擊
+- [ ] 簡單地圖與碰撞
+- [ ] 基礎物品或資源互動
 
-### 1. 素材整理
+## 目前進度
 
-- [ ] 把 Unity 專用檔移出 `assets/`，例如 `.anim`、`.controller`、`.unity`、`.unitypackage`、Unity `.prefab`、Unity `.asset`。
-- [ ] 保留可用的 `.png`、`.jpg`、必要 `.wav`。
-- [ ] 將音效從 `assets/Textures/` 之後整理到較合理的位置，例如 `assets/Audio/`。
-- [ ] 只把遊戲真的會用到的素材放進 Cocos 專案，原始素材包另外備份。
+### 已完成
 
-注意：不要批量刪除。需要清理時，由使用者手動確認或一次處理明確單一檔案。
+- [x] Cocos Creator 2.4.8 專案建立
+- [x] 基礎資料夾：`Core`、`Player`、`Entity`、`UI`、`Map`、`Utils`
+- [x] `Constants.ts` 定義 `GameEvent`、`EntityType`
+- [x] `BaseEntity.ts` 建立 HP / damage / die 基底
+- [x] `PlayerController.ts` 建立 WASD 移動、左右翻面、Idle / Run 動畫切換
+- [x] `NPC_AI.ts` 建立 Peace / Neutral / Hostile 行為外殼
+- [x] `UIManager.ts` 建立 HP / EXP UI 事件監聽外殼
+- [x] `EventCenter.ts` 改為 default import 用法，並修正 callback / target / off 邏輯
 
-#### Textures 殘留檔案位置清單
+### 進行中
 
-這些位置包含 Unity 專用或 Cocos 不適合直接匯入的檔案，例如 `.anim`、`.controller`、`.unity`、`.unitypackage`、Unity `.prefab`、Unity `.asset`、`.cs`。之後清理時優先檢查這些資料夾，只把真正會用到的 `.png`、`.jpg`、必要 `.wav` 留在 Cocos 專案裡。
+- [ ] 核心事件流測試：Player -> EventCenter -> UIManager / GameManager
+- [ ] 場景節點與 Inspector 綁定
+- [ ] 玩家受傷、死亡、EXP 流程
 
-清理目標：
+### 尚未開始
 
-- [ ] `Platformer Tileset - Pixelart Snow Mountain`
-- [ ] `Desert Pixel Art Environment`
-- [ ] `GUI - The Stone`
-- [ ] `Rainforest - Platformer Tileset`
-- [ ] `Unique Toon Projectiles Vol. 1`
-- [ ] `Purple Planet - Platformer Tileset`
-- [ ] `Traps and Tileset`
-- [ ] `2D Casual Background HD V.3`
-- [ ] `2D Casual Background HD V.2`
-- [ ] `100 FOOD ASSETS`
+- [ ] Score 系統
+- [ ] Item bar
+- [ ] 工具 / 武器 / 資源互動
+- [ ] NPC 真正攻擊玩家
+- [ ] Game Over UI
+- [ ] 素材整理與地圖導入
 
-```text
-assets/Textures/
-├── Platformer Tileset - Pixelart Snow Mountain/
-│   └── Assets/BigManJD/Platformer Tileset - Pixelart Snow Mountain/
-│       ├── v2.0.0/
-│       │   ├── Tileset Palette/
-│       │   │   ├── Rock/             .asset x200
-│       │   │   ├── Ice/              .asset x189
-│       │   │   ├── Background/       .asset x165
-│       │   │   ├── Snow/             .asset x52
-│       │   │   ├── Spikes/           .asset x8
-│       │   │   ├── Platforms/        .asset x3
-│       │   │   └── root              .prefab x1
-│       │   ├── Prefabs/              .prefab x26
-│       │   ├── Character/Animations/ .anim x6
-│       │   └── Scenes/
-│       │       ├── DemoAnims/        .anim x3, .controller x3
-│       │       └── root              .unity x2
-│       └── v1.0.0/
-│           ├── Tileset Palette/
-│           │   ├── Ice/              .asset x45
-│           │   ├── Rock/             .asset x30
-│           │   ├── Spikes/           .asset x12
-│           │   ├── Climbing/         .asset x10
-│           │   ├── Background/       .asset x9
-│           │   ├── Platforms/        .asset x3
-│           │   └── root              .prefab x1
-│           ├── Prefabs/              .prefab x10
-│           ├── Character/Animations/ .anim x1, .controller x1
-│           └── Scenes/               .unity x2
-│
-├── Desert Pixel Art Environment/
-│   └── Assets/Desert_pixel_art_environment/
-│       ├── Tiles/                    .asset x164
-│       ├── Prefabs/                  .prefab x126
-│       ├── Scenes/                   .unity x2
-│       └── Palette/                  .prefab x1
-│
-├── GUI - The Stone/
-│   └── Assets/Layer Lab/
-│       ├── GUI-TheStone/
-│       │   ├── Prefabs/
-│       │   │   ├── Prefabs_Component_Frames/        .prefab x36
-│       │   │   ├── Prefabs_DemoScene/               .prefab x30
-│       │   │   ├── Prefabs_Component_Buttons/       .prefab x23
-│       │   │   ├── Prefabs_Component_ActionText/    .prefab x19
-│       │   │   ├── Prefabs_Component_Sliders/       .prefab x19
-│       │   │   ├── Prefabs_Component_UI_Etc/        .prefab x15
-│       │   │   ├── Prefabs_Component_Labels-Titles/ .prefab x13
-│       │   │   └── Prefabs_Component_Popups/        .prefab x3
-│       │   ├── ResourcesData/Fonts/                 .asset x5
-│       │   ├── Scene/                               .unity x1
-│       │   └── PSD,AI/                              .unitypackage x1
-│       └── Scripts/                                 .cs x2
-│
-├── Rainforest - Platformer Tileset/
-│   └── Assets/Rainforest/
-│       ├── animations/              .anim x2, .controller x2
-│       └── root                     .unity x1
-│
-├── Unique Toon Projectiles Vol. 1/
-│   └── Assets/GabrielAguiarProductions/ .unitypackage x3
-│
-├── Purple Planet - Platformer Tileset/
-│   └── Assets/Purple Planet/        .unity x1
-│
-├── Traps and Tileset/
-│   └── Assets/TrapsTileset/Scenes/  .unity x1
-│
-├── 2D Casual Background HD V.3/
-│   └── Assets/2D Casual background HD V.3/Scene/ .unity x1
-│
-├── 2D Casual Background HD V.2/
-│   └── Assets/2D Casual background HD V.2/Scene/ .unity x1
-│
-└── 100 FOOD ASSETS/
-    └── Assets/food/                 .unity x1
-```
+## Core 規劃
 
-### 2. 核心腳本
+### Constants.ts
 
-- [ ] 修正 `GameManager.ts` 和 `UIManager.ts` 的 `EventCenter` import 寫法。
-- [ ] 改善 `EventCenter.off()`，避免事件取消失敗。
-- [ ] 確認 `BaseEntity.takeDamage()`、玩家死亡事件、UI 更新事件能正常串起來。
+用途：集中管理全域事件名稱與實體類型。
 
-### 3. 場景與 Inspector
+- `PLAYER_HP_CHANGED`
+- `PLAYER_EXP_CHANGED`
+- `PLAYER_DIED`
+- `NPC_MOCKED`
+- `SPAWN_ITEM`
+- `EntityType.PLAYER`
+- `EntityType.NPC_PEACE`
+- `EntityType.NPC_NEUTRAL`
+- `EntityType.NPC_HOSTILE`
 
-- [ ] 建立 Canvas 層級：`Core_Controllers`、`World_Root`、`UI_Root`。
-- [ ] 在 `Core_Controllers/GameManager` 掛上 `GameManager.ts`。
-- [ ] 建立玩家節點，掛上 `PlayerController.ts`。
-- [ ] 建立 HUD，掛上 `UIManager.ts`。
-- [ ] 在 Inspector 連接 `playerNode`、`expLabel`、`hpBar`。
+### EventCenter.ts
 
-## 功能規劃
+用途：全域事件中心，避免 Player、UI、GameManager 直接互相抓節點。
 
-### Player
+目前狀態：
 
-- [ ] WASD 移動。
-- [ ] 血量、受傷、死亡。
-- [ ] 經驗值累積。
-- [ ] 達到條件後進化，提升能力。
-- [ ] 之後補動畫狀態，例如 idle、walk、hurt、die。
+- [x] 使用 default export / default import
+- [x] `on(eventName, callback, target)` 保存原 callback、target、實際 handler
+- [x] `emit(eventName, ...args)` 使用 snapshot，避免 emit 中途增刪 listener 造成迭代問題
+- [x] `off(eventName, callback, target)` 可精準移除同一組 callback + target
+- [x] `off(eventName)` 可清除單一事件
+- [x] `clear()` 可清除全部事件，方便切場景或測試
 
-### NPC
+### BaseEntity.ts
 
-- [ ] 敵對 NPC 進入範圍後攻擊玩家。
-- [ ] 中立 NPC 被觸發後變敵對。
-- [ ] 補上 `attackTarget()` 的實際扣血邏輯。
-- [ ] 之後補巡邏、追蹤、死亡掉落。
+用途：所有可受傷實體的基底，例如 Player、NPC。
 
-### UI
+下一步：
 
-- [ ] 血條顯示。
-- [ ] 經驗值顯示。
-- [ ] 死亡 / Game Over 畫面。
-- [ ] 之後補道具欄、氧氣條、排行榜或結算資料。
+- [ ] `takeDamage()` clamp HP，不讓 HP 小於 0
+- [ ] 加入 `isDead`，避免重複死亡
+- [ ] 加入 `heal(amount)`
+- [ ] Player / NPC 覆寫 `onDamaged()` 與 `die()`
 
-### Map
+### GameManager.ts
 
-- [ ] 先用簡單靜態地圖測試玩家與 NPC。
-- [ ] 再加入地圖層：校園、海洋、地下。
-- [ ] 若 TileMap 匯入有問題，先用圖片背景 + 簡單 BoxCollider 做碰撞。
+用途：管理遊戲狀態、Game Over、初始化流程。
 
-## 使用者手動設定
+目前狀態：
 
-這些比較適合在 Cocos Creator Editor 裡手動做：
+- [x] Singleton 外殼
+- [x] 監聽 `PLAYER_DIED`
+- [x] 修正 EventCenter default import
+- [x] `onDestroy()` 帶 target 取消事件
 
-- [ ] 建立 / 調整場景節點。
-- [ ] 拖拉 Inspector 欄位。
-- [ ] 切 SpriteFrame、製作 AnimationClip。
-- [ ] 整理素材、刪除不需要的 Unity 原始檔。
-- [ ] 建立 Prefab。
+下一步：
 
-## AI 可協助
+- [ ] 接上 `playerNode`
+- [ ] `onGameOver()` 暫停玩家 / NPC
+- [ ] 顯示 Game Over UI
+- [ ] 視需要支援重新開始或回主選單
 
-- [ ] 修改 `.ts` 腳本。
-- [ ] 更新 `NOTE.md` / `PLAN.md`。
-- [ ] 檢查 import、事件流程、TypeScript 錯誤。
-- [ ] 幫忙設計腳本架構與 Cocos Inspector 連接方式。
-- [ ] 整理需要手動做的清單。
+## Player 規劃
 
-## Git 流程提醒
+目前狀態：
 
-- `main/master`：穩定版，確認沒問題再合併。
-- `develop`：平常開發主分支。
-- `feature/*`：每個功能自己開分支，完成後 merge 回 `develop`。
+- [x] WASD 移動
+- [x] Idle / Run 動畫切換
+- [x] 左右翻面
+
+下一步：
+
+- [ ] 覆寫 `onDamaged()`，發送 `PLAYER_HP_CHANGED`
+- [ ] 覆寫 `die()`，發送 `PLAYER_DIED`
+- [ ] 加入 `gainExp(amount)`，發送 `PLAYER_EXP_CHANGED`
+- [ ] 加入 Score 或資源數值
+- [ ] 加入測試按鍵或測試碰撞，方便驗證扣血流程
+
+## NPC 規劃
+
+目前狀態：
+
+- [x] 有 `detectRadius`
+- [x] Neutral NPC 可被 `onMocked(playerNode)` 轉為 enraged
+- [x] Hostile / Neutral 偵測流程外殼
+
+下一步：
+
+- [ ] 設定 `targetPlayer`
+- [ ] 實作 `attackTarget()`
+- [ ] 攻擊時呼叫玩家 `takeDamage()`
+- [ ] 加入攻擊冷卻時間
+- [ ] NPC 死亡時預留掉落物 / Score / EXP
+
+## UI 規劃
+
+目前狀態：
+
+- [x] `UIManager` 監聽 HP / EXP 事件
+- [x] 修正 EventCenter default import
+- [x] `onDestroy()` 帶 target 取消事件
+
+下一步：
+
+- [ ] 場景中建立 HUD 節點
+- [ ] Inspector 綁定 `hpBar`
+- [ ] Inspector 綁定 `expLabel`
+- [ ] 加入 Score label
+- [ ] 加入 Game Over panel
+- [ ] 加入 Item bar
+
+## Map / Assets 規劃
+
+短期：
+
+- [ ] 先用靜態背景圖做測試地圖
+- [ ] 先用 BoxCollider 建立簡單邊界與障礙
+- [ ] 放置玩家與 1 個測試 NPC
+
+中期：
+
+- [ ] 整理 `assets/Textures`
+- [ ] 保留 Cocos 可直接用的 `.png`、`.jpg`、`.wav`
+- [ ] 移除或隔離 Unity 專用 `.unity`、`.unitypackage`、`.controller`、`.asset`、`.cs`
+- [ ] 規劃 TileMap 或 atlas
+
+## 下一步優先順序
+
+1. 修 `BaseEntity`：HP clamp、`isDead`、`heal()`
+2. 修 `PlayerController`：受傷 / 死亡 / EXP 事件
+3. 建測試流程：按鍵扣血、按鍵加 EXP
+4. 確認 UIManager 可更新血條與 EXP
+5. 確認 GameManager 可收到玩家死亡
+6. 在 Cocos Editor 綁定 GameManager、Player、UIManager
+7. 實作 NPC `attackTarget()` 與攻擊冷卻
+
+## Git 流程
+
+- `main/master`：穩定版
+- `develop`：整合開發版
+- `feature/*`：單一功能分支

@@ -1,5 +1,5 @@
 // 路徑: assets/Scripts/UI/UIManager.ts
-import { EventCenter } from "../Core/EventCenter";
+import EventCenter from "../Core/EventCenter";
 import { GameEvent } from "../Core/Constants";
 
 const { ccclass, property } = cc._decorator;
@@ -32,7 +32,7 @@ export default class UIManager extends cc.Component {
     }
 
     onDestroy() {
-        EventCenter.off(GameEvent.PLAYER_HP_CHANGED, this.onHpUpdated);
-        EventCenter.off(GameEvent.PLAYER_EXP_CHANGED, this.onExpUpdated);
+        EventCenter.off(GameEvent.PLAYER_HP_CHANGED, this.onHpUpdated, this);
+        EventCenter.off(GameEvent.PLAYER_EXP_CHANGED, this.onExpUpdated, this);
     }
 }
