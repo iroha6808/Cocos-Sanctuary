@@ -1,0 +1,47 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "slime_green_idle",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.8,
+  "sample": 10,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "paths": {
+      "Sprite": {
+        "comps": {
+          "cc.Sprite": {
+            "spriteFrame": [
+              {
+                "frame": 0,
+                "value": {
+                  "__uuid__": "2726534b-8b83-4f09-8093-d1383f15a395"
+                }
+              },
+              {
+                "frame": 0.5,
+                "value": {
+                  "__uuid__": "a310bb9f-9918-4a6c-b191-09923aae5d5e"
+                }
+              },
+              {
+                "frame": 0.6,
+                "value": {
+                  "__uuid__": "44c5cb9c-7aa0-4ea4-97fa-260f56452bd0"
+                }
+              },
+              {
+                "frame": 0.7,
+                "value": {
+                  "__uuid__": "55190f03-25d1-4756-bb8a-c70d33dd2ba4"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "events": []
+}
