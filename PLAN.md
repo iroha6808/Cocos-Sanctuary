@@ -31,7 +31,7 @@
 - [x] `Constants.ts` 定義 `GameEvent`、`EntityType`
 - [x] `BaseEntity.ts` 建立 HP / damage / die 基底
 - [x] `PlayerController.ts` 建立 WASD 移動、左右翻面、Idle / Run 動畫切換
-- [x] `NPC_AI.ts` 建立 Peace / Neutral / Hostile 行為外殼
+- [x] `NPC_AI.ts` 建立 Peace / Neutral / Hostile 通用行為
 - [x] `UIManager.ts` 建立 HP / EXP UI 事件監聽外殼
 - [x] `EventCenter.ts` 改為 default import 用法，並修正 callback / target / off 邏輯
 
@@ -129,16 +129,20 @@
 目前狀態：
 
 - [x] 有 `detectRadius`
+- [x] 可在 Inspector 指定 `targetPlayer`
 - [x] Neutral NPC 可被 `onMocked(playerNode)` 轉為 enraged
-- [x] Hostile / Neutral 偵測流程外殼
+- [x] Hostile / Neutral 偵測與追蹤
+- [x] 近戰 `attackTarget()` 可呼叫玩家 `takeDamage()`
+- [x] 加入攻擊距離、傷害、冷卻時間
+- [x] NPC 死亡時發送 `NPC_DIED`
 
 下一步：
 
-- [ ] 設定 `targetPlayer`
-- [ ] 實作 `attackTarget()`
-- [ ] 攻擊時呼叫玩家 `takeDamage()`
-- [ ] 加入攻擊冷卻時間
-- [ ] NPC 死亡時預留掉落物 / Score / EXP
+- [ ] 在 Cocos Editor 建立 Hostile NPC prefab
+- [ ] 實測 NPC 是否能扣玩家血
+- [ ] 接上 NPC idle / run / hurt / attack / die 動畫
+- [ ] 規劃遠程攻擊與 projectile prefab
+- [ ] 將 `NPC_DIED` 接到掉落物 / Score / EXP
 
 ## UI 規劃
 
@@ -180,7 +184,7 @@
 4. 確認 UIManager 可更新血條與 EXP
 5. 確認 GameManager 可收到玩家死亡
 6. 在 Cocos Editor 綁定 GameManager、Player、UIManager
-7. 實作 NPC `attackTarget()` 與攻擊冷卻
+7. 建立 NPC prefab 並實測攻擊流程
 
 ## Git 流程
 
