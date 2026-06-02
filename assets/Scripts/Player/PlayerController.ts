@@ -18,6 +18,10 @@ export default class PlayerController extends BaseEntity {
     private bodyNode: cc.Node = null;
     private rb: cc.RigidBody = null;
 
+    private isAttacking: boolean = false;
+    private isHurting: boolean = false;
+    private isDead: boolean = false;
+
     onLoad() {
         super.onLoad(); 
         this.type = EntityType.PLAYER;
@@ -25,9 +29,31 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
 
+        let canvas = cc.find("Canvas");
+        if (canvas) {
+            canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        }
+
         this.bodyNode = this.node.getChildByName("Sprite_Body");
         if (this.bodyNode) {
             this.anim = this.bodyNode.getComponent(cc.Animation);
+            if (this.anim) {
+                this.anim.on('finished', this.onAnimFinished, this);
+            }
+        }
+        
+        this.currentHp = this.maxHp; 
+    }
+
+    private onMouseDown(event: cc.Event.EventMouse) {
+        if (this.isDead) return;
+
+        if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
+            this.attack();
+        } 
+        // 測試用：按滑鼠右鍵直接扣 20 血
+        else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
+            this.takeDamage(20); 
         }
         this.rb = this.getComponent(cc.RigidBody);
         if (!this.rb) {
@@ -45,30 +71,22 @@ export default class PlayerController extends BaseEntity {
 
     private applyMoveKey(keyCode: number, isDown: boolean) {
         const wasDown = !!this.keyStates[keyCode];
-        if (wasDown === isDown) {
-            return;
-        }
+        if (wasDown === isDown) return;
 
         this.keyStates[keyCode] = isDown;
         const amount = isDown ? 1 : -1;
 
         switch (keyCode) {
-            case cc.macro.KEY.w:
-                this.moveDir.y += amount;
-                break;
-            case cc.macro.KEY.s:
-                this.moveDir.y -= amount;
-                break;
-            case cc.macro.KEY.a:
-                this.moveDir.x -= amount;
-                break;
-            case cc.macro.KEY.d:
-                this.moveDir.x += amount;
-                break;
+            case cc.macro.KEY.w: this.moveDir.y += amount; break;
+            case cc.macro.KEY.s: this.moveDir.y -= amount; break;
+            case cc.macro.KEY.a: this.moveDir.x -= amount; break;
+            case cc.macro.KEY.d: this.moveDir.x += amount; break;
         }
     }
 
     update(dt: number) {
+        if (this.isDead || this.isHurting || this.isAttacking) return;
+
         let isMoving = this.moveDir.x !== 0 || this.moveDir.y !== 0;
         if (!this.rb) return;  
         if (isMoving) {
@@ -95,14 +113,67 @@ export default class PlayerController extends BaseEntity {
 
     private playAnimation(animName: string) {
         if (!this.anim) return;
-        
         if (this.currentAnimName === animName) return;
 
         this.anim.play(animName);
         this.currentAnimName = animName;
     }
 
-    // TODO: other functions like mining or attacking
+    private attack() {
+        if (this.isAttacking || this.isHurting) return;
+        this.isAttacking = true;
+        this.playAnimation("PlayerAttack");
+    }
+
+    // ================== 受傷與死亡覆寫 ==================
+
+    // BaseEntity 在扣血但沒死時，會自動呼叫這個
+    protected onDamaged() {
+        if (this.isDead) return;
+
+        this.isHurting = true;
+        this.isAttacking = false; // 強制中斷攻擊
+        
+        // 發送血量更新事件給 UIManager
+        EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
+        
+        this.playAnimation("PlayerHurt");
+    }
+
+    // BaseEntity 在血量歸零時，會自動呼叫這個
+    protected die() {
+        if (this.isDead) return;
+
+        this.isDead = true;
+        this.isHurting = false;
+        this.isAttacking = false;
+        EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 0, this.maxHp);
+
+        this.playAnimation("PlayerDie");
+        
+        // ⚠️ 注意：這裡還不發送 PLAYER_DIED 事件或切換場景
+        // 如果在這裡直接切，死亡動畫就播不出來了！我們要等動畫播完再切。
+    }
+
+    // =========================================================
+
+    private onAnimFinished(event: string, state: cc.AnimationState) {
+        if (state.name === "PlayerAttack") {
+            this.isAttacking = false;
+            this.currentAnimName = ""; 
+        } 
+        else if (state.name === "PlayerHurt") {
+            this.isHurting = false;
+            this.currentAnimName = "";
+        } 
+        else if (state.name === "PlayerDie") {
+            this.scheduleOnce(() => {
+                EventCenter.emit(GameEvent.PLAYER_DIED);
+                cc.director.loadScene("GameOver"); 
+            }, 0);
+            
+        }
+    }
 
     onDestroy() {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
