@@ -16,6 +16,7 @@ export default class PlayerController extends BaseEntity {
     private anim: cc.Animation = null;
     private currentAnimName: string = "";
     private bodyNode: cc.Node = null;
+    private rb: cc.RigidBody = null;
 
     private isAttacking: boolean = false;
     private isHurting: boolean = false;
@@ -54,6 +55,10 @@ export default class PlayerController extends BaseEntity {
         else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.takeDamage(20); 
         }
+        this.rb = this.getComponent(cc.RigidBody);
+        if (!this.rb) {
+            cc.warn("PlayerController: 找不到 RigidBody！請確認 Player node 上有掛 RigidBody 元件");
+        }
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
@@ -83,11 +88,17 @@ export default class PlayerController extends BaseEntity {
         if (this.isDead || this.isHurting || this.isAttacking) return;
 
         let isMoving = this.moveDir.x !== 0 || this.moveDir.y !== 0;
-
+        if (!this.rb) return;  
         if (isMoving) {
-            let velocity = this.moveDir.clone().normalize().mul(this.moveSpeed * dt);
-            this.node.x += velocity.x;
-            this.node.y += velocity.y;
+            // let velocity = this.moveDir.clone().normalize().mul(this.moveSpeed * dt);
+            // this.node.x += velocity.x;
+            // this.node.y += velocity.y;
+
+            // if (this.moveDir.x !== 0 && this.bodyNode) {
+            //     this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
+            // }
+            const speed = this.moveDir.clone().normalize().mul(this.moveSpeed * 0.8);
+            this.rb.linearVelocity = speed;
 
             if (this.moveDir.x !== 0 && this.bodyNode) {
                 this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
@@ -95,6 +106,7 @@ export default class PlayerController extends BaseEntity {
 
             this.playAnimation("PlayerRun"); 
         } else {
+            this.rb.linearVelocity = cc.v2(0, 0);
             this.playAnimation("PlayerIdle");
         }
     }

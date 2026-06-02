@@ -22,6 +22,9 @@ export default class GameManager extends cc.Component {
 
         // 註冊全域事件
         EventCenter.on(GameEvent.PLAYER_DIED, this.onGameOver, this);
+
+        // 啟用物理引擎
+        cc.director.getPhysicsManager().enabled = true;
     }
 
     start() {
