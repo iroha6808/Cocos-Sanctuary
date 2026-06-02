@@ -4,6 +4,7 @@ export const GameEvent = {
     PLAYER_EXP_CHANGED: "PLAYER_EXP_CHANGED",
     PLAYER_DIED: "PLAYER_DIED",
     NPC_MOCKED: "NPC_MOCKED",
+    NPC_DIED: "NPC_DIED",
     SPAWN_ITEM: "SPAWN_ITEM"
 };
 
