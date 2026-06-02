@@ -68,12 +68,12 @@
 
 | 功能 | 風險原因 | 負責 | 階段 |
 | --- | --- | --- | --- |
-| 2D tile / 地圖碰撞 | TileMap、BoxCollider、玩家移動與攝影機容易互相影響 | 田俊騏 | MVP |
-| Player 狀態流 | HP / EXP / Score / 死亡事件要串到 UI 與 GameManager | 許庭翊 | MVP |
-| NPC 偵測與攻擊 | Peace / Neutral / Hostile 狀態、距離判斷、冷卻與扣血要穩 | 林柏均 | MVP |
-| Item bar / 背包 | 道具切換會影響滑鼠操作、採集、攻擊與 UI | 許庭翊 | MVP |
-| 採集互動物件 | 樹、礦點、掉落物需要 prefab、碰撞、互動觸發 | 傅康睿、蔡敏中 | MVP |
-| Scoreboard | EXP / Score 儲存、排序、結算 UI 需要資料格式先定好 | 待分配 | 延伸 |
+| 2D tile / 地圖碰撞 | TileMap、BoxCollider、玩家移動與攝影機容易互相影響 |  | MVP |
+| Player 狀態流 | HP / EXP / Score / 死亡事件要串到 UI 與 GameManager |  | MVP |
+| NPC 偵測與攻擊 | Peace / Neutral / Hostile 狀態、距離判斷、冷卻與扣血要穩 |  | MVP |
+| Item bar / 背包 | 道具切換會影響滑鼠操作、採集、攻擊與 UI |  | MVP |
+| 採集互動物件 | 樹、礦點、掉落物需要 prefab、碰撞、互動觸發 |  | MVP |
+| Scoreboard | EXP / Score 儲存、排序、結算 UI 需要資料格式先定好 |  | 延伸 |
 
 ### High Value
 
@@ -81,13 +81,36 @@
 
 | 功能 | 價值原因 | 負責 | 階段 |
 | --- | --- | --- | --- |
-| 三類 NPC 差異 | Peace / Neutral / Hostile 是企劃核心賣點 | 林柏均 | MVP |
-| Neutral 嘲諷機制 | 讓 NPC 互動有記憶點，符合企劃 user story | 林柏均 | MVP |
-| 掉落物與撿取 | 採集、戰鬥、成長流程會因此串起來 | 傅康睿、蔡敏中 | 延伸 |
-| 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 傅康睿、蔡敏中 | 延伸 |
-| 升級 / 死亡動畫 | 展示效果明顯，提升完成度 | 許庭翊、林柏均 | 延伸 |
-| PvP | 企劃亮點但成本高，先不進 MVP | 待分配 | 延伸 |
-| 交通工具 car / boat / wing | 可展示地面、水中、空中探索差異 | 田俊騏 | 延伸 |
+| 三類 NPC 差異 | Peace / Neutral / Hostile 是企劃核心賣點 |  | MVP |
+| Neutral 嘲諷機制 | 讓 NPC 互動有記憶點，符合企劃 user story |  | MVP |
+| 掉落物與撿取 | 採集、戰鬥、成長流程會因此串起來 |  | 延伸 |
+| 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 |  | 延伸 |
+| 升級 / 死亡動畫 | 展示效果明顯，提升完成度 |  | 延伸 |
+| PvP | 企劃亮點但成本高，先不進 MVP |  | 延伸 |
+| 交通工具 car / boat / wing | 可展示地面、水中、空中探索差異 |  | 延伸 |
+
+## 分工
+
+- player + 背包 : 許庭翊
+- npc + 商人 : 林柏均
+- 物件(礦、樹) : 傅康睿
+- 物件(椰子) : 蔡敏中
+-  : 田俊騏
+
+| 主要負責 | 內容 |
+| --- | --- |
+| Player + 背包 | 玩家控制、玩家狀態、背包 / item bar、道具切換 |
+| NPC + 商人 | Peace / Neutral / Hostile、NPC 攻擊、商人互動 |
+| 物件：礦、樹 | 採礦、採果、資源點、可互動物件 prefab |
+| 物件：椰子 | 椰子相關道具、回血水果、掉落物或採集回饋 |
+|  |  |
+
+協作注意：
+
+- 每個人負責的遊戲物件盡量做成 prefab，方便場景整合。
+- 新增事件名稱先放到 `Constants.ts`，避免硬打字串。
+- 需要 Inspector 綁定的欄位，要在 PR / commit 訊息或 `PLAN.md` 記下來。
+- 不批量刪除素材；素材清理由使用者手動確認。
 
 ## 目前進度
 
@@ -264,23 +287,6 @@
 5. 確認 GameManager 可收到玩家死亡
 6. 在 Cocos Editor 綁定 GameManager、Player、UIManager
 7. 建立 NPC prefab 並實測攻擊流程
-
-## 分工
-
-| 主要負責 | 內容 |
-| --- | --- |
-| Player + 背包 | 玩家控制、玩家狀態、背包 / item bar、道具切換 |
-| NPC + 商人 | Peace / Neutral / Hostile、NPC 攻擊、商人互動 |
-| 物件：礦、樹 | 採礦、採果、資源點、可互動物件 prefab |
-| 物件：椰子 | 椰子相關道具、回血水果、掉落物或採集回饋 |
-|  |  |
-
-協作注意：
-
-- 每個人負責的遊戲物件盡量做成 prefab，方便場景整合。
-- 新增事件名稱先放到 `Constants.ts`，避免硬打字串。
-- 需要 Inspector 綁定的欄位，要在 PR / commit 訊息或 `PLAN.md` 記下來。
-- 不批量刪除素材；素材清理由使用者手動確認。
 
 ## Git 流程
 
