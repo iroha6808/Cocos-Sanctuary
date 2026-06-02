@@ -1,9 +1,7 @@
 # Cocos Sanctuary Plan
-
 > PLAN.md 盡量維持 300 行內。本檔只放高層規劃、目前進度與下一步。
 
 ## 目錄
-
 - [企劃摘要](#企劃摘要)
 - [專案目標](#專案目標)
 - [MVP 範圍](#mvp-範圍)
@@ -18,19 +16,29 @@
 - [分工](#分工)
 - [Git 流程](#git-流程)
 
+## 下一步優先順序
+1. 修 `BaseEntity`：HP clamp、`isDead`、`heal()`
+2. 修 `PlayerController`：受傷 / 死亡 / EXP 事件
+3. 建測試流程：按鍵扣血、按鍵加 EXP
+4. 確認 UIManager 可更新血條與 EXP
+5. 確認 GameManager 可收到玩家死亡
+6. 在 Cocos Editor 綁定 GameManager、Player、UIManager
+7. 建立 NPC prefab 並實測攻擊流程
+
+## Git 流程
+- `main/master`：穩定版
+- `develop`：整合開發版
+- `feature/*`：單一功能分支
+
 ## 企劃摘要
-
 遊戲名稱：`Coconut Sanctuary`
-
 背景：傳說探險家 Chu Hong Kuo 發現由椰子能量驅動的神祕島嶼，玩家作為開拓者，需要採集資源、對抗怪物、累積 EXP / Score，爭奪 `Golden Coconut` 與排行榜。
 
 操作：
-
 - Keyboard：玩家移動、切換手上道具。
 - Mouse：執行目前道具能力，例如採礦、採果、攻擊、UI 點擊。
 
 核心玩法：
-
 - 側視 2D 探索，有地面、水中、高低差與碰撞物件。
 - 採集樹、水果、礦物等資源。
 - 道具包含工具、武器、水果、礦物。
@@ -41,16 +49,13 @@
 - 長期延伸包含 PvE、PvP、交通工具 car / boat / wing、排行榜。
 
 ## 專案目標
-
 使用 Cocos Creator 2.4.8 製作 2D 生存 / 探索雛形，暫定遊戲名為 `Coconut Sanctuary`。
-
 - 玩家可移動、受傷、累積 EXP / Score，並逐步接上工具與攻擊。
 - NPC 分為 Peace / Neutral / Hostile，能根據狀態偵測與攻擊玩家。
 - UI 顯示 HP、EXP、Score、Item bar 與 Game Over。
 - 地圖先用簡單背景與碰撞完成 MVP，再逐步導入 TileMap / 素材。
 
 ## MVP 範圍
-
 - [ ] 玩家 WASD 移動
 - [ ] 玩家 HP / EXP / Score 資料流
 - [ ] HUD 顯示 HP / EXP / Score
@@ -61,6 +66,21 @@
 - [ ] 基礎物品或資源互動
 
 ## 需求拆解
+### 分工
+
+- player + 背包 : 許庭翊
+- npc + 商人 : 林柏均
+- 物件(礦、樹) : 傅康睿
+- 物件(椰子) : 蔡敏中
+-  : 田俊騏
+
+| 主要負責 | 內容 |
+| --- | --- |
+| Player + 背包 | 玩家控制、玩家狀態、背包 / item bar、道具切換 |
+| NPC + 商人 | Peace / Neutral / Hostile、NPC 攻擊、商人互動 |
+| 物件：礦、樹 | 採礦、採果、資源點、可互動物件 prefab |
+| 物件：椰子 | 椰子相關道具、回血水果、掉落物或採集回饋 |
+|  |  |
 
 ### High Risk
 
@@ -88,22 +108,6 @@
 | 升級 / 死亡動畫 | 展示效果明顯，提升完成度 |  | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP |  | 延伸 |
 | 交通工具 car / boat / wing | 可展示地面、水中、空中探索差異 |  | 延伸 |
-
-## 分工
-
-- player + 背包 : 許庭翊
-- npc + 商人 : 林柏均
-- 物件(礦、樹) : 傅康睿
-- 物件(椰子) : 蔡敏中
--  : 田俊騏
-
-| 主要負責 | 內容 |
-| --- | --- |
-| Player + 背包 | 玩家控制、玩家狀態、背包 / item bar、道具切換 |
-| NPC + 商人 | Peace / Neutral / Hostile、NPC 攻擊、商人互動 |
-| 物件：礦、樹 | 採礦、採果、資源點、可互動物件 prefab |
-| 物件：椰子 | 椰子相關道具、回血水果、掉落物或採集回饋 |
-|  |  |
 
 協作注意：
 
@@ -277,19 +281,3 @@
 - [ ] 將所有物件特性定義在一份文件當中 (TileConfig)
 - [ ] 一份 Tile Data 文件記錄整個大地圖每一個是甚麼方塊
 - [ ] 一個 TileRenderer Node，產生玩家當前畫面附近的 tile
- 
-## 下一步優先順序
-
-1. 修 `BaseEntity`：HP clamp、`isDead`、`heal()`
-2. 修 `PlayerController`：受傷 / 死亡 / EXP 事件
-3. 建測試流程：按鍵扣血、按鍵加 EXP
-4. 確認 UIManager 可更新血條與 EXP
-5. 確認 GameManager 可收到玩家死亡
-6. 在 Cocos Editor 綁定 GameManager、Player、UIManager
-7. 建立 NPC prefab 並實測攻擊流程
-
-## Git 流程
-
-- `main/master`：穩定版
-- `develop`：整合開發版
-- `feature/*`：單一功能分支
