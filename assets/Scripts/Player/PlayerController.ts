@@ -10,6 +10,9 @@ export default class PlayerController extends BaseEntity {
     @property(cc.Float)
     moveSpeed: number = 200;
 
+    @property(cc.Float)
+    jumpForce: number = 400;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
     
@@ -23,6 +26,16 @@ export default class PlayerController extends BaseEntity {
     private isDead: boolean = false;
 
     onLoad() {
+        super.onLoad(); 
+        this.type = EntityType.PLAYER;
+        let physicsManager = cc.director.getPhysicsManager();
+        physicsManager.enabled = true;
+
+        // for drawing debug box
+        // physicsManager.debugDrawFlags = 1; 
+
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         super.onLoad(); 
         this.type = EntityType.PLAYER;
 
@@ -43,6 +56,7 @@ export default class PlayerController extends BaseEntity {
         }
         
         this.currentHp = this.maxHp; 
+        this.rb = this.getComponent(cc.RigidBody); 
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
@@ -51,13 +65,8 @@ export default class PlayerController extends BaseEntity {
         if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
             this.attack();
         } 
-        // 測試用：按滑鼠右鍵直接扣 20 血
         else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.takeDamage(20); 
-        }
-        this.rb = this.getComponent(cc.RigidBody);
-        if (!this.rb) {
-            cc.warn("PlayerController: 找不到 RigidBody！請確認 Player node 上有掛 RigidBody 元件");
         }
     }
 
@@ -77,37 +86,41 @@ export default class PlayerController extends BaseEntity {
         const amount = isDown ? 1 : -1;
 
         switch (keyCode) {
-            case cc.macro.KEY.w: this.moveDir.y += amount; break;
-            case cc.macro.KEY.s: this.moveDir.y -= amount; break;
             case cc.macro.KEY.a: this.moveDir.x -= amount; break;
             case cc.macro.KEY.d: this.moveDir.x += amount; break;
+            case cc.macro.KEY.space: 
+                if (isDown) this.jump();
+                break;
+        }
+    }
+
+    private jump() {
+        if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
+        
+        if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+            this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
         }
     }
 
     update(dt: number) {
-        if (this.isDead || this.isHurting || this.isAttacking) return;
+        if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
 
-        let isMoving = this.moveDir.x !== 0 || this.moveDir.y !== 0;
-        if (!this.rb) return;  
-        if (isMoving) {
-            // let velocity = this.moveDir.clone().normalize().mul(this.moveSpeed * dt);
-            // this.node.x += velocity.x;
-            // this.node.y += velocity.y;
+        let isMovingX = this.moveDir.x !== 0;
 
-            // if (this.moveDir.x !== 0 && this.bodyNode) {
-            //     this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
-            // }
-            const speed = this.moveDir.clone().normalize().mul(this.moveSpeed * 0.8);
-            this.rb.linearVelocity = speed;
+        const targetSpeedX = this.moveDir.x * this.moveSpeed * 0.8;
+        this.rb.linearVelocity = cc.v2(targetSpeedX, this.rb.linearVelocity.y);
 
-            if (this.moveDir.x !== 0 && this.bodyNode) {
+        if (isMovingX) {
+            if (this.bodyNode) {
                 this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
             }
-
-            this.playAnimation("PlayerRun"); 
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+                this.playAnimation("PlayerRun"); 
+            }
         } else {
-            this.rb.linearVelocity = cc.v2(0, 0);
-            this.playAnimation("PlayerIdle");
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+                this.playAnimation("PlayerIdle");
+            }
         }
     }
 
@@ -125,22 +138,15 @@ export default class PlayerController extends BaseEntity {
         this.playAnimation("PlayerAttack");
     }
 
-    // ================== 受傷與死亡覆寫 ==================
-
-    // BaseEntity 在扣血但沒死時，會自動呼叫這個
     protected onDamaged() {
         if (this.isDead) return;
 
         this.isHurting = true;
-        this.isAttacking = false; // 強制中斷攻擊
-        
-        // 發送血量更新事件給 UIManager
+        this.isAttacking = false; 
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
-        
         this.playAnimation("PlayerHurt");
     }
 
-    // BaseEntity 在血量歸零時，會自動呼叫這個
     protected die() {
         if (this.isDead) return;
 
@@ -148,14 +154,8 @@ export default class PlayerController extends BaseEntity {
         this.isHurting = false;
         this.isAttacking = false;
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 0, this.maxHp);
-
         this.playAnimation("PlayerDie");
-        
-        // ⚠️ 注意：這裡還不發送 PLAYER_DIED 事件或切換場景
-        // 如果在這裡直接切，死亡動畫就播不出來了！我們要等動畫播完再切。
     }
-
-    // =========================================================
 
     private onAnimFinished(event: string, state: cc.AnimationState) {
         if (state.name === "PlayerAttack") {
@@ -171,7 +171,6 @@ export default class PlayerController extends BaseEntity {
                 EventCenter.emit(GameEvent.PLAYER_DIED);
                 cc.director.loadScene("GameOver"); 
             }, 0);
-            
         }
     }
 
