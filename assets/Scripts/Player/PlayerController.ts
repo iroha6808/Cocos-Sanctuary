@@ -11,7 +11,10 @@ export default class PlayerController extends BaseEntity {
     moveSpeed: number = 200;
 
     @property(cc.Float)
-    jumpForce: number = 400;
+    jumpForce: number = 500;
+
+    @property(cc.Node)
+    inventoryUI: cc.Node = null; 
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
@@ -28,16 +31,10 @@ export default class PlayerController extends BaseEntity {
     onLoad() {
         super.onLoad(); 
         this.type = EntityType.PLAYER;
+
         let physicsManager = cc.director.getPhysicsManager();
         physicsManager.enabled = true;
-
-        // for drawing debug box
-        // physicsManager.debugDrawFlags = 1; 
-
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
-        super.onLoad(); 
-        this.type = EntityType.PLAYER;
+        physicsManager.debugDrawFlags = 1; 
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
@@ -91,6 +88,17 @@ export default class PlayerController extends BaseEntity {
             case cc.macro.KEY.space: 
                 if (isDown) this.jump();
                 break;
+            case cc.macro.KEY.b:
+                if (isDown) this.toggleInventory();
+                break;
+        }
+    }
+
+    private toggleInventory() {
+        if (!this.inventoryUI) return;
+        this.inventoryUI.active = !this.inventoryUI.active;
+        if (this.inventoryUI.active && this.rb) {
+            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
         }
     }
 
@@ -103,6 +111,8 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
+        if (this.inventoryUI && this.inventoryUI.active) return;
+
         if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
 
         let isMovingX = this.moveDir.x !== 0;

@@ -25,10 +25,16 @@
     "_components": [
       {
         "__id__": 6
+      },
+      {
+        "__id__": 7
+      },
+      {
+        "__id__": 8
       }
     ],
     "_prefab": {
-      "__id__": 7
+      "__id__": 9
     },
     "_opacity": 255,
     "_color": {
@@ -52,8 +58,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        6.225,
-        102.341,
+        -92.893,
+        -108.66,
         0,
         0,
         0,
@@ -61,7 +67,7 @@
         1,
         3,
         3,
-        1
+        3
       ]
     },
     "_eulerAngles": {
@@ -202,6 +208,9 @@
       },
       {
         "__uuid__": "4ad8896a-c54c-43b7-952b-f21c88b04d88"
+      },
+      {
+        "__uuid__": "989ee600-2a96-4a5e-93f9-5fdd96a11007"
       }
     ],
     "playOnLoad": false,
@@ -229,6 +238,59 @@
     "type": 1,
     "maxHp": 100,
     "moveSpeed": 200,
+    "jumpForce": 500,
+    "inventoryUI": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.RigidBody",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_type": 2,
+    "_allowSleep": true,
+    "_gravityScale": 1,
+    "_linearDamping": 0,
+    "_angularDamping": 0,
+    "_linearVelocity": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_angularVelocity": 0,
+    "_fixedRotation": true,
+    "enabledContactListener": true,
+    "bullet": false,
+    "awakeOnLoad": true,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsBoxCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_size": {
+      "__type__": "cc.Size",
+      "width": 15,
+      "height": 19
+    },
     "_id": ""
   },
   {
