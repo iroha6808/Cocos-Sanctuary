@@ -118,6 +118,8 @@
 
 下一步：
 
+- [ ] 加入背包功能
+- [ ] WS更改為爬上爬下，空白鍵變為跳
 - [ ] 覆寫 `onDamaged()`，發送 `PLAYER_HP_CHANGED`
 - [ ] 覆寫 `die()`，發送 `PLAYER_DIED`
 - [ ] 加入 `gainExp(amount)`，發送 `PLAYER_EXP_CHANGED`
@@ -165,6 +167,9 @@
 
 短期：
 
+- [ ] 優先加入 ground，讓重力有辦法測試
+- [ ] 加入採集點 ex: 礦點、樹
+- [ ] 加入部分食物進行測試(水果)
 - [ ] 先用靜態背景圖做測試地圖
 - [ ] 先用 BoxCollider 建立簡單邊界與障礙
 - [ ] 放置玩家與 1 個測試 NPC
@@ -176,6 +181,13 @@
 - [ ] 移除或隔離 Unity 專用 `.unity`、`.unitypackage`、`.controller`、`.asset`、`.cs`
 - [ ] 規劃 TileMap 或 atlas
 
+### Load Map
+
+- [ ] 每個物件都做成 prefab
+- [ ] 將所有物件特性定義在一份文件當中 (TileConfig)
+- [ ] 一份 Tile Data 文件記錄整個大地圖每一個是甚麼方塊
+- [ ] 一個 TileRenderer Node，產生玩家當前畫面附近的 tile 
+ 
 ## 下一步優先順序
 
 1. 修 `BaseEntity`：HP clamp、`isDead`、`heal()`
@@ -191,3 +203,11 @@
 - `main/master`：穩定版
 - `develop`：整合開發版
 - `feature/*`：單一功能分支
+
+## 分工
+
+- player + 背包 : 許庭翊
+- npc + 商人 : 林柏均
+- 物件(礦、樹) : 傅康睿
+- 物件(椰子) : 蔡敏中
+-  : 田俊騏
