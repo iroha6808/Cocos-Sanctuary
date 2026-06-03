@@ -25,10 +25,16 @@
     "_components": [
       {
         "__id__": 6
+      },
+      {
+        "__id__": 7
+      },
+      {
+        "__id__": 8
       }
     ],
     "_prefab": {
-      "__id__": 7
+      "__id__": 9
     },
     "_opacity": 255,
     "_color": {
@@ -193,6 +199,15 @@
       },
       {
         "__uuid__": "be4a228e-2508-4edf-b26e-9b3f2258f7bc"
+      },
+      {
+        "__uuid__": "9b2e3b40-d42b-42f5-9c7f-e20f4f1d338a"
+      },
+      {
+        "__uuid__": "2661b22a-09bf-4e8a-94ee-bcb7f5a83228"
+      },
+      {
+        "__uuid__": "4ad8896a-c54c-43b7-952b-f21c88b04d88"
       }
     ],
     "playOnLoad": false,
@@ -220,6 +235,58 @@
     "type": 1,
     "maxHp": 100,
     "moveSpeed": 200,
+    "jumpForce": 400,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.RigidBody",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_type": 2,
+    "_allowSleep": true,
+    "_gravityScale": 1,
+    "_linearDamping": 0,
+    "_angularDamping": 0,
+    "_linearVelocity": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_angularVelocity": 0,
+    "_fixedRotation": false,
+    "enabledContactListener": false,
+    "bullet": false,
+    "awakeOnLoad": true,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsBoxCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_size": {
+      "__type__": "cc.Size",
+      "width": 15,
+      "height": 19
+    },
     "_id": ""
   },
   {

@@ -209,16 +209,17 @@
 - [x] WASD 移動
 - [x] Idle / Run 動畫切換
 - [x] 左右翻面
+- [x] 加入測試按鍵或測試碰撞，方便驗證扣血流程
+- [x] WS更改為爬上爬下，空白鍵變為跳
+- [x] 覆寫 `onDamaged()`，發送 `PLAYER_HP_CHANGED`
+- [x] 覆寫 `die()`，發送 `PLAYER_DIED`
 
 下一步：
 
 - [ ] 加入背包功能
-- [ ] WS更改為爬上爬下，空白鍵變為跳
-- [ ] 覆寫 `onDamaged()`，發送 `PLAYER_HP_CHANGED`
-- [ ] 覆寫 `die()`，發送 `PLAYER_DIED`
 - [ ] 加入 `gainExp(amount)`，發送 `PLAYER_EXP_CHANGED`
 - [ ] 加入 Score 或資源數值
-- [ ] 加入測試按鍵或測試碰撞，方便驗證扣血流程
+
 
 ## NPC 規劃
 
