@@ -1,5 +1,4 @@
 const { ccclass, property } = cc._decorator;
-import { InventoryManager } from "../../../Player/InventoryManager";
 
 enum DropState {
     Flying = 0,
@@ -8,29 +7,33 @@ enum DropState {
 }
 
 @ccclass
-export default class FoodBase extends cc.Component {
+export default class DropItem extends cc.Component {
+    @property()
+    itemName: string = "Item";
 
-    @property foodName: string = '';
-    @property hpRestore: number = 0;
-    @property staminaRestore: number = 0;
-    @property itemName: string = "Item";
-    @property itemAmount: number = 1;
-    @property attractDistance: number = 80;
-    @property collectDistance: number = 40;
-    @property attractSpeed: number = 220;
-    @property launchSpeedX: number = 30;
-    @property launchSpeedY: number = 65;
+    @property()
+    itemAmount: number = 1;
+
+    @property()
+    attractDistance: number = 140;
+
+    @property()
+    collectDistance: number = 28;
+
+    @property()
+    attractSpeed: number = 420;
+
+    @property()
+    launchSpeedX: number = 120;
+
+    @property()
+    launchSpeedY: number = 260;
+
     private rb: cc.RigidBody = null!;
     private collider: cc.PhysicsCollider = null!;
     private targetPlayer: cc.Node | null = null;
     private state: DropState = DropState.Flying;
 
-    // 由 Firebase 地圖渲染時呼叫，傳入初始資料
-    init(data: { name: string; hp: number; stamina: number }) {
-        this.foodName = data.name;
-        this.hpRestore = data.hp;
-        this.staminaRestore = data.stamina;
-    }
     onLoad() {
         this.rb = this.getComponent(cc.RigidBody);
         this.collider = this.getComponent(cc.PhysicsCollider);
@@ -84,22 +87,23 @@ export default class FoodBase extends cc.Component {
         }
 
         if (this.isGround(otherCollider.node)) {
-            // this.stopOnGround();
-            this.state = DropState.Resting;
+            this.stopOnGround();
         }
     }
 
-    // private stopOnGround() {
-    //     if (!this.rb) {
-    //         return;
-    //     }
+    private stopOnGround() {
+        if (!this.rb) {
+            return;
+        }
 
-    //     this.state = DropState.Resting;
-    //     this.rb.linearVelocity = cc.v2(0, 0);
-    //     this.rb.type = cc.RigidBodyType.Static;
+        this.state = DropState.Resting;
+        this.rb.linearVelocity = cc.v2(0, 0);
+        this.rb.angularVelocity = 0;
+        this.rb.gravityScale = 0;
+        this.rb.type = cc.RigidBodyType.Static;
 
-    //     cc.log("Drop item stopped on ground:", this.itemName);
-    // }
+        cc.log("Drop item stopped on ground:", this.itemName);
+    }
 
     private startAttract(player: cc.Node) {
         this.targetPlayer = player;
@@ -142,19 +146,6 @@ export default class FoodBase extends cc.Component {
 
     private collect() {
         cc.log("Collect item:", this.itemName, this.itemAmount);
-        let id = this.foodName ? this.foodName.toLowerCase() : "item";
-        let displayName = this.foodName || this.itemName;
-        
-        if (id === "coconut") {
-            displayName = "coconut";
-        }
-
-        InventoryManager.instance.addItem(
-            id, 
-            displayName, 
-            this.itemAmount || 1, 
-            `一個由系統自動吸附的 ${displayName}。`
-        );
         this.node.destroy();
     }
 
@@ -187,25 +178,5 @@ export default class FoodBase extends cc.Component {
         }
 
         return false;
-    }
-
-    // 吃掉：直接套用效果（你可以換成呼叫 PlayerStats）
-    eat(player: cc.Node) {
-        const stats = player.getComponent('Player'); // 換成你實際的元件名
-        if (stats) {
-            stats.restoreHp(this.hpRestore);
-            stats.restoreStamina(this.staminaRestore);
-        }
-        this.node.destroy();
-    }
-
-    // 丟掉：放回玩家腳下
-    drop(position: cc.Vec2) {
-        this.node.setPosition(position);
-    }
-
-    // 未來背包用
-    addToInventory() {
-        // TODO
     }
 }

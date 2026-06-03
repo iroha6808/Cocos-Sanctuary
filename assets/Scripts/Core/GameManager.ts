@@ -11,6 +11,9 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     playerNode: cc.Node = null; // 在編輯器裡把 Player Prefab 生成的節點拖進來
 
+    @property(cc.Boolean)
+    showPhysicsDebugDraw: boolean = false;
+
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
         if (GameManager.instance === null) {
@@ -24,7 +27,9 @@ export default class GameManager extends cc.Component {
         EventCenter.on(GameEvent.PLAYER_DIED, this.onGameOver, this);
 
         // 啟用物理引擎
-        cc.director.getPhysicsManager().enabled = true;
+        const physicsManager = cc.director.getPhysicsManager();
+        physicsManager.enabled = true;
+        physicsManager.debugDrawFlags = this.showPhysicsDebugDraw ? 1 : 0;
     }
 
     start() {

@@ -12,6 +12,9 @@ export enum CoconutState {
 export default class Coconut extends FoodBase {
 
     state: CoconutState = CoconutState.OnTree;
+    foodName: string = 'Coconut';
+    hpRestore: number = 10;
+    staminaRestore: number = 30;
 
     private rb: cc.RigidBody = null;
     private collider: cc.PhysicsCircleCollider = null;
