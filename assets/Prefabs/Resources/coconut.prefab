@@ -13,95 +13,27 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Player",
+    "_name": "coconut",
     "_objFlags": 0,
     "_parent": null,
-    "_children": [
-      {
-        "__id__": 2
-      }
-    ],
-    "_active": true,
-    "_components": [
-      {
-        "__id__": 6
-      },
-      {
-        "__id__": 7
-      },
-      {
-        "__id__": 8
-      }
-    ],
-    "_prefab": {
-      "__id__": 9
-    },
-    "_opacity": 255,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_trs": {
-      "__type__": "TypedArray",
-      "ctor": "Float64Array",
-      "array": [
-        -297.457,
-        111.758,
-        0,
-        0,
-        0,
-        0,
-        1,
-        3,
-        3,
-        1
-      ]
-    },
-    "_eulerAngles": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_skewX": 0,
-    "_skewY": 0,
-    "_is3DNode": false,
-    "_groupIndex": 0,
-    "groupIndex": 0,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.Node",
-    "_name": "Sprite_Body",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 1
-    },
     "_children": [],
     "_active": true,
     "_components": [
+      {
+        "__id__": 2
+      },
       {
         "__id__": 3
       },
       {
         "__id__": 4
+      },
+      {
+        "__id__": 5
       }
     ],
     "_prefab": {
-      "__id__": 5
+      "__id__": 6
     },
     "_opacity": 255,
     "_color": {
@@ -113,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
+      "width": 13,
+      "height": 16
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -125,15 +57,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
-        0,
+        66.638,
+        34.652,
         0,
         0,
         0,
         0,
         1,
-        1,
-        1,
+        2,
+        2,
         1
       ]
     },
@@ -155,7 +87,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 2
+      "__id__": 1
     },
     "_enabled": true,
     "_materials": [
@@ -166,7 +98,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "e3b1b6b1-46d8-45f0-bf67-e74e31384e89"
+      "__uuid__": "41788558-0568-4e88-90fb-77f7bea7e38d"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -183,62 +115,6 @@
     "_id": ""
   },
   {
-    "__type__": "cc.Animation",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 2
-    },
-    "_enabled": true,
-    "_defaultClip": {
-      "__uuid__": "18685964-1407-4645-868f-684f296a2d5d"
-    },
-    "_clips": [
-      {
-        "__uuid__": "18685964-1407-4645-868f-684f296a2d5d"
-      },
-      {
-        "__uuid__": "be4a228e-2508-4edf-b26e-9b3f2258f7bc"
-      },
-      {
-        "__uuid__": "9b2e3b40-d42b-42f5-9c7f-e20f4f1d338a"
-      },
-      {
-        "__uuid__": "2661b22a-09bf-4e8a-94ee-bcb7f5a83228"
-      },
-      {
-        "__uuid__": "4ad8896a-c54c-43b7-952b-f21c88b04d88"
-      }
-    ],
-    "playOnLoad": false,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 1
-    },
-    "asset": {
-      "__id__": 0
-    },
-    "fileId": "66yiYHCu9FFYsOEfT20Rew",
-    "sync": false
-  },
-  {
-    "__type__": "c9303cPzVFF4rlsMvZphcnX",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "type": 1,
-    "maxHp": 100,
-    "moveSpeed": 200,
-    "jumpForce": 400,
-    "_id": ""
-  },
-  {
     "__type__": "cc.RigidBody",
     "_name": "",
     "_objFlags": 0,
@@ -246,7 +122,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 2,
+    "_type": 1,
     "_allowSleep": true,
     "_gravityScale": 1,
     "_linearDamping": 0,
@@ -257,14 +133,14 @@
       "y": 0
     },
     "_angularVelocity": 0,
-    "_fixedRotation": true,
+    "_fixedRotation": false,
     "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""
   },
   {
-    "__type__": "cc.PhysicsBoxCollider",
+    "__type__": "cc.PhysicsCircleCollider",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -282,11 +158,27 @@
       "x": 0,
       "y": 0
     },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
+    "_radius": 8,
+    "_id": ""
+  },
+  {
+    "__type__": "101d5qBUK1FMZ2AVZf9X4vF",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
     },
+    "_enabled": true,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "itemName": "Item",
+    "itemAmount": 1,
+    "attractDistance": 80,
+    "collectDistance": 40,
+    "attractSpeed": 220,
+    "launchSpeedX": 30,
+    "launchSpeedY": 65,
     "_id": ""
   },
   {
