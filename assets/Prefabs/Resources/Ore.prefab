@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 201,
-      "height": 215
+      "width": 100,
+      "height": 50
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -101,7 +101,7 @@
       "__uuid__": "fd985b0b-a794-475f-b5ed-2dc526e3dc60"
     },
     "_type": 0,
-    "_sizeMode": 1,
+    "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -122,9 +122,9 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 2,
+    "_type": 0,
     "_allowSleep": true,
-    "_gravityScale": 1,
+    "_gravityScale": 0,
     "_linearDamping": 0,
     "_angularDamping": 0,
     "_linearVelocity": {
@@ -160,8 +160,8 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 70,
-      "height": 70
+      "width": 75,
+      "height": 45
     },
     "_id": ""
   },
@@ -173,9 +173,15 @@
       "__id__": 1
     },
     "_enabled": true,
-    "resourceType": 0,
+    "resourceType": 1,
     "maxDurability": 5,
-    "resourceAmount": 1,
+    "dropAmount": 1,
+    "dropPrefab": {
+      "__uuid__": "25176831-8b61-4622-bf50-997dbb5aaf27"
+    },
+    "depletedSpriteFrame": null,
+    "targetSprite": null,
+    "interactDistance": 120,
     "_id": ""
   },
   {

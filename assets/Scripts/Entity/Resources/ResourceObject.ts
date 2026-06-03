@@ -16,58 +16,86 @@ export default class ResourceObject extends cc.Component {
     maxDurability: number = 3;
 
     @property()
-    resourceAmount: number = 1;
+    dropAmount: number = 1;
+
+    @property(cc.Prefab)
+    dropPrefab: cc.Prefab = null!;
+
+    @property(cc.SpriteFrame)
+    depletedSpriteFrame: cc.SpriteFrame = null!;
+
+    @property(cc.Sprite)
+    targetSprite: cc.Sprite = null!;
 
     @property()
-    autoListenKey: boolean = true;
+    interactDistance: number = 160;
 
     private currentDurability: number = 0;
-    private playerInRange: boolean = false;
+    private isDepleted: boolean = false;
 
     onLoad() {
         this.currentDurability = this.maxDurability;
 
-        if (this.autoListenKey) {
-            cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        const canvas = cc.find("Canvas");
+        if (canvas) {
+            canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
         }
     }
 
     onDestroy() {
-        if (this.autoListenKey) {
-            cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        const canvas = cc.find("Canvas");
+        if (canvas) {
+            canvas.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
         }
     }
 
-    onBeginContact(contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
-        if (otherCollider.node.name === "Player") {
-            this.playerInRange = true;
-            cc.log("Player entered resource range:", this.node.name);
-        }
-    }
-
-    onEndContact(contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
-        if (otherCollider.node.name === "Player") {
-            this.playerInRange = false;
-            cc.log("Player left resource range:", this.node.name);
-        }
-    }
-
-    private onKeyDown(event: cc.Event.EventKeyboard) {
-        if (!this.playerInRange) {
+    private onMouseDown(event: cc.Event.EventMouse) {
+        if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }
 
-        if (event.keyCode === cc.macro.KEY.e) {
-            this.interact();
+        cc.log("Mouse clicked. Resource:", this.node.name);
+
+        if (!this.canInteract()) {
+            return;
         }
+
+        this.interact();
     }
 
     public canInteract(): boolean {
-        return this.playerInRange && this.currentDurability > 0;
+        if (this.isDepleted) {
+            cc.log("Cannot interact. Resource already depleted:", this.node.name);
+            return false;
+        }
+
+        if (this.currentDurability <= 0) {
+            cc.log("Cannot interact. Durability is 0:", this.node.name);
+            return false;
+        }
+
+        const player = this.findPlayer();
+        if (!player) {
+            cc.log("Cannot interact. Player not found.");
+            return false;
+        }
+
+        const resourceWorldPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        const playerWorldPos = player.convertToWorldSpaceAR(cc.Vec2.ZERO);
+        const distance = resourceWorldPos.sub(playerWorldPos).mag();
+
+        cc.log("Distance to", this.node.name, "=", distance);
+
+        if (distance > this.interactDistance) {
+            cc.log("Too far from resource:", this.node.name);
+            return false;
+        }
+
+        return true;
     }
 
     public interact() {
-        if (this.currentDurability <= 0) {
+        if (this.currentDurability <= 0 || this.isDepleted) {
             return;
         }
 
@@ -80,17 +108,87 @@ export default class ResourceObject extends cc.Component {
         }
 
         if (this.currentDurability <= 0) {
-            this.collect();
+            this.deplete();
         }
     }
 
-    private collect() {
+    private deplete() {
+        this.isDepleted = true;
+
+        this.spawnDrop();
+
         if (this.resourceType === ResourceType.TREE) {
-            cc.log("Gain wood:", this.resourceAmount);
+            this.changeToDepletedTree();
         } else {
-            cc.log("Gain ore:", this.resourceAmount);
+            cc.log("Ore depleted. Destroy ore.");
+            this.node.destroy();
+        }
+    }
+
+    private spawnDrop() {
+        if (!this.dropPrefab) {
+            cc.log("Drop prefab is not assigned:", this.node.name);
+            return;
         }
 
-        this.node.active = false;
+        const parent = this.node.parent;
+        const dropNode = cc.instantiate(this.dropPrefab);
+
+        dropNode.parent = parent;
+
+        if (this.resourceType === ResourceType.TREE) {
+            dropNode.setPosition(this.node.x, this.node.y + 80);
+        } else {
+            dropNode.setPosition(this.node.x, this.node.y + 40);
+        }
+
+        const dropScript = dropNode.getComponent("DropItem") as any;
+        if (dropScript) {
+            if (this.resourceType === ResourceType.TREE) {
+                dropScript.itemName = "Apple";
+            } else {
+                dropScript.itemName = "Ore";
+            }
+
+            dropScript.itemAmount = this.dropAmount;
+            dropScript.launch();
+        }
+
+        cc.log("Spawn drop from:", this.node.name);
+    }
+
+    private changeToDepletedTree() {
+        let sprite = this.targetSprite;
+
+        if (!sprite) {
+            sprite = this.getComponent(cc.Sprite);
+        }
+
+        if (!sprite) {
+            cc.log("Tree depleted, but Sprite is not assigned:", this.node.name);
+            return;
+        }
+
+        if (!this.depletedSpriteFrame) {
+            cc.log("Tree depleted, but depletedSpriteFrame is not assigned:", this.node.name);
+            return;
+        }
+
+        sprite.spriteFrame = this.depletedSpriteFrame;
+
+        sprite.sizeMode = cc.Sprite.SizeMode.CUSTOM;
+        sprite.node.width = this.node.width;
+        sprite.node.height = this.node.height;
+
+        cc.log("Tree image changed to depleted sprite.");
+    }
+
+    private findPlayer(): cc.Node | null {
+        const player = cc.find("Canvas/Player");
+        if (player) {
+            return player;
+        }
+
+        return null;
     }
 }
