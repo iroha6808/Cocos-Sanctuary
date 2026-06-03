@@ -1,6 +1,7 @@
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter"; 
 import { GameEvent, EntityType } from "../Core/Constants";
+import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
 
 const { ccclass, property } = cc._decorator;
 
@@ -13,6 +14,12 @@ export default class PlayerController extends BaseEntity {
     @property(cc.Float)
     jumpForce: number = 400;
 
+    @property(cc.Float)
+    attackDamage: number = 20;
+
+    @property(CombatHitbox)
+    attackHitbox: CombatHitbox = null;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
     
@@ -24,6 +31,7 @@ export default class PlayerController extends BaseEntity {
     private isAttacking: boolean = false;
     private isHurting: boolean = false;
     private isDead: boolean = false;
+    private canvasNode: cc.Node = null;
 
     onLoad() {
         super.onLoad(); 
@@ -36,15 +44,10 @@ export default class PlayerController extends BaseEntity {
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
-        super.onLoad(); 
-        this.type = EntityType.PLAYER;
 
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
-
-        let canvas = cc.find("Canvas");
-        if (canvas) {
-            canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        this.canvasNode = cc.find("Canvas");
+        if (this.canvasNode) {
+            this.canvasNode.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
         }
 
         this.bodyNode = this.node.getChildByName("Sprite_Body");
@@ -57,6 +60,19 @@ export default class PlayerController extends BaseEntity {
         
         this.currentHp = this.maxHp; 
         this.rb = this.getComponent(cc.RigidBody); 
+
+        if (!this.attackHitbox) {
+            const hitboxNode = this.node.getChildByName("AttackHitbox");
+            this.attackHitbox = hitboxNode ? hitboxNode.getComponent(CombatHitbox) : null;
+        }
+
+        if (this.attackHitbox) {
+            this.attackHitbox.ownerFaction = CombatFaction.PLAYER;
+            this.attackHitbox.canHitPlayer = false;
+            this.attackHitbox.canHitPeaceNpc = true;
+            this.attackHitbox.canHitNeutralNpc = true;
+            this.attackHitbox.canHitHostileNpc = true;
+        }
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
@@ -134,8 +150,14 @@ export default class PlayerController extends BaseEntity {
 
     private attack() {
         if (this.isAttacking || this.isHurting) return;
+
         this.isAttacking = true;
         this.playAnimation("PlayerAttack");
+
+        if (this.attackHitbox) {
+            const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
+            this.attackHitbox.activate(facingRight, this.attackDamage, this.node);
+        }
     }
 
     protected onDamaged() {
@@ -177,5 +199,13 @@ export default class PlayerController extends BaseEntity {
     onDestroy() {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+
+        if (this.canvasNode && cc.isValid(this.canvasNode)) {
+            this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        }
+
+        if (this.anim && cc.isValid(this.anim)) {
+            this.anim.off("finished", this.onAnimFinished, this);
+        }
     }
 }
