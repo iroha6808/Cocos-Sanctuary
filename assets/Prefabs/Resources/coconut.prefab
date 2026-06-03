@@ -57,8 +57,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        241.364,
-        0,
+        66.638,
+        34.652,
         0,
         0,
         0,
@@ -169,9 +169,16 @@
       "__id__": 1
     },
     "_enabled": true,
-    "foodName": "coconut",
-    "hpRestore": 100,
-    "staminaRestore": 100,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "itemName": "Item",
+    "itemAmount": 1,
+    "attractDistance": 80,
+    "collectDistance": 40,
+    "attractSpeed": 220,
+    "launchSpeedX": 30,
+    "launchSpeedY": 65,
     "_id": ""
   },
   {
