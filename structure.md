@@ -1,27 +1,42 @@
-# Cocos Sanctuary 專案架構與分工
+# Cocos Sanctuary 專案架構
 
-> 本文件整理目前專案實際架構、模組責任、組員分工與整合注意事項。
-> `PLAN.md` 保持短期開發計畫；`structure.md` 放長期架構與分工。
+> 更新日期：2026-06-04  
+> 目的：整理目前專案實際架構、模組責任、跨模組依賴，以及後續開發旅行商人 NPC 時需要對齊的基礎。
 
 ## 專案概況
 
 - 引擎：Cocos Creator 2.4.8
-- 類型：2D 生存 / 探索 / Terraria-like 雛形
+- 類型：2D 橫向平台 / 探索 / Terraria-like 生存採集
 - 主要場景：
   - `assets/Scenes/Game.fire`
-  - `assets/Scenes/GameOver.fire`
   - `assets/Scenes/MenuScene.fire`
-- 主要腳本根目錄：`assets/Scripts`
-- 主要素材根目錄：`assets/Textures`
+  - `assets/Scenes/GameOver.fire`
+- 主要 prefab：
+  - `assets/Prefabs/Player.prefab`
+  - `assets/Prefabs/NPCs/Slime.prefab`
+  - `assets/Prefabs/Resources/Tree.prefab`
+  - `assets/Prefabs/Resources/Ore.prefab`
+  - `assets/Prefabs/Resources/coconut.prefab`
 
-## 目前目錄架構
+## 目前資料夾結構
 
 ```text
 assets/
   Scenes/
     Game.fire
-    GameOver.fire
     MenuScene.fire
+    GameOver.fire
+
+  Prefabs/
+    Player.prefab
+    NPCs/
+      Slime.prefab
+    Resources/
+      Tree.prefab
+      Ore.prefab
+      FruitDrop.prefab
+      OreDrop.prefab
+      coconut.prefab
 
   Scripts/
     Core/
@@ -30,9 +45,13 @@ assets/
       EventCenter.ts
       GameManager.ts
 
+    Attack/
+      CombatHitbox.ts
+
     Player/
       PlayerController.ts
-      PlayerAttackHitbox.ts
+      InventoryManager.ts
+      CollectibleItem.ts
 
     NPC/
       NPC_AI.ts
@@ -49,39 +68,28 @@ assets/
 
     UI/
       UIManager.ts
+      InventoryUIController.ts
 
     Map/
       NewScript - 001.ts
 
     Utils/
+      NewScript - 002.ts
 
   Textures/
     Inventory/
     mystic_woods_free_2.2/
-    100 Retro Magic Sound Effects/
     100 FOOD ASSETS/
-    2D Casual Background HD V.2/
-    2D Casual Background HD V.3/
-    Desert Pixel Art Environment/
+    100 Retro Magic Sound Effects/
     GUI - The Stone/
     Platformer Tileset - Pixelart Snow Mountain/
-    Rainforest - Platformer Tileset/
-    Purple Planet - Platformer Tileset/
-    Traps and Tileset/
+    Desert Pixel Art Environment/
+    Animals/
 ```
 
-## 核心模組
-
-### Core
+## Core
 
 位置：`assets/Scripts/Core`
-
-職責：
-
-- 管理全域事件、基礎實體、遊戲流程。
-- 避免 Player、NPC、UI、物件彼此硬抓太多。
-
-檔案：
 
 - `Constants.ts`
   - 定義 `GameEvent`
@@ -95,417 +103,212 @@ assets/
     - `SPAWN_ITEM`
 
 - `EventCenter.ts`
-  - 全域事件中心。
-  - 提供 `on / emit / off / clear`。
-  - 事件溝通優先用這裡，不建議跨組直接互相抓 component。
+  - 專案內自製事件中心。
+  - 用於 Player / UI / GameManager / NPC 之間的低耦合通知。
 
 - `BaseEntity.ts`
-  - 所有有 HP 的角色基底。
-  - 目前提供：
+  - Player 與 NPC 的共同生命值基底。
+  - 欄位：
     - `type`
     - `maxHp`
     - `currentHp`
+  - 方法：
     - `takeDamage(amount)`
     - `onDamaged()`
     - `die()`
-  - 待補：
-    - HP clamp
-    - `isDead`
-    - `heal(amount)`
-    - 更穩定的死亡防重複觸發
+  - 後續建議：
+    - 補 `isDead`
+    - HP clamp 到 0
+    - 補 `receiveAttack(amount, attackerNode)` 統一攻擊入口
 
 - `GameManager.ts`
   - Singleton。
   - 啟用 PhysicsManager。
+  - 提供 `showPhysicsDebugDraw` Inspector 開關。
   - 監聽 `PLAYER_DIED`。
-  - 待補完整 Game Over / restart / pause 流程。
 
-## Player 模組
+## Attack
+
+位置：`assets/Scripts/Attack`
+
+- `CombatHitbox.ts`
+  - 目前唯一通用近戰攻擊 hitbox 腳本。
+  - 負責：
+    - 啟用 / 關閉攻擊碰撞框
+    - 設定 attack hitbox local position
+    - 設定 sensor collider 與 contact listener
+    - 依 faction 與可命中類型過濾目標
+    - 呼叫目標 `receiveAttack()` 或 `takeDamage()`
+  - 目前 faction：
+    - `PLAYER`
+    - `PEACE_NPC`
+    - `NEUTRAL_NPC`
+    - `HOSTILE_NPC`
+
+## Player
 
 位置：`assets/Scripts/Player`
 
-職責：
-
-- 玩家移動、跳躍、攻擊輸入、玩家受傷與死亡流程。
-- 玩家攻擊 NPC 使用 hitbox 碰撞判定。
-
-檔案：
-
 - `PlayerController.ts`
-  - 控制左右移動與跳躍。
-  - 播放 `PlayerIdle / PlayerRun / PlayerAttack / PlayerHurt / PlayerDie`。
-  - 左鍵攻擊。
-  - 右鍵目前可測試玩家受傷。
-  - 透過 `EventCenter` 發送玩家 HP / death 事件。
+  - 玩家移動、跳躍、攻擊、受傷、死亡。
+  - 使用 `CombatHitbox` 處理攻擊。
+  - `B` 可切換背包 UI。
+  - 目前有測試用 `T` 加物品邏輯。
+  - 目前風險：
+    - 部分中文字串顯示為亂碼，需確認是否造成 TS 編譯錯。
 
-- `PlayerAttackHitbox.ts`
-  - 玩家攻擊用碰撞箱。
-  - 攻擊時短暫啟用 `PhysicsCollider`。
-  - 碰到 NPC hurtbox 後呼叫 `NPC_AI.receiveAttack(damage, attackerNode)`。
+- `InventoryManager.ts`
+  - 背包資料 singleton。
+  - `Item` 目前包含：
+    - `id`
+    - `name`
+    - `count`
+    - `description`
+  - `addItem()` 會堆疊同 id 物品，並 emit `INVENTORY_CHANGED`。
+  - `getItems()` 回傳背包內容。
+  - 後續旅行商人需要擴充：
+    - `removeItem(id, count)`
+    - `getItemCount(id)`
+    - `canAddItem(...)`
+    - `hasItem(id, count)`
 
-建議 Player 節點：
+- `CollectibleItem.ts`
+  - 可撿拾物件，接觸 Player 後加入背包。
+  - 目前風險：
+    - 部分中文字串顯示為亂碼，需確認是否造成 TS 編譯錯。
 
-```text
-Player
-  PlayerController
-  RigidBody
-  PhysicsBoxCollider
-  Sprite_Body
-    Sprite
-    Animation
-  AttackHitbox
-    PlayerAttackHitbox
-    RigidBody
-    PhysicsBoxCollider
-```
-
-AttackHitbox 建議：
-
-- `RigidBody.type = Kinematic`
-- `PhysicsBoxCollider.sensor = true`
-- collider 預設可 disabled，由腳本攻擊時打開
-- `PlayerAttackHitbox.debugLog = true` 可用來測試命中
-
-## NPC 模組
+## NPC
 
 位置：`assets/Scripts/NPC`
 
-職責：
-
-- 通用 NPC 行為。
-- Peace / Neutral / Hostile 模式。
-- 追蹤、近戰攻擊、受傷、死亡、血條。
-- 播放 slime 方向動畫。
-
-檔案：
-
 - `NPC_AI.ts`
-  - Inspector 可設定：
-    - `type`
-    - `maxHp`
-    - `targetPlayer`
-    - `autoFindTarget`
-    - `targetNodeName`
-    - `debugLog`
-    - `showHpBar`
-    - `hpBar`
-    - `detectRadius`
-    - `attackRange`
-    - `attackDamage`
-    - `attackCooldown`
-    - `moveSpeed`
-    - `attackType`
-    - `chaseTarget`
-    - `attackAnimLockTime`
-    - `damagedAnimLockTime`
+  - 目前支援 Peace / Neutral / Hostile 類型。
+  - Hostile NPC 可追蹤、攻擊、受傷、死亡、顯示 HP bar。
+  - 使用 `CombatHitbox` 進行攻擊判定。
+  - Slime animation 命名：
+    - `idle_front`
+    - `idle_right`
+    - `idle_back`
+    - `move_front`
+    - `move_right`
+    - `move_back`
+    - `attack_front`
+    - `attack_right`
+    - `attack_back`
+    - `damaged_front`
+    - `damaged_right`
+    - `damaged_back`
+    - `death`
+  - 後續旅行商人不建議直接塞進 `NPC_AI.ts`：
+    - 商人是 peace NPC
+    - 不需要攻擊
+    - 需要閒逛、互動提示、對話、商店、生成與消失規則
+    - 建議新增 `MerchantNPC.ts` 或通用 `NPCWander.ts` + `MerchantNPC.ts`
 
-Slime 動畫命名規則：
-
-```text
-idle_front
-idle_right
-idle_back
-move_front
-move_right
-move_back
-attack_front
-attack_right
-attack_back
-damaged_front
-damaged_right
-damaged_back
-death
-```
-
-方向規則：
-
-- 目標在下方：`front`
-- 目標在上方：`back`
-- 目標在右方：`right`
-- 目標在左方：播放 `right`，`Sprite_Body.scaleX = -1`
-
-建議 Slime 節點：
-
-```text
-Slime
-  NPC_AI
-  RigidBody
-  PhysicsBoxCollider
-  Sprite_Body
-    Sprite
-    Animation
-  HpBar
-    ProgressBar
-    bar
-      Sprite
-```
-
-Slime collider 建議：
-
-- `RigidBody.type = Kinematic`
-- `PhysicsBoxCollider.sensor = true`
-- collider 大小包住 slime 身體即可
-- 若 hurtbox 放在子節點，`PlayerAttackHitbox` 會往 parent 找 `NPC_AI`
-
-注意：
-
-- NPC 攻擊玩家目前仍用距離判斷。
-- 玩家攻擊 NPC 已改為 hitbox 碰撞判定。
-- 商人或非戰鬥 NPC 可關閉 `showHpBar`。
-
-## Entity / Resource 模組
+## Entity / Resources / Items
 
 位置：`assets/Scripts/Entity`
 
-職責：
-
-- 可互動資源、掉落物、食物道具。
-- 目前這組和地圖 / 物件分工關係最密切。
-
-檔案：
-
 - `Resources/ResourceObject.ts`
-  - 樹 / 礦石類資源。
-  - 左鍵互動。
-  - 使用距離判斷玩家是否可互動。
-  - 耐久歸零後生成掉落物或改變 sprite。
+  - Tree / Ore 點擊互動。
+  - 距離檢查。
+  - 耐久扣減。
+  - 掉落 `DropItem` prefab。
 
 - `Resources/DropItem.ts`
-  - 掉落物彈出、落地、吸向玩家、收集。
-  - 使用 RigidBody / PhysicsCollider。
+  - 資源掉落物的物理彈出與狀態。
 
 - `Items/food/FoodBase.ts`
-  - 食物掉落與吸附邏輯。
-  - 預留食用恢復 HP / stamina。
+  - 食物掉落物基底。
+  - 支援靠近玩家吸附、加入 Inventory。
+  - 目前可作為未來 `ItemData` 的參考，但商店資料不應直接依賴 Mono Component。
 
 - `Items/food/fruits/coconut.ts`
   - 椰子食物實作。
+  - 旅行商人目前需求中，椰子數量會暫時作為金錢。
 
-## UI 模組
+## UI
 
 位置：`assets/Scripts/UI`
 
-職責：
-
-- HUD 顯示。
-- 接收事件更新 UI。
-
-檔案：
-
 - `UIManager.ts`
-  - 監聽 `PLAYER_HP_CHANGED`
-  - 監聽 `PLAYER_EXP_CHANGED`
-  - 更新 HP progress bar
-  - 更新 EXP label
+  - HUD。
+  - 監聽 `PLAYER_HP_CHANGED` / `PLAYER_EXP_CHANGED`。
+  - 更新 HP bar / EXP label。
 
-待補：
+- `InventoryUIController.ts`
+  - 背包 UI。
+  - 監聽 `INVENTORY_CHANGED`。
+  - 顯示 slot label。
+  - 後續旅行商店 UI 可參考此事件刷新模式。
 
-- Score UI
-- Item bar
-- Game Over panel
-- NPC 相關 UI 若需要集中管理，可從 `NPC_DIED` 接事件
-
-## Map 模組
+## Map
 
 位置：`assets/Scripts/Map`
 
-目前狀態：
+- 目前只有 `NewScript - 001.ts`，尚未形成正式 MapManager。
+- 後續旅行商人生成位置需要：
+  - 玩家 world position
+  - 可站立地面或簡化 spawn range
+  - `minSpawnDistance` / `maxSpawnDistance`
+  - 存在時間與無交易消失時間
 
-- `NewScript - 001.ts` 仍是預設空腳本。
-
-待補：
-
-- 地圖資料結構
-- 地形 / tile / collider
-- 場景邊界
-- 資源物件放置規則
-
-## 五人分工建議
-
-### 1. Player 組
-
-負責：
-
-- `assets/Scripts/Player`
-- 玩家移動、跳躍、攻擊、受傷、死亡。
-- 玩家攻擊 hitbox。
-- 玩家動畫。
-
-交付：
-
-- 玩家可移動、跳躍。
-- 左鍵攻擊可命中 NPC。
-- 玩家受傷會更新 UI。
-- 玩家死亡會發送 `PLAYER_DIED`。
-
-### 2. NPC 組
-
-負責：
-
-- `assets/Scripts/NPC/NPC_AI.ts`
-- NPC prefab。
-- NPC 動畫 clips。
-- NPC hurtbox / hp bar。
-
-交付：
-
-- Slime 可追蹤玩家。
-- Slime 可攻擊玩家。
-- Slime 可被玩家 hitbox 打到。
-- Slime 受傷 / 死亡 / 攻擊動畫可播。
-- 商人等和平 NPC 可使用同腳本但關閉攻擊與血條。
-
-### 3. 地圖 / Tile 組
-
-負責：
-
-- `assets/Scripts/Map`
-- 場景地形、tile、平台、地面 collider。
-- 世界邊界。
-
-交付：
-
-- `Game.fire` 有可玩的測試地圖。
-- Player / NPC / 掉落物可正確站在地面或被地形限制。
-- 後續可支援 tilemap。
-
-### 4. 物件 / 掉落 / 資源組
-
-負責：
-
-- `assets/Scripts/Entity/Resources`
-- `assets/Scripts/Entity/Items`
-- 樹、礦石、掉落物、食物。
-
-交付：
-
-- 樹 / 礦石可互動。
-- 互動後可掉落 item。
-- 掉落物可吸向玩家並收集。
-- 食物可預留恢復效果。
-
-### 5. Core / UI / 整合 PM 組
-
-負責：
-
-- `assets/Scripts/Core`
-- `assets/Scripts/UI`
-- `PLAN.md`
-- `structure.md`
-- 分支整合與事件命名。
-
-交付：
-
-- 維護 `GameEvent`。
-- 確保 Player / NPC / Entity / UI 透過事件或明確 API 互動。
-- 整合 Game Over / Restart。
-- 維持文件更新。
-
-## 模組互動規則
-
-### 事件優先
-
-跨組通知優先透過 `EventCenter`：
+## 目前跨模組流程
 
 ```text
-Player damaged -> PLAYER_HP_CHANGED -> UIManager
-Player dead    -> PLAYER_DIED       -> GameManager
-NPC dead       -> NPC_DIED          -> 掉落 / Score / UI
-Spawn item     -> SPAWN_ITEM        -> 掉落物系統
+PlayerController
+  -> CombatHitbox
+  -> BaseEntity / NPC_AI.receiveAttack()
+
+NPC_AI
+  -> CombatHitbox
+  -> PlayerController.takeDamage()
+
+ResourceObject
+  -> DropItem / FoodBase
+  -> InventoryManager.addItem()
+  -> INVENTORY_CHANGED
+  -> InventoryUIController.refreshUI()
+
+PlayerController
+  -> PLAYER_HP_CHANGED
+  -> UIManager
+
+PlayerController
+  -> PLAYER_DIED
+  -> GameManager
 ```
 
-### 直接呼叫只用於近距離 gameplay
+## 旅行商人開發建議位置
 
-允許直接呼叫的例子：
+建議新增：
 
 ```text
-PlayerAttackHitbox -> NPC_AI.receiveAttack()
-NPC_AI             -> PlayerController/BaseEntity.takeDamage()
-ResourceObject     -> DropItem.launch()
+assets/Scripts/Data/
+  ItemData.ts
+  MerchantPool.ts
+
+assets/Scripts/NPC/
+  MerchantNPC.ts
+  MerchantSpawner.ts
+
+assets/Scripts/UI/
+  DialogueUIController.ts
+  MerchantShopUIController.ts
 ```
 
-不建議：
-
-- UI 直接改 Player 內部狀態
-- NPC 直接改 UI
-- ResourceObject 直接改 GameManager 分數
-
-## 當前高優先修正事項
-
-1. 統一 NPC 腳本路徑
-   - 目前應以 `assets/Scripts/NPC/NPC_AI.ts` 作為正式路徑。
-   - 若還有 `assets/Scripts/Entity/NPC_AI.ts` 舊檔，應刪除或停止引用，避免兩份邏輯分裂。
-
-2. 修整 `PlayerController.ts`
-   - 目前 `onLoad()` 內有重複 `super.onLoad()`、重複設定 `type`、重複註冊鍵盤事件的跡象。
-   - 應整理成單一初始化流程。
-
-3. 修整 `BaseEntity.ts`
-   - `takeDamage()` 應 clamp 到 0。
-   - 加入 `isDead` 防止重複死亡。
-   - 補 `heal(amount)`。
-
-4. 攻擊碰撞測試
-   - Player `AttackHitbox` 需要 `RigidBody + PhysicsBoxCollider`。
-   - NPC 需要 `RigidBody + PhysicsBoxCollider`。
-   - PhysicsManager 已在 `GameManager` / `PlayerController` 啟用，但建議統一由 `GameManager` 啟用。
-
-5. UI 擴充
-   - 增加 Score。
-   - 增加 Game Over panel。
-   - 增加 item bar。
-
-## 建議分支
+可選擇新增：
 
 ```text
-feature/player-control
-feature/npc-combat
-feature/map-terrain
-feature/items-resources
-feature/core-ui-flow
+assets/Prefabs/NPCs/TravelingMerchant.prefab
+assets/Prefabs/UI/MerchantShopPanel.prefab
+assets/Prefabs/UI/DialoguePanel.prefab
 ```
 
-整合順序建議：
+## 目前風險與注意事項
 
-1. `feature/core-ui-flow`
-2. `feature/player-control`
-3. `feature/npc-combat`
-4. `feature/items-resources`
-5. `feature/map-terrain`
-
-## Editor 設定備忘
-
-### Player 攻擊 hitbox
-
-```text
-Player
-  AttackHitbox
-    PlayerAttackHitbox
-    RigidBody: Kinematic
-    PhysicsBoxCollider: sensor = true
-```
-
-### NPC hurtbox
-
-```text
-Slime
-  NPC_AI
-  RigidBody: Kinematic
-  PhysicsBoxCollider: sensor = true
-```
-
-### NPC animation
-
-`Animation` 建議掛在 `Sprite_Body`，clips 名稱必須和 `NPC_AI.ts` 使用的字串完全一致。
-
-### NPC hp bar
-
-```text
-Slime
-  HpBar
-    ProgressBar
-    bar
-      Sprite
-```
-
-`NPC_AI.showHpBar = false` 可用於商人、對話 NPC 等不需要血條的角色。
+1. `structure.md` 舊版內容曾出現亂碼，已重寫。
+2. 多個程式檔中的中文 log / description 看起來有亂碼，需確認是否造成 TypeScript 字串未閉合。
+3. `InventoryManager` 目前只支援 add/get，不足以支援商店扣款與購買。
+4. `NPC_AI.ts` 偏戰鬥 NPC，旅行商人應獨立腳本，避免把 peaceful 互動與 hostile AI 混在一起。
+5. 商店 UI 需要與背包同步，應使用 `INVENTORY_CHANGED` 或新增 typed `GameEvent`。

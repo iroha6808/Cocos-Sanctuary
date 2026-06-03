@@ -3,6 +3,9 @@ import EventCenter from "../Core/EventCenter";
 import { GameEvent, EntityType } from "../Core/Constants";
 import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
 import { InventoryManager } from "./InventoryManager";
+import MerchantNPC from "../NPC/MerchantNPC";
+import DialogueUIController from "../UI/DialogueUIController";
+import MerchantShopUIController from "../UI/MerchantShopUIController";
 
 const { ccclass, property } = cc._decorator;
 
@@ -24,6 +27,12 @@ export default class PlayerController extends BaseEntity {
     @property(CombatHitbox)
     attackHitbox: CombatHitbox = null;
 
+    @property(DialogueUIController)
+    dialogueUI: DialogueUIController = null;
+
+    @property(MerchantShopUIController)
+    merchantShopUI: MerchantShopUIController = null;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
     
@@ -36,6 +45,8 @@ export default class PlayerController extends BaseEntity {
     private isHurting: boolean = false;
     private isDead: boolean = false;
     private canvasNode: cc.Node = null;
+    private currentMerchant: MerchantNPC = null;
+    private promptMerchant: MerchantNPC = null;
 
     onLoad() {
         super.onLoad(); 
@@ -54,6 +65,7 @@ export default class PlayerController extends BaseEntity {
         this.canvasNode = cc.find("Canvas");
         if (this.canvasNode) {
             this.canvasNode.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+            this.canvasNode.on(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
         }
 
         this.bodyNode = this.node.getChildByName("Sprite_Body");
@@ -82,7 +94,7 @@ export default class PlayerController extends BaseEntity {
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
-        if (this.isDead) return;
+        if (this.isDead || this.isMerchantUIOpen()) return;
 
         if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
             this.attack();
@@ -105,6 +117,10 @@ export default class PlayerController extends BaseEntity {
         if (wasDown === isDown) return;
 
         this.keyStates[keyCode] = isDown;
+        if (isDown && this.handleMerchantShopKey(keyCode)) {
+            return;
+        }
+
         const amount = isDown ? 1 : -1;
 
         switch (keyCode) {
@@ -116,14 +132,65 @@ export default class PlayerController extends BaseEntity {
             case cc.macro.KEY.b:
                 if (isDown) this.toggleInventory();
                 break;
+            case cc.macro.KEY.f:
+                if (isDown) this.tryInteractWithMerchant();
+                break;
             case cc.macro.KEY.t:
                 if (isDown) {
-                    import("./InventoryManager").then(({ InventoryManager }) => {
-                        InventoryManager.instance.addItem("potion", "紅水", 1, "恢復20點生命值");
-                    });
+                    InventoryManager.instance.addItem("coconut", "Coconut", 10, "Temporary merchant currency.");
                 }
                 break;
         }
+    }
+
+    private onMouseWheel(event: cc.Event.EventMouse) {
+        const scrollY = event.getScrollY();
+        if (scrollY === 0) {
+            return;
+        }
+
+        if (this.dialogueUI && this.dialogueUI.isOptionsVisible()) {
+            if (scrollY < 0) {
+                this.dialogueUI.selectNext();
+            } else {
+                this.dialogueUI.selectPrev();
+            }
+            return;
+        }
+
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            if (scrollY < 0) {
+                this.merchantShopUI.selectNextItem();
+            } else {
+                this.merchantShopUI.selectPrevItem();
+            }
+        }
+    }
+
+    private tryInteractWithMerchant() {
+        if (this.isDead) {
+            return;
+        }
+
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            this.closeMerchantFlow();
+            return;
+        }
+
+        if (this.dialogueUI && this.dialogueUI.isOptionsVisible()) {
+            this.confirmDialogueOption();
+            return;
+        }
+
+        const merchant = this.promptMerchant || this.findNearestMerchant();
+        if (!merchant || !merchant.canInteract(this.node)) {
+            cc.log("[PlayerController] No merchant in interaction range.");
+            return;
+        }
+
+        this.currentMerchant = merchant;
+        merchant.beginInteraction(this.node);
+        this.showMerchantOptions();
     }
 
     private toggleInventory() {
@@ -142,8 +209,57 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
+    private findNearestMerchant(): MerchantNPC {
+        const scene = cc.director.getScene();
+        const merchants: MerchantNPC[] = [];
+        this.collectMerchants(scene, merchants);
+
+        let nearest: MerchantNPC = null;
+        let nearestDistance = Number.MAX_VALUE;
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
+            : this.node.position;
+
+        for (const merchant of merchants) {
+            if (!merchant || !cc.isValid(merchant.node)) {
+                continue;
+            }
+
+            const merchantWorldPos = merchant.node.parent
+                ? merchant.node.parent.convertToWorldSpaceAR(merchant.node.position)
+                : merchant.node.position;
+            const distance = merchantWorldPos.sub(playerWorldPos).mag();
+
+            if (distance < nearestDistance) {
+                nearest = merchant;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    private collectMerchants(root: cc.Node, result: MerchantNPC[]) {
+        if (!root) {
+            return;
+        }
+
+        const merchant = (root as any).getComponent ? root.getComponent(MerchantNPC) : null;
+        if (merchant) {
+            result.push(merchant);
+        }
+
+        const children = (root as any).children || [];
+        for (const child of children) {
+            this.collectMerchants(child, result);
+        }
+    }
+
     update(dt: number) {
+        this.updateMerchantPrompt();
+
         if (this.inventoryUI && this.inventoryUI.active) return;
+        if (this.isMerchantUIOpen()) return;
 
         if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
 
@@ -228,10 +344,115 @@ export default class PlayerController extends BaseEntity {
 
         if (this.canvasNode && cc.isValid(this.canvasNode)) {
             this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+            this.canvasNode.off(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
         }
 
         if (this.anim && cc.isValid(this.anim)) {
             this.anim.off("finished", this.onAnimFinished, this);
+        }
+    }
+
+    private updateMerchantPrompt() {
+        if (!this.dialogueUI || this.isDead || this.isMerchantUIOpen()) {
+            return;
+        }
+
+        if (this.dialogueUI.isOptionsVisible()) {
+            return;
+        }
+
+        const merchant = this.findNearestMerchant();
+        if (merchant && merchant.canInteract(this.node)) {
+            this.promptMerchant = merchant;
+            this.dialogueUI.showPrompt("Press F to Talk");
+            return;
+        }
+
+        this.promptMerchant = null;
+        this.dialogueUI.hidePrompt();
+    }
+
+    private showMerchantOptions() {
+        if (this.dialogueUI) {
+            this.dialogueUI.showOptions("Welcome, traveler.", ["Trade", "Chat", "Leave"]);
+        }
+    }
+
+    private confirmDialogueOption() {
+        if (!this.currentMerchant || !cc.isValid(this.currentMerchant.node)) {
+            this.closeMerchantFlow();
+            return;
+        }
+
+        const selectedIndex = this.dialogueUI ? this.dialogueUI.getSelectedIndex() : 0;
+        if (selectedIndex === 0) {
+            this.currentMerchant.openTrade();
+            if (this.dialogueUI) {
+                this.dialogueUI.hide();
+            }
+            if (this.merchantShopUI) {
+                this.merchantShopUI.open(this.currentMerchant);
+            }
+            return;
+        }
+
+        if (selectedIndex === 1) {
+            if (this.dialogueUI) {
+                this.dialogueUI.showOptions("The road is quiet today.", ["Trade", "Chat", "Leave"]);
+            }
+            return;
+        }
+
+        this.closeMerchantFlow();
+    }
+
+    private closeMerchantFlow() {
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            this.merchantShopUI.close();
+        }
+
+        if (this.dialogueUI) {
+            this.dialogueUI.hide();
+        }
+
+        if (this.currentMerchant && cc.isValid(this.currentMerchant.node)) {
+            this.currentMerchant.closeTrade();
+        }
+
+        this.currentMerchant = null;
+        this.promptMerchant = null;
+    }
+
+    private isMerchantUIOpen(): boolean {
+        return !!(
+            (this.dialogueUI && this.dialogueUI.isOptionsVisible()) ||
+            (this.merchantShopUI && this.merchantShopUI.isOpen())
+        );
+    }
+
+    private handleMerchantShopKey(keyCode: number): boolean {
+        if (!this.merchantShopUI || !this.merchantShopUI.isOpen()) {
+            return false;
+        }
+
+        switch (keyCode) {
+            case cc.macro.KEY.up:
+                this.merchantShopUI.selectPrevItem();
+                return true;
+            case cc.macro.KEY.down:
+                this.merchantShopUI.selectNextItem();
+                return true;
+            case cc.macro.KEY.left:
+                this.merchantShopUI.decreaseAmount();
+                return true;
+            case cc.macro.KEY.right:
+                this.merchantShopUI.increaseAmount();
+                return true;
+            case cc.macro.KEY.enter:
+                this.merchantShopUI.buySelected();
+                return true;
+            default:
+                return false;
         }
     }
 }

@@ -10,6 +10,12 @@ export enum NPCAttackType {
     MELEE = 1
 }
 
+export enum NPCMoveMode {
+    NONE = 0,
+    CHASE_TARGET = 1,
+    WANDER = 2
+}
+
 enum NPCFacing {
     FRONT = "front",
     RIGHT = "right",
@@ -17,6 +23,7 @@ enum NPCFacing {
 }
 
 cc.Enum(NPCAttackType);
+cc.Enum(NPCMoveMode);
 
 @ccclass
 export default class NPC_AI extends BaseEntity {
@@ -54,6 +61,27 @@ export default class NPC_AI extends BaseEntity {
     @property(cc.Float)
     public moveSpeed: number = 80;
 
+    @property({ type: cc.Enum(NPCMoveMode) })
+    public moveMode: NPCMoveMode = NPCMoveMode.CHASE_TARGET;
+
+    @property(cc.Float)
+    public wanderMoveSpeed: number = 40;
+
+    @property(cc.Float)
+    public minWanderMoveTime: number = 1.5;
+
+    @property(cc.Float)
+    public maxWanderMoveTime: number = 4;
+
+    @property(cc.Float)
+    public minWanderIdleTime: number = 1;
+
+    @property(cc.Float)
+    public maxWanderIdleTime: number = 3;
+
+    @property(cc.Float)
+    public interactDistance: number = 90;
+
     @property({ type: cc.Enum(NPCAttackType) })
     public attackType: NPCAttackType = NPCAttackType.MELEE;
 
@@ -84,6 +112,10 @@ export default class NPC_AI extends BaseEntity {
     @property(CombatHitbox)
     public attackHitbox: CombatHitbox = null;
 
+    protected isTalking: boolean = false;
+    protected isTrading: boolean = false;
+    protected isMovementPaused: boolean = false;
+
     private isEnraged: boolean = false;
     private isDead: boolean = false;
     private isAttacking: boolean = false;
@@ -93,6 +125,8 @@ export default class NPC_AI extends BaseEntity {
     private actionLockTimer: number = 0;
     private stuckTimer: number = 0;
     private lastX: number = 0;
+    private wanderTimer: number = 0;
+    private wanderDirection: number = 0;
     private bodyNode: cc.Node = null;
     private anim: cc.Animation = null;
     private rb: cc.RigidBody = null;
@@ -147,13 +181,66 @@ export default class NPC_AI extends BaseEntity {
         this.targetPlayer = playerNode;
     }
 
+    public pauseMovement() {
+        this.isMovementPaused = true;
+        this.stopMovement();
+    }
+
+    public resumeMovement() {
+        this.isMovementPaused = false;
+    }
+
+    public stopMovement() {
+        this.stopHorizontalMove();
+        this.wanderDirection = 0;
+        this.wanderTimer = 0;
+        this.playStateAnimation("idle");
+    }
+
+    public isPlayerInInteractRange(player: cc.Node): boolean {
+        if (!player || !cc.isValid(player)) {
+            return false;
+        }
+
+        const npcWorldPos = this.getNodeWorldPosition();
+        const playerWorldPos = player.parent
+            ? player.parent.convertToWorldSpaceAR(player.position)
+            : player.position;
+
+        return npcWorldPos.sub(playerWorldPos).mag() <= this.interactDistance;
+    }
+
+    public beginTalk(player: cc.Node) {
+        this.isTalking = true;
+        this.targetPlayer = player;
+        this.pauseMovement();
+    }
+
+    public endTalk() {
+        this.isTalking = false;
+        this.isTrading = false;
+        this.resumeMovement();
+    }
+
+    public beginTrading() {
+        this.isTrading = true;
+        this.pauseMovement();
+    }
+
+    public endTrading() {
+        this.isTrading = false;
+        if (!this.isTalking) {
+            this.resumeMovement();
+        }
+    }
+
     update(dt: number) {
         if (this.isDead) return;
 
         this.updateTimers(dt);
         this.updateDebugLog(dt);
 
-        if (!this.canAct()) {
+        if (this.isMovementPaused || this.isTalking || this.isTrading) {
             this.stopHorizontalMove();
             this.playStateAnimation("idle");
             return;
@@ -161,6 +248,23 @@ export default class NPC_AI extends BaseEntity {
 
         if (this.isAttacking || this.isHurting) {
             this.stopHorizontalMove();
+            return;
+        }
+
+        if (this.moveMode === NPCMoveMode.NONE) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        if (this.moveMode === NPCMoveMode.WANDER) {
+            this.updateWander(dt);
+            return;
+        }
+
+        if (!this.canAct()) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
             return;
         }
 
@@ -295,7 +399,7 @@ export default class NPC_AI extends BaseEntity {
         const targetName = hasTarget ? this.targetPlayer.name : "null";
         const distance = hasTarget ? this.getTargetDistance().toFixed(1) : "n/a";
         const velocity = this.rb ? `(${this.rb.linearVelocity.x.toFixed(1)}, ${this.rb.linearVelocity.y.toFixed(1)})` : "no-rigidbody";
-        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, distance=${distance}, velocity=${velocity}, attacking=${this.isAttacking}, hurting=${this.isHurting}`);
+        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, moveMode=${this.moveMode}, distance=${distance}, velocity=${velocity}, attacking=${this.isAttacking}, hurting=${this.isHurting}, talking=${this.isTalking}, trading=${this.isTrading}`);
     }
 
     private canAct() {
@@ -339,6 +443,53 @@ export default class NPC_AI extends BaseEntity {
 
         this.tryJumpWhenStuck(dt);
         this.playStateAnimation("move");
+    }
+
+    protected updateWander(dt: number) {
+        this.wanderTimer -= dt;
+
+        if (this.wanderTimer <= 0) {
+            this.chooseNextWanderState();
+        }
+
+        if (this.wanderDirection === 0) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        const targetSpeedX = this.wanderDirection * this.wanderMoveSpeed;
+        if (this.rb) {
+            this.rb.linearVelocity = cc.v2(targetSpeedX, this.rb.linearVelocity.y);
+        } else {
+            this.node.x += targetSpeedX * dt;
+        }
+
+        this.setFacingByDirection(cc.v2(this.wanderDirection, 0));
+        this.tryJumpWhenStuck(dt);
+        this.playStateAnimation("move");
+    }
+
+    protected setFacingByDirection(direction: cc.Vec2 | cc.Vec3) {
+        this.updateFacing(direction);
+    }
+
+    private chooseNextWanderState() {
+        const shouldIdle = Math.random() < 0.45;
+        if (shouldIdle) {
+            this.wanderDirection = 0;
+            this.wanderTimer = this.randomRange(this.minWanderIdleTime, this.maxWanderIdleTime);
+            return;
+        }
+
+        this.wanderDirection = Math.random() < 0.5 ? -1 : 1;
+        this.wanderTimer = this.randomRange(this.minWanderMoveTime, this.maxWanderMoveTime);
+    }
+
+    private randomRange(min: number, max: number) {
+        const safeMin = Math.min(min, max);
+        const safeMax = Math.max(min, max);
+        return safeMin + Math.random() * (safeMax - safeMin);
     }
 
     private tryJumpWhenStuck(dt: number) {
