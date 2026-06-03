@@ -216,7 +216,8 @@
 
 下一步：
 
-- [ ] 加入背包功能
+- [ ] 背包item icon
+- [ ] 從背包移除物品
 - [ ] 加入 `gainExp(amount)`，發送 `PLAYER_EXP_CHANGED`
 - [ ] 加入 Score 或資源數值
 
