@@ -233,12 +233,14 @@
 - [x] 近戰 `attackTarget()` 可呼叫玩家 `takeDamage()`
 - [x] 加入攻擊距離、傷害、冷卻時間
 - [x] NPC 死亡時發送 `NPC_DIED`
+- [x] 接上 NPC idle / run / hurt / attack / die 動畫
+- [x] 實測 NPC 是否能扣玩家血
+- [x] 在 Cocos Editor 建立 Hostile NPC prefab
+- [x] 建立 traveling merchant NPC prefab(peace)
+- [x] 測試交易邏輯
 
 下一步：
 
-- [ ] 在 Cocos Editor 建立 Hostile NPC prefab
-- [ ] 實測 NPC 是否能扣玩家血
-- [ ] 接上 NPC idle / run / hurt / attack / die 動畫
 - [ ] 規劃遠程攻擊與 projectile prefab
 - [ ] 將 `NPC_DIED` 接到掉落物 / Score / EXP
 
