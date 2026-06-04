@@ -228,20 +228,6 @@ MerchantNPC.buy()
   -> InventoryUIController / MerchantShopUIController refresh
 ```
 
-## Cocos Inspector 設定
-
-- 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`。
-- 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp`、`moveSpeed`、`jumpForce`、`attackDamage`。
-- `PlayerController.ts` 需要接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`。
-- 玩家節點建議有 `RigidBody`、`Sprite_Body`、`AttackHitbox` 子節點。
-- 掛 `NPC_AI.ts` 的 NPC 節點可以調整 `type`、`maxHp`、`detectRadius`、`attackRange`、`attackDamage`、`moveMode`、`attackType`。
-- NPC 節點建議接 `targetPlayer`、`hpBar`、`attackHitbox`，商人節點需同時掛 `MerchantNPC.ts` 與 `NPC_AI.ts`。
-- 掛 `UIManager.ts` 的 UI 節點需要把經驗 Label 拖到 `expLabel`，把血條 ProgressBar 拖到 `hpBar`。
-- `InventoryUIController.ts` 需要接 `gridContainer`，格子底下要有 `Label` 子節點。
-- `DialogueUIController.ts` 需要接 prompt、dialogue panel、dialogue label、option labels。
-- `MerchantShopUIController.ts` 需要接 root、currency label、商品列表、商品描述、價格、庫存、持有數、購買數量、buy button。
-- `ResourceObject.ts` 需要接 `dropPrefab`，Tree 若要變枯樹需接 `depletedSpriteFrame` / `targetSprite`。
-
 ## 目前注意事項
 
 - `BaseEntity.takeDamage()` 仍是基底版本，沒有 clamp HP；`NPC_AI` 自己有 override 並 clamp，Player 目前靠動畫狀態控制死亡流程。
