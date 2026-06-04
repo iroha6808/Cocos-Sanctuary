@@ -172,7 +172,7 @@
 
 - [x] Tree / Ore 耐久與掉落
 - [x] FoodBase 自動吸附並加入背包
-- [ ] DropItem 收集也加入背包
+- [x] DropItem 收集也加入背包
 - [ ] Coconut eat/drop 與 PlayerController stats API 統一
 - [ ] 礦物製作工具
 
