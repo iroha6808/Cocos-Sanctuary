@@ -6,7 +6,7 @@ export enum ItemMode{
     Drop = 1, // 掉落物模式：可被吸附、收進背包
 }
 
-export enum DropState {
+export enum ItemState {
     Flying = 0,
     Resting = 1,
     Attracting = 2,
@@ -40,7 +40,7 @@ export default class DropItem extends cc.Component {
     protected rb: cc.RigidBody = null!;
     protected collider: cc.PhysicsCollider = null!;
     private targetPlayer: cc.Node | null = null;
-    protected state: DropState = DropState.Flying;
+    protected state: ItemState = ItemState.Flying;
     protected mode: ItemMode = ItemMode.Drop;
 
     onLoad() {
@@ -66,7 +66,7 @@ export default class DropItem extends cc.Component {
 
         const direction = Math.random() < 0.5 ? -1 : 1;
 
-        this.state = DropState.Flying;
+        this.state = ItemState.Flying;
         this.rb.type = cc.RigidBodyType.Dynamic;
         this.rb.gravityScale = 1;
         this.rb.linearVelocity = cc.v2(direction * this.launchSpeedX, this.launchSpeedY);
@@ -76,7 +76,7 @@ export default class DropItem extends cc.Component {
 
     public placeAsObject(worldPos: cc.Vec2) {
         this.mode  = ItemMode.Object;
-        this.state = DropState.Flying; // 讓它自然落下
+        this.state = ItemState.Flying; // 讓它自然落下
 
         if (this.node.parent) {
             this.node.setPosition(this.node.parent.convertToNodeSpaceAR(worldPos));
@@ -102,30 +102,30 @@ export default class DropItem extends cc.Component {
 
     update(dt: number) {
         if (this.mode === ItemMode.Object) return;
-        if (this.state === DropState.Held)  return;
+        if (this.state === ItemState.Held)  return;
         const player = this.findPlayer();
         if (!player) return;
 
         const distance = this.getWorldDistanceTo(player);
 
-        if (this.state !== DropState.Attracting && distance <= this.attractDistance) {
+        if (this.state !== ItemState.Attracting && distance <= this.attractDistance) {
             this.startAttract(player);
         }
 
-        if (this.state === DropState.Attracting) {
+        if (this.state === ItemState.Attracting) {
             this.moveToPlayer(player, dt);
         }
     }
 
     onBeginContact(contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
-        if (this.state !== DropState.Flying) return;
+        if (this.state !== ItemState.Flying) return;
         if (!this.isGround(otherCollider.node)) return;
         this.stopOnGround();
     }
 
-    private stopOnGround() {
+    stopOnGround() {
         if (!this.rb)  return;
-        this.state = DropState.Resting;
+        this.state = ItemState.Resting;
         this.rb.linearVelocity = cc.v2(0, 0);
         this.rb.angularVelocity = 0;
         this.rb.gravityScale = 0;
@@ -136,7 +136,7 @@ export default class DropItem extends cc.Component {
     private startAttract(player: cc.Node) {
         if (this.mode === ItemMode.Object) return;
         this.targetPlayer = player;
-        this.state = DropState.Attracting;
+        this.state = ItemState.Attracting;
         if (this.rb) {
             this.rb.linearVelocity = cc.v2(0, 0);
             this.rb.angularVelocity = 0;

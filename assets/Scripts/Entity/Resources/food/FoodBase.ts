@@ -7,7 +7,7 @@ export enum ItemMode{
     Drop = 1, // 掉落物模式：可被吸附、收進背包
 }
 
-export enum DropState {
+export enum ItemState {
     Flying = 0,
     Resting = 1,
     Attracting = 2,
@@ -21,8 +21,8 @@ export default class FoodBase extends DropItem {
     @property({ tooltip: '吃掉後恢復的 HP' })   hpRestore: number = 0;
     @property({ tooltip: '吃掉後恢復的體力' })  staminaRestore: number = 0;
     @property({ tooltip: '腐敗時間（秒），-1 為永不腐敗' }) rottenTime: number = -1;
-    private rottenTimer: number = 0;
-    private isRotten: boolean   = false;
+    rottenTimer: number = 0;
+    isRotten: boolean   = false;
 
     onLoad() {
         super.onLoad();
@@ -85,7 +85,7 @@ export default class FoodBase extends DropItem {
         this.mode = newState;
     }
 
-    changeState(newState: DropState) {
+    changeState(newState: ItemState) {
         this.state = newState;
     }
 }

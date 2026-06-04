@@ -2,11 +2,11 @@ const { ccclass, property } = cc._decorator;
 import FoodBase from '../FoodBase';
 import DropState from '../../DropItem';
 
-export enum CoconutState {
-    OnTree   = 0,
-    Falling  = 1,
-    OnGround = 2,
-    Held     = 3,
+export enum ItemState {
+    Flying = 0,
+    Resting = 1,
+    Attracting = 2,
+    Held = 3,
 }
 
 export enum ItemMode{
@@ -23,8 +23,9 @@ export default class Coconut extends FoodBase {
     foodName: string = 'Coconut';
     hpRestore: number = 10;
     staminaRestore: number = 30;
+    rottenTimer: number = 600; // 10分鐘腐敗
 
-    @property({ tooltip: '椰子狀態' })         coconutState: CoconutState = CoconutState.OnTree;
+    @property({ tooltip: '椰子狀態' })         coconutState: ItemState = ItemState.Resting;
     @property({ tooltip: '為世界唯一交易貨幣' }) cashValue: number = 1;
 
     private interactLabel: cc.Node = null!;
@@ -51,8 +52,8 @@ export default class Coconut extends FoodBase {
 
     // ── 採集：玩家按 F，椰子從樹上掉下來 ──────────────
     startFall() {
-        if (this.coconutState !== CoconutState.OnTree) return;
-        this.coconutState = CoconutState.Falling;
+        if (this.coconutState !== ItemState.Resting) return;
+        this.coconutState = ItemState.Flying;
         this.hideInteractHint();
 
         this.rb.type           = cc.RigidBodyType.Dynamic;
@@ -66,27 +67,21 @@ export default class Coconut extends FoodBase {
         self: cc.PhysicsCollider,
         other: cc.PhysicsCollider
     ) {
-        if (this.coconutState !== CoconutState.Falling) return;
+        if (this.coconutState !== ItemState.Flying) return;
         if (!this.isGround(other.node)) return;
 
-        this.coconutState = CoconutState.OnGround;
+        this.coconutState = ItemState.Resting;
 
-        // ★ 呼叫父類的 stopOnGround()（現在是 protected，可以直接呼叫）
-        //   讓 this.state = Resting，同時停止 rb
         this.stopOnGround();
         this.rb.linearDamping  = 8;
         this.rb.angularDamping = 8;
-
-        // ★ Resting 時把 collider 設成 sensor，讓椰子不再推玩家
-        //   （Attracting 時父類會 disable collider，雙重保險）
+        
         if (this.collider) this.collider.sensor = true;
     }
 
     // ── 互動提示 ────────────────────────────────────────
     showInteractHint() {
-        const canShow =
-            this.coconutState === CoconutState.OnTree ||
-            this.coconutState === CoconutState.OnGround;
+        const canShow = this.coconutState === ItemState.Resting;
         if (canShow && this.interactLabel) this.interactLabel.active = true;
     }
 
@@ -96,9 +91,9 @@ export default class Coconut extends FoodBase {
 
     // ── 撿起（玩家手動從地上撿） ────────────────────────
     pickup(playerNode: cc.Node) {
-        if (this.coconutState !== CoconutState.OnGround) return;
-        this.coconutState = CoconutState.Held;
-        this.changeState(DropState.Held);
+        if (this.coconutState !== ItemState.Resting) return;
+        this.coconutState = ItemState.Held;
+        this.changeState(ItemState.Held);
 
         this.rb.type           = cc.RigidBodyType.Kinematic;
         this.rb.linearVelocity = cc.v2(0, 0);
@@ -110,15 +105,15 @@ export default class Coconut extends FoodBase {
 
     // ── 吃掉（手持狀態） ────────────────────────────────
     eat(player: cc.Node) {
-        if (this.coconutState !== CoconutState.Held) return;
+        if (this.coconutState !== ItemState.Held) return;
         super.eat(player);
     }
 
     // ── 丟掉（手持狀態） ────────────────────────────────
     drop(direction: cc.Vec2) {
-        if (this.coconutState !== CoconutState.Held) return;
-        this.coconutState = CoconutState.Falling;
-        this.changeState(DropState.Flying);
+        if (this.coconutState !== ItemState.Held) return;
+        this.coconutState = ItemState.Flying;
+        this.changeState(ItemState.Flying);
 
         const worldPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
         const canvas   = cc.director.getScene().getChildByName('Canvas');
@@ -138,7 +133,7 @@ export default class Coconut extends FoodBase {
 
     // ── 直接受物理影響（從天而降時使用） ────────────────
     enablePhysics() {
-        this.coconutState = CoconutState.Falling;
+        this.coconutState = ItemState.Flying;
 
         if (!this.rb) {
             cc.error('[Coconut] enablePhysics: rb 為 null，請確認 super.onLoad() 有被呼叫');
