@@ -9,6 +9,11 @@ export enum CoconutState {
     Held     = 3,
 }
 
+export enum ItemMode{
+    Object = 0, // 物件模式：純物理，不可吸附，不可撿起
+    Drop = 1, // 掉落物模式：可被吸附、收進背包
+}
+
 // 大部分紅線都是繼承的變數和函式，不用管它們
 
 @ccclass
@@ -93,7 +98,7 @@ export default class Coconut extends FoodBase {
     pickup(playerNode: cc.Node) {
         if (this.coconutState !== CoconutState.OnGround) return;
         this.coconutState = CoconutState.Held;
-        this.state        = DropState.Held;
+        this.changeState(DropState.Held);
 
         this.rb.type           = cc.RigidBodyType.Kinematic;
         this.rb.linearVelocity = cc.v2(0, 0);
@@ -113,7 +118,7 @@ export default class Coconut extends FoodBase {
     drop(direction: cc.Vec2) {
         if (this.coconutState !== CoconutState.Held) return;
         this.coconutState = CoconutState.Falling;
-        this.state        = DropState.Flying;
+        this.changeState(DropState.Flying);
 
         const worldPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
         const canvas   = cc.director.getScene().getChildByName('Canvas');

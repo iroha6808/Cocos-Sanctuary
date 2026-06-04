@@ -15840,9 +15840,6 @@
       "__id__": 343
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -15850,6 +15847,12 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "rottenTime": -1,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "48JwKPzo5EyKFVgaXR/soO"
   },
   {
@@ -16023,9 +16026,6 @@
       "__id__": 349
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -16033,6 +16033,12 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "rottenTime": -1,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "0fv98aoO5NzaUoBFjY+Tjz"
   },
   {
@@ -16206,9 +16212,6 @@
       "__id__": 355
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -16216,6 +16219,12 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "rottenTime": -1,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "34AiGaWypDjrhA7iQ/2hLz"
   },
   {
