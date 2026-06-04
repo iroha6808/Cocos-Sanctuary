@@ -170,15 +170,15 @@ export default class DropItem extends cc.Component {
         if (this.mode === ItemMode.Object) return;
         cc.log("Collect item:", this.itemName, this.itemAmount);
         if (!InventoryManager.instance) {
-            cc.error('[FoodBase] 無法找到 InventoryManager，無法加入背包');
+            cc.error('[DropItem] 無法找到 InventoryManager，無法加入背包');
             return;
         }
         const id = this.itemName.toLowerCase();
         const name = this.itemName;
-        const description = `獲得 ${this.itemAmount} 個 ${name}`;
-        const added = InventoryManager.instance.addItem(id, name, 1, description);
-        if (added) cc.log(`[FoodBase] ${name} 已加入背包`);
-        else cc.warn(`[FoodBase] 背包已滿，${name} 無法加入`); 
+        const added = InventoryManager.instance.addItem(id, this.itemAmount);
+
+        if (added) cc.log(`[DropItem] ${name} 已加入背包`);
+        else cc.warn(`[DropItem] 背包已滿，${name} 無法加入`); 
         this.node.destroy();
     }
 

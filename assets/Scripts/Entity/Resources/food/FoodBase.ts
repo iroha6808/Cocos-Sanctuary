@@ -36,16 +36,16 @@ export default class FoodBase extends DropItem {
     }
 
     collect() {
-        const id          = (this.foodName || this.itemName).toLowerCase();
-        const name        = this.foodName || this.itemName;
-        const description = `恢復 ${this.hpRestore} HP 和 ${this.staminaRestore} 體力`;
-        // 嘗試找到背包
+        const id   = (this.foodName || this.itemName).toLowerCase();
+        const name = this.foodName || this.itemName;
+        
         cc.log(`[FoodBase] 嘗試將 ${name} 加入背包...`);
         if (!InventoryManager.instance) {
             cc.error('[FoodBase] 無法找到 InventoryManager，無法加入背包');
             return;
         }
-        const added = InventoryManager.instance.addItem(id, name, 1, description);
+        const added = InventoryManager.instance.addItem(id, 1);
+
         if (added) cc.log(`[FoodBase] ${name} 已加入背包`);
         else cc.warn(`[FoodBase] 背包已滿，${name} 無法加入`);
         this.node.destroy();
@@ -61,13 +61,12 @@ export default class FoodBase extends DropItem {
         this.node.destroy();
     }
 
-    // ── 腐敗計時（只在 Object 模式下運作） ──────────
     update(dt: number) {
-        super.update(dt); // 讓父類處理吸附邏輯（Drop 模式時）
+        super.update(dt); 
 
         if (this.mode !== ItemMode.Object) return;
-        if (this.rottenTime < 0)           return;
-        if (this.isRotten)                 return;
+        if (this.rottenTime < 0) return;
+        if (this.isRotten) return;
 
         this.rottenTimer += dt;
         if (this.rottenTimer >= this.rottenTime) {

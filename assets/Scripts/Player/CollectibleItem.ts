@@ -8,7 +8,7 @@ export default class CollectibleItem extends cc.Component {
     itemId: string = "apple";
 
     @property(cc.String)
-    itemName: string = "蘋果";
+    itemName: string = "蘋果"; 
 
     @property(cc.Integer)
     itemCount: number = 1;
@@ -22,9 +22,7 @@ export default class CollectibleItem extends cc.Component {
         if (playerCtrl) {
             let isPickedUp = InventoryManager.instance.addItem(
                 this.itemId, 
-                this.itemName, 
-                this.itemCount, 
-                this.itemDescription
+                this.itemCount
             );
 
             if (isPickedUp) {
