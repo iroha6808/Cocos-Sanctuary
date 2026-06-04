@@ -169,7 +169,7 @@ export default class NPC_AI extends BaseEntity {
 
     start() {
         if (!this.targetPlayer && this.autoFindTarget) {
-            this.targetPlayer = this.findNodeByName(cc.director.getScene(), this.targetNodeName);
+            this.targetPlayer = this.findNodeByName(cc.find("Canvas"), this.targetNodeName);
         }
 
         if (this.debugLog) {

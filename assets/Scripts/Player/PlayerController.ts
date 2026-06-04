@@ -210,9 +210,9 @@ export default class PlayerController extends BaseEntity {
     }
 
     private findNearestMerchant(): MerchantNPC {
-        const scene = cc.director.getScene();
+        const root = this.canvasNode || cc.find("Canvas");
         const merchants: MerchantNPC[] = [];
-        this.collectMerchants(scene, merchants);
+        this.collectMerchants(root, merchants);
 
         let nearest: MerchantNPC = null;
         let nearestDistance = Number.MAX_VALUE;
@@ -244,7 +244,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const merchant = (root as any).getComponent ? root.getComponent(MerchantNPC) : null;
+        const merchant = root.getComponent(MerchantNPC);
         if (merchant) {
             result.push(merchant);
         }
