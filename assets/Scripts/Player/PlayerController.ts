@@ -1,7 +1,7 @@
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter"; 
 import { GameEvent, EntityType } from "../Core/Constants";
-import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
+import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
 import { InventoryManager } from "./InventoryManager";
 import MerchantNPC from "../NPC/MerchantNPC";
 import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDialogue";
@@ -34,6 +34,12 @@ export default class PlayerController extends BaseEntity {
     @property(MerchantShopUIController)
     merchantShopUI: MerchantShopUIController = null;
 
+    @property({ type: cc.Float, range: [0, 1, 0.05], slide: true })
+    knockbackResistance: number = 0;
+
+    @property(cc.Float)
+    knockbackLockTime: number = 0.12;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
     
@@ -49,6 +55,7 @@ export default class PlayerController extends BaseEntity {
     private currentMerchant: MerchantNPC = null;
     private promptMerchant: MerchantNPC = null;
     private currentDialogueOptions: DialogueOption[] = [];
+    private knockbackTimer: number = 0;
 
     onLoad() {
         super.onLoad(); 
@@ -215,6 +222,15 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
+    public receiveAttack(amount: number, attackerNode: cc.Node = null, hitInfo?: CombatHitInfo) {
+        if (this.isDead) {
+            return;
+        }
+
+        this.applyKnockback(attackerNode, hitInfo);
+        this.takeDamage(amount);
+    }
+
     private findNearestMerchant(): MerchantNPC {
         const root = this.canvasNode || cc.find("Canvas");
         const merchants: MerchantNPC[] = [];
@@ -267,11 +283,13 @@ export default class PlayerController extends BaseEntity {
         }
 
         this.updateMerchantPrompt();
+        this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
 
         if (this.inventoryUI && this.inventoryUI.active) return;
         if (this.isMerchantUIOpen()) return;
 
         if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
+        if (this.knockbackTimer > 0) return;
 
         let isMovingX = this.moveDir.x !== 0;
 
@@ -310,6 +328,32 @@ export default class PlayerController extends BaseEntity {
             const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
             this.attackHitbox.activate(facingRight, this.attackDamage, this.node);
         }
+    }
+
+    private applyKnockback(attackerNode: cc.Node, hitInfo?: CombatHitInfo) {
+        if (!this.rb || !attackerNode || !cc.isValid(attackerNode) || this.isDead) {
+            return;
+        }
+
+        const knockbackX = hitInfo ? hitInfo.knockbackX : 0;
+        const knockbackY = hitInfo ? hitInfo.knockbackY : 0;
+        if (knockbackX <= 0 && knockbackY <= 0) {
+            return;
+        }
+
+        const selfWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
+            : this.node.position;
+        const attackerWorldPos = attackerNode.parent
+            ? attackerNode.parent.convertToWorldSpaceAR(attackerNode.position)
+            : attackerNode.position;
+        const direction = selfWorldPos.x >= attackerWorldPos.x ? 1 : -1;
+        const scale = 1 - Math.max(0, Math.min(1, this.knockbackResistance));
+        const velocityX = direction * knockbackX * scale;
+        const velocityY = knockbackY * scale;
+
+        this.rb.linearVelocity = cc.v2(velocityX, Math.max(this.rb.linearVelocity.y, velocityY));
+        this.knockbackTimer = this.knockbackLockTime;
     }
 
     protected onDamaged() {

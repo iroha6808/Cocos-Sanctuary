@@ -166,6 +166,7 @@
 - [x] Wander / Chase / Melee
 - [x] Merchant talk / trade
 - [X] 商人生成 / 離開規則
+- [x] 掉落物
 - [ ] 遠程攻擊
 
 ### Resource / Item

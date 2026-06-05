@@ -1,7 +1,7 @@
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter";
 import { EntityType, GameEvent } from "../Core/Constants";
-import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
+import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
 
 const { ccclass, property } = cc._decorator;
 
@@ -24,6 +24,25 @@ enum NPCFacing {
 
 cc.Enum(NPCAttackType);
 cc.Enum(NPCMoveMode);
+
+@ccclass("NPCDropEntry")
+export class NPCDropEntry {
+
+    @property(cc.Prefab)
+    public prefab: cc.Prefab = null;
+
+    @property
+    public itemName: string = "Item";
+
+    @property(cc.Integer)
+    public minAmount: number = 1;
+
+    @property(cc.Integer)
+    public maxAmount: number = 1;
+
+    @property({ type: cc.Float, range: [0, 1, 0.01], slide: true })
+    public dropChance: number = 1;
+}
 
 @ccclass
 export default class NPC_AI extends BaseEntity {
@@ -112,6 +131,21 @@ export default class NPC_AI extends BaseEntity {
     @property(CombatHitbox)
     public attackHitbox: CombatHitbox = null;
 
+    @property([NPCDropEntry])
+    public dropTable: NPCDropEntry[] = [];
+
+    @property(cc.Float)
+    public dropSpawnOffsetY: number = 32;
+
+    @property(cc.Boolean)
+    public debugDropLog: boolean = false;
+
+    @property({ type: cc.Float, range: [0, 1, 0.05], slide: true })
+    public knockbackResistance: number = 0;
+
+    @property(cc.Float)
+    public knockbackLockTime: number = 0.12;
+
     protected isTalking: boolean = false;
     protected isTrading: boolean = false;
     protected isMovementPaused: boolean = false;
@@ -136,6 +170,8 @@ export default class NPC_AI extends BaseEntity {
     private hasWarnedPeace: boolean = false;
     private debugTimer: number = 0;
     private warnedMissingClips: { [name: string]: boolean } = {};
+    private hasDroppedLoot: boolean = false;
+    private knockbackTimer: number = 0;
 
     onLoad() {
         super.onLoad();
@@ -240,6 +276,10 @@ export default class NPC_AI extends BaseEntity {
         this.updateTimers(dt);
         this.updateDebugLog(dt);
 
+        if (this.knockbackTimer > 0) {
+            return;
+        }
+
         if (this.isMovementPaused || this.isTalking || this.isTrading) {
             this.stopHorizontalMove();
             this.playStateAnimation("idle");
@@ -307,11 +347,12 @@ export default class NPC_AI extends BaseEntity {
         EventCenter.emit(GameEvent.NPC_MOCKED, this.node, playerNode);
     }
 
-    public receiveAttack(amount: number, attackerNode: cc.Node = null) {
+    public receiveAttack(amount: number, attackerNode: cc.Node = null, hitInfo?: CombatHitInfo) {
         if (attackerNode && cc.isValid(attackerNode)) {
             this.targetPlayer = attackerNode;
         }
 
+        this.applyKnockback(attackerNode, hitInfo);
         this.takeDamage(amount);
     }
 
@@ -343,7 +384,9 @@ export default class NPC_AI extends BaseEntity {
         this.isHurting = true;
         this.isAttacking = false;
         this.actionLockTimer = this.damagedAnimLockTime;
-        this.stopHorizontalMove();
+        if (this.knockbackTimer <= 0) {
+            this.stopHorizontalMove();
+        }
         this.playStateAnimation("damaged", true);
 
         this.scheduleOnce(() => {
@@ -362,6 +405,7 @@ export default class NPC_AI extends BaseEntity {
         this.isAttacking = false;
         this.hideHpBar();
         this.stopHorizontalMove();
+        this.spawnDrops();
         this.playAnimation("death", true);
         EventCenter.emit(GameEvent.NPC_DIED, this.node, this.type);
 
@@ -378,10 +422,104 @@ export default class NPC_AI extends BaseEntity {
         }
     }
 
+    private spawnDrops(): void {
+        if (this.hasDroppedLoot) {
+            return;
+        }
+
+        this.hasDroppedLoot = true;
+
+        if (!this.dropTable || this.dropTable.length <= 0) {
+            return;
+        }
+
+        const parent = this.node.parent;
+        if (!parent) {
+            if (this.debugDropLog) {
+                cc.warn(`[NPC_AI] ${this.node.name} cannot spawn drops without parent.`);
+            }
+            return;
+        }
+
+        for (const dropEntry of this.dropTable) {
+            if (!dropEntry || !dropEntry.prefab) {
+                if (this.debugDropLog) {
+                    cc.warn(`[NPC_AI] ${this.node.name} has empty drop entry.`);
+                }
+                continue;
+            }
+
+            const dropChance = Math.max(0, Math.min(1, dropEntry.dropChance));
+            if (Math.random() > dropChance) {
+                continue;
+            }
+
+            const dropNode = cc.instantiate(dropEntry.prefab);
+            dropNode.parent = parent;
+
+            const randomOffsetX = (Math.random() - 0.5) * 24;
+            dropNode.setPosition(
+                this.node.x + randomOffsetX,
+                this.node.y + this.dropSpawnOffsetY
+            );
+
+            const dropScript = dropNode.getComponent("DropItem") as any;
+            if (dropScript) {
+                dropScript.itemName = dropEntry.itemName;
+                dropScript.itemAmount = this.rollDropAmount(dropEntry.minAmount, dropEntry.maxAmount);
+                if (dropScript.launch) {
+                    dropScript.launch();
+                }
+            } else if (this.debugDropLog) {
+                cc.warn(`[NPC_AI] spawned drop ${dropNode.name}, but it has no DropItem component.`);
+            }
+
+            if (this.debugDropLog) {
+                const amount = dropScript ? dropScript.itemAmount : "n/a";
+                cc.log(`[NPC_AI] ${this.node.name} dropped ${dropEntry.itemName} x${amount}`);
+            }
+        }
+    }
+
+    private rollDropAmount(min: number, max: number): number {
+        const safeMin = Math.max(1, Math.ceil(Math.min(min, max)));
+        const safeMax = Math.max(safeMin, Math.floor(Math.max(min, max)));
+        return safeMin + Math.floor(Math.random() * (safeMax - safeMin + 1));
+    }
+
     private updateTimers(dt: number) {
         this.attackTimer = Math.max(0, this.attackTimer - dt);
         this.actionLockTimer = Math.max(0, this.actionLockTimer - dt);
         this.jumpTimer = Math.max(0, this.jumpTimer - dt);
+        this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
+    }
+
+    private applyKnockback(attackerNode: cc.Node, hitInfo?: CombatHitInfo): void {
+        if (!this.rb || !attackerNode || !cc.isValid(attackerNode) || this.isDead) {
+            return;
+        }
+
+        const knockbackX = hitInfo ? hitInfo.knockbackX : 0;
+        const knockbackY = hitInfo ? hitInfo.knockbackY : 0;
+        if (knockbackX <= 0 && knockbackY <= 0) {
+            return;
+        }
+
+        const selfWorldPos = this.getNodeWorldPosition();
+        const attackerWorldPos = attackerNode.parent
+            ? attackerNode.parent.convertToWorldSpaceAR(attackerNode.position)
+            : attackerNode.position;
+        const direction = selfWorldPos.x >= attackerWorldPos.x ? 1 : -1;
+        const scale = 1 - Math.max(0, Math.min(1, this.knockbackResistance));
+        const velocityX = direction * knockbackX * scale;
+        const velocityY = knockbackY * scale;
+
+        this.rb.linearVelocity = cc.v2(velocityX, Math.max(this.rb.linearVelocity.y, velocityY));
+        this.knockbackTimer = this.knockbackLockTime;
+
+        if (this.debugLog) {
+            cc.log(`[NPC_AI] knockback velocity=(${velocityX.toFixed(1)}, ${velocityY.toFixed(1)})`);
+        }
     }
 
     private updateDebugLog(dt: number) {
