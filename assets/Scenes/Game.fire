@@ -105,16 +105,16 @@
         "__id__": 313
       },
       {
-        "__id__": 342
+        "__id__": 344
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 361
+        "__id__": 363
       },
       {
-        "__id__": 362
+        "__id__": 364
       }
     ],
     "_prefab": null,
@@ -13977,6 +13977,7 @@
       "__id__": 290
     },
     "_enabled": true,
+    "objectOrDrop": 1,
     "itemName": "Ore",
     "itemAmount": 1,
     "attractDistance": 50,
@@ -14349,6 +14350,7 @@
       "__id__": 302
     },
     "_enabled": true,
+    "objectOrDrop": 1,
     "itemName": "Apple",
     "itemAmount": 1,
     "attractDistance": 50,
@@ -15354,9 +15356,6 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 338
-      },
-      {
         "__id__": 339
       },
       {
@@ -15364,9 +15363,14 @@
       },
       {
         "__id__": 341
+      },
+      {
+        "__id__": 342
       }
     ],
-    "_prefab": null,
+    "_prefab": {
+      "__id__": 343
+    },
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -15412,7 +15416,7 @@
     "_is3DNode": false,
     "_groupIndex": 0,
     "groupIndex": 0,
-    "_id": "a6Ls4jm8ZFva07iEF2vVR3"
+    "_id": "a5Kg+UgFdK+rM5H7O2ZyY3"
   },
   {
     "__type__": "cc.Node",
@@ -15428,7 +15432,9 @@
         "__id__": 337
       }
     ],
-    "_prefab": null,
+    "_prefab": {
+      "__id__": 338
+    },
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -15474,7 +15480,7 @@
     "_is3DNode": false,
     "_groupIndex": 0,
     "groupIndex": 0,
-    "_id": "af4sWKsVRLRIv1mRf5PPqj"
+    "_id": "a0m8Rrz5pDi70pKRQ2+rNx"
   },
   {
     "__type__": "cc.Sprite",
@@ -15506,7 +15512,18 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": null,
-    "_id": "33cL9cnTNP165SnuvfC+2Z"
+    "_id": "01WY0hBwhOHraKRBK7d3F+"
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 335
+    },
+    "asset": {
+      "__uuid__": "42bb7b8a-689c-4c59-be1c-a9d5ac37fd79"
+    },
+    "fileId": "acj4V53+1A0r8AOlXARXyW",
+    "sync": false
   },
   {
     "__type__": "d808c6Oc1tFJJw5E7Jn2QKX",
@@ -15518,9 +15535,7 @@
     "_enabled": true,
     "type": 1,
     "maxHp": 10000,
-    "targetPlayer": {
-      "__id__": 87
-    },
+    "targetPlayer": null,
     "autoFindTarget": true,
     "targetNodeName": "Player",
     "debugLog": true,
@@ -15548,7 +15563,7 @@
     "minMoveDeltaX": 1,
     "groundCheckVelocityY": 0.1,
     "attackHitbox": null,
-    "_id": "64nMGP69NHOL3JranP/eg3"
+    "_id": "67XI+6OspMl6ATfMQorQgR"
   },
   {
     "__type__": "d95e6QDbzBOPrGXfV8mdOIs",
@@ -15559,7 +15574,9 @@
     },
     "_enabled": true,
     "debugLog": true,
-    "_id": "deNqvPH6ZOD6qh95VYPd9Q"
+    "useRandomStock": true,
+    "stockItemCount": 2,
+    "_id": "4c3umJMWxHjYGorgP8mjXr"
   },
   {
     "__type__": "cc.RigidBody",
@@ -15584,7 +15601,7 @@
     "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
-    "_id": "d3mebvU1BADaKKRkduQo1F"
+    "_id": "80oH/oCzdEVYdtCeUROc1w"
   },
   {
     "__type__": "cc.PhysicsBoxCollider",
@@ -15610,7 +15627,18 @@
       "width": 15,
       "height": 19
     },
-    "_id": "4fGvmARSJG9Ju+frBFZvD5"
+    "_id": "5e2ypVUihOIoqearTszvZm"
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 335
+    },
+    "asset": {
+      "__uuid__": "42bb7b8a-689c-4c59-be1c-a9d5ac37fd79"
+    },
+    "fileId": "",
+    "sync": false
   },
   {
     "__type__": "cc.Node",
@@ -15621,13 +15649,13 @@
     },
     "_children": [
       {
-        "__id__": 343
+        "__id__": 345
       },
       {
-        "__id__": 349
+        "__id__": 351
       },
       {
-        "__id__": 355
+        "__id__": 357
       }
     ],
     "_active": true,
@@ -15685,26 +15713,26 @@
     "_name": "coconut",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 342
+      "__id__": 344
     },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 344
-      },
-      {
-        "__id__": 345
-      },
-      {
         "__id__": 346
       },
       {
         "__id__": 347
+      },
+      {
+        "__id__": 348
+      },
+      {
+        "__id__": 349
       }
     ],
     "_prefab": {
-      "__id__": 348
+      "__id__": 350
     },
     "_opacity": 255,
     "_color": {
@@ -15758,7 +15786,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 343
+      "__id__": 345
     },
     "_enabled": true,
     "_materials": [
@@ -15790,7 +15818,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 343
+      "__id__": 345
     },
     "_enabled": true,
     "_type": 1,
@@ -15815,7 +15843,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 343
+      "__id__": 345
     },
     "_enabled": true,
     "tag": 0,
@@ -15837,12 +15865,10 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 343
+      "__id__": 345
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
+    "objectOrDrop": 1,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -15850,12 +15876,17 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "48JwKPzo5EyKFVgaXR/soO"
   },
   {
     "__type__": "cc.PrefabInfo",
     "root": {
-      "__id__": 343
+      "__id__": 345
     },
     "asset": {
       "__uuid__": "2505aaf7-b97c-4f9e-9373-9b3bb0b94e4e"
@@ -15868,26 +15899,26 @@
     "_name": "coconut",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 342
+      "__id__": 344
     },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 350
-      },
-      {
-        "__id__": 351
-      },
-      {
         "__id__": 352
       },
       {
         "__id__": 353
+      },
+      {
+        "__id__": 354
+      },
+      {
+        "__id__": 355
       }
     ],
     "_prefab": {
-      "__id__": 354
+      "__id__": 356
     },
     "_opacity": 255,
     "_color": {
@@ -15941,7 +15972,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 349
+      "__id__": 351
     },
     "_enabled": true,
     "_materials": [
@@ -15973,7 +16004,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 349
+      "__id__": 351
     },
     "_enabled": true,
     "_type": 1,
@@ -15998,7 +16029,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 349
+      "__id__": 351
     },
     "_enabled": true,
     "tag": 0,
@@ -16020,12 +16051,10 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 349
+      "__id__": 351
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
+    "objectOrDrop": 1,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -16033,12 +16062,17 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "0fv98aoO5NzaUoBFjY+Tjz"
   },
   {
     "__type__": "cc.PrefabInfo",
     "root": {
-      "__id__": 349
+      "__id__": 351
     },
     "asset": {
       "__uuid__": "2505aaf7-b97c-4f9e-9373-9b3bb0b94e4e"
@@ -16051,26 +16085,26 @@
     "_name": "coconut",
     "_objFlags": 0,
     "_parent": {
-      "__id__": 342
+      "__id__": 344
     },
     "_children": [],
     "_active": true,
     "_components": [
       {
-        "__id__": 356
-      },
-      {
-        "__id__": 357
-      },
-      {
         "__id__": 358
       },
       {
         "__id__": 359
+      },
+      {
+        "__id__": 360
+      },
+      {
+        "__id__": 361
       }
     ],
     "_prefab": {
-      "__id__": 360
+      "__id__": 362
     },
     "_opacity": 255,
     "_color": {
@@ -16124,7 +16158,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 355
+      "__id__": 357
     },
     "_enabled": true,
     "_materials": [
@@ -16156,7 +16190,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 355
+      "__id__": 357
     },
     "_enabled": true,
     "_type": 1,
@@ -16181,7 +16215,7 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 355
+      "__id__": 357
     },
     "_enabled": true,
     "tag": 0,
@@ -16203,12 +16237,10 @@
     "_name": "",
     "_objFlags": 0,
     "node": {
-      "__id__": 355
+      "__id__": 357
     },
     "_enabled": true,
-    "foodName": "Coconut",
-    "hpRestore": 10,
-    "staminaRestore": 30,
+    "objectOrDrop": 1,
     "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
@@ -16216,12 +16248,17 @@
     "attractSpeed": 220,
     "launchSpeedX": 30,
     "launchSpeedY": 65,
+    "foodName": "Coconut",
+    "hpRestore": 10,
+    "staminaRestore": 30,
+    "coconutState": 0,
+    "cashValue": 1,
     "_id": "34AiGaWypDjrhA7iQ/2hLz"
   },
   {
     "__type__": "cc.PrefabInfo",
     "root": {
-      "__id__": 355
+      "__id__": 357
     },
     "asset": {
       "__uuid__": "2505aaf7-b97c-4f9e-9373-9b3bb0b94e4e"

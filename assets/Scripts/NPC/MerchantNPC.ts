@@ -1,6 +1,6 @@
 import { EntityType } from "../Core/Constants";
 import { getItemDefinition } from "../Data/ItemData";
-import { getDefaultMerchantStock, MerchantStockItem } from "../Data/MerchantPool";
+import { getDefaultMerchantStock, MerchantStockItem, rollMerchantStock } from "../Data/MerchantPool";
 import { InventoryManager } from "../Player/InventoryManager";
 import NPC_AI, { NPCAttackType, NPCMoveMode } from "./NPC_AI";
 
@@ -21,6 +21,12 @@ export default class MerchantNPC extends cc.Component {
     @property(cc.Boolean)
     public debugLog: boolean = false;
 
+    @property(cc.Boolean)
+    public useRandomStock: boolean = true;
+
+    @property(cc.Integer)
+    public stockItemCount: number = 4;
+
     public shopItems: MerchantStockItem[] = [];
 
     private npcAI: NPC_AI = null;
@@ -38,7 +44,7 @@ export default class MerchantNPC extends cc.Component {
         this.npcAI.moveMode = NPCMoveMode.WANDER;
         this.npcAI.attackType = NPCAttackType.NONE;
 
-        this.shopItems = getDefaultMerchantStock();
+        this.shopItems = this.createStock();
         this.logStock("loaded stock");
     }
 
@@ -160,6 +166,15 @@ export default class MerchantNPC extends cc.Component {
         if (this.debugLog) {
             cc.log(`[MerchantNPC] ${this.node.name}: ${message}`);
         }
+    }
+
+    private createStock(): MerchantStockItem[] {
+        if (!this.useRandomStock) {
+            return getDefaultMerchantStock();
+        }
+
+        const rolledStock = rollMerchantStock(this.stockItemCount);
+        return rolledStock.length > 0 ? rolledStock : getDefaultMerchantStock();
     }
 
     private logStock(prefix: string): void {
