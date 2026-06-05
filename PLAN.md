@@ -165,8 +165,8 @@
 - [x] Peace / Neutral / Hostile
 - [x] Wander / Chase / Melee
 - [x] Merchant talk / trade
+- [X] 商人生成 / 離開規則
 - [ ] 遠程攻擊
-- [ ] 商人生成 / 離開規則
 
 ### Resource / Item
 

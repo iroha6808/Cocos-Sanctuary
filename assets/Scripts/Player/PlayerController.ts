@@ -4,6 +4,7 @@ import { GameEvent, EntityType } from "../Core/Constants";
 import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
 import { InventoryManager } from "./InventoryManager";
 import MerchantNPC from "../NPC/MerchantNPC";
+import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDialogue";
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 
@@ -47,6 +48,7 @@ export default class PlayerController extends BaseEntity {
     private canvasNode: cc.Node = null;
     private currentMerchant: MerchantNPC = null;
     private promptMerchant: MerchantNPC = null;
+    private currentDialogueOptions: DialogueOption[] = [];
 
     onLoad() {
         super.onLoad(); 
@@ -196,6 +198,10 @@ export default class PlayerController extends BaseEntity {
     private toggleInventory() {
         if (!this.inventoryUI) return;
         this.inventoryUI.active = !this.inventoryUI.active;
+        if (this.inventoryUI.active && this.dialogueUI && !this.isMerchantUIOpen()) {
+            this.dialogueUI.hide();
+            this.promptMerchant = null;
+        }
         if (this.inventoryUI.active && this.rb) {
             this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
         }
@@ -256,6 +262,10 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
+        if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
+            this.closeMerchantFlow();
+        }
+
         this.updateMerchantPrompt();
 
         if (this.inventoryUI && this.inventoryUI.active) return;
@@ -317,6 +327,7 @@ export default class PlayerController extends BaseEntity {
         this.isDead = true;
         this.isHurting = false;
         this.isAttacking = false;
+        this.closeMerchantFlow();
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 0, this.maxHp);
         this.playAnimation("PlayerDie");
     }
@@ -350,6 +361,10 @@ export default class PlayerController extends BaseEntity {
         if (this.anim && cc.isValid(this.anim)) {
             this.anim.off("finished", this.onAnimFinished, this);
         }
+
+        if (this.dialogueUI) {
+            this.dialogueUI.hide();
+        }
     }
 
     private updateMerchantPrompt() {
@@ -364,7 +379,7 @@ export default class PlayerController extends BaseEntity {
         const merchant = this.findNearestMerchant();
         if (merchant && merchant.canInteract(this.node)) {
             this.promptMerchant = merchant;
-            this.dialogueUI.showPrompt("Press F to Talk");
+            this.dialogueUI.showPrompt("Press F to Talk", merchant.node);
             return;
         }
 
@@ -373,8 +388,8 @@ export default class PlayerController extends BaseEntity {
     }
 
     private showMerchantOptions() {
-        if (this.dialogueUI) {
-            this.dialogueUI.showOptions("Welcome, traveler.", ["Trade", "Chat", "Leave"]);
+        if (this.dialogueUI && this.currentMerchant && cc.isValid(this.currentMerchant.node)) {
+            this.showDialogueContent(this.currentMerchant.getDialogueContent(), this.currentMerchant.node);
         }
     }
 
@@ -384,8 +399,16 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const selectedIndex = this.dialogueUI ? this.dialogueUI.getSelectedIndex() : 0;
-        if (selectedIndex === 0) {
+        const selectedIndex = this.dialogueUI ? this.dialogueUI.getSelectedIndex() : -1;
+        const selectedOption = this.currentDialogueOptions[selectedIndex];
+        if (!selectedOption) {
+            this.closeMerchantFlow();
+            return;
+        }
+
+        this.currentMerchant.handleDialogueOption(selectedOption.id, this.node);
+
+        if (selectedOption.id === DialogueOptionId.Trade) {
             this.currentMerchant.openTrade();
             if (this.dialogueUI) {
                 this.dialogueUI.hide();
@@ -396,10 +419,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (selectedIndex === 1) {
-            if (this.dialogueUI) {
-                this.dialogueUI.showOptions("The road is quiet today.", ["Trade", "Chat", "Leave"]);
-            }
+        if (selectedOption.id === DialogueOptionId.Chat) {
+            this.showDialogueContent(this.currentMerchant.getChatDialogueContent(), this.currentMerchant.node);
             return;
         }
 
@@ -421,6 +442,7 @@ export default class PlayerController extends BaseEntity {
 
         this.currentMerchant = null;
         this.promptMerchant = null;
+        this.currentDialogueOptions = [];
     }
 
     private isMerchantUIOpen(): boolean {
@@ -454,5 +476,18 @@ export default class PlayerController extends BaseEntity {
             default:
                 return false;
         }
+    }
+
+    private showDialogueContent(content: DialogueContent, anchorNode: cc.Node) {
+        if (!this.dialogueUI || !content) {
+            return;
+        }
+
+        this.currentDialogueOptions = content.options ? content.options.slice() : [];
+        this.dialogueUI.showOptions(
+            content.line,
+            this.currentDialogueOptions.map(option => option.label),
+            anchorNode
+        );
     }
 }
