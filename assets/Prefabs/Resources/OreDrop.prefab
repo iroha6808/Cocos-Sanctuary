@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "coconut",
+    "_name": "OreDrop",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 13,
-      "height": 16
+      "width": 25,
+      "height": 30
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,15 +57,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        241.364,
-        0,
+        100,
+        -50,
         0,
         0,
         0,
         0,
         1,
-        2,
-        2,
+        1,
+        1,
         1
       ]
     },
@@ -98,10 +98,10 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "41788558-0568-4e88-90fb-77f7bea7e38d"
+      "__uuid__": "e9289a63-ffb3-49b8-9b4e-91f2e3cdc0a1"
     },
     "_type": 0,
-    "_sizeMode": 1,
+    "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -115,6 +115,23 @@
     "_id": ""
   },
   {
+    "__type__": "40ce2qxd9BL9JVQC8ZIvFlp",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "itemName": "Ore",
+    "itemAmount": 1,
+    "attractDistance": 50,
+    "collectDistance": 20,
+    "attractSpeed": 160,
+    "launchSpeedX": 120,
+    "launchSpeedY": 250,
+    "_id": ""
+  },
+  {
     "__type__": "cc.RigidBody",
     "_name": "",
     "_objFlags": 0,
@@ -122,11 +139,11 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 1,
+    "_type": 2,
     "_allowSleep": true,
     "_gravityScale": 1,
-    "_linearDamping": 0,
-    "_angularDamping": 0,
+    "_linearDamping": 2,
+    "_angularDamping": 8,
     "_linearVelocity": {
       "__type__": "cc.Vec2",
       "x": 0,
@@ -158,20 +175,7 @@
       "x": 0,
       "y": 0
     },
-    "_radius": 8,
-    "_id": ""
-  },
-  {
-    "__type__": "101d5qBUK1FMZ2AVZf9X4vF",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "foodName": "coconut",
-    "hpRestore": 100,
-    "staminaRestore": 100,
+    "_radius": 15,
     "_id": ""
   },
   {

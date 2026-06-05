@@ -13,31 +13,31 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Player",
+    "_name": "TravelingMerchant",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
       {
         "__id__": 2
-      },
-      {
-        "__id__": 6
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 11
+        "__id__": 5
       },
       {
-        "__id__": 12
+        "__id__": 6
       },
       {
-        "__id__": 13
+        "__id__": 7
+      },
+      {
+        "__id__": 8
       }
     ],
     "_prefab": {
-      "__id__": 14
+      "__id__": 9
     },
     "_opacity": 255,
     "_color": {
@@ -61,8 +61,8 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -297.457,
-        111.758,
+        534.545,
+        247.282,
         0,
         0,
         0,
@@ -98,13 +98,10 @@
     "_components": [
       {
         "__id__": 3
-      },
-      {
-        "__id__": 4
       }
     ],
     "_prefab": {
-      "__id__": 5
+      "__id__": 4
     },
     "_opacity": 255,
     "_color": {
@@ -186,37 +183,6 @@
     "_id": ""
   },
   {
-    "__type__": "cc.Animation",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 2
-    },
-    "_enabled": true,
-    "_defaultClip": {
-      "__uuid__": "18685964-1407-4645-868f-684f296a2d5d"
-    },
-    "_clips": [
-      {
-        "__uuid__": "18685964-1407-4645-868f-684f296a2d5d"
-      },
-      {
-        "__uuid__": "be4a228e-2508-4edf-b26e-9b3f2258f7bc"
-      },
-      {
-        "__uuid__": "9b2e3b40-d42b-42f5-9c7f-e20f4f1d338a"
-      },
-      {
-        "__uuid__": "2661b22a-09bf-4e8a-94ee-bcb7f5a83228"
-      },
-      {
-        "__uuid__": "4ad8896a-c54c-43b7-952b-f21c88b04d88"
-      }
-    ],
-    "playOnLoad": false,
-    "_id": ""
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -224,163 +190,11 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "66yiYHCu9FFYsOEfT20Rew",
+    "fileId": "acj4V53+1A0r8AOlXARXyW",
     "sync": false
   },
   {
-    "__type__": "cc.Node",
-    "_name": "AttackHitbox",
-    "_objFlags": 0,
-    "_parent": {
-      "__id__": 1
-    },
-    "_children": [],
-    "_active": true,
-    "_components": [
-      {
-        "__id__": 7
-      },
-      {
-        "__id__": 8
-      },
-      {
-        "__id__": 9
-      }
-    ],
-    "_prefab": {
-      "__id__": 10
-    },
-    "_opacity": 255,
-    "_color": {
-      "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
-      "a": 255
-    },
-    "_contentSize": {
-      "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
-    },
-    "_anchorPoint": {
-      "__type__": "cc.Vec2",
-      "x": 0.5,
-      "y": 0.5
-    },
-    "_trs": {
-      "__type__": "TypedArray",
-      "ctor": "Float64Array",
-      "array": [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        1,
-        1,
-        1
-      ]
-    },
-    "_eulerAngles": {
-      "__type__": "cc.Vec3",
-      "x": 0,
-      "y": 0,
-      "z": 0
-    },
-    "_skewX": 0,
-    "_skewY": 0,
-    "_is3DNode": false,
-    "_groupIndex": 0,
-    "groupIndex": 0,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.RigidBody",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 6
-    },
-    "_enabled": true,
-    "_type": 1,
-    "_allowSleep": true,
-    "_gravityScale": 0,
-    "_linearDamping": 0,
-    "_angularDamping": 0,
-    "_linearVelocity": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_angularVelocity": 0,
-    "_fixedRotation": false,
-    "enabledContactListener": true,
-    "bullet": false,
-    "awakeOnLoad": true,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.PhysicsBoxCollider",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 6
-    },
-    "_enabled": true,
-    "tag": 0,
-    "_density": 1,
-    "_sensor": true,
-    "_friction": 0.2,
-    "_restitution": 0,
-    "body": null,
-    "_offset": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 45,
-      "height": 45
-    },
-    "_id": ""
-  },
-  {
-    "__type__": "d1ee0vTcWBJooyU2VCXzSu+",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 6
-    },
-    "_enabled": true,
-    "activeTime": 0.12,
-    "offsetX": 15,
-    "offsetY": 0,
-    "debugLog": true,
-    "ownerFaction": 1,
-    "ignoreSameFaction": true,
-    "canHitPlayer": false,
-    "canHitPeaceNpc": false,
-    "canHitNeutralNpc": true,
-    "canHitHostileNpc": true,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.PrefabInfo",
-    "root": {
-      "__id__": 1
-    },
-    "asset": {
-      "__id__": 0
-    },
-    "fileId": "8c+FtVKuJFkJIqMHs22lv2",
-    "sync": false
-  },
-  {
-    "__type__": "c9303cPzVFF4rlsMvZphcnX",
+    "__type__": "d808c6Oc1tFJJw5E7Jn2QKX",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -388,14 +202,46 @@
     },
     "_enabled": true,
     "type": 1,
-    "maxHp": 100,
-    "moveSpeed": 200,
-    "jumpForce": 400,
-    "inventoryUI": null,
-    "attackDamage": 20,
-    "attackHitbox": {
-      "__id__": 9
+    "maxHp": 10000,
+    "targetPlayer": null,
+    "autoFindTarget": true,
+    "targetNodeName": "Player",
+    "debugLog": true,
+    "showHpBar": false,
+    "hpBar": null,
+    "detectRadius": 300,
+    "attackRange": 60,
+    "attackDamage": 10,
+    "attackCooldown": 1,
+    "moveSpeed": 80,
+    "moveMode": 2,
+    "wanderMoveSpeed": 5,
+    "minWanderMoveTime": 1.5,
+    "maxWanderMoveTime": 4,
+    "minWanderIdleTime": 1,
+    "maxWanderIdleTime": 3,
+    "interactDistance": 90,
+    "attackType": 1,
+    "chaseTarget": true,
+    "attackAnimLockTime": 0.35,
+    "damagedAnimLockTime": 0.2,
+    "jumpForce": 250,
+    "jumpCooldown": 3,
+    "stuckCheckTime": 0.25,
+    "minMoveDeltaX": 1,
+    "groundCheckVelocityY": 0.1,
+    "attackHitbox": null,
+    "_id": ""
+  },
+  {
+    "__type__": "d95e6QDbzBOPrGXfV8mdOIs",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
     },
+    "_enabled": true,
+    "debugLog": true,
     "_id": ""
   },
   {
@@ -418,7 +264,7 @@
     },
     "_angularVelocity": 0,
     "_fixedRotation": true,
-    "enabledContactListener": true,
+    "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""

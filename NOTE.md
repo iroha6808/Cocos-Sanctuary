@@ -1,5 +1,15 @@
 # Cocos Sanctuary Note
 
+## 目錄
+
+- [Git 規則](#git-規則)
+- [專案結構](#專案結構)
+- [Canvas 層級規劃](#canvas-層級規劃)
+- [Code Trace：已實作功能](#code-trace已實作功能)
+- [主要事件流程](#主要事件流程)
+- [Cocos Inspector 設定](#cocos-inspector-設定)
+- [目前注意事項](#目前注意事項)
+
 ## Git 規則
 
 Master/main 要確定沒問題的版本再放上去。
@@ -42,12 +52,17 @@ assets/
 
 目前 `assets/Scripts/` 實際已有：
 
+- `Attack/`
 - `Core/`
-- `Player/`
+- `Data/`
 - `Entity/`
+- `Map/`
+- `NPC/`
+- `Player/`
 - `UI/`
+- `Utils/`
 
-`Map/` 和 `Utils/` 是預留規劃方向，目前只有對應 `.meta`，之後需要實作地圖生成或工具函式時再補腳本。
+`Map/` 和 `Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Items/food/`、`UI/`。
 
 ## Canvas 層級規劃
 
@@ -70,100 +85,107 @@ Canvas
       └── Screen_Layer     # 全螢幕介面：死亡結算畫面
 ```
 
-## assets/Scripts 說明
+## Code Trace：已實作功能
 
-這個資料夾放遊戲主要 TypeScript 腳本，目前架構是「核心系統 + 實體基底 + 玩家控制 + NPC AI + UI 更新」。
+以下是依照目前 `assets/Scripts/` 程式碼追蹤出的功能狀態。
 
-## Core
+### 操作與測試鍵
 
-`Scripts/Core/` 是整個遊戲的地基，目前包含 `Constants.ts`、`EventCenter.ts`、`BaseEntity.ts`、`GameManager.ts`。
+來源：`assets/Scripts/Player/PlayerController.ts`
 
-### Constants.ts
+| 操作 | 功能 |
+| --- | --- |
+| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 |
+| `Space` | 跳躍，僅在垂直速度接近 0 時觸發。 |
+| 滑鼠左鍵 | 玩家攻擊，播放 `PlayerAttack`，啟用 `CombatHitbox`。 |
+| 滑鼠右鍵 | 測試扣血：玩家受到 20 damage。 |
+| 滑鼠滾輪 | 對話選項 / 商店商品上下選擇。 |
+| `B` | 開關背包 UI；打開時停止水平速度。 |
+| `F` | 商人互動鍵：靠近商人時顯示對話，對話中確認選項，商店開啟時關閉流程。 |
+| `T` | 測試用：直接加入 `coconut x10` 到背包，作為商人交易貨幣。 |
+| 商店開啟時 `Up` / `Down` | 選擇上一個 / 下一個商店商品。 |
+| 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 |
+| 商店開啟時 `Enter` | 購買目前選取商品。 |
 
-集中管理共用常數，也可以理解成全域常數字典。
+### Core 系統
 
-- `GameEvent`：全域事件名稱，例如玩家血量改變、經驗改變、死亡。
-- `EntityType`：實體類型，例如玩家、和平 NPC、中立 NPC、敵對 NPC。
-- `cc.Enum(EntityType)`：讓 `EntityType` 可以在 Cocos Creator Inspector 中顯示為下拉選單。
+- `Constants.ts`：已定義 `PLAYER_HP_CHANGED`、`PLAYER_EXP_CHANGED`、`PLAYER_DIED`、`NPC_MOCKED`、`NPC_DIED`、`SPAWN_ITEM`。
+- `EventCenter.ts`：已改成 default export，事件資料會保存原 callback、target、實際 handler；`off(eventName, callback, target)` 可正確移除特定監聽，也支援清除單一事件或全部事件。
+- `BaseEntity.ts`：提供 `type`、`maxHp`、`currentHp`、`takeDamage()`、`onDamaged()`、`die()` 基底。
+- `GameManager.ts`：Singleton、啟用物理、可切換 physics debug draw、監聽 `PLAYER_DIED`，目前 `onGameOver()` 還是 TODO。
 
-這個檔案的重點是避免打錯字，例如把 `PLAYER_DIED` 寫成其他拼法導致事件收不到。之後要新增事件或 NPC 種類，統一從這裡加。
+### Player
 
-### EventCenter.ts
+- 玩家類型設為 `EntityType.PLAYER`。
+- 啟用 Cocos Physics，並取得 `RigidBody` 控制移動。
+- 支援左右移動、跳躍、左右翻面。
+- 支援 `PlayerIdle`、`PlayerRun`、`PlayerAttack`、`PlayerHurt`、`PlayerDie` 動畫切換。
+- 攻擊時會啟用 `AttackHitbox` 子節點上的 `CombatHitbox`。
+- 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED` 並載入 `GameOver` 場景。
+- 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
+- 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
 
-簡單的全域事件中心，負責在不同腳本之間傳遞資料，是觀察者模式的簡化實作。
+### CombatHitbox
 
-- `EventCenter.on(eventName, callback, target)`：註冊事件。
-- `EventCenter.emit(eventName, ...args)`：發送事件。
-- `EventCenter.off(eventName, callback)`：取消事件。
+- `CombatHitbox.ts` 實作短時間開啟的 sensor hitbox。
+- 可設定 `ownerFaction`、是否忽略同陣營、可命中的目標類型。
+- 支援 Player / Peace NPC / Neutral NPC / Hostile NPC faction 判斷。
+- 避免重複命中同一個目標。
+- 若目標有 `receiveAttack()`，優先呼叫；否則呼叫 `BaseEntity.takeDamage()`。
 
-典型用途：
+### Inventory / Items
 
-```text
-玩家扣血
-  -> EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, currentHp, maxHp)
-  -> UIManager 接收事件
-  -> 更新血條
-```
+- `InventoryManager.ts`：背包 singleton，支援 `addItem()`、`removeItem()`、`getItemCount()`、`hasItem()`、`getItems()`。
+- 背包最大格數目前為 `45`。
+- 背包變更時發送 `cc.systemEvent.emit("INVENTORY_CHANGED")`。
+- `InventoryUIController.ts`：監聽 `INVENTORY_CHANGED`，將道具名稱與數量顯示到 grid slot 的 `Label`。
+- `ItemData.ts`：目前定義 `coconut`、`potion`、`apple`、`ore`、`wood`。
+- `CollectibleItem.ts`：碰到 PlayerController 時可加入背包並 destroy 自己。
 
-### BaseEntity.ts
+### Merchant / Dialogue / Shop
 
-所有會動、有血量、會受傷的實體通用藍圖。Player、NPC 這類物件應該繼承它，而不是直接繼承 `cc.Component`。
+- `MerchantNPC.ts`：商人會強制使用 Peace NPC、Wander 移動、無攻擊。
+- 商人狀態包含 `Wandering`、`Talking`、`Trading`、`Leaving`。
+- `canInteract()` 會透過 NPC_AI 的互動距離判斷玩家是否可對話。
+- `buy()` 以 `coconut` 作為交易貨幣，會檢查庫存、價格、玩家持有數量，再扣 coconut 並加入購買道具。
+- `MerchantPool.ts`：提供預設商店庫存，包含 `potion`、`apple`、`ore`。
+- `DialogueUIController.ts`：支援 Prompt、Options、選項高亮、滾輪切換、取得選取 index。
+- `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態。
 
-- `type`：實體類型。
-- `maxHp`：最大生命值，可在 Inspector 調整。
-- `currentHp`：目前生命值。
-- `takeDamage(amount)`：扣血並檢查是否死亡。
-- `onDamaged()`：受傷後的 hook，給子類 override。
-- `die()`：死亡邏輯，預設會 destroy 節點。
+### NPC AI
 
-好處是血量、受傷、死亡這些基礎邏輯只要寫一次。不同角色只需要 override `onDamaged()` 或 `die()` 加上特效、音效、掉落物、分數等。
+- `NPC_AI.ts` 繼承 `BaseEntity`。
+- 支援 `NPCAttackType.NONE / MELEE`。
+- 支援 `NPCMoveMode.NONE / CHASE_TARGET / WANDER`。
+- Peace NPC 不會主動行動或攻擊。
+- Neutral NPC 預設不攻擊，被 `onMocked()` 或受傷後會 enraged。
+- Hostile / enraged Neutral 可偵測、追蹤、攻擊玩家。
+- 支援自動尋找 `targetNodeName`，預設找 `Player`。
+- 支援互動距離、談話 / 交易時暫停移動。
+- 支援 Wander：隨機 idle / 左右移動。
+- 支援卡住時自動跳躍。
+- 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
+- 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
 
-### GameManager.ts
+### Resource / Drop / Food
 
-遊戲流程管理器。
+- `ResourceObject.ts`：支援 `TREE`、`ORE` 兩類資源。
+- 資源有耐久度、互動距離、掉落數量、drop prefab。
+- 滑鼠左鍵點擊資源且玩家距離夠近時會扣耐久。
+- 耐久歸零後，Tree 會換成 depleted sprite，Ore 會 destroy。
+- 資源耗盡時會生成 drop prefab，Tree 掉 `Apple`，Ore 掉 `Ore`。
+- `DropItem.ts`：掉落物會先飛出，碰到 ground / Ground / tempFloor 後停下；玩家靠近後吸附，達到收集距離後 destroy。
+- `FoodBase.ts`：食物掉落物可飛出、吸附玩家、收集時加入 `InventoryManager`。
+- `coconut.ts`：椰子有 OnTree / Falling / OnGround / Held 狀態，支援掉落、顯示互動提示、撿起、吃掉、丟出。
 
-- 使用 `GameManager.instance` 做簡單 Singleton。
-- 在 `onLoad()` 註冊 `PLAYER_DIED` 事件。
-- `onGameOver()` 目前先印出結算訊息，之後可以接 UI 結算畫面、重新開始、切換場景等流程。
-- `playerNode` 是 Inspector 欄位，可以把玩家節點拖進來。
+### UI
 
-## Player
+- `UIManager.ts`：監聽 `PLAYER_HP_CHANGED` 更新 HP progress bar，監聽 `PLAYER_EXP_CHANGED` 更新 EXP label。
+- `InventoryUIController.ts`：背包 grid UI。
+- `DialogueUIController.ts`：商人提示與對話選項 UI。
+- `MerchantShopUIController.ts`：商店 UI 與購買流程。
 
-### PlayerController.ts
-
-玩家控制器，繼承 `BaseEntity`。
-
-- WASD 控制移動方向。
-- `moveSpeed` 可在 Inspector 調整。
-- `update(dt)` 根據目前方向移動玩家節點。
-- `gainExp(amount)` 增加經驗並發送 `PLAYER_EXP_CHANGED`。
-- 經驗超過 1000 且等級為 1 時，呼叫 `evolveToUltimate()` 進化並增加移動速度。
-- 受傷時發送 `PLAYER_HP_CHANGED`，讓 UI 更新血條。
-- 死亡時發送 `PLAYER_DIED`，並把玩家節點設為 inactive。
-
-## Entity
-
-### NPC_AI.ts
-
-NPC 行為腳本，繼承 `BaseEntity`。
-
-- `detectRadius` 可在 Inspector 調整偵測距離。
-- 敵對 NPC 會在玩家進入偵測範圍時攻擊。
-- 中立 NPC 需要先被 `onMocked(playerNode)` 觸發，才會進入憤怒狀態並攻擊。
-- `attackTarget()` 目前還是空函式，之後可以補上扣血、追蹤或播放攻擊動畫。
-
-## UI
-
-### UIManager.ts
-
-負責把遊戲資料同步到 UI。
-
-- `expLabel`：顯示玩家經驗值。
-- `hpBar`：顯示玩家生命值比例。
-- 監聽 `PLAYER_HP_CHANGED` 後更新血條。
-- 監聽 `PLAYER_EXP_CHANGED` 後更新經驗文字。
-
-## 事件流程
+## 主要事件流程
 
 ```text
 PlayerController.takeDamage()
@@ -182,20 +204,36 @@ PlayerController.gainExp()
 
 ```text
 PlayerController.die()
+  -> 播放 PlayerDie
+  -> 動畫結束
   -> EventCenter.emit(PLAYER_DIED)
   -> GameManager.onGameOver()
+  -> cc.director.loadScene("GameOver")
 ```
 
-## Cocos Inspector 設定
+```text
+CombatHitbox.onBeginContact()
+  -> findTarget()
+  -> receiveAttack() 或 takeDamage()
+  -> NPC / Player 扣血與播放受傷動畫
+```
 
-- 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`。
-- 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp` 和 `moveSpeed`。
-- 掛 `NPC_AI.ts` 的 NPC 節點可以調整 `type`、`maxHp` 和 `detectRadius`。
-- 掛 `UIManager.ts` 的 UI 節點需要把經驗 Label 拖到 `expLabel`，把血條 ProgressBar 拖到 `hpBar`。
+```text
+MerchantNPC.buy()
+  -> 檢查商店庫存
+  -> 檢查玩家 coconut 數量
+  -> InventoryManager.removeItem("coconut", cost)
+  -> InventoryManager.addItem(商品)
+  -> INVENTORY_CHANGED
+  -> InventoryUIController / MerchantShopUIController refresh
+```
 
 ## 目前注意事項
 
-- `EventCenter.ts` 是 default export，所以其他腳本應使用 default import。
-- `GameManager.ts` 和 `UIManager.ts` 若使用 `import { EventCenter } ...`，可能會造成編譯錯誤，建議改成 `import EventCenter ...`。
-- `EventCenter.off()` 目前用原 callback 比對，但 `on()` 存的是 bind 後的新函式，取消事件時可能移除不到。之後若要頻繁切換場景，建議修正事件註冊資料結構。
-- `NPC_AI.attackTarget()` 還沒有實作，現在只保留攻擊邏輯入口。
+- `BaseEntity.takeDamage()` 仍是基底版本，沒有 clamp HP；`NPC_AI` 自己有 override 並 clamp，Player 目前靠動畫狀態控制死亡流程。
+- `PlayerController` 目前有 `T` 測試鍵直接增加 coconut，正式版應移除或包成 debug 開關。
+- `PlayerController` 滑鼠右鍵目前是測試扣血，正式版應改成實際道具 / 互動邏輯。
+- `GameManager.onGameOver()` 目前只有 log；真正結算 UI 還沒接。
+- `DropItem.ts` 收集後只 destroy，沒有加入背包；`FoodBase.ts` 和 `CollectibleItem.ts` 有加入背包。
+- `ResourceObject.findPlayer()` 目前固定找 `Canvas/Player`，場景節點路徑如果不同要調整。
+- `coconut.ts` 的 `eat()` 會找 `PlayerStats`，但目前玩家主腳本是 `PlayerController`；要接回血需再統一玩家 stats API。
