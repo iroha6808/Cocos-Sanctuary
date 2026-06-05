@@ -1,5 +1,6 @@
 const { ccclass, property } = cc._decorator;
 import { InventoryManager } from '../../Player/InventoryManager';
+import { getItemDefinition } from "../../Data/ItemData";
 
 export enum ItemMode{
     Object = 0, // 物件模式：純物理，不可吸附，不可撿起
@@ -16,8 +17,8 @@ export enum ItemState {
 @ccclass
 export default class DropItem extends cc.Component {
 
-    @property({ tooltip: '道具名稱（存入背包用）' })
-    itemName: string = "Item";
+    // @property({ tooltip: '道具名稱（存入背包用）' })
+    // itemName: string = "Item";
 
     @property({ tooltip: '數量' })
     itemAmount: number = 1;
@@ -42,6 +43,7 @@ export default class DropItem extends cc.Component {
     private targetPlayer: cc.Node | null = null;
     protected state: ItemState = ItemState.Flying;
     protected mode: ItemMode = ItemMode.Drop;
+    protected itemName: string = "Item";
 
     onLoad() {
         this.rb = this.getComponent(cc.RigidBody);
@@ -53,6 +55,28 @@ export default class DropItem extends cc.Component {
             this.rb.linearDamping = 2;
             this.rb.angularDamping = 8;
         }
+
+        this.loadSprite();
+    }
+
+    private loadSprite() {
+        const def = getItemDefinition(this.itemName);
+        if (!def || !def.iconPath) return;
+
+        // 自動去掉副檔名，避免有人填了 .png
+        const path = def.iconPath.replace(/\.(png|jpg|jpeg)$/i, '');
+
+        cc.resources.load(path, cc.SpriteFrame, (err, sf) => {
+            if (err) {
+                cc.warn(`[DropItem] 找不到 ${this.itemName} 的圖片，路徑: ${path}`);
+                return;
+            }
+            const sprite = this.getComponent(cc.Sprite);
+            if (sprite) {
+                sprite.spriteFrame = sf as cc.SpriteFrame;
+                cc.log(`[DropItem] ${this.itemName} 圖片載入成功`);
+            }
+        });
     }
 
     start() {

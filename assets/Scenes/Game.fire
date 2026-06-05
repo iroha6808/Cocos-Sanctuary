@@ -18814,7 +18814,6 @@
       "__id__": 396
     },
     "_enabled": true,
-    "itemName": "Ore",
     "itemAmount": 1,
     "attractDistance": 50,
     "collectDistance": 20,
@@ -19186,7 +19185,6 @@
       "__id__": 408
     },
     "_enabled": true,
-    "itemName": "Apple",
     "itemAmount": 1,
     "attractDistance": 50,
     "collectDistance": 20,
@@ -19598,7 +19596,6 @@
       "__id__": 420
     },
     "_enabled": true,
-    "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
     "collectDistance": 40,
@@ -19606,11 +19603,12 @@
     "launchSpeedX": 30,
     "launchSpeedY": 65,
     "foodName": "Coconut",
+    "description": "",
     "hpRestore": 10,
     "staminaRestore": 30,
     "rottenTime": -1,
-    "coconutState": 0,
-    "cashValue": 1,
+    "foodState": 1,
+    "interactLabel": null,
     "_id": "48JwKPzo5EyKFVgaXR/soO"
   },
   {
@@ -19712,9 +19710,7 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "41788558-0568-4e88-90fb-77f7bea7e38d"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,
@@ -19784,7 +19780,6 @@
       "__id__": 426
     },
     "_enabled": true,
-    "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
     "collectDistance": 40,
@@ -19792,11 +19787,12 @@
     "launchSpeedX": 30,
     "launchSpeedY": 65,
     "foodName": "Coconut",
+    "description": "",
     "hpRestore": 10,
     "staminaRestore": 30,
     "rottenTime": -1,
-    "coconutState": 0,
-    "cashValue": 1,
+    "foodState": 1,
+    "interactLabel": null,
     "_id": "0fv98aoO5NzaUoBFjY+Tjz"
   },
   {
@@ -19970,7 +19966,6 @@
       "__id__": 432
     },
     "_enabled": true,
-    "itemName": "Item",
     "itemAmount": 1,
     "attractDistance": 80,
     "collectDistance": 40,
@@ -19978,11 +19973,12 @@
     "launchSpeedX": 30,
     "launchSpeedY": 65,
     "foodName": "Coconut",
+    "description": "",
     "hpRestore": 10,
     "staminaRestore": 30,
     "rottenTime": -1,
-    "coconutState": 0,
-    "cashValue": 1,
+    "foodState": 1,
+    "interactLabel": null,
     "_id": "34AiGaWypDjrhA7iQ/2hLz"
   },
   {
