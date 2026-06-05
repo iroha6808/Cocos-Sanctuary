@@ -73,10 +73,14 @@ export class InventoryManager {
     }
 
     private refreshUI() {
-        const uiNode = cc.find("Canvas/UI Root/InventoryUI"); 
+        const uiNode = cc.find("InventoryUI"); 
         if (uiNode) {
             const uiCtrl = uiNode.getComponent("InventoryUIController");
-            if (uiCtrl) uiCtrl.refreshUI();
+            if (uiCtrl) {
+                uiCtrl.refreshUI();
+            }
+        } else {
+            cc.error("[背包大腦] 🛑 嚴重錯誤：找不到 InventoryUI 節點，視覺無法刷新！");
         }
     }
 

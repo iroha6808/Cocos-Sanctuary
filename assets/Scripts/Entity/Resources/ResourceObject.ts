@@ -50,6 +50,12 @@ export default class ResourceObject extends cc.Component {
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
+        // stall other interactions when checking backpack
+        const inventoryUI = cc.find("Canvas/UI Root/InventoryUI");
+        if (inventoryUI && inventoryUI.active) {
+            return; 
+        }
+
         if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }

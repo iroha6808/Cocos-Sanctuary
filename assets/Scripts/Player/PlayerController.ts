@@ -104,13 +104,14 @@ export default class PlayerController extends BaseEntity {
 
     private onMouseDown(event: cc.Event.EventMouse) {
         if (this.isDead || this.isMerchantUIOpen()) return;
+        if (this.inventoryUI && this.inventoryUI.active) return; 
 
         if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
             this.attack();
         } 
-        else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
+        /*else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.takeDamage(20); 
-        }
+        }*/
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {

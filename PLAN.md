@@ -154,11 +154,13 @@
 ### Player / Inventory
 
 - [x] 移動、跳躍、攻擊、受傷、死亡
-- [x] B 背包、F 商人、T debug coconut
+- [x] B 背包、F 商人、T debug coconut、左鍵編輯道具
 - [x] 背包 add/remove/count/has
 - [ ] 移除正式版 debug key
 - [ ] 加入 `gainExp(amount)` 與 Score
-- [ ] 背包 item icon
+- [ ] 加入 各項道具的use功能
+- [x] 可刪除道具
+- [x] 背包 item icon
 
 ### NPC / Merchant
 
