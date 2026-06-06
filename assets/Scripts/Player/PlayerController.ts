@@ -148,7 +148,7 @@ export default class PlayerController extends BaseEntity {
                 break;
             case cc.macro.KEY.t:
                 if (isDown) {
-                    InventoryManager.instance.addItem("coconut", "Coconut", 10, "Temporary merchant currency.");
+                    InventoryManager.instance.addItem("coconut", 10);
                 }
                 break;
         }

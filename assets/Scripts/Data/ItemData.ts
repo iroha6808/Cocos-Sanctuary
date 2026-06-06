@@ -217,6 +217,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "potion",
         name: "Potion",
         description: "A simple healing potion.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
         hpRestore: 110
     },
     redberries: {
