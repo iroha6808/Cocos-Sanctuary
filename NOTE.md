@@ -44,9 +44,10 @@ assets/
   │   ├── Player/       # 玩家控制、進化邏輯
   │   ├── Entity/       # NPC 基類與三種行為 AI
   │   ├── Map/          # 地圖生成、區塊管理，例如 Land、Sea、Underground
+  │   ├── Scene/        # 場景專用腳本，例如 MenuScene
   │   ├── UI/           # 排行榜、道具欄、血條
   │   └── Utils/        # 工具類，例如 Physics、Math
-  ├── Resources/        # 需要動態加載的資源
+  ├── resources/        # 需要動態加載的資源
   └── Textures/         # 靜圖、貼圖集 Atlas
 ```
 
@@ -59,15 +60,19 @@ assets/
 - `Map/`
 - `NPC/`
 - `Player/`
+- `Scene/`
 - `UI/`
 - `Utils/`
 
-`Map/` 和 `Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Resources/food/`、`UI/`。
+`Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Resources/food/`、`Map/`、`Scene/`、`UI/`。
 
 素材新增重點：
 
 - `assets/Textures/Buttons/`：商店 / UI 可用按鈕圖。
+- `assets/Textures/effects/fire effects/`：BurningCoconutProjectile 使用的火焰特效圖與 `fire_effect.anim`。
+- `assets/Textures/npcs/`：Slime 與 Skeleton Mage 角色素材 / 動畫。
 - `assets/resources/100 FOOD ASSETS/`：水果、堅果、蔬菜、花、菇類 icon 圖；注意這是小寫 `resources`，可供 `cc.resources.load()` 使用。
+- `assets/resources/Purple Planet - Platformer Tileset/`：地圖 / 礦物 / tile 相關素材，包含 png 與來源向量檔。
 
 ## Canvas 層級規劃
 
@@ -107,7 +112,9 @@ Canvas
 | 滑鼠滾輪 | 對話選項 / 商店商品上下選擇。 |
 | `B` | 開關背包 UI；打開時停止水平速度。 |
 | `F` | 商人互動鍵：靠近商人時顯示對話，對話中確認選項，商店開啟時關閉流程。 |
-| `T` | 測試用：預期加入 `coconut x10`，但目前仍用舊 `addItem()` 參數格式，需要修正。 |
+| `T` | 測試用：加入 `coconut x10` 到背包，作為商人交易貨幣。 |
+| 水域中 `W` / `Up` / `Space` | 上游。 |
+| 水域中 `S` / `Down` | 下潛。 |
 | 商店開啟時 `Up` / `Down` | 選擇上一個 / 下一個商店商品。 |
 | 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 |
 | 商店開啟時 `Enter` | 購買目前選取商品。 |
@@ -129,6 +136,8 @@ Canvas
 - 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED` 並載入 `GameOver` 場景。
 - 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
 - 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
+- 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`。
+- 死亡載入 `GameOver` 前有 `gameOverTransitionPending`，避免重複切場景。
 
 ### CombatHitbox
 
@@ -137,6 +146,14 @@ Canvas
 - 支援 Player / Peace NPC / Neutral NPC / Hostile NPC faction 判斷。
 - 避免重複命中同一個目標。
 - 若目標有 `receiveAttack()`，優先呼叫；否則呼叫 `BaseEntity.takeDamage()`。
+
+### CombatProjectile
+
+- `CombatProjectile.ts` 實作遠程攻擊投射物。
+- `launch(owner, faction, velocity, damage, knockbackX, knockbackY)` 由 `NPC_AI` 呼叫。
+- 支援陣營過濾、忽略 owner hierarchy、同一目標只命中一次。
+- 命中目標時優先呼叫 `receiveAttack()`，命中實體地形或生命週期結束後 destroy。
+- `visualNode` 可跟隨速度方向旋轉；若 prefab 有 `CoconutSprite` / `FireEffect`，會自動整理成 `VisualRoot`。
 
 ### Inventory / Items
 
@@ -155,7 +172,7 @@ Canvas
 - 商人狀態包含 `Wandering`、`Talking`、`Trading`、`Leaving`。
 - `canInteract()` 會透過 NPC_AI 的互動距離判斷玩家是否可對話。
 - `buy()` 以 `coconut` 作為交易貨幣，會檢查庫存、價格、玩家持有數量，再扣 coconut 並加入購買道具。
-- `MerchantNPC.buy()` 目前加入商品時仍使用舊 `InventoryManager.addItem(id, name, amount, description)` 格式，需要改為新格式。
+- `MerchantNPC.buy()` 已改用 `InventoryManager.addItem(itemId, amount)`。
 - `MerchantPool.ts`：提供預設商店庫存，包含 `potion`、`apple`、`ore`；隨機池另含 `wood`。
 - `MerchantSpawner.ts`：可開場或定時生成 TravelingMerchant，會重用既有商人，避免重複生成。
 - `NPCDialogue.ts`：統一 `Trade`、`Chat`、`Leave` 對話選項 ID 與資料格式。
@@ -165,7 +182,7 @@ Canvas
 ### NPC AI
 
 - `NPC_AI.ts` 繼承 `BaseEntity`。
-- 支援 `NPCAttackType.NONE / MELEE`。
+- 支援 `NPCAttackType.NONE / MELEE / RANGED`。
 - 支援 `NPCMoveMode.NONE / CHASE_TARGET / WANDER`。
 - Peace NPC 不會主動行動或攻擊。
 - Neutral NPC 預設不攻擊，被 `onMocked()` 或受傷後會 enraged。
@@ -174,21 +191,26 @@ Canvas
 - 支援互動距離、談話 / 交易時暫停移動。
 - 支援 Wander：隨機 idle / 左右移動。
 - 支援卡住時自動跳躍。
+- 支援遠程 projectile prefab、生成點、parent、釋放延遲、瞄準模式、飛行時間、速度與擊退。
+- 支援 NPC drop table：死亡後可依機率生成 prefab 並設定 `DropItem.itemName` / `itemAmount`。
 - 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
 - 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
 
 ### Resource / Drop / Food
 
-- `ResourceObject.ts`：支援 `TREE`、`ORE` 兩類資源。
-- 資源有耐久度、互動距離、掉落數量、drop prefab。
-- 滑鼠左鍵點擊資源且玩家距離夠近時會扣耐久。
-- 耐久歸零後，Tree 會換成 depleted sprite，Ore 會 destroy。
-- 資源耗盡時會生成 drop prefab，Tree 掉 `Apple`，Ore 掉 `Ore`。
+- `ResourceObject.ts`：資源基底，處理滑鼠左鍵互動、互動距離、每幾下觸發一次掉落、共用 prefab spawn 工具。
+- `AppleTree.ts`：蘋果樹 / 灌木子類，支援 `maxApples`、`regenInterval`、蘋果掉落與 depleted 外觀。
+- `OreRock.ts`：礦石子類，支援 weighted drop table，掉落後 destroy。
 - `DropItem.ts`：掉落物會先飛出，碰到 ground / Ground / tempFloor 後停下；玩家靠近後吸附，達到收集距離後加入 `InventoryManager` 並 destroy。
 - `FoodBase.ts`：位於 `Entity/Resources/food/`，繼承 `DropItem`，食物掉落物可飛出、吸附玩家、收集時加入 `InventoryManager`。
 - `FoodBase.eat()` 仍尋找 `PlayerStats`，目前尚未接上 `PlayerController` 的 HP / heal API。
-- `apple.ts`、`avacado.ts`、`blueberries.ts`、`coconut.ts`、`acorn.ts`：從 `ItemData` 套用食物名稱、描述、回血、體力與腐敗時間。
+- 水果 / 堅果腳本已大量補齊：apple、avacado、blueberries、cherry、coconut、durian、grapes、greenapple、kiwi、mulberry、orange、peach、pear、pineapple、plum、redberries、strawberry、watermelonslice、acorn、cashew、chestnut、coffeebean、guazi、peanuts、pistachio。
 - `coconut.ts`：目前是 `FoodBase` 子類，`itemName = "coconut"`，同時作為商人交易測試貨幣。
+
+### Map / Scene
+
+- `OceanArea.ts`：掛在水域 sensor collider 上；玩家進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
+- `MenuScene.ts`：選單場景用腳本，`goToGameScene()` 會載入 Inspector 設定的 `gameScene`，預設 `Game`。
 
 ### UI
 
@@ -198,6 +220,24 @@ Canvas
 - `MerchantShopUIController.ts`：商店 UI 與購買流程。
 
 ## 主要事件流程
+
+```text
+NPC_AI RANGED
+  -> startAttack()
+  -> schedule releaseRangedProjectile()
+  -> instantiate projectile prefab
+  -> CombatProjectile.launch()
+  -> receiveAttack() / terrain hit / lifetime destroy
+```
+
+```text
+OceanArea.onBeginContact()
+  -> find PlayerController
+  -> PlayerController.enterOceanArea()
+  -> ocean movement update
+  -> OceanArea.onEndContact()
+  -> PlayerController.exitOceanArea()
+```
 
 ```text
 DropItem.collect()
@@ -259,9 +299,10 @@ MerchantNPC.buy()
 ## 目前注意事項
 
 - `BaseEntity.takeDamage()` 仍是基底版本，沒有 clamp HP；`NPC_AI` 自己有 override 並 clamp，Player 目前靠動畫狀態控制死亡流程。
-- `InventoryManager.addItem()` 已改為 `(id, count)`；`PlayerController` 的 `T` debug coconut 和 `MerchantNPC.buy()` 還是舊格式，會造成加入背包失敗。
 - `PlayerController` 目前仍有 `T` 測試鍵，正式版應移除或包成 debug 開關。
 - `GameManager.onGameOver()` 目前只有 log；真正結算 UI 還沒接。
 - `ResourceObject.findPlayer()` 目前固定找 `Canvas/Player`，場景節點路徑如果不同要調整。
 - `FoodBase.eat()` 會找 `PlayerStats`，但目前玩家主腳本是 `PlayerController`；要接回血需再統一玩家 stats API。
-- `ItemData.iconPath` 有些路徑含 `assets/resources/` 前綴；`cc.resources.load()` 通常要填 resources 底下的相對路徑且不含副檔名。
+- 遠程攻擊是否能打到玩家，取決於 SkeletonMage 的 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`、collider sensor 與 contact listener。
+- OceanArea 需要 `PhysicsBoxCollider` sensor，且 Player collider / rigidbody 要能觸發 contact。
+- `ItemData.iconPath` 目前多數已改為 resources 相對路徑，但仍要實測大小寫與檔名，例如 `greenapple`、`coffeebean`、`guazi` / `gauzi.ts`。

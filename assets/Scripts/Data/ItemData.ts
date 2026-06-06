@@ -13,7 +13,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "acorn",
         name: "Acorn",
         description: "A nut from an oak tree.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/acorn.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/acorn.png",
         hpRestore: 0,
         staminaRestore: 2,
         rottenTime: 3600 // 1 hour
@@ -22,7 +22,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "apple",
         name: "Apple",
         description: "A common fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/apple.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/apple.png",
         hpRestore: 4,
         staminaRestore: 7,
         rottenTime: 1800 // 30 minutes
@@ -31,7 +31,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "avacado",
         name: "Avacado",
         description: "A creamy fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/avacado.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/avacado.png",
         hpRestore: 13,
         staminaRestore: 16,
         rottenTime: 1580
@@ -40,7 +40,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "blueberries",
         name: "Blueberries",
         description: "Small and sweet berries.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/blueberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/blueberries.png",
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 819
@@ -49,7 +49,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "cashew",
         name: "Cashew",
         description: "A creamy nut.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/cashew.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/cashew.png",
         hpRestore: 0,
         staminaRestore: 3,
         rottenTime: 3469
@@ -58,7 +58,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "cherry",
         name: "Cherry",
         description: "A small and sweet fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/cherry.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/cherry.png",
         hpRestore: 9,
         staminaRestore: 3,
         rottenTime: 916
@@ -67,7 +67,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "chestnut",
         name: "Chestnut",
         description: "A nut from a chestnut tree.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/chestnut.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/chestnut.png",
         hpRestore: 0,
         staminaRestore: 8,
         rottenTime: 3241
@@ -81,11 +81,11 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 5,
         rottenTime: 1800 // 30 minutes
     },
-    coffeeBean: {
-        id: "coffeeBean",
-        name: "Coffee Bean",
+    coffeebean: {
+        id: "coffeebean",
+        name: "coffeebean",
         description: "Raw coffee beans.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/coffeeBean.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
         hpRestore: 0,
         staminaRestore: 1,
         rottenTime: 4096
@@ -94,7 +94,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "durian",
         name: "Durian",
         description: "A spiky fruit with a strong smell.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/durian.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/durian.png",
         hpRestore: 6,
         staminaRestore: 7,
         rottenTime: 6767
@@ -103,16 +103,16 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "grapes",
         name: "Grapes",
         description: "Small and sweet berries.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/grapes.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/grapes.png",
         hpRestore: 9,
         staminaRestore: 3,
         rottenTime: 1018
     },
-    greenApple: {
-        id: "greenApple",
-        name: "Green Apple",
+    greenapple: {
+        id: "greenapple",
+        name: "greenapple",
         description: "A crisp and tart apple.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/greenApple.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/greenapple.png",
         hpRestore: 5,
         staminaRestore: 7,
         rottenTime: 1900
@@ -121,7 +121,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "guazi",
         name: "Guazi",
         description: "A small and sweet fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/guazi.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/guazi.png",
         hpRestore: 1,
         staminaRestore: 1,
         rottenTime: 2100
@@ -130,7 +130,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "kiwi",
         name: "Kiwi",
         description: "A fuzzy tropical fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/kiwi.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/kiwi.png",
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 985
@@ -139,7 +139,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "mulberry",
         name: "Mulberry",
         description: "A sweet and juicy berry.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/mulberry.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/mulberry.png",
         hpRestore: 12,
         staminaRestore: 1,
         rottenTime: 1137
@@ -148,7 +148,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "orange",
         name: "Orange",
         description: "A citrus fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/orange.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/orange.png",
         hpRestore: 6,
         staminaRestore: 8,
         rottenTime: 1987
@@ -157,39 +157,40 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "ore",
         name: "Ore",
         description: "Raw ore for crafting.",
+        iconPath: "Purple Planet - Platformer Tileset/Assets/Purple Planet/png/128px/objects/Diamond (1)",
     },
     peach: {
         id: "peach",
         name: "Peach",
         description: "A juicy and sweet fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/peach.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/peach.png",
         hpRestore: 13,
         staminaRestore: 4,
         rottenTime: 1153
-    },
-    pear: {
-        id: "pear",
-        name: "Pear",
-        description: "A soft and sweet fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/pear.png",
-        hpRestore: 1,
-        staminaRestore: 7,
-        rottenTime: 1657
     },
     peanuts: {
         id: "peanuts",
         name: "Peanuts",
         description: "A crunchy and protein-rich nut.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/peanuts.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/peanuts.png",
         hpRestore: 1,
         staminaRestore: 0,
         rottenTime: 2048
+    },
+    pear: {
+        id: "pear",
+        name: "Pear",
+        description: "A soft and sweet fruit.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/pear.png",
+        hpRestore: 1,
+        staminaRestore: 7,
+        rottenTime: 1657
     },
     pineapple: {
         id: "pineapple",
         name: "Pineapple",
         description: "A tropical fruit with a sweet and tangy flavor.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/pineapple.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/pineapple.png",
         hpRestore: 0,
         staminaRestore: 18,
         rottenTime: 2430
@@ -198,7 +199,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "pistachio",
         name: "Pistachio",
         description: "A delicious and nutritious nut.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/nuts/pistachio.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/pistachio.png",
         hpRestore: -11,
         staminaRestore: 28,
         rottenTime: 2843
@@ -207,7 +208,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "plum",
         name: "Plum",
         description: "A juicy and sweet fruit.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/plum.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/plum.png",
         hpRestore: 1,
         staminaRestore: 5,
         rottenTime: 1415
@@ -216,13 +217,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "potion",
         name: "Potion",
         description: "A simple healing potion.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
         hpRestore: 110
     },
     redberries: {
         id: "redberries",
-        name: "Red Berries",
+        name: "redberries",
         description: "Small and sweet red berries.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/redberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/redberries.png",
         hpRestore: 16,
         staminaRestore: 1,
         rottenTime: 856
@@ -231,16 +233,16 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "strawberry",
         name: "Strawberry",
         description: "A sweet and juicy berry.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits1/strawberry.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/strawberry.png",
         hpRestore: 25,
         staminaRestore: 2,
         rottenTime: 680
     },
     watermelonslice: {
         id: "watermelonslice",
-        name: "Watermelon Slice",
+        name: "watermelonslice",
         description: "A refreshing slice of watermelon.",
-        iconPath: "assets/resources/100 FOOD ASSETS/Assets/food/food/fruits2/watermelonslice.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/watermelonslice.png",
         hpRestore: 3,
         staminaRestore: 6,
         rottenTime: 458

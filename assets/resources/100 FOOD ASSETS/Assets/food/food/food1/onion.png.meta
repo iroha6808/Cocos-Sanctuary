@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cdb87666-d607-4c9e-9dde-2cd22f6c9ae9",
+  "uuid": "5a20dca9-616d-44a5-b6bc-75682866660a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "onion": {
       "ver": "1.0.6",
-      "uuid": "d9b3afb9-5975-48ce-bca3-93be4017dbcc",
+      "uuid": "dd090875-fc4f-4f13-80a8-de8d434c723c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cdb87666-d607-4c9e-9dde-2cd22f6c9ae9",
+      "rawTextureUuid": "5a20dca9-616d-44a5-b6bc-75682866660a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

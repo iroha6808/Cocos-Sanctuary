@@ -24,7 +24,7 @@ export default class DropItem extends cc.Component {
     itemAmount: number = 1;
 
     @property({ tooltip: '吸引距離' })
-    attractDistance: number = 140;
+    attractDistance: number = 56;
 
     @property({ tooltip: '收集距離' })
     collectDistance: number = 28;
@@ -33,10 +33,10 @@ export default class DropItem extends cc.Component {
     attractSpeed: number = 220;
 
     @property({ tooltip: '發射速度（X軸）' })
-    launchSpeedX: number = 120;
+    launchSpeedX: number = 240;
 
     @property({ tooltip: '發射速度（Y軸）' })
-    launchSpeedY: number = 260;
+    launchSpeedY: number = 520;
 
     protected rb: cc.RigidBody = null!;
     protected collider: cc.PhysicsCollider = null!;

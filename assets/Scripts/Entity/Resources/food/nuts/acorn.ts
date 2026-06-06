@@ -4,6 +4,7 @@ import { getItemDefinition } from "../../../../Data/ItemData";
 
 @ccclass
 export default class Acorn extends FoodBase {
+    itemName: string = "acorn"; 
     onLoad() {
         super.onLoad();
         cc.log(`[acorn] onLoad → ${this.foodName || this.itemName}, rottenTime=${this.rottenTime}`);

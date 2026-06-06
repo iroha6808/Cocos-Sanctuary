@@ -9,34 +9,34 @@ const { ccclass, property } = cc._decorator;
 export default class MerchantShopUIController extends cc.Component {
 
     @property(cc.Node)
-    public root: cc.Node = null;
+    public root: cc.Node | null = null;
 
     @property(cc.Label)
-    public currencyLabel: cc.Label = null;
+    public currencyLabel: cc.Label | null = null;
 
     @property(cc.Node)
-    public itemListRoot: cc.Node = null;
+    public itemListRoot: cc.Node | null = null;
 
     @property(cc.Label)
-    public itemNameLabel: cc.Label = null;
+    public itemNameLabel: cc.Label | null = null;
 
     @property(cc.Label)
-    public descriptionLabel: cc.Label = null;
+    public descriptionLabel: cc.Label | null = null;
 
     @property(cc.Label)
-    public priceLabel: cc.Label = null;
+    public priceLabel: cc.Label | null = null;
 
     @property(cc.Label)
-    public stockLabel: cc.Label = null;
+    public stockLabel: cc.Label | null = null;
 
     @property(cc.Label)
-    public playerOwnedLabel: cc.Label = null;
+    public playerOwnedLabel: cc.Label | null = null;
 
     @property(cc.Label)
-    public buyAmountLabel: cc.Label = null;
+    public buyAmountLabel: cc.Label | null = null;
 
     @property(cc.Button)
-    public buyButton: cc.Button = null;
+    public buyButton: cc.Button | null = null;
 
     @property(cc.Color)
     public canBuyColor: cc.Color = cc.Color.GREEN;
@@ -44,7 +44,7 @@ export default class MerchantShopUIController extends cc.Component {
     @property(cc.Color)
     public cannotBuyColor: cc.Color = cc.Color.GRAY;
 
-    private merchant: MerchantNPC = null;
+    private merchant: MerchantNPC | null = null;
     private selectedIndex: number = 0;
     private buyAmount: number = 1;
 
@@ -176,6 +176,7 @@ export default class MerchantShopUIController extends cc.Component {
 
         if (this.merchant.buy(item.itemId, this.buyAmount)) {
             this.buyAmount = 1;
+            InventoryManager.instance.addItem(item.itemId, this.buyAmount);
             this.refresh();
         }
     }

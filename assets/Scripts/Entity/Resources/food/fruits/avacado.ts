@@ -4,6 +4,7 @@ import { getItemDefinition } from "../../../../Data/ItemData";
 
 @ccclass
 export default class Avacado extends FoodBase {
+    itemName: string = "avacado"; 
     onLoad() {
         super.onLoad();
         cc.log(`[avacado] onLoad → ${this.foodName || this.itemName}, rottenTime=${this.rottenTime}`);
