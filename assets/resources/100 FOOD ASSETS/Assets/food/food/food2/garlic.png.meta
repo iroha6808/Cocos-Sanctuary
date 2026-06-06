@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e7f00ed0-957e-4541-80d7-b8ca5bdd9990",
+  "uuid": "98ec6de3-2ff5-41c4-841a-c980d03b47c2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "garlic": {
       "ver": "1.0.6",
-      "uuid": "2ce22a8f-abc0-4556-b592-2c7893822aa6",
+      "uuid": "26b2613b-3664-4608-83cd-c98abb530901",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e7f00ed0-957e-4541-80d7-b8ca5bdd9990",
+      "rawTextureUuid": "98ec6de3-2ff5-41c4-841a-c980d03b47c2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

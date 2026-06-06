@@ -43,6 +43,7 @@ assets/
   Scripts/
     Attack/
       CombatHitbox.ts
+      CombatProjectile.ts
     Core/
       BaseEntity.ts
       Constants.ts
@@ -168,6 +169,11 @@ Canvas
   - 啟用時設定位置與傷害，時間到自動關閉。
   - 命中後優先呼叫目標的 `receiveAttack()`，沒有則呼叫 `takeDamage()`。
   - 已避免向上搜尋 parent 時對 Scene 呼叫 `getComponent()`。
+- `CombatProjectile.ts`
+  - 遠程攻擊共用投射物，使用 Dynamic RigidBody 與 sensor collider。
+  - 接收 owner、陣營、初速度、傷害與擊退，沿用 `CombatHitInfo` 傳遞受傷資料。
+  - 排除攻擊者與同陣營、每個目標只命中一次，命中實體、地形或超時後銷毀。
+  - `VisualRoot` 會依速度方向旋轉；若 prefab 只有 `CoconutSprite` 與 `FireEffect`，載入時會自動建立視覺根節點。
 
 ## Player
 
@@ -191,7 +197,11 @@ Canvas
 - `NPC_AI.ts`
   - NPC 共同行為基底。
   - 支援 `NONE`、`CHASE_TARGET`、`WANDER` 移動模式。
-  - 支援 `NONE`、`MELEE` 攻擊模式。
+  - 支援 `NONE`、`MELEE`、`RANGED` 攻擊模式。
+  - 遠程模式可設定 projectile prefab、生成點、世界 parent、釋放延遲、飛行時間、瞄準高度與擊退。
+  - 遠程瞄準支援固定飛行時間與可直接調整的水平速度模式。
+  - 受傷、死亡、停用或銷毀會取消尚未釋放的投射物。
+  - 左右翻面會保留 `Sprite_Body` 原始縮放，只改變 X 軸正負號。
   - 支援受傷、死亡、血條、動畫狀態、跳躍越障。
   - 提供商人需要的 `pauseMovement()`、`resumeMovement()`、`stopMovement()`、`beginTalk()`、`endTalk()`、`beginTrading()`、`endTrading()`、`isPlayerInInteractRange()`。
 - `MerchantNPC.ts`
