@@ -172,9 +172,7 @@ export default class MerchantNPC extends cc.Component {
 
         InventoryManager.instance.addItem(
             itemDefinition.id,
-            itemDefinition.name,
-            amount,
-            itemDefinition.description
+            amount
         );
 
         stockItem.stock -= amount;

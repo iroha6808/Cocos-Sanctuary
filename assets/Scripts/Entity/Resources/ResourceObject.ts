@@ -1,25 +1,23 @@
 const { ccclass, property } = cc._decorator;
 
-enum ResourceType {
-    TREE = 0,
-    ORE = 1,
-}
-
+/**
+ * ResourceObject — 基底類別
+ * ─────────────────────────────────────────────
+ * 管理「被攻擊幾下後觸發掉落」的核心邏輯。
+ * depletedSpriteFrame / targetSprite / dropAmount
+ * 統一在這裡宣告，子類直接用，不要重複宣告。
+ */
 @ccclass
 export default class ResourceObject extends cc.Component {
-    @property({
-        type: cc.Enum(ResourceType)
-    })
-    resourceType: ResourceType = ResourceType.TREE;
 
-    @property()
-    maxDurability: number = 3;
+    @property({ tooltip: '每幾下攻擊觸發一次掉落' })
+    hitsPerDrop: number = 3;
 
-    @property()
+    @property({ tooltip: '每次掉落幾個' })
     dropAmount: number = 1;
 
-    @property(cc.Prefab)
-    dropPrefab: cc.Prefab = null!;
+    @property({ tooltip: '互動距離（px）' })
+    interactDistance: number = 160;
 
     @property(cc.SpriteFrame)
     depletedSpriteFrame: cc.SpriteFrame = null!;
@@ -27,174 +25,96 @@ export default class ResourceObject extends cc.Component {
     @property(cc.Sprite)
     targetSprite: cc.Sprite = null!;
 
-    @property()
-    interactDistance: number = 160;
-
-    private currentDurability: number = 0;
-    private isDepleted: boolean = false;
+    protected hitCount: number = 0;
 
     onLoad() {
-        this.currentDurability = this.maxDurability;
-
-        const canvas = cc.find("Canvas");
-        if (canvas) {
-            canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
-        }
+        const canvas = cc.find('Canvas');
+        if (canvas) canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
 
     onDestroy() {
-        const canvas = cc.find("Canvas");
-        if (canvas) {
-            canvas.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
-        }
+        const canvas = cc.find('Canvas');
+        if (canvas) canvas.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
-        // stall other interactions when checking backpack
-        const inventoryUI = cc.find("Canvas/UI Root/InventoryUI");
-        if (inventoryUI && inventoryUI.active) {
-            return; 
-        }
+        const inventoryUI = cc.find('Canvas/UI Root/InventoryUI');
+        if (inventoryUI && inventoryUI.active) return;
+        if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) return;
 
-        if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
-            return;
-        }
+        cc.log(`[ResourceObject] 點擊 ${this.node.name}`);
+        if (!this.checkDistance()) return;
+        if (!this.canInteract()) return;
 
-        cc.log("Mouse clicked. Resource:", this.node.name);
-
-        if (!this.canInteract()) {
-            return;
-        }
-
-        this.interact();
+        this.receiveHit();
     }
 
-    public canInteract(): boolean {
-        if (this.isDepleted) {
-            cc.log("Cannot interact. Resource already depleted:", this.node.name);
+    private checkDistance(): boolean {
+        const player = cc.find('Canvas/Player');
+        if (!player) return false;
+
+        const dist = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO)
+                         .sub(player.convertToWorldSpaceAR(cc.Vec2.ZERO)).mag();
+
+        if (dist > this.interactDistance) {
+            cc.log(`[ResourceObject] 距離 ${dist.toFixed(0)} > ${this.interactDistance}，太遠`);
             return false;
         }
-
-        if (this.currentDurability <= 0) {
-            cc.log("Cannot interact. Durability is 0:", this.node.name);
-            return false;
-        }
-
-        const player = this.findPlayer();
-        if (!player) {
-            cc.log("Cannot interact. Player not found.");
-            return false;
-        }
-
-        const resourceWorldPos = this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        const playerWorldPos = player.convertToWorldSpaceAR(cc.Vec2.ZERO);
-        const distance = resourceWorldPos.sub(playerWorldPos).mag();
-
-        cc.log("Distance to", this.node.name, "=", distance);
-
-        if (distance > this.interactDistance) {
-            cc.log("Too far from resource:", this.node.name);
-            return false;
-        }
-
         return true;
     }
 
-    public interact() {
-        if (this.currentDurability <= 0 || this.isDepleted) {
-            return;
-        }
+    private receiveHit() {
+        this.hitCount++;
+        cc.log(`[ResourceObject] ${this.node.name} 被攻擊 ${this.hitCount}/${this.hitsPerDrop}`);
 
-        this.currentDurability--;
-
-        if (this.resourceType === ResourceType.TREE) {
-            cc.log("Hit tree. Durability:", this.currentDurability);
-        } else {
-            cc.log("Hit ore. Durability:", this.currentDurability);
-        }
-
-        if (this.currentDurability <= 0) {
-            this.deplete();
+        if (this.hitCount >= this.hitsPerDrop) {
+            this.hitCount = 0;
+            this.onDrop();
         }
     }
 
-    private deplete() {
-        this.isDepleted = true;
+    // ── 子類覆寫的 Hook ──────────────────────────────
 
-        this.spawnDrop();
-
-        if (this.resourceType === ResourceType.TREE) {
-            this.changeToDepletedTree();
-        } else {
-            cc.log("Ore depleted. Destroy ore.");
-            this.node.destroy();
-        }
+    protected onDrop() {
+        cc.log(`[ResourceObject] onDrop（子類應覆寫）`);
     }
 
-    private spawnDrop() {
-        if (!this.dropPrefab) {
-            cc.log("Drop prefab is not assigned:", this.node.name);
-            return;
-        }
-
-        const parent = this.node.parent;
-        const dropNode = cc.instantiate(this.dropPrefab);
-
-        dropNode.parent = parent;
-
-        if (this.resourceType === ResourceType.TREE) {
-            dropNode.setPosition(this.node.x, this.node.y + 80);
-        } else {
-            dropNode.setPosition(this.node.x, this.node.y + 40);
-        }
-
-        const dropScript = dropNode.getComponent("DropItem") as any;
-        if (dropScript) {
-            if (this.resourceType === ResourceType.TREE) {
-                dropScript.itemName = "Apple";
-            } else {
-                dropScript.itemName = "Ore";
-            }
-
-            dropScript.itemAmount = this.dropAmount;
-            dropScript.launch();
-        }
-
-        cc.log("Spawn drop from:", this.node.name);
+    protected onDepleted() {
+        cc.log(`[ResourceObject] onDepleted（子類應覆寫）`);
     }
 
-    private changeToDepletedTree() {
-        let sprite = this.targetSprite;
+    protected canInteract(): boolean {
+        return true;
+    }
 
-        if (!sprite) {
-            sprite = this.getComponent(cc.Sprite);
-        }
+    // ── 工具方法（子類可用） ─────────────────────────
 
-        if (!sprite) {
-            cc.log("Tree depleted, but Sprite is not assigned:", this.node.name);
+    protected spawnPrefab(prefab: cc.Prefab, worldX: number, worldY: number) {
+        if (!prefab) {
+            cc.warn(`[ResourceObject] spawnPrefab：prefab 為 null`);
             return;
         }
+        const node = cc.instantiate(prefab);
+        node.parent = this.node.parent;
+        node.setPosition(
+            this.node.parent.convertToNodeSpaceAR(cc.v2(worldX, worldY))
+        );
+        const drop = node.getComponent('DropItem') as any;
+        if (drop) drop.launch();
+        cc.log(`[ResourceObject] 生成掉落物 ${node.name}`);
+    }
 
-        if (!this.depletedSpriteFrame) {
-            cc.log("Tree depleted, but depletedSpriteFrame is not assigned:", this.node.name);
-            return;
-        }
-
+    /** 切換成耗盡外觀（子類呼叫） */
+    protected changeToDepletedSprite() {
+        if (!this.depletedSpriteFrame) return;
+        const sprite = this.targetSprite || this.getComponent(cc.Sprite);
+        if (!sprite) return;
         sprite.spriteFrame = this.depletedSpriteFrame;
-
-        sprite.sizeMode = cc.Sprite.SizeMode.CUSTOM;
-        sprite.node.width = this.node.width;
-        sprite.node.height = this.node.height;
-
-        cc.log("Tree image changed to depleted sprite.");
+        sprite.sizeMode    = cc.Sprite.SizeMode.CUSTOM;
+        cc.log(`[ResourceObject] ${this.node.name} 切換成耗盡外觀`);
     }
 
-    private findPlayer(): cc.Node | null {
-        const player = cc.find("Canvas/Player");
-        if (player) {
-            return player;
-        }
-
-        return null;
+    protected getWorldPos(): cc.Vec2 {
+        return this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
     }
 }
