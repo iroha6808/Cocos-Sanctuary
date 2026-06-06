@@ -14212,17 +14212,6 @@
     "actionMenu": {
       "__id__": 274
     },
-    "coconutIcon": {
-      "__uuid__": "41788558-0568-4e88-90fb-77f7bea7e38d"
-    },
-    "potionIcon": null,
-    "appleIcon": {
-      "__uuid__": "a13dbe4b-3e5d-471f-831a-baf7d34b5f0c"
-    },
-    "oreIcon": {
-      "__uuid__": "e2250b52-6b4c-40e5-be33-c72e71a05277"
-    },
-    "woodIcon": null,
     "selectionFrame": {
       "__id__": 293
     },
@@ -20329,7 +20318,9 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": null,
+    "_spriteFrame": {
+      "__uuid__": "41788558-0568-4e88-90fb-77f7bea7e38d"
+    },
     "_type": 0,
     "_sizeMode": 1,
     "_fillType": 0,

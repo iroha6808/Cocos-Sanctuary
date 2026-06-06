@@ -1,17 +1,19 @@
 const { ccclass, property } = cc._decorator;
 import { InventoryManager } from "../Player/InventoryManager";
+import { getItemDefinition } from "../Data/ItemData";
 
 @ccclass
 export default class InventoryUIController extends cc.Component {
 
     @property(cc.Node) gridContainer: cc.Node = null!;
     @property(cc.Node) actionMenu: cc.Node = null!;
-    @property(cc.SpriteFrame) coconutIcon: cc.SpriteFrame = null!;
-    @property(cc.SpriteFrame) potionIcon: cc.SpriteFrame = null!;
-    @property(cc.SpriteFrame) appleIcon: cc.SpriteFrame = null!;
-    @property(cc.SpriteFrame) oreIcon: cc.SpriteFrame = null!;
-    @property(cc.SpriteFrame) woodIcon: cc.SpriteFrame = null!;
+    // @property(cc.SpriteFrame) coconutIcon: cc.SpriteFrame = null!;
+    // @property(cc.SpriteFrame) potionIcon: cc.SpriteFrame = null!;
+    // @property(cc.SpriteFrame) appleIcon: cc.SpriteFrame = null!;
+    // @property(cc.SpriteFrame) oreIcon: cc.SpriteFrame = null!;
+    // @property(cc.SpriteFrame) woodIcon: cc.SpriteFrame = null!;
     @property(cc.Node) selectionFrame: cc.Node = null!;
+    private spriteCache: { [id: string]: cc.SpriteFrame } = {};
 
     private selectedIndex: number = -1; 
 
@@ -101,6 +103,46 @@ export default class InventoryUIController extends cc.Component {
         this.hideActionMenu();
     }
 
+    // refreshUI() {
+    //     if (!this.gridContainer) return;
+    //     let items = InventoryManager.instance.getItems();
+    //     let slots = this.gridContainer.children;
+
+    //     for (let i = 0; i < slots.length; i++) {
+    //         let currentSlot = slots[i];
+    //         let iconNode = currentSlot.getChildByName("Icon");
+    //         let labelNode = currentSlot.getChildByName("Label");
+
+    //         let label = labelNode ? labelNode.getComponent(cc.Label) : null;
+    //         let iconSprite = iconNode ? iconNode.getComponent(cc.Sprite) : null;
+
+    //         if (i < items.length) {
+    //             let item = items[i];
+    //             if (label) label.string = item.count.toString();
+    //             if (iconSprite) {
+    //                 iconSprite.node.active = true;
+    //                 switch (item.id) {
+    //                     case "coconut": 
+    //                         iconSprite.spriteFrame = this.coconutIcon; 
+    //                         break;
+    //                     case "apple": 
+    //                         iconSprite.spriteFrame = this.appleIcon; 
+    //                         break;
+    //                     case "ore":
+    //                         iconSprite.spriteFrame = this.oreIcon; 
+    //                         break;
+    //                     default: 
+    //                         iconSprite.node.active = false; 
+    //                         break;
+    //                 }
+    //             }
+    //         } else {
+    //             if (label) label.string = "";
+    //             if (iconSprite) iconSprite.node.active = false;
+    //         }
+    //     }
+    // }
+
     refreshUI() {
         if (!this.gridContainer) return;
         let items = InventoryManager.instance.getItems();
@@ -118,26 +160,41 @@ export default class InventoryUIController extends cc.Component {
                 let item = items[i];
                 if (label) label.string = item.count.toString();
                 if (iconSprite) {
-                    iconSprite.node.active = true;
-                    switch (item.id) {
-                        case "coconut": 
-                            iconSprite.spriteFrame = this.coconutIcon; 
-                            break;
-                        case "apple": 
-                            iconSprite.spriteFrame = this.appleIcon; 
-                            break;
-                        case "ore":
-                            iconSprite.spriteFrame = this.oreIcon; 
-                            break;
-                        default: 
-                            iconSprite.node.active = false; 
-                            break;
-                    }
+                    this.loadIconForSlot(item.id, iconSprite);
                 }
             } else {
                 if (label) label.string = "";
                 if (iconSprite) iconSprite.node.active = false;
             }
         }
+    }
+
+    private loadIconForSlot(itemId: string, iconSprite: cc.Sprite) {
+        // 已經 cache 過，直接用
+        if (this.spriteCache[itemId]) {
+            iconSprite.spriteFrame = this.spriteCache[itemId];
+            iconSprite.node.active = true;
+            return;
+        }
+
+        const def = getItemDefinition(itemId);
+        if (!def || !def.iconPath) {
+            iconSprite.node.active = false;
+            return;
+        }
+
+        const path = def.iconPath.replace(/\.(png|jpg|jpeg)$/i, '');
+        cc.resources.load(path, cc.SpriteFrame, (err, sf) => {
+            if (err) {
+                cc.warn(`[InventoryUI] 找不到 ${itemId} 的圖片，路徑: ${path}`);
+                iconSprite.node.active = false;
+                return;
+            }
+            const frame = sf as cc.SpriteFrame;
+            this.spriteCache[itemId] = frame; // 存進 cache
+            iconSprite.spriteFrame = frame;
+            iconSprite.node.active = true;
+            cc.log(`[InventoryUI] ${itemId} 圖片載入成功`);
+        });
     }
 }
