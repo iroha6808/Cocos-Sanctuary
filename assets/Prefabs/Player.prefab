@@ -396,6 +396,8 @@
     "attackHitbox": {
       "__id__": 9
     },
+    "dialogueUI": null,
+    "merchantShopUI": null,
     "_id": ""
   },
   {

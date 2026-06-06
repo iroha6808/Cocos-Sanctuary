@@ -242,6 +242,8 @@
     },
     "_enabled": true,
     "debugLog": true,
+    "useRandomStock": true,
+    "stockItemCount": 3,
     "_id": ""
   },
   {

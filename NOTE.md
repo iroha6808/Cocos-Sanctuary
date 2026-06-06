@@ -62,7 +62,12 @@ assets/
 - `UI/`
 - `Utils/`
 
-`Map/` 和 `Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Items/food/`、`UI/`。
+`Map/` 和 `Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Resources/food/`、`UI/`。
+
+素材新增重點：
+
+- `assets/Textures/Buttons/`：商店 / UI 可用按鈕圖。
+- `assets/resources/100 FOOD ASSETS/`：水果、堅果、蔬菜、花、菇類 icon 圖；注意這是小寫 `resources`，可供 `cc.resources.load()` 使用。
 
 ## Canvas 層級規劃
 
@@ -98,11 +103,11 @@ Canvas
 | `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 |
 | `Space` | 跳躍，僅在垂直速度接近 0 時觸發。 |
 | 滑鼠左鍵 | 玩家攻擊，播放 `PlayerAttack`，啟用 `CombatHitbox`。 |
-| 滑鼠右鍵 | 測試扣血：玩家受到 20 damage。 |
+| 滑鼠右鍵 | 目前扣血測試已註解，不再觸發。 |
 | 滑鼠滾輪 | 對話選項 / 商店商品上下選擇。 |
 | `B` | 開關背包 UI；打開時停止水平速度。 |
 | `F` | 商人互動鍵：靠近商人時顯示對話，對話中確認選項，商店開啟時關閉流程。 |
-| `T` | 測試用：直接加入 `coconut x10` 到背包，作為商人交易貨幣。 |
+| `T` | 測試用：預期加入 `coconut x10`，但目前仍用舊 `addItem()` 參數格式，需要修正。 |
 | 商店開啟時 `Up` / `Down` | 選擇上一個 / 下一個商店商品。 |
 | 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 |
 | 商店開啟時 `Enter` | 購買目前選取商品。 |
@@ -136,10 +141,12 @@ Canvas
 ### Inventory / Items
 
 - `InventoryManager.ts`：背包 singleton，支援 `addItem()`、`removeItem()`、`getItemCount()`、`hasItem()`、`getItems()`。
-- 背包最大格數目前為 `45`。
+- `addItem()` 現在簽名是 `addItem(id, count)`，會從 `ItemData.ts` 找道具名稱與描述。
+- 背包最大格數目前為 `40`。
 - 背包變更時發送 `cc.systemEvent.emit("INVENTORY_CHANGED")`。
-- `InventoryUIController.ts`：監聽 `INVENTORY_CHANGED`，將道具名稱與數量顯示到 grid slot 的 `Label`。
-- `ItemData.ts`：目前定義 `coconut`、`potion`、`apple`、`ore`、`wood`。
+- `InventoryUIController.ts`：監聽 `INVENTORY_CHANGED`，將道具數量顯示到 grid slot 的 `Label`，並支援 coconut / apple / ore icon。
+- `InventoryUIController.ts`：右鍵格子可開 action menu，支援 Use / Delete；目前 Use 只是扣道具，尚未套用回血效果。
+- `ItemData.ts`：目前定義 `coconut`、`potion`、`apple`、`ore`、`wood`，以及多種水果 / 堅果資料與 icon / HP / stamina / rotten time。
 - `CollectibleItem.ts`：碰到 PlayerController 時可加入背包並 destroy 自己。
 
 ### Merchant / Dialogue / Shop
@@ -148,7 +155,10 @@ Canvas
 - 商人狀態包含 `Wandering`、`Talking`、`Trading`、`Leaving`。
 - `canInteract()` 會透過 NPC_AI 的互動距離判斷玩家是否可對話。
 - `buy()` 以 `coconut` 作為交易貨幣，會檢查庫存、價格、玩家持有數量，再扣 coconut 並加入購買道具。
-- `MerchantPool.ts`：提供預設商店庫存，包含 `potion`、`apple`、`ore`。
+- `MerchantNPC.buy()` 目前加入商品時仍使用舊 `InventoryManager.addItem(id, name, amount, description)` 格式，需要改為新格式。
+- `MerchantPool.ts`：提供預設商店庫存，包含 `potion`、`apple`、`ore`；隨機池另含 `wood`。
+- `MerchantSpawner.ts`：可開場或定時生成 TravelingMerchant，會重用既有商人，避免重複生成。
+- `NPCDialogue.ts`：統一 `Trade`、`Chat`、`Leave` 對話選項 ID 與資料格式。
 - `DialogueUIController.ts`：支援 Prompt、Options、選項高亮、滾輪切換、取得選取 index。
 - `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態。
 
@@ -174,9 +184,11 @@ Canvas
 - 滑鼠左鍵點擊資源且玩家距離夠近時會扣耐久。
 - 耐久歸零後，Tree 會換成 depleted sprite，Ore 會 destroy。
 - 資源耗盡時會生成 drop prefab，Tree 掉 `Apple`，Ore 掉 `Ore`。
-- `DropItem.ts`：掉落物會先飛出，碰到 ground / Ground / tempFloor 後停下；玩家靠近後吸附，達到收集距離後 destroy。
-- `FoodBase.ts`：食物掉落物可飛出、吸附玩家、收集時加入 `InventoryManager`。
-- `coconut.ts`：椰子有 OnTree / Falling / OnGround / Held 狀態，支援掉落、顯示互動提示、撿起、吃掉、丟出。
+- `DropItem.ts`：掉落物會先飛出，碰到 ground / Ground / tempFloor 後停下；玩家靠近後吸附，達到收集距離後加入 `InventoryManager` 並 destroy。
+- `FoodBase.ts`：位於 `Entity/Resources/food/`，繼承 `DropItem`，食物掉落物可飛出、吸附玩家、收集時加入 `InventoryManager`。
+- `FoodBase.eat()` 仍尋找 `PlayerStats`，目前尚未接上 `PlayerController` 的 HP / heal API。
+- `apple.ts`、`avacado.ts`、`blueberries.ts`、`coconut.ts`、`acorn.ts`：從 `ItemData` 套用食物名稱、描述、回血、體力與腐敗時間。
+- `coconut.ts`：目前是 `FoodBase` 子類，`itemName = "coconut"`，同時作為商人交易測試貨幣。
 
 ### UI
 
@@ -186,6 +198,22 @@ Canvas
 - `MerchantShopUIController.ts`：商店 UI 與購買流程。
 
 ## 主要事件流程
+
+```text
+DropItem.collect()
+  -> InventoryManager.addItem(itemId, amount)
+  -> INVENTORY_CHANGED
+  -> InventoryUIController.refreshUI()
+  -> node.destroy()
+```
+
+```text
+MerchantSpawner.spawnMerchant()
+  -> resolve Canvas/Player and Canvas/NPC
+  -> reuse existing MerchantNPC if found
+  -> instantiate TravelingMerchant prefab
+  -> MerchantNPC rolls stock
+```
 
 ```text
 PlayerController.takeDamage()
@@ -231,9 +259,9 @@ MerchantNPC.buy()
 ## 目前注意事項
 
 - `BaseEntity.takeDamage()` 仍是基底版本，沒有 clamp HP；`NPC_AI` 自己有 override 並 clamp，Player 目前靠動畫狀態控制死亡流程。
-- `PlayerController` 目前有 `T` 測試鍵直接增加 coconut，正式版應移除或包成 debug 開關。
-- `PlayerController` 滑鼠右鍵目前是測試扣血，正式版應改成實際道具 / 互動邏輯。
+- `InventoryManager.addItem()` 已改為 `(id, count)`；`PlayerController` 的 `T` debug coconut 和 `MerchantNPC.buy()` 還是舊格式，會造成加入背包失敗。
+- `PlayerController` 目前仍有 `T` 測試鍵，正式版應移除或包成 debug 開關。
 - `GameManager.onGameOver()` 目前只有 log；真正結算 UI 還沒接。
-- `DropItem.ts` 收集後只 destroy，沒有加入背包；`FoodBase.ts` 和 `CollectibleItem.ts` 有加入背包。
 - `ResourceObject.findPlayer()` 目前固定找 `Canvas/Player`，場景節點路徑如果不同要調整。
-- `coconut.ts` 的 `eat()` 會找 `PlayerStats`，但目前玩家主腳本是 `PlayerController`；要接回血需再統一玩家 stats API。
+- `FoodBase.eat()` 會找 `PlayerStats`，但目前玩家主腳本是 `PlayerController`；要接回血需再統一玩家 stats API。
+- `ItemData.iconPath` 有些路徑含 `assets/resources/` 前綴；`cc.resources.load()` 通常要填 resources 底下的相對路徑且不含副檔名。

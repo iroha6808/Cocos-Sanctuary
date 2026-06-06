@@ -1,9 +1,10 @@
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter"; 
 import { GameEvent, EntityType } from "../Core/Constants";
-import CombatHitbox, { CombatFaction } from "../Attack/CombatHitbox";
+import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
 import { InventoryManager } from "./InventoryManager";
 import MerchantNPC from "../NPC/MerchantNPC";
+import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDialogue";
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 
@@ -33,6 +34,12 @@ export default class PlayerController extends BaseEntity {
     @property(MerchantShopUIController)
     merchantShopUI: MerchantShopUIController = null;
 
+    @property({ type: cc.Float, range: [0, 1, 0.05], slide: true })
+    knockbackResistance: number = 0;
+
+    @property(cc.Float)
+    knockbackLockTime: number = 0.12;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
     
@@ -47,6 +54,8 @@ export default class PlayerController extends BaseEntity {
     private canvasNode: cc.Node = null;
     private currentMerchant: MerchantNPC = null;
     private promptMerchant: MerchantNPC = null;
+    private currentDialogueOptions: DialogueOption[] = [];
+    private knockbackTimer: number = 0;
 
     onLoad() {
         super.onLoad(); 
@@ -95,13 +104,14 @@ export default class PlayerController extends BaseEntity {
 
     private onMouseDown(event: cc.Event.EventMouse) {
         if (this.isDead || this.isMerchantUIOpen()) return;
+        if (this.inventoryUI && this.inventoryUI.active) return; 
 
         if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
             this.attack();
         } 
-        else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
+        /*else if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.takeDamage(20); 
-        }
+        }*/
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
@@ -196,6 +206,10 @@ export default class PlayerController extends BaseEntity {
     private toggleInventory() {
         if (!this.inventoryUI) return;
         this.inventoryUI.active = !this.inventoryUI.active;
+        if (this.inventoryUI.active && this.dialogueUI && !this.isMerchantUIOpen()) {
+            this.dialogueUI.hide();
+            this.promptMerchant = null;
+        }
         if (this.inventoryUI.active && this.rb) {
             this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
         }
@@ -207,6 +221,15 @@ export default class PlayerController extends BaseEntity {
         if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
         }
+    }
+
+    public receiveAttack(amount: number, attackerNode: cc.Node = null, hitInfo?: CombatHitInfo) {
+        if (this.isDead) {
+            return;
+        }
+
+        this.applyKnockback(attackerNode, hitInfo);
+        this.takeDamage(amount);
     }
 
     private findNearestMerchant(): MerchantNPC {
@@ -256,12 +279,18 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
+        if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
+            this.closeMerchantFlow();
+        }
+
         this.updateMerchantPrompt();
+        this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
 
         if (this.inventoryUI && this.inventoryUI.active) return;
         if (this.isMerchantUIOpen()) return;
 
         if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
+        if (this.knockbackTimer > 0) return;
 
         let isMovingX = this.moveDir.x !== 0;
 
@@ -302,6 +331,32 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
+    private applyKnockback(attackerNode: cc.Node, hitInfo?: CombatHitInfo) {
+        if (!this.rb || !attackerNode || !cc.isValid(attackerNode) || this.isDead) {
+            return;
+        }
+
+        const knockbackX = hitInfo ? hitInfo.knockbackX : 0;
+        const knockbackY = hitInfo ? hitInfo.knockbackY : 0;
+        if (knockbackX <= 0 && knockbackY <= 0) {
+            return;
+        }
+
+        const selfWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
+            : this.node.position;
+        const attackerWorldPos = attackerNode.parent
+            ? attackerNode.parent.convertToWorldSpaceAR(attackerNode.position)
+            : attackerNode.position;
+        const direction = selfWorldPos.x >= attackerWorldPos.x ? 1 : -1;
+        const scale = 1 - Math.max(0, Math.min(1, this.knockbackResistance));
+        const velocityX = direction * knockbackX * scale;
+        const velocityY = knockbackY * scale;
+
+        this.rb.linearVelocity = cc.v2(velocityX, Math.max(this.rb.linearVelocity.y, velocityY));
+        this.knockbackTimer = this.knockbackLockTime;
+    }
+
     protected onDamaged() {
         if (this.isDead) return;
 
@@ -317,6 +372,7 @@ export default class PlayerController extends BaseEntity {
         this.isDead = true;
         this.isHurting = false;
         this.isAttacking = false;
+        this.closeMerchantFlow();
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 0, this.maxHp);
         this.playAnimation("PlayerDie");
     }
@@ -350,6 +406,10 @@ export default class PlayerController extends BaseEntity {
         if (this.anim && cc.isValid(this.anim)) {
             this.anim.off("finished", this.onAnimFinished, this);
         }
+
+        if (this.dialogueUI) {
+            this.dialogueUI.hide();
+        }
     }
 
     private updateMerchantPrompt() {
@@ -364,7 +424,7 @@ export default class PlayerController extends BaseEntity {
         const merchant = this.findNearestMerchant();
         if (merchant && merchant.canInteract(this.node)) {
             this.promptMerchant = merchant;
-            this.dialogueUI.showPrompt("Press F to Talk");
+            this.dialogueUI.showPrompt("Press F to Talk", merchant.node);
             return;
         }
 
@@ -373,8 +433,8 @@ export default class PlayerController extends BaseEntity {
     }
 
     private showMerchantOptions() {
-        if (this.dialogueUI) {
-            this.dialogueUI.showOptions("Welcome, traveler.", ["Trade", "Chat", "Leave"]);
+        if (this.dialogueUI && this.currentMerchant && cc.isValid(this.currentMerchant.node)) {
+            this.showDialogueContent(this.currentMerchant.getDialogueContent(), this.currentMerchant.node);
         }
     }
 
@@ -384,8 +444,16 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const selectedIndex = this.dialogueUI ? this.dialogueUI.getSelectedIndex() : 0;
-        if (selectedIndex === 0) {
+        const selectedIndex = this.dialogueUI ? this.dialogueUI.getSelectedIndex() : -1;
+        const selectedOption = this.currentDialogueOptions[selectedIndex];
+        if (!selectedOption) {
+            this.closeMerchantFlow();
+            return;
+        }
+
+        this.currentMerchant.handleDialogueOption(selectedOption.id, this.node);
+
+        if (selectedOption.id === DialogueOptionId.Trade) {
             this.currentMerchant.openTrade();
             if (this.dialogueUI) {
                 this.dialogueUI.hide();
@@ -396,10 +464,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (selectedIndex === 1) {
-            if (this.dialogueUI) {
-                this.dialogueUI.showOptions("The road is quiet today.", ["Trade", "Chat", "Leave"]);
-            }
+        if (selectedOption.id === DialogueOptionId.Chat) {
+            this.showDialogueContent(this.currentMerchant.getChatDialogueContent(), this.currentMerchant.node);
             return;
         }
 
@@ -421,6 +487,7 @@ export default class PlayerController extends BaseEntity {
 
         this.currentMerchant = null;
         this.promptMerchant = null;
+        this.currentDialogueOptions = [];
     }
 
     private isMerchantUIOpen(): boolean {
@@ -454,5 +521,18 @@ export default class PlayerController extends BaseEntity {
             default:
                 return false;
         }
+    }
+
+    private showDialogueContent(content: DialogueContent, anchorNode: cc.Node) {
+        if (!this.dialogueUI || !content) {
+            return;
+        }
+
+        this.currentDialogueOptions = content.options ? content.options.slice() : [];
+        this.dialogueUI.showOptions(
+            content.line,
+            this.currentDialogueOptions.map(option => option.label),
+            anchorNode
+        );
     }
 }

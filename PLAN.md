@@ -1,6 +1,6 @@
 # Cocos Sanctuary Plan
 
-> 更新日期：2026-06-04
+> 更新日期：2026-06-06
 > 本檔只放高層規劃、目前進度、下一步與手動設定。詳細架構見 `structure.md`，功能追蹤見 `NOTE.md`。
 
 ## 目錄
@@ -18,12 +18,12 @@
 ## 下一步優先順序
 
 掉落物、水
-1. 移除或包裝 debug 行為：`T` 加 coconut、滑鼠右鍵扣血。
-2. 統一物品收集流程：讓 `DropItem.ts` 收集後也能進 `InventoryManager`。
-3. 統一回血 API：處理 `coconut.ts` 找 `PlayerStats`，但玩家主腳本是 `PlayerController` 的問題。
-4. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
-5. 完成 Game Over 流程：`GameManager.onGameOver()` 接結算 UI 或場景。
-6. 檢查 Cocos Editor Inspector 綁定：Player、NPC、Merchant、Resource、UI。
+1. 修正背包 API 呼叫：`InventoryManager.addItem(id, count)` 已改為兩參數，但 `T` debug coconut 與 `MerchantNPC.buy()` 仍用舊四參數格式。
+2. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
+3. 檢查 Cocos Editor Inspector 綁定：Player、NPC、MerchantSpawner、Merchant、Resource、UI。
+4. 整理 item icon path：`cc.resources.load()` 需要 `assets/resources` 下的相對路徑，`ItemData.ts` 有些路徑仍含 `assets/resources/`。
+5. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
+6. 完成 Game Over 流程：`GameManager.onGameOver()` 接結算 UI 或場景。
 7. 整理 Map 系統：先固定 `Canvas/Player` 路徑，之後再拆 `TileConfig / TileData / TileRenderer`。
 
 ## 企劃摘要
@@ -50,6 +50,7 @@
 - [x] 基礎 NPC 偵測、追蹤、近戰攻擊
 - [x] 背包資料與背包 UI
 - [x] 商人對話與商店交易
+- [x] MerchantSpawner 旅行商人生成腳本
 - [x] Tree / Ore 資源互動與掉落物生成
 - [x] GameOver 場景切換
 - [ ] EXP / Score 資料流
@@ -74,9 +75,10 @@
 | 功能 | 風險原因 | 階段 |
 | --- | --- | --- |
 | 地圖碰撞 / TileRenderer | TileMap、BoxCollider、玩家移動與固定路徑 `Canvas/Player` 會互相影響 | MVP |
-| Player 狀態流 | HP 已接，EXP / Score / heal 尚未統一 | MVP |
-| 物品收集 | `FoodBase` 會進背包，但 `DropItem` 目前只 destroy | MVP |
-| 商人交易 | 已可買賣，但仍依賴 debug coconut 與 Inspector UI 綁定 | MVP |
+| 背包 API 使用不一致 | `addItem()` 目前是 `(id, count)`，但部分呼叫仍用舊格式，會導致 debug coconut / 商人購買失敗 | MVP |
+| Player 狀態流 | HP 已接，EXP / Score / heal 尚未統一，食物仍找 `PlayerStats` | MVP |
+| 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
+| item icon 動態載入 | `cc.resources.load()` 路徑需相對於 `assets/resources`，部分 `ItemData.iconPath` 仍需整理 | MVP |
 | Game Over | 玩家會切 GameOver，但 `GameManager.onGameOver()` 尚未接結算 UI | MVP |
 | 素材清理 | `assets/Textures` 混 Unity 檔與 Cocos 可用素材 | 延伸 |
 
@@ -87,6 +89,7 @@
 | 三類 NPC 差異 | Peace / Neutral / Hostile 是企劃核心賣點 | MVP |
 | 商人 NPC | 讓探索和背包有實際用途 | MVP |
 | 掉落物與撿取 | 採集、戰鬥、成長流程會串起來 | MVP |
+| 食物資料表 | `ItemData` 已擴充水果 / 堅果，可支撐回血、體力、商店與掉落 | MVP |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP | 延伸 |
@@ -107,17 +110,22 @@
 - [x] `CombatHitbox.ts` 支援 faction 過濾與單次命中
 - [x] `InventoryManager.ts` 支援 add/remove/count/has/get
 - [x] `InventoryUIController.ts` 監聽 `INVENTORY_CHANGED`
+- [x] `InventoryUIController.ts` 支援格子 icon、右鍵 action menu、使用 / 刪除
 - [x] `NPC_AI.ts` 支援 Peace / Neutral / Hostile、Wander / Chase、近戰攻擊、HP bar、死亡事件
 - [x] `MerchantNPC.ts` 支援對話、交易、coconut 貨幣、庫存
+- [x] `MerchantSpawner.ts` 支援開場 / 定時生成與避免重複生成商人
+- [x] `NPCDialogue.ts` 統一 Trade / Chat / Leave 對話選項資料
 - [x] `DialogueUIController.ts` 與 `MerchantShopUIController.ts`
 - [x] `ResourceObject.ts` 支援 Tree / Ore 互動與掉落 prefab
-- [x] `FoodBase.ts` / `CollectibleItem.ts` 可加入背包
+- [x] `DropItem.ts` / `FoodBase.ts` / `CollectibleItem.ts` 可加入背包
+- [x] `FoodBase.ts` 搬到 `Entity/Resources/food/`，新增 apple、avacado、blueberries、coconut、acorn 腳本
+- [x] `ItemData.ts` 擴充水果 / 堅果 / potion / ore / wood 資料
 
 ### 進行中
 
+- [ ] `addItem()` 新舊參數格式修正
 - [ ] Inspector 綁定完整性檢查
 - [ ] 商店 / 背包 UI 實機流程測試
-- [ ] 資源掉落物與背包流程統一
 - [ ] 玩家回血與食物效果 API 統一
 
 ### 尚未開始 / 未完成
@@ -154,25 +162,29 @@
 ### Player / Inventory
 
 - [x] 移動、跳躍、攻擊、受傷、死亡
-- [x] B 背包、F 商人、T debug coconut
+- [x] B 背包、F 商人、右鍵背包 action menu
+- [ ] 修正 `T` debug coconut 的 `addItem()` 參數
 - [x] 背包 add/remove/count/has
 - [ ] 移除正式版 debug key
 - [ ] 加入 `gainExp(amount)` 與 Score
-- [ ] 背包 item icon
+- [ ] 加入 各項道具的use功能
+- [x] 可刪除道具
+- [x] 背包 item icon
 
 ### NPC / Merchant
 
 - [x] Peace / Neutral / Hostile
 - [x] Wander / Chase / Melee
 - [x] Merchant talk / trade
+- [x] 商人生成 / 離開規則
+- [x] 掉落物
 - [ ] 遠程攻擊
-- [ ] 商人生成 / 離開規則
 
 ### Resource / Item
 
 - [x] Tree / Ore 耐久與掉落
 - [x] FoodBase 自動吸附並加入背包
-- [ ] DropItem 收集也加入背包
+- [x] DropItem 收集也加入背包
 - [ ] Coconut eat/drop 與 PlayerController stats API 統一
 - [ ] 礦物製作工具
 
@@ -192,6 +204,7 @@
 - [ ] 加入正式 MapManager
 - [ ] 規劃 `TileConfig` / `TileData` / `TileRenderer`
 - [ ] 整理 `assets/Textures`
+- [ ] 整理 `assets/resources/100 FOOD ASSETS` 圖示路徑與實際使用素材
 - [ ] 保留 Cocos 可用 `.png`、`.jpg`、`.wav`
 - [ ] 隔離 Unity `.unity`、`.unitypackage`、`.controller`、`.asset`、`.cs`
 
@@ -202,6 +215,7 @@
 - [ ] Player 的 `AttackHitbox` 掛 `CombatHitbox` + PhysicsCollider
 - [ ] NPC prefab 接 `targetPlayer`、`hpBar`、`attackHitbox`
 - [ ] TravelingMerchant 同節點掛 `NPC_AI` + `MerchantNPC`
+- [ ] MerchantSpawner 接 `merchantPrefab`、`playerNode`、`spawnParent`
 - [ ] Resource prefab 接 `dropPrefab`
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`

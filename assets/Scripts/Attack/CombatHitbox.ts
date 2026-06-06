@@ -13,6 +13,14 @@ export enum CombatFaction {
 
 cc.Enum(CombatFaction);
 
+export interface CombatHitInfo {
+    attackerNode: cc.Node;
+    hitboxNode: cc.Node;
+    damage: number;
+    knockbackX: number;
+    knockbackY: number;
+}
+
 @ccclass
 export default class CombatHitbox extends cc.Component {
 
@@ -24,6 +32,12 @@ export default class CombatHitbox extends cc.Component {
 
     @property(cc.Float)
     public offsetY: number = 0;
+
+    @property(cc.Float)
+    public knockbackX: number = 240;
+
+    @property(cc.Float)
+    public knockbackY: number = 120;
 
     @property(cc.Boolean)
     public debugLog: boolean = false;
@@ -148,11 +162,19 @@ export default class CombatHitbox extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
-        this.log(`Hit ${target.node.name}, damage=${this.damage}`);
+        const hitInfo: CombatHitInfo = {
+            attackerNode: this.attackerNode,
+            hitboxNode: this.node,
+            damage: this.damage,
+            knockbackX: this.knockbackX,
+            knockbackY: this.knockbackY
+        };
+
+        this.log(`Hit ${target.node.name}, damage=${this.damage}, knockback=(${this.knockbackX}, ${this.knockbackY})`);
 
         const receiver = target as any;
         if (receiver.receiveAttack) {
-            receiver.receiveAttack(this.damage, this.attackerNode);
+            receiver.receiveAttack(this.damage, this.attackerNode, hitInfo);
             return;
         }
 
