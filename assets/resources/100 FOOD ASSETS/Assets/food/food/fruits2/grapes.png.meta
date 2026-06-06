@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e3c32b2e-e2d1-4bc1-8dd1-f1a9c957a039",
+  "uuid": "a3811c32-6846-428f-bbc3-6b8909c3b48e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "grapes": {
       "ver": "1.0.6",
-      "uuid": "4ae79dd8-b759-422d-a1ae-f0a45e75eafc",
+      "uuid": "9bf98578-7e85-46df-a9c1-39fa4aa024c3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e3c32b2e-e2d1-4bc1-8dd1-f1a9c957a039",
+      "rawTextureUuid": "a3811c32-6846-428f-bbc3-6b8909c3b48e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

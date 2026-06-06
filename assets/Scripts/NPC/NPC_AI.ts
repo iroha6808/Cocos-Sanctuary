@@ -2,12 +2,19 @@ import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter";
 import { EntityType, GameEvent } from "../Core/Constants";
 import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
+import CombatProjectile from "../Attack/CombatProjectile";
 
 const { ccclass, property } = cc._decorator;
 
 export enum NPCAttackType {
     NONE = 0,
-    MELEE = 1
+    MELEE = 1,
+    RANGED = 2
+}
+
+export enum ProjectileAimMode {
+    FIXED_FLIGHT_TIME = 0,
+    HORIZONTAL_SPEED = 1
 }
 
 export enum NPCMoveMode {
@@ -23,6 +30,7 @@ enum NPCFacing {
 }
 
 cc.Enum(NPCAttackType);
+cc.Enum(ProjectileAimMode);
 cc.Enum(NPCMoveMode);
 
 @ccclass("NPCDropEntry")
@@ -131,6 +139,42 @@ export default class NPC_AI extends BaseEntity {
     @property(CombatHitbox)
     public attackHitbox: CombatHitbox = null;
 
+    @property(cc.Prefab)
+    public projectilePrefab: cc.Prefab = null;
+
+    @property(cc.Node)
+    public projectileSpawnNode: cc.Node = null;
+
+    @property(cc.Node)
+    public projectileParent: cc.Node = null;
+
+    @property(cc.Float)
+    public projectileSpawnDelay: number = 0.35;
+
+    @property({ type: cc.Enum(ProjectileAimMode) })
+    public projectileAimMode: ProjectileAimMode = ProjectileAimMode.HORIZONTAL_SPEED;
+
+    @property(cc.Float)
+    public projectileSpeed: number = 300;
+
+    @property(cc.Float)
+    public projectileFlightTime: number = 0.8;
+
+    @property(cc.Float)
+    public projectileMinFlightTime: number = 0.35;
+
+    @property(cc.Float)
+    public projectileMaxFlightTime: number = 1.25;
+
+    @property(cc.Float)
+    public projectileTargetOffsetY: number = 12;
+
+    @property(cc.Float)
+    public projectileKnockbackX: number = 180;
+
+    @property(cc.Float)
+    public projectileKnockbackY: number = 100;
+
     @property([NPCDropEntry])
     public dropTable: NPCDropEntry[] = [];
 
@@ -172,11 +216,16 @@ export default class NPC_AI extends BaseEntity {
     private warnedMissingClips: { [name: string]: boolean } = {};
     private hasDroppedLoot: boolean = false;
     private knockbackTimer: number = 0;
+    private rangedReleasePending: boolean = false;
+    private baseBodyScaleX: number = 1;
+    private lastProjectileFlightTime: number = 0;
 
     onLoad() {
         super.onLoad();
 
         this.bodyNode = this.node.getChildByName("Sprite_Body");
+        const spriteNode = this.bodyNode || this.node;
+        this.baseBodyScaleX = Math.max(0.001, Math.abs(spriteNode.scaleX));
         this.anim = (this.bodyNode || this.node).getComponent(cc.Animation);
         if (this.anim) {
             this.anim.on("finished", this.onAnimFinished, this);
@@ -381,6 +430,7 @@ export default class NPC_AI extends BaseEntity {
             this.isEnraged = true;
         }
 
+        this.cancelPendingRangedAttack("hurt");
         this.isHurting = true;
         this.isAttacking = false;
         this.actionLockTimer = this.damagedAnimLockTime;
@@ -401,6 +451,7 @@ export default class NPC_AI extends BaseEntity {
         }
 
         this.isDead = true;
+        this.cancelPendingRangedAttack("death");
         this.isHurting = false;
         this.isAttacking = false;
         this.hideHpBar();
@@ -417,9 +468,17 @@ export default class NPC_AI extends BaseEntity {
     }
 
     onDestroy() {
+        this.unscheduleAllCallbacks();
+        this.cancelPendingRangedAttack("destroyed");
         if (this.anim && cc.isValid(this.anim)) {
             this.anim.off("finished", this.onAnimFinished, this);
         }
+    }
+
+    onDisable() {
+        this.cancelPendingRangedAttack("disabled");
+        this.isAttacking = false;
+        this.currentAnimName = "";
     }
 
     private spawnDrops(): void {
@@ -658,12 +717,21 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
+        if (this.attackType === NPCAttackType.RANGED && !this.canStartRangedAttack()) {
+            return;
+        }
+
         this.isAttacking = true;
         this.isHurting = false;
-        this.actionLockTimer = this.attackAnimLockTime;
+        const attackLockTime = this.attackType === NPCAttackType.RANGED
+            ? Math.max(this.attackAnimLockTime, this.projectileSpawnDelay + 0.05)
+            : this.attackAnimLockTime;
+        this.actionLockTimer = attackLockTime;
         this.playStateAnimation("attack", true);
 
-        if (this.attackHitbox) {
+        if (this.attackType === NPCAttackType.RANGED) {
+            this.scheduleRangedProjectile();
+        } else if (this.attackHitbox) {
             const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
             this.attackHitbox.activate(facingRight, this.attackDamage, this.node);
         } else if (this.debugLog) {
@@ -676,10 +744,159 @@ export default class NPC_AI extends BaseEntity {
 
         this.attackTimer = this.attackCooldown;
 
-        this.scheduleOnce(() => {
-            this.isAttacking = false;
-            this.currentAnimName = "";
-        }, this.attackAnimLockTime);
+        this.unschedule(this.finishAttack);
+        this.scheduleOnce(this.finishAttack, attackLockTime);
+    }
+
+    private canStartRangedAttack(): boolean {
+        if (!this.projectilePrefab) {
+            if (this.debugLog) {
+                cc.warn(`[NPC_AI] ${this.node.name} cannot use ranged attack without projectilePrefab.`);
+            }
+            return false;
+        }
+
+        if (!this.targetPlayer || !cc.isValid(this.targetPlayer)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private scheduleRangedProjectile() {
+        this.unschedule(this.releaseRangedProjectile);
+        this.rangedReleasePending = true;
+        this.scheduleOnce(this.releaseRangedProjectile, Math.max(0, this.projectileSpawnDelay));
+    }
+
+    private releaseRangedProjectile = () => {
+        this.rangedReleasePending = false;
+
+        if (
+            this.isDead ||
+            this.isHurting ||
+            !this.isAttacking ||
+            !this.projectilePrefab ||
+            !this.targetPlayer ||
+            !cc.isValid(this.targetPlayer)
+        ) {
+            this.logRangedAttack("release cancelled: invalid attack state");
+            return;
+        }
+
+        const parent = this.getProjectileParent();
+        if (!parent || !cc.isValid(parent)) {
+            cc.warn(`[NPC_AI] ${this.node.name} cannot spawn projectile without a valid world parent.`);
+            return;
+        }
+
+        const projectileNode = cc.instantiate(this.projectilePrefab);
+        projectileNode.parent = parent;
+
+        const spawnWorldPosition = this.getProjectileSpawnWorldPosition();
+        projectileNode.setPosition(parent.convertToNodeSpaceAR(spawnWorldPosition));
+
+        const projectile = projectileNode.getComponent(CombatProjectile);
+        if (!projectile) {
+            cc.warn(`[NPC_AI] ${this.node.name}'s projectile prefab has no CombatProjectile component.`);
+            projectileNode.destroy();
+            return;
+        }
+
+        const targetWorldPosition = this.getTargetWorldPosition().add(cc.v2(0, this.projectileTargetOffsetY));
+        const velocity = this.calculateProjectileVelocity(spawnWorldPosition, targetWorldPosition);
+        const launched = projectile.launch(
+            this.node,
+            this.getCombatFaction(),
+            velocity,
+            this.attackDamage,
+            this.projectileKnockbackX,
+            this.projectileKnockbackY
+        );
+
+        if (!launched && cc.isValid(projectileNode)) {
+            projectileNode.destroy();
+            return;
+        }
+
+        this.logRangedAttack(
+            `projectile released mode=${ProjectileAimMode[this.projectileAimMode]}, ` +
+            `speed=${this.projectileSpeed.toFixed(1)}, flightTime=${this.lastProjectileFlightTime.toFixed(2)}, ` +
+            `velocity=(${velocity.x.toFixed(1)}, ${velocity.y.toFixed(1)})`
+        );
+    };
+
+    private finishAttack = () => {
+        this.isAttacking = false;
+        this.currentAnimName = "";
+    };
+
+    private cancelPendingRangedAttack(reason: string) {
+        this.unschedule(this.releaseRangedProjectile);
+        this.unschedule(this.finishAttack);
+
+        if (this.rangedReleasePending) {
+            this.logRangedAttack(`release cancelled: ${reason}`);
+        }
+        this.rangedReleasePending = false;
+    }
+
+    private getProjectileParent(): cc.Node {
+        if (this.projectileParent && cc.isValid(this.projectileParent)) {
+            return this.projectileParent;
+        }
+        return this.node.parent;
+    }
+
+    private getProjectileSpawnWorldPosition(): cc.Vec2 {
+        if (!this.projectileSpawnNode || !cc.isValid(this.projectileSpawnNode)) {
+            return this.getNodeWorldPosition();
+        }
+
+        if (this.projectileSpawnNode.parent === this.node) {
+            const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
+            const localPosition = cc.v2(
+                facingRight
+                    ? Math.abs(this.projectileSpawnNode.x)
+                    : -Math.abs(this.projectileSpawnNode.x),
+                this.projectileSpawnNode.y
+            );
+            return this.node.convertToWorldSpaceAR(localPosition);
+        }
+
+        return this.projectileSpawnNode.parent
+            ? this.projectileSpawnNode.parent.convertToWorldSpaceAR(this.projectileSpawnNode.position)
+            : this.projectileSpawnNode.position;
+    }
+
+    private calculateProjectileVelocity(spawnWorld: cc.Vec2, targetWorld: cc.Vec2): cc.Vec2 {
+        const minFlightTime = Math.max(0.05, Math.min(this.projectileMinFlightTime, this.projectileMaxFlightTime));
+        const maxFlightTime = Math.max(minFlightTime, Math.max(this.projectileMinFlightTime, this.projectileMaxFlightTime));
+        const delta = targetWorld.sub(spawnWorld);
+        let requestedFlightTime = this.projectileFlightTime;
+
+        if (this.projectileAimMode === ProjectileAimMode.HORIZONTAL_SPEED) {
+            const safeSpeed = Math.max(1, Math.abs(this.projectileSpeed));
+            requestedFlightTime = Math.abs(delta.x) > 0.01
+                ? Math.abs(delta.x) / safeSpeed
+                : minFlightTime;
+        }
+
+        const flightTime = Math.max(minFlightTime, Math.min(maxFlightTime, requestedFlightTime));
+        this.lastProjectileFlightTime = flightTime;
+        const physicsManager = cc.director.getPhysicsManager();
+        const gravityY = physicsManager ? physicsManager.gravity.y : -320;
+
+        return cc.v2(
+            delta.x / flightTime,
+            (delta.y - 0.5 * gravityY * flightTime * flightTime) / flightTime
+        );
+    }
+
+    private logRangedAttack(message: string) {
+        if (this.debugLog) {
+            cc.log(`[NPC_AI] ${this.node.name} ranged: ${message}`);
+        }
     }
 
     private setupAttackHitbox() {
@@ -721,11 +938,11 @@ export default class NPC_AI extends BaseEntity {
         const spriteNode = this.bodyNode || this.node;
         if (Math.abs(direction.x) > 1) {
             this.facing = NPCFacing.RIGHT;
-            spriteNode.scaleX = direction.x >= 0 ? 1 : -1;
+            spriteNode.scaleX = direction.x >= 0 ? this.baseBodyScaleX : -this.baseBodyScaleX;
             return;
         }
 
-        spriteNode.scaleX = 1;
+        spriteNode.scaleX = this.baseBodyScaleX;
         this.facing = direction.y > 0 ? NPCFacing.BACK : NPCFacing.FRONT;
     }
 

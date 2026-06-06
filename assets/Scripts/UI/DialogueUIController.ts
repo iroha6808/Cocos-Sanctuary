@@ -51,6 +51,7 @@ export default class DialogueUIController extends cc.Component {
     private options: string[] = [];
     private selectedIndex: number = 0;
     private anchorTarget: cc.Node = null;
+    private isDestroying: boolean = false;
 
     onLoad() {
         if (!this.floatingRoot) {
@@ -154,19 +155,36 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public hide(): void {
-        this.state = DialogueUIState.Hidden;
-        this.options = [];
-        this.selectedIndex = 0;
+        this.clearState();
 
-        if (this.promptNode) {
+        if (this.isDestroying || !this.node || !cc.isValid(this.node)) {
+            return;
+        }
+
+        if (this.promptNode && cc.isValid(this.promptNode)) {
             this.promptNode.active = false;
         }
-        if (this.dialoguePanel) {
+        if (this.dialoguePanel && cc.isValid(this.dialoguePanel)) {
             this.dialoguePanel.active = false;
         }
 
-        this.clearAnchorTarget();
         this.refreshOptions();
+    }
+
+    public clearForOwnerDestroy(): void {
+        this.clearState();
+    }
+
+    onDestroy() {
+        this.isDestroying = true;
+        this.clearState();
+        this.optionLabels = [];
+        this.floatingRoot = null;
+        this.canvasNode = null;
+        this.promptNode = null;
+        this.promptLabel = null;
+        this.dialoguePanel = null;
+        this.dialogueLabel = null;
     }
 
     public isPromptVisible(): boolean {
@@ -186,21 +204,34 @@ export default class DialogueUIController extends cc.Component {
     }
 
     private refreshOptions(): void {
-        for (let i = 0; i < this.optionLabels.length; i++) {
-            const label = this.optionLabels[i];
-            if (!label) {
+        if (this.isDestroying || !this.node || !cc.isValid(this.node)) {
+            return;
+        }
+
+        const labels = this.optionLabels || [];
+        const options = this.options || [];
+        for (let i = 0; i < labels.length; i++) {
+            const label = labels[i];
+            if (!label || !cc.isValid(label) || !label.node || !cc.isValid(label.node)) {
                 continue;
             }
 
-            if (i < this.options.length) {
+            if (i < options.length) {
                 label.node.active = true;
-                label.string = `${i === this.selectedIndex ? "> " : "  "}${this.options[i]}`;
+                label.string = `${i === this.selectedIndex ? "> " : "  "}${options[i]}`;
                 label.node.color = i === this.selectedIndex ? this.selectedColor : this.normalColor;
             } else {
                 label.string = "";
                 label.node.active = false;
             }
         }
+    }
+
+    private clearState(): void {
+        this.state = DialogueUIState.Hidden;
+        this.options = [];
+        this.selectedIndex = 0;
+        this.anchorTarget = null;
     }
 
     private updateFloatingPosition(): void {
