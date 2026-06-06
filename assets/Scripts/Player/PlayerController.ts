@@ -82,6 +82,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
 
         this.canvasNode = cc.find("Canvas");
         if (this.canvasNode) {
@@ -150,7 +151,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (isDown && this.handleMerchantShopKey(keyCode)) {
+        if (isDown && this.handleMerchantUIKey(keyCode)) {
             return;
         }
 
@@ -465,6 +466,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
 
         if (this.canvasNode && cc.isValid(this.canvasNode)) {
             this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
@@ -637,15 +639,43 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    private handleMerchantShopKey(keyCode: number): boolean {
-        if (!this.merchantShopUI || !this.merchantShopUI.isOpen()) {
+    private handleMerchantUIKey(keyCode: number): boolean {
+        const dialogueOpen = !!this.dialogueUI && this.dialogueUI.isOptionsVisible();
+        const shopOpen = !!this.merchantShopUI && this.merchantShopUI.isOpen();
+        if (!dialogueOpen && !shopOpen) {
             return false;
         }
 
+        if (keyCode === cc.macro.KEY.escape) {
+            this.closeMerchantFlow();
+            return true;
+        }
+
+        if (dialogueOpen) {
+            switch (keyCode) {
+                case cc.macro.KEY.w:
+                case cc.macro.KEY.up:
+                    this.dialogueUI.selectPrev();
+                    return true;
+                case cc.macro.KEY.s:
+                case cc.macro.KEY.down:
+                    this.dialogueUI.selectNext();
+                    return true;
+                case cc.macro.KEY.enter:
+                case cc.macro.KEY.f:
+                    this.confirmDialogueOption();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         switch (keyCode) {
+            case cc.macro.KEY.w:
             case cc.macro.KEY.up:
                 this.merchantShopUI.selectPrevItem();
                 return true;
+            case cc.macro.KEY.s:
             case cc.macro.KEY.down:
                 this.merchantShopUI.selectNextItem();
                 return true;
@@ -656,11 +686,20 @@ export default class PlayerController extends BaseEntity {
                 this.merchantShopUI.increaseAmount();
                 return true;
             case cc.macro.KEY.enter:
+            case cc.macro.KEY.f:
                 this.merchantShopUI.buySelected();
                 return true;
             default:
                 return false;
         }
+    }
+
+    private onDialogueOptionConfirmed(index: number): void {
+        if (!this.dialogueUI || !this.dialogueUI.isOptionsVisible()) {
+            return;
+        }
+        this.dialogueUI.selectOption(index);
+        this.confirmDialogueOption();
     }
 
     private showDialogueContent(content: DialogueContent, anchorNode: cc.Node) {

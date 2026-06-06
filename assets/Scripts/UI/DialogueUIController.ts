@@ -62,6 +62,7 @@ export default class DialogueUIController extends cc.Component {
             this.canvasNode = cc.find("Canvas");
         }
 
+        this.bindOptionInput();
         this.hide();
     }
 
@@ -154,6 +155,21 @@ export default class DialogueUIController extends cc.Component {
         return this.selectedIndex;
     }
 
+    public selectOption(index: number): void {
+        if (!this.isOptionsVisible() || index < 0 || index >= this.options.length) {
+            return;
+        }
+        this.selectedIndex = index;
+        this.refreshOptions();
+    }
+
+    public confirmOption(index: number): void {
+        this.selectOption(index);
+        if (this.isOptionsVisible()) {
+            cc.systemEvent.emit("DIALOGUE_OPTION_CONFIRMED", this.selectedIndex);
+        }
+    }
+
     public hide(): void {
         this.clearState();
 
@@ -224,6 +240,40 @@ export default class DialogueUIController extends cc.Component {
                 label.string = "";
                 label.node.active = false;
             }
+        }
+    }
+
+    private bindOptionInput(): void {
+        const labels = this.optionLabels || [];
+        for (let index = 0; index < labels.length; index++) {
+            const label = labels[index];
+            if (!label || !label.node || (label.node as any).__dialogueInputBound) {
+                continue;
+            }
+            (label.node as any).__dialogueInputBound = true;
+            label.node.on(cc.Node.EventType.MOUSE_DOWN, (event: cc.Event.EventMouse) => {
+                if (
+                    this.isOptionsVisible()
+                    && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT
+                ) {
+                    this.selectOption(index);
+                }
+            }, this);
+            label.node.on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
+                if (
+                    this.isOptionsVisible()
+                    && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT
+                ) {
+                    event.stopPropagation();
+                    this.confirmOption(index);
+                }
+            }, this);
+            label.node.on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
+                if (this.isOptionsVisible()) {
+                    event.stopPropagation();
+                    this.confirmOption(index);
+                }
+            }, this);
         }
     }
 
