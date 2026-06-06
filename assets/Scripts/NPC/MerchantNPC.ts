@@ -174,6 +174,11 @@ export default class MerchantNPC extends cc.Component {
             return false;
         }
 
+        InventoryManager.instance.addItem(
+            itemDefinition.id,
+            amount
+        );
+
         stockItem.stock -= amount;
         this.log(`bought ${itemDefinition.name} x${amount}, cost=${cost}, stockLeft=${stockItem.stock}`);
         return true;

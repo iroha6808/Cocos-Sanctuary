@@ -101,6 +101,8 @@ export default class CraftingUIController extends cc.Component {
         this.suspendInventoryWidgets();
 
         this.opened = true;
+        this.sanitizeRenderComponents(this.inventoryUI);
+        this.sanitizeRenderComponents(this.root);
         this.inventoryUI.active = true;
         this.ensureUIRenderOrder();
         this.layoutInventoryAndCrafting();
@@ -482,6 +484,7 @@ export default class CraftingUIController extends cc.Component {
             node.name = name;
             node.active = true;
             node.setScale(1, 1);
+            this.sanitizeRenderComponents(node);
         } else {
             node = this.createBox(name, parent, 60, 60, cc.color(70, 80, 90));
         }
@@ -958,7 +961,40 @@ export default class CraftingUIController extends cc.Component {
 
     private setVisible(visible: boolean): void {
         if (this.root && cc.isValid(this.root)) {
+            if (visible) {
+                this.sanitizeRenderComponents(this.root);
+            }
             this.root.active = visible;
+        }
+    }
+
+    private sanitizeRenderComponents(root: cc.Node): void {
+        if (!root || !cc.isValid(root)) {
+            return;
+        }
+
+        for (const sprite of root.getComponentsInChildren(cc.Sprite)) {
+            const frame = sprite.spriteFrame;
+            if (frame && (!cc.isValid(frame) || !frame.getTexture())) {
+                sprite.spriteFrame = null;
+                sprite.enabled = false;
+            }
+        }
+
+        for (const button of root.getComponentsInChildren(cc.Button)) {
+            if (button.transition !== cc.Button.Transition.SPRITE) {
+                continue;
+            }
+
+            const frames = [
+                button.normalSprite,
+                button.pressedSprite,
+                button.hoverSprite,
+                button.disabledSprite
+            ];
+            if (frames.some(frame => !!frame && (!cc.isValid(frame) || !frame.getTexture()))) {
+                button.transition = cc.Button.Transition.NONE;
+            }
         }
     }
 }

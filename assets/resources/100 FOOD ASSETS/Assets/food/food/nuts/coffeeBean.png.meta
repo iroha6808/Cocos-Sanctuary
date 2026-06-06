@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "60f6154f-fa98-4f6c-b655-c8f08db16a75",
+  "uuid": "45351eee-42f3-42fc-833e-aa36b140d40f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "coffeeBean": {
       "ver": "1.0.6",
-      "uuid": "ecdb8e48-f80e-494a-bad6-b9fc0a152ef5",
+      "uuid": "49803845-0ef0-4318-8403-d38bed235b39",
       "importer": "sprite-frame",
-      "rawTextureUuid": "60f6154f-fa98-4f6c-b655-c8f08db16a75",
+      "rawTextureUuid": "45351eee-42f3-42fc-833e-aa36b140d40f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

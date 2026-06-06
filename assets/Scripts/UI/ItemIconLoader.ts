@@ -55,6 +55,7 @@ export default class ItemIconLoader {
         }
 
         const requestItemId = itemId;
+        sprite.enabled = true;
         sprite.node.active = false;
         sprite.spriteFrame = null;
         (sprite.node as any).__craftingItemId = requestItemId;
@@ -69,8 +70,12 @@ export default class ItemIconLoader {
                 return;
             }
 
-            sprite.spriteFrame = spriteFrame;
-            sprite.node.active = !!spriteFrame;
+            const usableFrame = !!spriteFrame
+                && cc.isValid(spriteFrame)
+                && !!spriteFrame.getTexture();
+            sprite.enabled = usableFrame;
+            sprite.spriteFrame = usableFrame ? spriteFrame : null;
+            sprite.node.active = usableFrame;
         });
     }
 }
