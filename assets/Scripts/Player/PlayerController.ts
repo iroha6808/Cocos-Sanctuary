@@ -56,6 +56,7 @@ export default class PlayerController extends BaseEntity {
     private promptMerchant: MerchantNPC = null;
     private currentDialogueOptions: DialogueOption[] = [];
     private knockbackTimer: number = 0;
+    private gameOverTransitionPending: boolean = false;
 
     onLoad() {
         super.onLoad(); 
@@ -387,14 +388,24 @@ export default class PlayerController extends BaseEntity {
             this.currentAnimName = "";
         } 
         else if (state.name === "PlayerDie") {
-            this.scheduleOnce(() => {
-                EventCenter.emit(GameEvent.PLAYER_DIED);
-                cc.director.loadScene("GameOver"); 
-            }, 0);
+            if (!this.gameOverTransitionPending) {
+                this.gameOverTransitionPending = true;
+                this.scheduleOnce(this.loadGameOverScene, 0);
+            }
         }
     }
 
+    private loadGameOverScene = () => {
+        if (!this.node || !cc.isValid(this.node)) {
+            return;
+        }
+
+        EventCenter.emit(GameEvent.PLAYER_DIED);
+        cc.director.loadScene("GameOver");
+    };
+
     onDestroy() {
+        this.unscheduleAllCallbacks();
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
 
@@ -407,9 +418,11 @@ export default class PlayerController extends BaseEntity {
             this.anim.off("finished", this.onAnimFinished, this);
         }
 
-        if (this.dialogueUI) {
-            this.dialogueUI.hide();
-        }
+        this.dialogueUI = null;
+        this.merchantShopUI = null;
+        this.currentMerchant = null;
+        this.promptMerchant = null;
+        this.currentDialogueOptions = [];
     }
 
     private updateMerchantPrompt() {

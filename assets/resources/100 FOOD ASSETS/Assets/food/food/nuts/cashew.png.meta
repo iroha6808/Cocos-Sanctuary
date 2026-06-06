@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6f7bcb7d-c53c-413b-8038-231a02599e33",
+  "uuid": "1eaf211a-4096-49b3-90f7-58caf32394ae",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "cashew": {
       "ver": "1.0.6",
-      "uuid": "83f90592-50da-4db2-a46b-19a2625e0bf0",
+      "uuid": "4a8c2e29-154a-4100-8c88-3a03c60eb020",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6f7bcb7d-c53c-413b-8038-231a02599e33",
+      "rawTextureUuid": "1eaf211a-4096-49b3-90f7-58caf32394ae",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

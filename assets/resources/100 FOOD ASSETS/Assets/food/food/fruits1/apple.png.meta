@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "55ca6cc7-bca2-4abd-8d15-0234d4f634b3",
+  "uuid": "3a04e14c-742f-4fd4-ae07-c9ddb43a4428",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "apple": {
       "ver": "1.0.6",
-      "uuid": "2b39feb1-bceb-4fcc-a730-9595517ceead",
+      "uuid": "aae0cc34-c0f4-40a5-8bfe-c90bb4f12fb6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "55ca6cc7-bca2-4abd-8d15-0234d4f634b3",
+      "rawTextureUuid": "3a04e14c-742f-4fd4-ae07-c9ddb43a4428",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
