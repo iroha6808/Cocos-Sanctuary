@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9aa7a4c7-d73b-47b3-8c37-e4cfd1a0dea7",
+  "uuid": "1b45164e-fb6e-4faf-82e8-c51127d60e2f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Tile (33)": {
       "ver": "1.0.6",
-      "uuid": "291371c3-f078-4c39-914a-731a4a7ef57b",
+      "uuid": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9aa7a4c7-d73b-47b3-8c37-e4cfd1a0dea7",
+      "rawTextureUuid": "1b45164e-fb6e-4faf-82e8-c51127d60e2f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

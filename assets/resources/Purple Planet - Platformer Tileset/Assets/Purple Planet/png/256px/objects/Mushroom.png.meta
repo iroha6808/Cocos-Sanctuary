@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5d131e81-6763-4faa-a3b7-a88177c36899",
+  "uuid": "85e9ee5e-9dac-4187-95af-417218607ce4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Mushroom": {
       "ver": "1.0.6",
-      "uuid": "0dc71f76-6b05-499c-bde2-892c879ffe43",
+      "uuid": "b491e865-f91c-4745-880a-c7c2a93435dc",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5d131e81-6763-4faa-a3b7-a88177c36899",
+      "rawTextureUuid": "85e9ee5e-9dac-4187-95af-417218607ce4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
