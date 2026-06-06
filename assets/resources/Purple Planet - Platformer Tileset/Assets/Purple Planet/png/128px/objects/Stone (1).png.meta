@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "eb5121fe-5356-43dd-b51f-472ee1e862ab",
+  "uuid": "501047c3-ba8c-4e8c-bc45-fa4dfd60f2eb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Stone (1)": {
       "ver": "1.0.6",
-      "uuid": "74701b90-d5ae-43cf-bef4-c384345807c4",
+      "uuid": "165e503e-599f-4b8f-9596-40d5bd994388",
       "importer": "sprite-frame",
-      "rawTextureUuid": "eb5121fe-5356-43dd-b51f-472ee1e862ab",
+      "rawTextureUuid": "501047c3-ba8c-4e8c-bc45-fa4dfd60f2eb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,8 +1,17 @@
-// 路徑: assets/Scripts/UI/UIManager.ts
 import EventCenter from "../Core/EventCenter";
 import { GameEvent } from "../Core/Constants";
 
 const { ccclass, property } = cc._decorator;
+
+export enum ModalUIType {
+    NONE = 0,
+    INVENTORY = 1,
+    DIALOGUE = 2,
+    SHOP = 3,
+    CRAFTING = 4
+}
+
+cc.Enum(ModalUIType);
 
 @ccclass
 export default class UIManager extends cc.Component {
@@ -13,10 +22,34 @@ export default class UIManager extends cc.Component {
     @property(cc.ProgressBar)
     hpBar: cc.ProgressBar = null;
 
+    private activeModal: ModalUIType = ModalUIType.NONE;
+
     onLoad() {
-        // 綁定事件：當資料改變時，UI 才會跟著動
         EventCenter.on(GameEvent.PLAYER_HP_CHANGED, this.onHpUpdated, this);
         EventCenter.on(GameEvent.PLAYER_EXP_CHANGED, this.onExpUpdated, this);
+    }
+
+    public tryOpenModal(type: ModalUIType): boolean {
+        if (type === ModalUIType.NONE) {
+            return false;
+        }
+        if (this.activeModal !== ModalUIType.NONE && this.activeModal !== type) {
+            return false;
+        }
+        this.activeModal = type;
+        return true;
+    }
+
+    public closeModal(type: ModalUIType): void {
+        if (this.activeModal === type) {
+            this.activeModal = ModalUIType.NONE;
+        }
+    }
+
+    public isModalOpen(type?: ModalUIType): boolean {
+        return type === undefined
+            ? this.activeModal !== ModalUIType.NONE
+            : this.activeModal === type;
     }
 
     private onHpUpdated(currentHp: number, maxHp: number) {

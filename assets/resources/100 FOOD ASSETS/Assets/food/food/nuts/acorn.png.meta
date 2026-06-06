@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c8309afb-0123-4acf-8d8b-b03899b17372",
+  "uuid": "f4ef154b-6a85-43df-b6fa-d8f2299d23bf",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "acorn": {
       "ver": "1.0.6",
-      "uuid": "45953d26-cef4-4481-a704-a65d8a68c88e",
+      "uuid": "40c806d3-a40f-4714-af10-c7aa8f87e80f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c8309afb-0123-4acf-8d8b-b03899b17372",
+      "rawTextureUuid": "f4ef154b-6a85-43df-b6fa-d8f2299d23bf",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

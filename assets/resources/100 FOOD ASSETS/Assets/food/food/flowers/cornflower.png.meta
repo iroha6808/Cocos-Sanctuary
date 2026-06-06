@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f7a4a56f-2ff1-49cf-ad81-bc86bf85a659",
+  "uuid": "c69525d7-c8d0-49b3-95aa-75ac0bc6cb19",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "cornflower": {
       "ver": "1.0.6",
-      "uuid": "ca82a7a0-252c-4981-8b80-22615d9f2238",
+      "uuid": "6344a1c4-4135-4b86-ac82-eabcaa3fc9d1",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f7a4a56f-2ff1-49cf-ad81-bc86bf85a659",
+      "rawTextureUuid": "c69525d7-c8d0-49b3-95aa-75ac0bc6cb19",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

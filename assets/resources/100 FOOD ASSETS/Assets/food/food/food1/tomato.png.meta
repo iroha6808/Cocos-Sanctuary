@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "83b1be43-77eb-4022-a1c2-f2b8ffafd225",
+  "uuid": "f2dd293d-287d-45a5-aa07-cfc290480987",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "tomato": {
       "ver": "1.0.6",
-      "uuid": "f4428a2e-8bab-4553-8479-1813874456a6",
+      "uuid": "a34fcffd-42ce-4b16-bb72-a2fdc3c7c69c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "83b1be43-77eb-4022-a1c2-f2b8ffafd225",
+      "rawTextureUuid": "f2dd293d-287d-45a5-aa07-cfc290480987",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
