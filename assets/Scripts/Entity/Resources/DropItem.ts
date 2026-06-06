@@ -24,7 +24,7 @@ export default class DropItem extends cc.Component {
     itemAmount: number = 1;
 
     @property({ tooltip: '吸引距離' })
-    attractDistance: number = 140;
+    attractDistance: number = 56;
 
     @property({ tooltip: '收集距離' })
     collectDistance: number = 28;

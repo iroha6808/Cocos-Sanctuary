@@ -46,7 +46,7 @@ assets/
   │   ├── Map/          # 地圖生成、區塊管理，例如 Land、Sea、Underground
   │   ├── UI/           # 排行榜、道具欄、血條
   │   └── Utils/        # 工具類，例如 Physics、Math
-  ├── Resources/        # 需要動態加載的資源
+  ├── resources/        # 需要動態加載的資源
   └── Textures/         # 靜圖、貼圖集 Atlas
 ```
 
