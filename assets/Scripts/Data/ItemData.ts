@@ -40,7 +40,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "blueberries",
         name: "Blueberries",
         description: "Small and sweet berries.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/blueberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/blueberrys.png",
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 819
@@ -112,7 +112,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "greenapple",
         name: "greenapple",
         description: "A crisp and tart apple.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/greenapple.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/greenApple.png",
         hpRestore: 5,
         staminaRestore: 7,
         rottenTime: 1900
@@ -224,7 +224,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "redberries",
         name: "redberries",
         description: "Small and sweet red berries.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/redberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/mulberry.png",
         hpRestore: 16,
         staminaRestore: 1,
         rottenTime: 856
