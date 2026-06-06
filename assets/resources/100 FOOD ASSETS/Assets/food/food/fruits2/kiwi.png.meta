@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6ff326ca-ae4f-4399-8fce-6b3db9b4e73f",
+  "uuid": "4e2b8e51-eda8-4797-8582-e3cc2e085f43",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "kiwi": {
       "ver": "1.0.6",
-      "uuid": "cc39f641-a656-4ff7-8223-49710ef6fcfb",
+      "uuid": "432f119c-4a1a-4989-9830-fa34ae8d4f81",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6ff326ca-ae4f-4399-8fce-6b3db9b4e73f",
+      "rawTextureUuid": "4e2b8e51-eda8-4797-8582-e3cc2e085f43",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

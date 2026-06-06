@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2e392f3f-0fb7-46e4-bea1-fceb8f8c2de7",
+  "uuid": "25bbe265-0f58-4a3a-aa14-5d4db3793471",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "watermelonslice": {
       "ver": "1.0.6",
-      "uuid": "ab3095c8-df55-4a7f-9de9-9511f382bc15",
+      "uuid": "a89c7ef4-3d92-4f64-9b96-264f7df42f68",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2e392f3f-0fb7-46e4-bea1-fceb8f8c2de7",
+      "rawTextureUuid": "25bbe265-0f58-4a3a-aa14-5d4db3793471",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
