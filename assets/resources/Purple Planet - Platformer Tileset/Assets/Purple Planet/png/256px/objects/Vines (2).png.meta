@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6d53f3fa-2a09-484c-abfc-bef75ddceeac",
+  "uuid": "95b97a96-ebf8-4abc-9c29-b66ca35977d7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Vines (2)": {
       "ver": "1.0.6",
-      "uuid": "8ec773be-8c8b-47d4-bec2-0b30b5c4403b",
+      "uuid": "007df4d1-59c1-4931-a047-b2b32e42a579",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6d53f3fa-2a09-484c-abfc-bef75ddceeac",
+      "rawTextureUuid": "95b97a96-ebf8-4abc-9c29-b66ca35977d7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

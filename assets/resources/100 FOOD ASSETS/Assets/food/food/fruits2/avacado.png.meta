@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8134f8fe-2e7f-4f73-9ccd-f878e5aec785",
+  "uuid": "c949a0d7-4d71-4639-b326-409d46cccddb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "avacado": {
       "ver": "1.0.6",
-      "uuid": "ad4d94ad-1dc2-449f-a884-6c1341b9d4a9",
+      "uuid": "0c6a7f63-e736-42bb-aeb6-81ef5812c0f3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8134f8fe-2e7f-4f73-9ccd-f878e5aec785",
+      "rawTextureUuid": "c949a0d7-4d71-4639-b326-409d46cccddb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

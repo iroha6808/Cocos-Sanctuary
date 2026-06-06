@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "696f9299-3cc3-4725-b31c-0fdd7d696278",
+  "uuid": "4d8eada3-077c-4473-a441-f878cc580db5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "tulip": {
       "ver": "1.0.6",
-      "uuid": "e0ac6177-40f3-4c58-89ed-bab40fd23537",
+      "uuid": "784c265e-10b4-4bb7-8f4d-e0d680dbd73d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "696f9299-3cc3-4725-b31c-0fdd7d696278",
+      "rawTextureUuid": "4d8eada3-077c-4473-a441-f878cc580db5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

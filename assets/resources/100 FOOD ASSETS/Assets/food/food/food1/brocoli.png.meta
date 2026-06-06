@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "031a92df-ba37-4d40-b11f-687604335eb2",
+  "uuid": "2c41a165-ca9c-4c02-8ae9-94e0032ed578",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "brocoli": {
       "ver": "1.0.6",
-      "uuid": "02b112b8-af8b-405b-b575-f5a9b50e574f",
+      "uuid": "f25c440b-9aba-4506-b927-208f1ddac620",
       "importer": "sprite-frame",
-      "rawTextureUuid": "031a92df-ba37-4d40-b11f-687604335eb2",
+      "rawTextureUuid": "2c41a165-ca9c-4c02-8ae9-94e0032ed578",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
