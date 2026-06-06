@@ -1,14 +1,19 @@
+import { getItemDefinition } from "../Data/ItemData";
+
 export interface Item {
     id: string;
     name: string;
-    count: number; // 統一使用 count
+    count: number;
     description: string;
 }
 
-import { getItemDefinition } from "../Data/ItemData";
+export interface ItemAmount {
+    itemId: string;
+    count: number;
+}
 
 export class InventoryManager {
-    private static _instance: InventoryManager = null!;
+    private static _instance: InventoryManager = null;
 
     public static get instance(): InventoryManager {
         if (!this._instance) {
@@ -18,86 +23,118 @@ export class InventoryManager {
     }
 
     private items: Item[] = [];
-    public maxSlots: number = 40; 
+    public maxSlots: number = 40;
 
-    public addItem(id: string, count: any = 1): boolean {
-        // ❌ 移除 parseInt 保底！改用嚴格型態檢查
-        if (typeof count !== "number" || isNaN(count)) {
-            cc.error(`[背包大腦] 🛑 嚴重錯誤！傳入的數量不是有效的數字！`);
-            cc.error(`[背包大腦] 錯誤來源 ID: ${id} | 丟進來的數量內容物實際為:`, count);
-            return false; // 拒絕寫入，直接暴露問題
-        }
-
-        const def = getItemDefinition(id);
-        if (!def) {
-            cc.error(`[背包大腦] 錯誤：在 ITEM_DATA 中找不到 ID: ${id}`);
-            return false;
-        }
-
-        let existingItem = this.items.find(i => i.id === id);
-        if (existingItem) {
-            existingItem.count += count; 
-        } else {
-            if (this.items.length >= this.maxSlots) { 
-                cc.log("[背包大腦] 背包已滿！");
-                return false;
-            }
-            this.items.push({
-                id: id,
-                name: def.name,
-                count: count, 
-                description: def.description
-            });
-        }
-
-        cc.log(`[背包大腦] 🟢 成功放入真實數字：${def.name} x ${count}`);
-        this.refreshUI();
-        this.notifyUI();
-        return true;
+    public addItem(id: string, count: number = 1): boolean {
+        return this.transact([], [{ itemId: id, count }]);
     }
 
-    public removeItem(id: string, amount: number = 1): boolean {
-        let item = this.items.find(i => i.id === id);
-        if (!item) return false;
-
-        // 🟢 修正：amount -> count
-        item.count -= amount;
-        if (item.count <= 0) {
-            this.items = this.items.filter(i => i.id !== id);
-        }
-
-        cc.log(`[背包大腦] 扣除 ${id} x ${amount}`);
-        this.refreshUI(); 
-        this.notifyUI();
-        return true;
+    public removeItem(id: string, count: number = 1): boolean {
+        return this.removeItems([{ itemId: id, count }]);
     }
 
-    private refreshUI() {
-        const uiNode = cc.find("InventoryUI"); 
-        if (uiNode) {
-            const uiCtrl = uiNode.getComponent("InventoryUIController");
-            if (uiCtrl) {
-                uiCtrl.refreshUI();
-            }
-        } else {
-            cc.error("[背包大腦] 🛑 嚴重錯誤：找不到 InventoryUI 節點，視覺無法刷新！");
-        }
-    }
-
-    public getItemCount(id: string): number {
-        const existingItem = this.items.find(item => item.id === id);
-        return existingItem ? existingItem.count : 0;
+    public canAddItem(itemId: string, count: number): boolean {
+        return this.buildTransactionResult([], [{ itemId, count }]) !== null;
     }
 
     public hasItem(id: string, count: number = 1): boolean {
         return this.getItemCount(id) >= count;
     }
 
-    public getItems(): Item[] {
-        return this.items;
+    public hasItems(requirements: ItemAmount[]): boolean {
+        const normalized = this.normalizeAmounts(requirements);
+        return !!normalized && normalized.every(item => this.getItemCount(item.itemId) >= item.count);
     }
 
-    private notifyUI() {
+    public removeItems(requirements: ItemAmount[]): boolean {
+        return this.transact(requirements, []);
+    }
+
+    public transact(remove: ItemAmount[], add: ItemAmount[]): boolean {
+        const result = this.buildTransactionResult(remove, add);
+        if (!result) {
+            return false;
+        }
+
+        this.items = result;
         cc.systemEvent.emit("INVENTORY_CHANGED");
+        return true;
+    }
+
+    public getItemCount(id: string): number {
+        const item = this.items.find(current => current.id === id);
+        return item ? item.count : 0;
+    }
+
+    public getItemsSnapshot(): Item[] {
+        return this.items.map(item => ({ ...item }));
+    }
+
+    public getItems(): Item[] {
+        return this.getItemsSnapshot();
+    }
+
+    private buildTransactionResult(remove: ItemAmount[], add: ItemAmount[]): Item[] | null {
+        const normalizedRemove = this.normalizeAmounts(remove);
+        const normalizedAdd = this.normalizeAmounts(add);
+        if (!normalizedRemove || !normalizedAdd || !this.hasItems(normalizedRemove)) {
+            return null;
+        }
+
+        const counts: { [itemId: string]: number } = {};
+        for (const item of this.items) {
+            counts[item.id] = item.count;
+        }
+        for (const item of normalizedRemove) {
+            counts[item.itemId] = (counts[item.itemId] || 0) - item.count;
+        }
+        for (const item of normalizedAdd) {
+            counts[item.itemId] = (counts[item.itemId] || 0) + item.count;
+        }
+
+        const itemIds = Object.keys(counts).filter(itemId => counts[itemId] > 0);
+        if (itemIds.length > this.maxSlots) {
+            return null;
+        }
+
+        const result: Item[] = [];
+        for (const itemId of itemIds) {
+            const definition = getItemDefinition(itemId);
+            if (!definition) {
+                cc.error(`[InventoryManager] Unknown item id: ${itemId}`);
+                return null;
+            }
+            result.push({
+                id: itemId,
+                name: definition.name,
+                count: counts[itemId],
+                description: definition.description
+            });
+        }
+        return result;
+    }
+
+    private normalizeAmounts(amounts: ItemAmount[]): ItemAmount[] | null {
+        if (!amounts) {
+            return null;
+        }
+
+        const totals: { [itemId: string]: number } = {};
+        for (const amount of amounts) {
+            if (
+                !amount
+                || !amount.itemId
+                || typeof amount.count !== "number"
+                || !isFinite(amount.count)
+                || Math.floor(amount.count) !== amount.count
+                || amount.count <= 0
+                || !getItemDefinition(amount.itemId)
+            ) {
+                return null;
+            }
+            totals[amount.itemId] = (totals[amount.itemId] || 0) + amount.count;
+        }
+
+        return Object.keys(totals).map(itemId => ({ itemId, count: totals[itemId] }));
     }
 }

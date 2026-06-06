@@ -1,6 +1,6 @@
 const { ccclass, property } = cc._decorator;
 import { InventoryManager } from "../Player/InventoryManager";
-import { getItemDefinition } from "../Data/ItemData";
+import ItemIconLoader from "./ItemIconLoader";
 
 @ccclass
 export default class InventoryUIController extends cc.Component {
@@ -13,8 +13,6 @@ export default class InventoryUIController extends cc.Component {
     // @property(cc.SpriteFrame) oreIcon: cc.SpriteFrame = null!;
     // @property(cc.SpriteFrame) woodIcon: cc.SpriteFrame = null!;
     @property(cc.Node) selectionFrame: cc.Node = null!;
-    private spriteCache: { [id: string]: cc.SpriteFrame } = {};
-
     private selectedIndex: number = -1; 
 
     start() {
@@ -37,13 +35,21 @@ export default class InventoryUIController extends cc.Component {
         this.refreshUI();
     }
 
+    onLoad() {
+        cc.systemEvent.on("INVENTORY_CHANGED", this.refreshUI, this);
+    }
+
+    onDestroy() {
+        cc.systemEvent.off("INVENTORY_CHANGED", this.refreshUI, this);
+    }
+
     onEnable() {
         this.refreshUI();
         this.hideActionMenu();
     }
 
     onSlotMouseUp(index: number, event: cc.Event.EventMouse) {
-        let items = InventoryManager.instance.getItems();
+        let items = InventoryManager.instance.getItemsSnapshot();
         if (index >= items.length) {
             this.hideActionMenu();
             return; 
@@ -59,7 +65,7 @@ export default class InventoryUIController extends cc.Component {
     showActionMenu(index: number) {
         if (!this.actionMenu) return;
         this.selectedIndex = index;
-        let item = InventoryManager.instance.getItems()[index];
+        let item = InventoryManager.instance.getItemsSnapshot()[index];
         let slotNode = this.gridContainer.children[index];
         if (!slotNode) return;
         let slotWorldPos = slotNode.convertToWorldSpaceAR(cc.Vec2.ZERO);
@@ -82,7 +88,7 @@ export default class InventoryUIController extends cc.Component {
 
     onUseBtnClicked() {
         if (this.selectedIndex === -1) return;
-        let item = InventoryManager.instance.getItems()[this.selectedIndex];
+        let item = InventoryManager.instance.getItemsSnapshot()[this.selectedIndex];
         
         cc.log(`[UI] 點擊使用：${item.name}`);
         
@@ -95,7 +101,7 @@ export default class InventoryUIController extends cc.Component {
 
     onDeleteBtnClicked() {
         if (this.selectedIndex === -1) return;
-        let item = InventoryManager.instance.getItems()[this.selectedIndex];
+        let item = InventoryManager.instance.getItemsSnapshot()[this.selectedIndex];
         
         cc.log(`[UI] 點擊刪除：${item.name}`);
         InventoryManager.instance.removeItem(item.id, 1); // 扣除大腦資料庫 1 個
@@ -145,7 +151,7 @@ export default class InventoryUIController extends cc.Component {
 
     refreshUI() {
         if (!this.gridContainer) return;
-        let items = InventoryManager.instance.getItems();
+        let items = InventoryManager.instance.getItemsSnapshot();
         let slots = this.gridContainer.children;
 
         for (let i = 0; i < slots.length; i++) {
@@ -170,31 +176,6 @@ export default class InventoryUIController extends cc.Component {
     }
 
     private loadIconForSlot(itemId: string, iconSprite: cc.Sprite) {
-        // 已經 cache 過，直接用
-        if (this.spriteCache[itemId]) {
-            iconSprite.spriteFrame = this.spriteCache[itemId];
-            iconSprite.node.active = true;
-            return;
-        }
-
-        const def = getItemDefinition(itemId);
-        if (!def || !def.iconPath) {
-            iconSprite.node.active = false;
-            return;
-        }
-
-        const path = def.iconPath.replace(/\.(png|jpg|jpeg)$/i, '');
-        cc.resources.load(path, cc.SpriteFrame, (err, sf) => {
-            if (err) {
-                cc.warn(`[InventoryUI] 找不到 ${itemId} 的圖片，路徑: ${path}`);
-                iconSprite.node.active = false;
-                return;
-            }
-            const frame = sf as cc.SpriteFrame;
-            this.spriteCache[itemId] = frame; // 存進 cache
-            iconSprite.spriteFrame = frame;
-            iconSprite.node.active = true;
-            cc.log(`[InventoryUI] ${itemId} 圖片載入成功`);
-        });
+        ItemIconLoader.apply(itemId, iconSprite);
     }
 }

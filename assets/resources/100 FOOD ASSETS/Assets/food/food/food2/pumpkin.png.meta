@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "7f2e720b-0595-4985-a3d2-0e25c9a435c9",
+  "uuid": "f67190e2-9187-4c57-bd16-e1206c7b3fd9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "pumpkin": {
       "ver": "1.0.6",
-      "uuid": "ac2a5056-8569-4fc0-b18d-bf44a8cda888",
+      "uuid": "ac701fe5-db80-450a-b85f-6c09f86e52ff",
       "importer": "sprite-frame",
-      "rawTextureUuid": "7f2e720b-0595-4985-a3d2-0e25c9a435c9",
+      "rawTextureUuid": "f67190e2-9187-4c57-bd16-e1206c7b3fd9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

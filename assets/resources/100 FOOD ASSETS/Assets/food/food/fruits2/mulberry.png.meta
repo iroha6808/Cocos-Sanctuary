@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "19e71bab-8076-4f1c-84df-cc42e2e6eeef",
+  "uuid": "af253a0f-3d49-4865-84af-ef058d1eee2c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "mulberry": {
       "ver": "1.0.6",
-      "uuid": "753da8a1-8032-4e60-bd46-e4ec80be4e87",
+      "uuid": "2e2ef25b-6e6f-4a86-a5b1-2db0b56a4db4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "19e71bab-8076-4f1c-84df-cc42e2e6eeef",
+      "rawTextureUuid": "af253a0f-3d49-4865-84af-ef058d1eee2c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

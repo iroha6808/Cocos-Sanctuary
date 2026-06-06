@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "266841a4-2e54-44a7-8dab-3adb33e6f59e",
+  "uuid": "3887bcc2-4e4d-4006-9fd8-7cb410a9bbcd",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "durian": {
       "ver": "1.0.6",
-      "uuid": "ed77c3da-6c57-45ac-b92b-8b749e3c80b8",
+      "uuid": "8483ce03-9047-45bd-adcd-34a718b27a5c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "266841a4-2e54-44a7-8dab-3adb33e6f59e",
+      "rawTextureUuid": "3887bcc2-4e4d-4006-9fd8-7cb410a9bbcd",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e189815e-55db-4dd4-829e-00cfcfed6e94",
+  "uuid": "e6d6f850-df80-452d-9e20-561debf4a765",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "sunflower": {
       "ver": "1.0.6",
-      "uuid": "026d511e-6c9f-420f-a84a-b2cba45c34da",
+      "uuid": "e79d5efc-4bb5-4f53-80ae-68fc747ed344",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e189815e-55db-4dd4-829e-00cfcfed6e94",
+      "rawTextureUuid": "e6d6f850-df80-452d-9e20-561debf4a765",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

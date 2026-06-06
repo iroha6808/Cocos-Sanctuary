@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "60e69bac-a057-4655-803e-8e2280915014",
+  "uuid": "39d63916-018c-4108-a58d-2f4c421286f2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Toxic (1)": {
       "ver": "1.0.6",
-      "uuid": "0476147a-020e-46d4-aebe-665820ac60ee",
+      "uuid": "ba9d5373-b1ab-476a-930b-3f22524cb789",
       "importer": "sprite-frame",
-      "rawTextureUuid": "60e69bac-a057-4655-803e-8e2280915014",
+      "rawTextureUuid": "39d63916-018c-4108-a58d-2f4c421286f2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

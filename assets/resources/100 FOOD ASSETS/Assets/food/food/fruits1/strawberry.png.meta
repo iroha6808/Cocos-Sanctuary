@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "80151015-c65b-4a51-be23-97d8a62e5481",
+  "uuid": "47ac0138-a19d-454f-bbe1-d7c75a357810",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "strawberry": {
       "ver": "1.0.6",
-      "uuid": "7ff27530-bddc-4ffb-9e36-ee55395fecbc",
+      "uuid": "382a9fe0-cdae-4485-ab53-62a973d6a303",
       "importer": "sprite-frame",
-      "rawTextureUuid": "80151015-c65b-4a51-be23-97d8a62e5481",
+      "rawTextureUuid": "47ac0138-a19d-454f-bbe1-d7c75a357810",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

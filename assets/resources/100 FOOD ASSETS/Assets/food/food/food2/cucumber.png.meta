@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "eb22d2a3-aa66-4427-948b-f7fa789adc7c",
+  "uuid": "f3b7a04a-c7c7-42dd-9f43-27a0b54945bc",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "cucumber": {
       "ver": "1.0.6",
-      "uuid": "1af6a12d-ea51-4e4c-93b5-e3ebe232fa3e",
+      "uuid": "2d698242-be44-4de9-a930-8717b19cb7a6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "eb22d2a3-aa66-4427-948b-f7fa789adc7c",
+      "rawTextureUuid": "f3b7a04a-c7c7-42dd-9f43-27a0b54945bc",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
