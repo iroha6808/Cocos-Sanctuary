@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "a2b0f638-c37d-4b2c-94aa-254ca2fea77d",
+=======
+  "uuid": "a9943590-7a84-4039-ac12-fcf0f714424f",
+>>>>>>> feature/rocks
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "dandelion": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "864e7c83-5168-4f07-b441-f3a8abb32877",
       "importer": "sprite-frame",
       "rawTextureUuid": "a2b0f638-c37d-4b2c-94aa-254ca2fea77d",
+=======
+      "uuid": "f073e9d6-9715-4b15-94dc-b2ad582cf7b4",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "a9943590-7a84-4039-ac12-fcf0f714424f",
+>>>>>>> feature/rocks
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "a9bbf997-c26e-4c1c-8610-2349cadd14cc",
+=======
+  "uuid": "a39b2889-cd71-46c3-b559-5b8a78509d44",
+>>>>>>> feature/rocks
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "cashew": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "05ff603e-14c5-4546-9659-70ef0b67585c",
       "importer": "sprite-frame",
       "rawTextureUuid": "a9bbf997-c26e-4c1c-8610-2349cadd14cc",
+=======
+      "uuid": "b6372273-596f-47b5-a49a-764184ef28ce",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "a39b2889-cd71-46c3-b559-5b8a78509d44",
+>>>>>>> feature/rocks
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

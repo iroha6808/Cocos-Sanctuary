@@ -40,7 +40,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "blueberries",
         name: "Blueberries",
         description: "Small and sweet berries.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/blueberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/blueberrys.png",
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 819
@@ -217,13 +217,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "potion",
         name: "Potion",
         description: "A simple healing potion.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
         hpRestore: 110
     },
     redberries: {
         id: "redberries",
         name: "redberries",
         description: "Small and sweet red berries.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/redberries.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/mulberry.png",
         hpRestore: 16,
         staminaRestore: 1,
         rottenTime: 856
@@ -250,6 +251,37 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "wood",
         name: "Wood",
         description: "Basic building material."
+    },
+    wood_plank: {
+        id: "wood_plank",
+        name: "Wood Plank",
+        description: "Processed wood used for building."
+    },
+    ore_block: {
+        id: "ore_block",
+        name: "Ore Block",
+        description: "A compact block crafted from four pieces of ore.",
+        iconPath: "Purple Planet - Platformer Tileset/Assets/Purple Planet/png/128px/objects/Diamond (1)"
+    },
+    fruit_salad: {
+        id: "fruit_salad",
+        name: "Fruit Salad",
+        description: "A simple dish made from apple and coconut.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/apple.png",
+        hpRestore: 12,
+        staminaRestore: 12,
+        rottenTime: 1200
+    },
+    fire_essence: {
+        id: "fire_essence",
+        name: "Fire Essence",
+        description: "A concentrated source of heat."
+    },
+    burning_coconut: {
+        id: "burning_coconut",
+        name: "Burning Coconut",
+        description: "A coconut infused with fire essence.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/coconut.png"
     }
 };
 

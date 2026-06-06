@@ -249,7 +249,6 @@ export default class NPC_AI extends BaseEntity {
         }
 
         this.updateHpBar();
-        this.playStateAnimation("idle");
     }
 
     start() {
@@ -260,6 +259,10 @@ export default class NPC_AI extends BaseEntity {
         if (this.debugLog) {
             cc.log(`[NPC_AI] ${this.node.name} target=${this.targetPlayer ? this.targetPlayer.name : "null"}, type=${this.type}`);
         }
+
+        // Animation states are fully initialized after onLoad.
+        this.currentAnimName = "";
+        this.playStateAnimation("idle", true);
     }
 
     public setTarget(playerNode: cc.Node) {
@@ -433,7 +436,11 @@ export default class NPC_AI extends BaseEntity {
         this.cancelPendingRangedAttack("hurt");
         this.isHurting = true;
         this.isAttacking = false;
-        this.actionLockTimer = this.damagedAnimLockTime;
+        const damagedLockTime = Math.max(
+            this.damagedAnimLockTime,
+            this.getStateAnimationDuration("damaged")
+        );
+        this.actionLockTimer = damagedLockTime;
         if (this.knockbackTimer <= 0) {
             this.stopHorizontalMove();
         }
@@ -442,7 +449,7 @@ export default class NPC_AI extends BaseEntity {
         this.scheduleOnce(() => {
             this.isHurting = false;
             this.currentAnimName = "";
-        }, this.damagedAnimLockTime);
+        }, damagedLockTime);
     }
 
     protected die() {
@@ -596,7 +603,13 @@ export default class NPC_AI extends BaseEntity {
         const targetName = hasTarget ? this.targetPlayer.name : "null";
         const distance = hasTarget ? this.getTargetDistance().toFixed(1) : "n/a";
         const velocity = this.rb ? `(${this.rb.linearVelocity.x.toFixed(1)}, ${this.rb.linearVelocity.y.toFixed(1)})` : "no-rigidbody";
-        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, moveMode=${this.moveMode}, distance=${distance}, velocity=${velocity}, attacking=${this.isAttacking}, hurting=${this.isHurting}, talking=${this.isTalking}, trading=${this.isTrading}`);
+        const animationState = this.currentAnimName && this.anim
+            ? this.anim.getAnimationState(this.currentAnimName)
+            : null;
+        const animationText = this.currentAnimName
+            ? `${this.currentAnimName}:${animationState && animationState.isPlaying ? "playing" : "stopped"}`
+            : "none";
+        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, moveMode=${this.moveMode}, distance=${distance}, velocity=${velocity}, animation=${animationText}, attacking=${this.isAttacking}, hurting=${this.isHurting}, talking=${this.isTalking}, trading=${this.isTrading}`);
     }
 
     private canAct() {
@@ -723,9 +736,10 @@ export default class NPC_AI extends BaseEntity {
 
         this.isAttacking = true;
         this.isHurting = false;
+        const attackAnimationDuration = this.getStateAnimationDuration("attack");
         const attackLockTime = this.attackType === NPCAttackType.RANGED
-            ? Math.max(this.attackAnimLockTime, this.projectileSpawnDelay + 0.05)
-            : this.attackAnimLockTime;
+            ? Math.max(this.attackAnimLockTime, attackAnimationDuration, this.projectileSpawnDelay + 0.05)
+            : Math.max(this.attackAnimLockTime, attackAnimationDuration);
         this.actionLockTimer = attackLockTime;
         this.playStateAnimation("attack", true);
 
@@ -936,7 +950,7 @@ export default class NPC_AI extends BaseEntity {
         }
 
         const spriteNode = this.bodyNode || this.node;
-        if (Math.abs(direction.x) > 1) {
+        if (Math.abs(direction.x) > 0.01) {
             this.facing = NPCFacing.RIGHT;
             spriteNode.scaleX = direction.x >= 0 ? this.baseBodyScaleX : -this.baseBodyScaleX;
             return;
@@ -998,7 +1012,19 @@ export default class NPC_AI extends BaseEntity {
     }
 
     private getDirectionalAnimationName(stateName: string) {
-        return `${stateName}_${this.facing}`;
+        const directionalName = `${stateName}_${this.facing}`;
+        if (this.hasAnimation(directionalName)) {
+            return directionalName;
+        }
+
+        // Some NPCs, such as MiniBoar, only provide right-facing clips.
+        // Reuse that clip and let updateFacing mirror Sprite_Body for left movement.
+        const rightFacingName = `${stateName}_${NPCFacing.RIGHT}`;
+        if (this.hasAnimation(rightFacingName)) {
+            return rightFacingName;
+        }
+
+        return directionalName;
     }
 
     private playAnimation(animName: string, force: boolean = false) {
@@ -1014,12 +1040,13 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
-        if (!force && this.currentAnimName === animName) {
+        const state = this.anim.getAnimationState(animName);
+        if (!force && this.currentAnimName === animName && state && state.isPlaying) {
             return;
         }
 
-        this.anim.play(animName);
-        this.currentAnimName = animName;
+        const playedState = this.anim.play(animName);
+        this.currentAnimName = playedState ? animName : "";
     }
 
     private hasAnimation(animName: string) {
@@ -1033,6 +1060,10 @@ export default class NPC_AI extends BaseEntity {
 
         const state = this.anim.getAnimationState(animName);
         return state ? state.duration : 0;
+    }
+
+    private getStateAnimationDuration(stateName: string): number {
+        return this.getAnimationDuration(this.getDirectionalAnimationName(stateName));
     }
 
     private onAnimFinished(event: string, state: cc.AnimationState) {

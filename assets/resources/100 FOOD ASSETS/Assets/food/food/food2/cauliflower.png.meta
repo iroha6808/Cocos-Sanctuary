@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "96c9bc68-d070-4f4d-b51e-b45ff5f14aea",
+=======
+  "uuid": "4793b581-ab7a-4c6d-ab5c-cb4732219c32",
+>>>>>>> feature/rocks
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "cauliflower": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "c680dc37-b335-4219-9c1d-26be2fbd3edf",
       "importer": "sprite-frame",
       "rawTextureUuid": "96c9bc68-d070-4f4d-b51e-b45ff5f14aea",
+=======
+      "uuid": "1155abc8-b9f0-4498-b508-6704cdace35a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "4793b581-ab7a-4c6d-ab5c-cb4732219c32",
+>>>>>>> feature/rocks
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

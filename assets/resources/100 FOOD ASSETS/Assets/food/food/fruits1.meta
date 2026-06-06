@@ -1,6 +1,10 @@
 {
   "ver": "1.1.3",
+<<<<<<< HEAD
   "uuid": "7f5b7f46-29c0-4bbb-9651-20e8629619af",
+=======
+  "uuid": "f3a98cc8-1191-4d92-ad9e-b519489a821d",
+>>>>>>> feature/rocks
   "importer": "folder",
   "isBundle": false,
   "bundleName": "",

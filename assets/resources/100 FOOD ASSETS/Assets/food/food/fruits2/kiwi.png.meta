@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "4e2b8e51-eda8-4797-8582-e3cc2e085f43",
+=======
+  "uuid": "1c1c20a1-01ff-4e64-8336-f4fda7e1eea3",
+>>>>>>> feature/rocks
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "kiwi": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "432f119c-4a1a-4989-9830-fa34ae8d4f81",
       "importer": "sprite-frame",
       "rawTextureUuid": "4e2b8e51-eda8-4797-8582-e3cc2e085f43",
+=======
+      "uuid": "036217f9-423c-4c8f-8f6d-6689eb6edeb3",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "1c1c20a1-01ff-4e64-8336-f4fda7e1eea3",
+>>>>>>> feature/rocks
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

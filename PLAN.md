@@ -1,6 +1,6 @@
 # Cocos Sanctuary Plan
 
-> 更新日期：2026-06-06
+> 更新日期：2026-06-07
 > 本檔只放高層規劃、目前進度、下一步與手動設定。詳細架構見 `structure.md`，功能追蹤見 `NOTE.md`。
 
 ## 目錄
@@ -18,13 +18,13 @@
 ## 下一步優先順序
 
 掉落物、水
-1. 修正背包 API 呼叫：`InventoryManager.addItem(id, count)` 已改為兩參數，但 `T` debug coconut 與 `MerchantNPC.buy()` 仍用舊四參數格式。
-2. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
-3. 檢查 Cocos Editor Inspector 綁定：Player、NPC、MerchantSpawner、Merchant、Resource、UI。
-4. 整理 item icon path：`cc.resources.load()` 需要 `assets/resources` 下的相對路徑，`ItemData.ts` 有些路徑仍含 `assets/resources/`。
-5. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
-6. 完成 Game Over 流程：`GameManager.onGameOver()` 接結算 UI 或場景。
-7. 整理 Map 系統：先固定 `Canvas/Player` 路徑，之後再拆 `TileConfig / TileData / TileRenderer`。
+1. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
+2. 實測水域：`OceanArea.ts` sensor collider 進出時是否正確切換玩家重力與游泳控制。
+3. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
+4. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
+5. 整理 item / prefab 命名：`greenapple`、`coffeebean`、`guazi` 與 `gauzi.ts` 檔名需確認一致。
+6. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
+7. 清理素材：`assets/resources/Purple Planet - Platformer Tileset` 含 `.ai`、`.cdr`、`.eps`、`.svg` 等來源檔，需手動確認是否保留。
 
 ## 企劃摘要
 
@@ -51,6 +51,8 @@
 - [x] 背包資料與背包 UI
 - [x] 商人對話與商店交易
 - [x] MerchantSpawner 旅行商人生成腳本
+- [x] NPC 遠程攻擊程式與 BurningCoconut projectile prefab
+- [x] OceanArea 水域判定與玩家游泳控制
 - [x] Tree / Ore 資源互動與掉落物生成
 - [x] GameOver 場景切換
 - [ ] EXP / Score 資料流
@@ -74,13 +76,13 @@
 
 | 功能 | 風險原因 | 階段 |
 | --- | --- | --- |
-| 地圖碰撞 / TileRenderer | TileMap、BoxCollider、玩家移動與固定路徑 `Canvas/Player` 會互相影響 | MVP |
-| 背包 API 使用不一致 | `addItem()` 目前是 `(id, count)`，但部分呼叫仍用舊格式，會導致 debug coconut / 商人購買失敗 | MVP |
+| 水域碰撞 / OceanArea | 需要 sensor collider、玩家 contact listener、進出水域時重力還原要穩 | MVP |
+| 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP 已接，EXP / Score / heal 尚未統一，食物仍找 `PlayerStats` | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
-| item icon 動態載入 | `cc.resources.load()` 路徑需相對於 `assets/resources`，部分 `ItemData.iconPath` 仍需整理 | MVP |
+| item / prefab 命名一致性 | `greenapple`、`coffeebean`、`guazi` / `gauzi.ts` 命名混用，可能影響資料查找或 prefab 綁定 | MVP |
 | Game Over | 玩家會切 GameOver，但 `GameManager.onGameOver()` 尚未接結算 UI | MVP |
-| 素材清理 | `assets/Textures` 混 Unity 檔與 Cocos 可用素材 | 延伸 |
+| 素材清理 | `assets/Textures` 與 `assets/resources` 有大量來源檔 / 動畫 / 圖集，需要人工判斷 | 延伸 |
 
 ### High Value
 
@@ -90,6 +92,8 @@
 | 商人 NPC | 讓探索和背包有實際用途 | MVP |
 | 掉落物與撿取 | 採集、戰鬥、成長流程會串起來 | MVP |
 | 食物資料表 | `ItemData` 已擴充水果 / 堅果，可支撐回血、體力、商店與掉落 | MVP |
+| 遠程 NPC | SkeletonMage + projectile 讓戰鬥展示差異更明顯 | MVP |
+| 水域探索 | OceanArea 讓地形不只地面，能展示水中控制 | MVP |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP | 延伸 |
@@ -108,24 +112,29 @@
 - [x] `GameManager.ts` 啟用 physics，監聽 `PLAYER_DIED`
 - [x] `PlayerController.ts` 支援 A/D、Space、左鍵攻擊、B 背包、F 商人、T debug coconut
 - [x] `CombatHitbox.ts` 支援 faction 過濾與單次命中
+- [x] `CombatProjectile.ts` 支援遠程投射物、陣營過濾、命中 / 地形 / timeout 銷毀
 - [x] `InventoryManager.ts` 支援 add/remove/count/has/get
 - [x] `InventoryUIController.ts` 監聽 `INVENTORY_CHANGED`
 - [x] `InventoryUIController.ts` 支援格子 icon、右鍵 action menu、使用 / 刪除
 - [x] `NPC_AI.ts` 支援 Peace / Neutral / Hostile、Wander / Chase、近戰攻擊、HP bar、死亡事件
+- [x] `NPC_AI.ts` 支援 `RANGED`、projectile 釋放延遲、瞄準模式、drop table
 - [x] `MerchantNPC.ts` 支援對話、交易、coconut 貨幣、庫存
 - [x] `MerchantSpawner.ts` 支援開場 / 定時生成與避免重複生成商人
 - [x] `NPCDialogue.ts` 統一 Trade / Chat / Leave 對話選項資料
 - [x] `DialogueUIController.ts` 與 `MerchantShopUIController.ts`
 - [x] `ResourceObject.ts` 支援 Tree / Ore 互動與掉落 prefab
 - [x] `DropItem.ts` / `FoodBase.ts` / `CollectibleItem.ts` 可加入背包
-- [x] `FoodBase.ts` 搬到 `Entity/Resources/food/`，新增 apple、avacado、blueberries、coconut、acorn 腳本
+- [x] `FoodBase.ts` 搬到 `Entity/Resources/food/`，水果 / 堅果腳本與 prefab 已大量補齊
 - [x] `ItemData.ts` 擴充水果 / 堅果 / potion / ore / wood 資料
+- [x] `OceanArea.ts` 與 `PlayerController` 水域移動 / 重力切換
+- [x] `MenuScene.ts` 提供從選單載入 `Game`
+- [x] `AppleTree.ts` / `OreRock.ts` 資源子類與掉落表
 
 ### 進行中
 
-- [ ] `addItem()` 新舊參數格式修正
 - [ ] Inspector 綁定完整性檢查
 - [ ] 商店 / 背包 UI 實機流程測試
+- [ ] 遠程攻擊與水域實機流程測試
 - [ ] 玩家回血與食物效果 API 統一
 
 ### 尚未開始 / 未完成
@@ -133,7 +142,6 @@
 - [ ] Score 系統
 - [ ] EXP 實際增加流程
 - [ ] Scoreboard / 排行榜
-- [ ] 遠程攻擊與 projectile prefab
 - [ ] `NPC_DIED` 接掉落物 / Score / EXP
 - [ ] `GameManager.onGameOver()` 結算 UI
 - [ ] 正式 MapManager / TileRenderer
@@ -163,7 +171,8 @@
 
 - [x] 移動、跳躍、攻擊、受傷、死亡
 - [x] B 背包、F 商人、右鍵背包 action menu
-- [ ] 修正 `T` debug coconut 的 `addItem()` 參數
+- [x] `T` debug coconut 已改用 `addItem("coconut", 10)`
+- [x] OceanArea 中支援水平 / 垂直游泳控制
 - [x] 背包 add/remove/count/has
 - [ ] 移除正式版 debug key
 - [ ] 加入 `gainExp(amount)` 與 Score
@@ -178,11 +187,14 @@
 - [x] Merchant talk / trade
 - [x] 商人生成 / 離開規則
 - [x] 掉落物
-- [ ] 遠程攻擊
+- [x] 遠程攻擊程式與 projectile prefab
+- [ ] SkeletonMage 實機測試
 
 ### Resource / Item
 
 - [x] Tree / Ore 耐久與掉落
+- [x] AppleTree 可消耗與回復蘋果
+- [x] OreRock 支援 weighted drop table
 - [x] FoodBase 自動吸附並加入背包
 - [x] DropItem 收集也加入背包
 - [ ] Coconut eat/drop 與 PlayerController stats API 統一
@@ -201,10 +213,11 @@
 ### Map / Assets
 
 - [ ] 固定目前 `Canvas/Player` 路徑或改成可配置引用
+- [x] 加入 `OceanArea` 水域 prefab / 腳本
 - [ ] 加入正式 MapManager
 - [ ] 規劃 `TileConfig` / `TileData` / `TileRenderer`
 - [ ] 整理 `assets/Textures`
-- [ ] 整理 `assets/resources/100 FOOD ASSETS` 圖示路徑與實際使用素材
+- [ ] 整理 `assets/resources/100 FOOD ASSETS` 與 `Purple Planet - Platformer Tileset` 圖示路徑與實際使用素材
 - [ ] 保留 Cocos 可用 `.png`、`.jpg`、`.wav`
 - [ ] 隔離 Unity `.unity`、`.unitypackage`、`.controller`、`.asset`、`.cs`
 
@@ -214,8 +227,11 @@
 - [ ] Player 的 `Sprite_Body` 掛 `cc.Animation`
 - [ ] Player 的 `AttackHitbox` 掛 `CombatHitbox` + PhysicsCollider
 - [ ] NPC prefab 接 `targetPlayer`、`hpBar`、`attackHitbox`
+- [ ] SkeletonMage 接 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`
+- [ ] BurningCoconutProjectile prefab 要有 `CombatProjectile`、RigidBody、PhysicsCollider、視覺 / 火焰動畫
 - [ ] TravelingMerchant 同節點掛 `NPC_AI` + `MerchantNPC`
 - [ ] MerchantSpawner 接 `merchantPrefab`、`playerNode`、`spawnParent`
+- [ ] OceanArea 節點掛 `PhysicsBoxCollider` sensor + `OceanArea.ts`
 - [ ] Resource prefab 接 `dropPrefab`
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`

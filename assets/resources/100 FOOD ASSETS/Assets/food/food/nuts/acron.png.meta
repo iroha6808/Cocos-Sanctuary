@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9f721d14-bd2d-4350-9fb9-df11659e9225",
+  "uuid": "c8309afb-0123-4acf-8d8b-b03899b17372",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "acron": {
       "ver": "1.0.6",
-      "uuid": "291db9fb-6d61-4ac0-8393-0e0682277b09",
+      "uuid": "45953d26-cef4-4481-a704-a65d8a68c88e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9f721d14-bd2d-4350-9fb9-df11659e9225",
+      "rawTextureUuid": "c8309afb-0123-4acf-8d8b-b03899b17372",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

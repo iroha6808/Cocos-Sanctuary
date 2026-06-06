@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "42810319-ce8f-4847-86f2-72f62d1479d5",
+=======
+  "uuid": "3e175edb-67de-437e-bc69-0f5b8c16188c",
+>>>>>>> feature/rocks
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "pistachio": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "b0216601-0d88-41b4-8a56-70898e150310",
       "importer": "sprite-frame",
       "rawTextureUuid": "42810319-ce8f-4847-86f2-72f62d1479d5",
+=======
+      "uuid": "fa9c0a46-d0ed-43bb-bc5b-76de994ed97e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3e175edb-67de-437e-bc69-0f5b8c16188c",
+>>>>>>> feature/rocks
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
