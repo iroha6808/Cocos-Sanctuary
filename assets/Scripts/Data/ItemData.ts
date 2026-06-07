@@ -79,7 +79,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/coconut.png",
         hpRestore: 8,
         staminaRestore: 5,
-        rottenTime: 1800 // 30 minutes
+        rottenTime: 1800 // 30 min
     },
     coffeebean: {
         id: "coffeebean",
