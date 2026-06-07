@@ -18,13 +18,13 @@
 ## 下一步優先順序
 
 掉落物、水
-1. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
-2. 實測水域：`OceanArea.ts` sensor collider 進出時是否正確切換玩家重力與游泳控制。
-3. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
-4. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
-5. 整理 item / prefab 命名：`greenapple`、`coffeebean`、`guazi` 與 `gauzi.ts` 檔名需確認一致。
+1. 修正交易 UI 座標：`MerchantShopUI` 目前固定在原 Background 座標，OceanArea 交易時會跑到畫面外；應改掛 Main Camera / Screen UI Root。
+2. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
+3. 實測水域：Camera 已跟玩家到水域，需確認 `OceanArea.ts` 進出時玩家重力 / 游泳控制穩定。
+4. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
+5. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
 6. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
-7. 清理素材：`assets/resources/Purple Planet - Platformer Tileset` 含 `.ai`、`.cdr`、`.eps`、`.svg` 等來源檔，需手動確認是否保留。
+7. 清理素材與命名：`Purple Planet` 來源檔、`greenapple`、`coffeebean`、`guazi` / `gauzi.ts` 需確認。
 
 ## 企劃摘要
 
@@ -77,6 +77,7 @@
 | 功能 | 風險原因 | 階段 |
 | --- | --- | --- |
 | 水域碰撞 / OceanArea | 需要 sensor collider、玩家 contact listener、進出水域時重力還原要穩 | MVP |
+| Camera / 商店 UI 座標 | Camera 已跟玩家移動，Dialogue 已能保持可見，但 MerchantShop UI 仍固定在舊世界座標 | MVP |
 | 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP 已接，EXP / Score / heal 尚未統一，食物仍找 `PlayerStats` | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
@@ -118,6 +119,7 @@
 - [x] `InventoryUIController.ts` 支援格子 icon、右鍵 action menu、使用 / 刪除
 - [x] `NPC_AI.ts` 支援 Peace / Neutral / Hostile、Wander / Chase、近戰攻擊、HP bar、死亡事件
 - [x] `NPC_AI.ts` 支援 `RANGED`、projectile 釋放延遲、瞄準模式、drop table
+- [x] NPC 已具備 hitbox / hurtbox、RigidBody、HP bar、受傷 / 死亡動畫流程
 - [x] `MerchantNPC.ts` 支援對話、交易、coconut 貨幣、庫存
 - [x] `MerchantSpawner.ts` 支援開場 / 定時生成與避免重複生成商人
 - [x] `NPCDialogue.ts` 統一 Trade / Chat / Leave 對話選項資料
@@ -127,6 +129,8 @@
 - [x] `FoodBase.ts` 搬到 `Entity/Resources/food/`，水果 / 堅果腳本與 prefab 已大量補齊
 - [x] `ItemData.ts` 擴充水果 / 堅果 / potion / ore / wood 資料
 - [x] `OceanArea.ts` 與 `PlayerController` 水域移動 / 重力切換
+- [x] Camera 目前會跟隨玩家移動到水域；商人生成會依玩家位置落在附近
+- [x] Dialogue UI 已改成跟隨商人並 clamp 到鏡頭可見範圍
 - [x] `MenuScene.ts` 提供從選單載入 `Game`
 - [x] `AppleTree.ts` / `OreRock.ts` 資源子類與掉落表
 
@@ -134,6 +138,7 @@
 
 - [ ] Inspector 綁定完整性檢查
 - [ ] 商店 / 背包 UI 實機流程測試
+- [ ] MerchantShop UI 改成 screen-space / camera-bound，避免 OceanArea 交易時離開畫面
 - [ ] 遠程攻擊與水域實機流程測試
 - [ ] 玩家回血與食物效果 API 統一
 
@@ -206,6 +211,8 @@
 - [x] Inventory UI
 - [x] Dialogue UI
 - [x] Merchant Shop UI
+- [x] Dialogue UI 可跟著鏡頭可見範圍顯示
+- [ ] Merchant Shop UI 改掛 Screen UI Root / Main Camera 對齊畫面
 - [ ] Score label
 - [ ] Game Over 結算面板
 - [ ] UI prefab 整理
@@ -238,6 +245,7 @@
 - [ ] InventoryUI 接 `gridContainer`
 - [ ] DialogueUI 接 prompt、panel、option labels
 - [ ] MerchantShopUI 接 root、labels、itemListRoot、buyButton
+- [ ] MerchantShopUI root 放在跟隨 Main Camera 的 Screen UI Root，或由腳本每次 open 時轉成 camera/screen 座標
 
 ### Cocos Inspector 設定
 

@@ -79,6 +79,7 @@ assets/
 ```text
 Canvas
  ├── Main Camera
+ │    └── CameraFollow / follow Player
  │
  ├── [Core_Controllers]    # 系統大腦區，不可見
  │    └── GameManager      # 掛載 GameManager.ts
@@ -93,6 +94,7 @@ Canvas
       ├── HUD_Layer        # 常駐介面：血條、氧氣條、道具欄，掛載 UIManager.ts
       ├── PopUp_Layer      # 彈出介面：排行榜、升級進化提示
       └── Screen_Layer     # 全螢幕介面：死亡結算畫面
+          └── MerchantShopPanel  # 建議放這裡或 Main Camera 子節點，避免世界座標跑出畫面
 ```
 
 ## Code Trace：已實作功能
@@ -140,6 +142,7 @@ Canvas
 - 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
 - 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`。
 - 死亡載入 `GameOver` 前有 `gameOverTransitionPending`，避免重複切場景。
+- Main Camera 目前會跟隨玩家移動到水域；商人生成依玩家世界座標，所以玩家在水域時商人會生成在附近。
 
 ### CombatHitbox
 
@@ -177,9 +180,10 @@ Canvas
 - `MerchantNPC.buy()` 已改用 `InventoryManager.addItem(itemId, amount)`。
 - `MerchantPool.ts`：提供預設商店庫存，包含 `potion`、`apple`、`ore`；隨機池另含 `wood`。
 - `MerchantSpawner.ts`：可開場或定時生成 TravelingMerchant，會重用既有商人，避免重複生成。
+- `MerchantSpawner.ts`：生成位置跟玩家世界座標有關，Camera 跟到 OceanArea 後商人也可能出現在水域附近。
 - `NPCDialogue.ts`：統一 `Trade`、`Chat`、`Leave` 對話選項 ID 與資料格式。
-- `DialogueUIController.ts`：支援 Prompt、Options、選項高亮、滾輪切換、取得選取 index。
-- `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態。
+- `DialogueUIController.ts`：支援 Prompt、Options、選項高亮、滾輪切換、取得選取 index，並用 anchorTarget + clamp 讓對話留在鏡頭可見範圍。
+- `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態；目前 root 仍偏世界固定座標。
 
 ### NPC AI
 
@@ -197,6 +201,7 @@ Canvas
 - 支援 NPC drop table：死亡後可依機率生成 prefab 並設定 `DropItem.itemName` / `itemAmount`。
 - 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
 - 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
+- NPC 目前功能重點：Dynamic RigidBody、hurtbox / attack hitbox、HP bar、jump / stuck 越障、受傷 / 死亡動畫與近遠程攻擊。
 
 ### Resource / Drop / Food
 
@@ -218,8 +223,8 @@ Canvas
 
 - `UIManager.ts`：監聽 `PLAYER_HP_CHANGED` 更新 HP progress bar，監聽 `PLAYER_EXP_CHANGED` 更新 EXP label。
 - `InventoryUIController.ts`：背包 grid UI。
-- `DialogueUIController.ts`：商人提示與對話選項 UI。
-- `MerchantShopUIController.ts`：商店 UI 與購買流程。
+- `DialogueUIController.ts`：商人提示與對話選項 UI；已能跟隨商人並 clamp 到 Canvas 可見區域。
+- `MerchantShopUIController.ts`：商店 UI 與購買流程；應改成掛在 Screen UI Root / Main Camera 底下，或在 `open()` 時依 camera/screen 座標重新定位。
 
 ## 主要事件流程
 
@@ -252,9 +257,18 @@ DropItem.collect()
 ```text
 MerchantSpawner.spawnMerchant()
   -> resolve Canvas/Player and Canvas/NPC
+  -> use player world position
   -> reuse existing MerchantNPC if found
   -> instantiate TravelingMerchant prefab
   -> MerchantNPC rolls stock
+```
+
+```text
+Merchant dialogue / shop UI
+  -> DialogueUIController.showOptions(anchorTarget=merchant)
+  -> clamp dialogue to visible Canvas area
+  -> MerchantShopUIController.open()
+  -> should show under Screen UI Root / Main Camera
 ```
 
 ```text
@@ -307,4 +321,6 @@ MerchantNPC.buy()
 - `FoodBase.eat()` 會找 `PlayerStats`，但目前玩家主腳本是 `PlayerController`；要接回血需再統一玩家 stats API。
 - 遠程攻擊是否能打到玩家，取決於 SkeletonMage 的 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`、collider sensor 與 contact listener。
 - OceanArea 需要 `PhysicsBoxCollider` sensor，且 Player collider / rigidbody 要能觸發 contact。
+- MerchantShop UI 目前仍固定在原本 Background / 世界座標；在 OceanArea 交易時會跑到鏡頭外，需改掛 Screen UI Root / Main Camera 或在 `open()` 時轉成 camera/screen 座標。
+- Dialogue UI 已跟著商人並 clamp 到鏡頭可見範圍；商店 UI 尚未同步這個做法。
 - `ItemData.iconPath` 目前多數已改為 resources 相對路徑，但仍要實測大小寫與檔名，例如 `greenapple`、`coffeebean`、`guazi` / `gauzi.ts`。
