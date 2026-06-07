@@ -1,10 +1,6 @@
 {
   "ver": "2.3.7",
-<<<<<<< HEAD
-  "uuid": "2dad6218-019f-4b4a-a2e5-104abc4dc3ee",
-=======
-  "uuid": "b3ccc327-401f-4391-b68c-56e03479ceee",
->>>>>>> feature/rocks
+  "uuid": "d12c33fe-f74d-4f69-b55a-2b2011251747",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -18,15 +14,9 @@
   "subMetas": {
     "frame_05": {
       "ver": "1.0.6",
-<<<<<<< HEAD
-      "uuid": "d8690bcc-ba04-4b93-8b5b-a980710188be",
+      "uuid": "71491d34-e34e-48a2-be99-b36cbda2fb3b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2dad6218-019f-4b4a-a2e5-104abc4dc3ee",
-=======
-      "uuid": "24c10e57-9d87-4220-bd37-cce8e1fd5108",
-      "importer": "sprite-frame",
-      "rawTextureUuid": "b3ccc327-401f-4391-b68c-56e03479ceee",
->>>>>>> feature/rocks
+      "rawTextureUuid": "d12c33fe-f74d-4f69-b55a-2b2011251747",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

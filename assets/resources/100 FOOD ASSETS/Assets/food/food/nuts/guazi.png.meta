@@ -1,10 +1,6 @@
 {
   "ver": "2.3.7",
-<<<<<<< HEAD
-  "uuid": "5d9ea619-9a91-4fad-8111-ae8b1115c4bc",
-=======
-  "uuid": "65982b46-b14c-4712-8ca6-af51fe258675",
->>>>>>> feature/rocks
+  "uuid": "4804c92e-9e36-456f-90b5-ba1141a82511",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -18,15 +14,9 @@
   "subMetas": {
     "guazi": {
       "ver": "1.0.6",
-<<<<<<< HEAD
-      "uuid": "4bdfa51f-eb98-4395-938d-7bcb10f744c9",
+      "uuid": "3ddea82e-aab4-4203-b49b-d8122e167b83",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5d9ea619-9a91-4fad-8111-ae8b1115c4bc",
-=======
-      "uuid": "e2172984-3263-4509-8940-7fc796d4a4fc",
-      "importer": "sprite-frame",
-      "rawTextureUuid": "65982b46-b14c-4712-8ca6-af51fe258675",
->>>>>>> feature/rocks
+      "rawTextureUuid": "4804c92e-9e36-456f-90b5-ba1141a82511",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

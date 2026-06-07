@@ -1,10 +1,6 @@
 {
   "ver": "2.3.7",
-<<<<<<< HEAD
-  "uuid": "96c9bc68-d070-4f4d-b51e-b45ff5f14aea",
-=======
-  "uuid": "4793b581-ab7a-4c6d-ab5c-cb4732219c32",
->>>>>>> feature/rocks
+  "uuid": "248e9941-0a47-4d2c-8aaf-07b623fca8a1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -18,15 +14,9 @@
   "subMetas": {
     "cauliflower": {
       "ver": "1.0.6",
-<<<<<<< HEAD
-      "uuid": "c680dc37-b335-4219-9c1d-26be2fbd3edf",
+      "uuid": "6f369f8c-5bab-4db4-995f-40ecd836a382",
       "importer": "sprite-frame",
-      "rawTextureUuid": "96c9bc68-d070-4f4d-b51e-b45ff5f14aea",
-=======
-      "uuid": "1155abc8-b9f0-4498-b508-6704cdace35a",
-      "importer": "sprite-frame",
-      "rawTextureUuid": "4793b581-ab7a-4c6d-ab5c-cb4732219c32",
->>>>>>> feature/rocks
+      "rawTextureUuid": "248e9941-0a47-4d2c-8aaf-07b623fca8a1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,10 +1,6 @@
 {
   "ver": "2.3.7",
-<<<<<<< HEAD
-  "uuid": "1b978313-5df8-48bb-9ed5-2010c1bea799",
-=======
-  "uuid": "1b9d0507-00c1-4d54-b8c6-21bf89c68a68",
->>>>>>> feature/rocks
+  "uuid": "18c2f825-7891-486c-99d2-ce6aa32c9d76",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -18,15 +14,9 @@
   "subMetas": {
     "pineapple": {
       "ver": "1.0.6",
-<<<<<<< HEAD
-      "uuid": "e007536c-dd24-41f7-8f76-dc230a88a4ee",
+      "uuid": "eb5dfc75-37f7-484e-9c0e-bf85d660dae0",
       "importer": "sprite-frame",
-      "rawTextureUuid": "1b978313-5df8-48bb-9ed5-2010c1bea799",
-=======
-      "uuid": "bfcacfd7-c97e-45be-9e5e-60a0da1d2b73",
-      "importer": "sprite-frame",
-      "rawTextureUuid": "1b9d0507-00c1-4d54-b8c6-21bf89c68a68",
->>>>>>> feature/rocks
+      "rawTextureUuid": "18c2f825-7891-486c-99d2-ce6aa32c9d76",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

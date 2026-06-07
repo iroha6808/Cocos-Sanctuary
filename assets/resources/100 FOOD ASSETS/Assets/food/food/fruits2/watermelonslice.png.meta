@@ -1,10 +1,6 @@
 {
   "ver": "2.3.7",
-<<<<<<< HEAD
-  "uuid": "25bbe265-0f58-4a3a-aa14-5d4db3793471",
-=======
-  "uuid": "ae2a1865-92fd-4ed1-98d3-795f630fc7e1",
->>>>>>> feature/rocks
+  "uuid": "3ef896fa-c863-49ce-8965-e7711d4c23d6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -18,15 +14,9 @@
   "subMetas": {
     "watermelonslice": {
       "ver": "1.0.6",
-<<<<<<< HEAD
-      "uuid": "a89c7ef4-3d92-4f64-9b96-264f7df42f68",
+      "uuid": "7503cda8-395a-46c0-a142-cb39d8222788",
       "importer": "sprite-frame",
-      "rawTextureUuid": "25bbe265-0f58-4a3a-aa14-5d4db3793471",
-=======
-      "uuid": "d2aa7d24-7937-4d50-94d3-5ff1170c5e64",
-      "importer": "sprite-frame",
-      "rawTextureUuid": "ae2a1865-92fd-4ed1-98d3-795f630fc7e1",
->>>>>>> feature/rocks
+      "rawTextureUuid": "3ef896fa-c863-49ce-8965-e7711d4c23d6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
