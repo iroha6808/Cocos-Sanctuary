@@ -227,7 +227,7 @@ Canvas
 
 - `PlayerController.ts`
   - A/D 移動、Space 跳躍、滑鼠左鍵攻擊。
-  - Esc 由 `GameManager` 處理 Pause / Resume，R 可在 Pause 時重玩，M 切換靜音。
+  - 鍵盤入口保留在 `GameManager`，再轉呼叫 `PlayerController.handleGameKeyDown/Up()`；未被玩家 / UI 吃掉的 Esc / R / M 由 GameManager 處理。
   - B 開關背包。
   - T 測試用：加入 `coconut x10`。
   - F 旅行商人互動：靠近 prompt、對話選項、開商店、關商店。

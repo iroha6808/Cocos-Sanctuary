@@ -49,6 +49,12 @@ export default class AudioManager extends cc.Component {
         AudioManager.instance = this;
     }
 
+    onDestroy(): void {
+        if (AudioManager.instance === this) {
+            AudioManager.instance = null;
+        }
+    }
+
     start(): void {
         if (this.playBgmOnStart) {
             this.playBgm();

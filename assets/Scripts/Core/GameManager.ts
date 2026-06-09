@@ -3,8 +3,13 @@ import { GameEvent } from "./Constants";
 import SaveService, { SaveData } from "./SaveService";
 import AudioManager, { SfxType } from "./AudioManager";
 import { InventoryManager } from "../Player/InventoryManager";
+import PlayerController from "../Player/PlayerController";
 
 const { ccclass, property } = cc._decorator;
+
+const KEY_ESCAPE = 27;
+const KEY_R = 82;
+const KEY_M = 77;
 
 @ccclass
 export default class GameManager extends cc.Component {
@@ -50,6 +55,8 @@ export default class GameManager extends cc.Component {
     private score: number = 0;
     private exp: number = 0;
     private isPaused: boolean = false;
+    private playerController: PlayerController = null;
+    private globalKeyStates: { [key: number]: boolean } = {};
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -66,6 +73,7 @@ export default class GameManager extends cc.Component {
         EventCenter.on(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
         EventCenter.on(GameEvent.MERCHANT_PURCHASED, this.onMerchantPurchased, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
 
         // 啟用物理引擎
         const physicsManager = cc.director.getPhysicsManager();
@@ -81,6 +89,7 @@ export default class GameManager extends cc.Component {
     start() {
         console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:28");
         // TODO: 在這裡呼叫 MapManager 生成初始地圖
+        this.resolvePlayerController();
         if (this.autoLoadRequestedSave && SaveService.consumeLoadOnNextGame()) {
             this.loadCurrentUserSave();
         } else {
@@ -121,6 +130,8 @@ export default class GameManager extends cc.Component {
         cc.director.getScheduler().setTimeScale(0);
         if (this.pausePanel) {
             this.pausePanel.active = true;
+        } else {
+            cc.warn("[GameManager] pausePanel is not assigned; game is paused without visible UI.");
         }
         EventCenter.emit(GameEvent.GAME_PAUSED);
         AudioManager.play(SfxType.SKILL);
@@ -195,29 +206,68 @@ export default class GameManager extends cc.Component {
 
     onDestroy() {
         cc.director.getScheduler().setTimeScale(1);
+        if (GameManager.instance === this) {
+            GameManager.instance = null;
+        }
         EventCenter.off(GameEvent.PLAYER_DIED, this.onGameOver, this);
         EventCenter.off(GameEvent.NPC_DIED, this.onNpcDied, this);
         EventCenter.off(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
         EventCenter.off(GameEvent.MERCHANT_PURCHASED, this.onMerchantPurchased, this);
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
-        switch (event.keyCode) {
-            case cc.macro.KEY.escape:
-                this.togglePause();
-                break;
-            case cc.macro.KEY.r:
-                if (this.isPaused) {
-                    this.restartGame();
-                }
-                break;
-            case cc.macro.KEY.m:
-                AudioManager.toggleMute();
-                break;
-            default:
-                break;
+        const keyCode = event.keyCode;
+        if (this.globalKeyStates[keyCode]) {
+            return;
         }
+        this.globalKeyStates[keyCode] = true;
+
+        if (this.forwardPlayerKey(keyCode, true)) {
+            return;
+        }
+
+        if (keyCode === cc.macro.KEY.escape || keyCode === KEY_ESCAPE) {
+            this.togglePause();
+            return;
+        }
+
+        if (keyCode === cc.macro.KEY.r || keyCode === KEY_R) {
+            this.restartGame();
+            return;
+        }
+
+        if (keyCode === cc.macro.KEY.m || keyCode === KEY_M) {
+            AudioManager.toggleMute();
+        }
+    }
+
+    private onKeyUp(event: cc.Event.EventKeyboard): void {
+        const keyCode = event.keyCode;
+        this.globalKeyStates[keyCode] = false;
+        this.forwardPlayerKey(keyCode, false);
+    }
+
+    private forwardPlayerKey(keyCode: number, isDown: boolean): boolean {
+        const playerController = this.resolvePlayerController();
+        if (!playerController) {
+            return false;
+        }
+
+        return isDown
+            ? playerController.handleGameKeyDown(keyCode)
+            : playerController.handleGameKeyUp(keyCode);
+    }
+
+    private resolvePlayerController(): PlayerController {
+        if (this.playerController && cc.isValid(this.playerController.node)) {
+            return this.playerController;
+        }
+
+        const player = this.playerNode || cc.find("Canvas/Player");
+        this.playerController = player ? player.getComponent(PlayerController) : null;
+        return this.playerController;
     }
 
     private onNpcDied(): void {

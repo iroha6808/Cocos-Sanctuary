@@ -28,6 +28,12 @@ export default class EffectsManager extends cc.Component {
         }
     }
 
+    onDestroy(): void {
+        if (EffectsManager.instance === this) {
+            EffectsManager.instance = null;
+        }
+    }
+
     public static play(type: EffectType, worldPosition: cc.Vec2): void {
         if (EffectsManager.instance) {
             EffectsManager.instance.playEffect(type, worldPosition);

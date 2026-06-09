@@ -69,7 +69,7 @@
 | 存檔 / 讀檔 | 6% | Firebase；每帳號固定存檔欄位，可覆寫或新增 | `SaveService` 已補每帳號存檔、讀檔、下次進 Game 自動載入；待手動 UI 綁定 |
 | 物理系統 | 13% | 正確重力與碰撞系統 | 已有 physics、碰撞、OceanArea；需實測 |
 | 遊戲音效 | 7% | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 BGM + attack / hit / collect / buy / heal / skill；待拖 AudioClip |
-| 遊戲操作 | 13% | 所有角色移動 4%；三種移動以外操作 9% | 既有移動、攻擊、背包、商人、水中控制；新增 Esc pause、R retry、M mute |
+| 遊戲操作 | 13% | 所有角色移動 4%；三種移動以外操作 9% | GameManager 統一收鍵並轉給 PlayerController；新增 Esc pause、R retry、M mute，R 在 Game 中可直接重玩 |
 | 遊戲動畫 | 12% | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC 基礎動畫已有；新增 fade transition；開場 / 結束可用 UI 動畫補強 |
 | 遊戲特效 | 5% | 五種不同粒子特效 | `EffectsManager` 已補 hit / collect / heal / fire / water runtime particle；待拖 particle sprite |
 | 版本控制 | 7% | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |

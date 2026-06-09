@@ -89,8 +89,6 @@ export default class PlayerController extends BaseEntity {
         physicsManager.enabled = true;
         physicsManager.debugDrawFlags = 1;
 
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
         cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
@@ -144,51 +142,54 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    onKeyDown(event: cc.Event.EventKeyboard) {
-        this.applyMoveKey(event.keyCode, true);
+    public handleGameKeyDown(keyCode: number): boolean {
+        return this.applyMoveKey(keyCode, true);
     }
 
-    onKeyUp(event: cc.Event.EventKeyboard) {
-        this.applyMoveKey(event.keyCode, false);
+    public handleGameKeyUp(keyCode: number): boolean {
+        return this.applyMoveKey(keyCode, false);
     }
 
-    private applyMoveKey(keyCode: number, isDown: boolean) {
+    private applyMoveKey(keyCode: number, isDown: boolean): boolean {
         const wasDown = !!this.keyStates[keyCode];
-        if (wasDown === isDown) return;
+        if (wasDown === isDown) return false;
 
         this.keyStates[keyCode] = isDown;
 
         if (this.isCraftingUIOpen()) {
             this.moveDir.x = 0;
-            return;
+            if (keyCode === cc.macro.KEY.escape) {
+                return true;
+            }
+            return this.isPlayerControlKey(keyCode);
         }
 
         if (isDown && this.handleMerchantUIKey(keyCode)) {
-            return;
+            return true;
         }
 
         switch (keyCode) {
             case cc.macro.KEY.a:
             case cc.macro.KEY.d:
                 this.refreshMoveDirection();
-                break;
+                return true;
             case cc.macro.KEY.space:
                 if (isDown) this.jump();
-                break;
+                return true;
 
             case cc.macro.KEY.b:
                 if (isDown) this.toggleInventory();
-                break;
+                return true;
 
             case cc.macro.KEY.f:
                 if (isDown) this.tryInteractWithMerchant();
-                break;
+                return true;
 
             case cc.macro.KEY.t:
                 if (isDown) {
                     InventoryManager.instance.addItem("coconut", 10);
                 }
-                break;
+                return true;
             case cc.macro.KEY.y:
                 if (isDown) {
                     InventoryManager.instance.transact([], [
@@ -198,7 +199,28 @@ export default class PlayerController extends BaseEntity {
                     ]);
                     cc.log("[CraftingDebug] Added coconut, ore and apple x10.");
                 }
-                break;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private isPlayerControlKey(keyCode: number): boolean {
+        switch (keyCode) {
+            case cc.macro.KEY.a:
+            case cc.macro.KEY.d:
+            case cc.macro.KEY.w:
+            case cc.macro.KEY.s:
+            case cc.macro.KEY.up:
+            case cc.macro.KEY.down:
+            case cc.macro.KEY.space:
+            case cc.macro.KEY.b:
+            case cc.macro.KEY.f:
+            case cc.macro.KEY.t:
+            case cc.macro.KEY.y:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -577,8 +599,6 @@ export default class PlayerController extends BaseEntity {
         this.closeCrafting();
 
         this.unscheduleAllCallbacks();
-        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
         cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);

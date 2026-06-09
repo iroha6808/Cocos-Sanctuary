@@ -3,6 +3,10 @@ import AudioManager, { SfxType } from "../Core/AudioManager";
 
 const { ccclass, property } = cc._decorator;
 
+const KEY_ESCAPE = 27;
+const KEY_R = 82;
+const KEY_M = 77;
+
 @ccclass
 export default class GameOverScene extends cc.Component {
     @property
@@ -86,11 +90,12 @@ export default class GameOverScene extends cc.Component {
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
-        if (event.keyCode === cc.macro.KEY.r) {
+        const keyCode = event.keyCode;
+        if (keyCode === cc.macro.KEY.r || keyCode === KEY_R) {
             this.retry();
-        } else if (event.keyCode === cc.macro.KEY.escape) {
+        } else if (keyCode === cc.macro.KEY.escape || keyCode === KEY_ESCAPE) {
             this.goToMainMenu();
-        } else if (event.keyCode === cc.macro.KEY.m) {
+        } else if (keyCode === cc.macro.KEY.m || keyCode === KEY_M) {
             AudioManager.toggleMute();
         }
     }
