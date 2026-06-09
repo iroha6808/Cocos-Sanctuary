@@ -1,6 +1,6 @@
 # Cocos Sanctuary Plan
 
-> 更新日期：2026-06-09
+> 更新日期：2026-06-10
 > 本檔只放高層規劃、目前進度、下一步與手動設定。詳細架構見 `structure.md`，功能追蹤見 `NOTE.md`。
 
 ## 目錄
@@ -22,7 +22,7 @@
 2. 補 Final Project 流程分數缺口：暫停 / 繼續、GameOver 結算、回主畫面或重玩。
 3. 補課程技術配分缺口：Scoreboard / 排行榜、Firebase 存讀、BGM / SFX、粒子特效。
 4. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
-5. 實測水域：Camera 已跟玩家到水域，需確認 `OceanArea.ts` 進出時玩家重力 / 游泳控制穩定。
+5. 實測水域與橡皮筋鏡頭：CameraRig 會跟玩家到水域，需確認 `OceanArea.ts` 進出時玩家重力 / 游泳控制穩定。
 6. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
 7. 統一回血 / 食物使用 API，並補 `Score / EXP` 資料流與 UI。
 
@@ -74,7 +74,7 @@
 | 遊戲特效 | 5% | 五種不同粒子特效 | `EffectsManager` 已補 hit / collect / heal / fire / water runtime particle；待拖 particle sprite |
 | 版本控制 | 7% | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |
 | 遊戲技術合計 | 60% | 技術表原始總分 70，最高可拿 60 | 腳本已補主要缺口；剩 Cocos Editor 節點、AudioClip、Label、Button 綁定 |
-| 進階功能 | 20% | 敵人 AI 0-6%；Node Pooling 0-4%；客製化渲染 0-4%；2.5D 0-2%；打擊感 0-3%；特殊運鏡 0-4%；客製化物理 0-4%；關卡編輯器 0-8%；自動地圖 0-4%；無限地圖 0-3%；魔王 0-2%；線上多人 0-8%；其他自由發揮 | 已有敵人 AI、水域特殊物理雛形；可補 projectile / drop Node Pooling、打擊感或運鏡 |
+| 進階功能 | 20% | 敵人 AI 0-6%；Node Pooling 0-4%；客製化渲染 0-4%；2.5D 0-2%；打擊感 0-3%；特殊運鏡 0-4%；客製化物理 0-4%；關卡編輯器 0-8%；自動地圖 0-4%；無限地圖 0-3%；魔王 0-2%；線上多人 0-8%；其他自由發揮 | 已有敵人 AI、水域特殊物理、`HitFeelManager` 打擊感、`CameraRig` 橡皮筋運鏡；可再補 projectile / drop Node Pooling |
 | 美術風格 | 5% | 整體視覺一致性 | 素材量足夠；需統一可用素材、UI / 場景風格，並隔離 Unity 殘留檔 |
 | 主觀分數 | 15% | 完成度、體驗、展示效果 | 優先把採集、背包、商人、戰鬥、水域、死亡 / 重玩 demo loop 跑順 |
 
@@ -116,7 +116,7 @@
 | 遠程 NPC | SkeletonMage + projectile 讓戰鬥展示差異更明顯 | MVP |
 | 水域探索 | OceanArea 讓地形不只地面，能展示水中控制 | MVP |
 | 敵人 AI / Node Pooling | 對應進階功能配分，可用在敵人、projectile、掉落物效能優化 | 延伸 |
-| 音效 / 粒子 / 打擊感 | 分數明確且展示效果明顯 | 延伸 |
+| 音效 / 粒子 / 打擊感 / 運鏡 | 分數明確且展示效果明顯，已用 hit stop、shake、flash、spring camera 補強 | 延伸 |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP | 延伸 |
@@ -126,7 +126,7 @@
 
 | 狀態 | 摘要 |
 | --- | --- |
-| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、Camera 跟隨、Dialogue / Shop / HUD 外殼 |
+| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、CameraRig 橡皮筋跟隨、HitFeel 打擊感、Dialogue / Shop / HUD 外殼 |
 | 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 遠程攻擊 / 水域實測、MerchantShop UI screen-space 修正 |
 | 未完成 | Firebase 真後端替換、正式 UI 美術、Node Pooling、MapManager / TileRenderer、素材清理 |
 
@@ -144,7 +144,7 @@
 
 | 模組 | 已有 | 待補 |
 | --- | --- | --- |
-| Core | `EventCenter`、`Constants`、physics / death event、`SaveService`、score / exp、pause / retry / save / leaderboard | Firebase 真後端替換、正式 GameOver 視覺 |
+| Core | `EventCenter`、`Constants`、physics / death event、`SaveService`、score / exp、pause / retry / save / leaderboard、`CameraRig`、`HitFeelManager` | Firebase 真後端替換、正式 GameOver 視覺 |
 | Player / Inventory | 移動、跳躍、攻擊、受傷 / 死亡、背包、item icon、水中控制、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish |
 | NPC / Merchant | 三類 NPC、巡邏 / 追擊、近遠程攻擊、商人對話 / 交易 / 生成、drop table | SkeletonMage 實測、交易流程測試 |
 | Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、FoodBase、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
@@ -172,7 +172,9 @@
 - [ ] MerchantShopUI root 放在跟隨 Main Camera 的 Screen UI Root，或由腳本每次 open 時轉成 camera/screen 座標
 - [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
-- [ ] GameManager 接 `pausePanel`、`fadeOverlay`，Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
+- [ ] 可選：調整 runtime `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceExponentScale` / `lookAheadScale`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
+- [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
+- [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
 - [ ] MenuScene 接 `mainPanel`、`loginPanel`、`settingsPanel`、`leaderboardPanel`、`fadeOverlay`、username / password EditBox、status / current user / leaderboard Labels
 - [ ] Menu 按鈕綁 `goToGameScene()`、`loadSavedGame()`、`register()`、`login()`、`logout()`、`showMain()`、`showLogin()`、`showSettings()`、`showLeaderboard()`、`toggleMute()`
 - [ ] GameOver 場景掛 `GameOverScene.ts`，接 title / username / score / exp / status Labels 與 fadeOverlay
@@ -180,7 +182,7 @@
 
 ### Cocos Inspector 設定
 
-- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`。
+- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
 - [ ] 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp`、`moveSpeed`、`jumpForce`、`attackDamage`。
 - [ ] `PlayerController.ts` 需要接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`。
 - [ ] 玩家節點建議有 `RigidBody`、`Sprite_Body`、`AttackHitbox` 子節點。

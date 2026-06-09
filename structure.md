@@ -1,6 +1,6 @@
 # Cocos Sanctuary 專案架構
 
-> 更新日期：2026-06-09
+> 更新日期：2026-06-10
 > 引擎：Cocos Creator 2.4.8
 > 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人、水域控制、資源掉落、背包與 UI。
 
@@ -59,10 +59,12 @@ assets/
     Core/
       AudioManager.ts
       BaseEntity.ts
+      CameraRig.ts
       Constants.ts
       EffectsManager.ts
       EventCenter.ts
       GameManager.ts
+      HitFeelManager.ts
       SaveService.ts
     Data/
       ItemData.ts
@@ -147,8 +149,8 @@ Canvas
     OceanArea                      # PhysicsBoxCollider sensor + OceanArea
   UI Root
     Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
-    FadeOverlay                   # optional，Menu / Game / GameOver 轉場用
-    PausePanel                    # GameManager pause / resume / retry / menu / save
+    FadeOverlay                   # optional，全螢幕黑幕，Retry / Main Menu 切場景淡出用
+    PausePanel                    # Esc 暫停時顯示的 UI 容器，放 resume / retry / menu / save
     ExpLabel
     ScoreLabel
     HpBar
@@ -204,8 +206,13 @@ Canvas
   - 場景 BGM 與六種 SFX：attack、hit、collect、buy、heal、skill。
 - `EffectsManager.ts`
   - runtime particle 特效：hit、collect、heal、fire、water。
+- `CameraRig.ts`
+  - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick。
+- `HitFeelManager.ts`
+  - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `GameManager.ts`
-  - 遊戲初始化、PhysicsManager、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
+  - 遊戲初始化、PhysicsManager、CameraRig / HitFeelManager runtime 建立、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
+  - `pausePanel` 是暫停 UI 容器；`fadeOverlay` 是 Retry / Main Menu 切場景前的淡出黑幕。
 
 ## Attack
 
@@ -214,13 +221,13 @@ Canvas
   - 透過 `ownerFaction`、`canHitPlayer`、`canHitPeaceNpc`、`canHitNeutralNpc`、`canHitHostileNpc` 判斷陣營與可攻擊對象。
   - 啟用時設定位置與傷害，時間到自動關閉。
   - 命中後優先呼叫目標的 `receiveAttack()`，沒有則呼叫 `takeDamage()`。
-  - 命中時呼叫 `AudioManager` / `EffectsManager` 播放 hit feedback。
+  - 命中時呼叫 `AudioManager` / `EffectsManager` 播放 hit feedback，並 emit `COMBAT_HIT_CONFIRMED`。
   - 已避免向上搜尋 parent 時對 Scene 呼叫 `getComponent()`。
 - `CombatProjectile.ts`
   - 遠程攻擊共用投射物，使用 Dynamic RigidBody 與 sensor collider。
   - 接收 owner、陣營、初速度、傷害與擊退，沿用 `CombatHitInfo` 傳遞受傷資料。
   - 排除攻擊者與同陣營、每個目標只命中一次，命中實體、地形或超時後銷毀。
-  - 發射與命中時呼叫音效 / fire particle。
+  - 發射與命中時呼叫音效 / fire particle，命中時 emit `COMBAT_HIT_CONFIRMED`。
   - `VisualRoot` 會依速度方向旋轉；若 prefab 只有 `CoconutSprite` 與 `FireEffect`，載入時會自動建立視覺根節點。
 
 ## Player
@@ -382,7 +389,8 @@ Canvas
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
   - `MerchantShopPanel` 建議放在 Screen UI Root 或 Main Camera 子節點，避免 Camera 移動後跑出畫面。
 - Flow / final grading
-  - `GameManager.pausePanel`、`fadeOverlay`
+  - `GameManager.pausePanel`：Esc 暫停時顯示的 UI 容器，可放 Resume / Retry / Main Menu / Save 按鈕。
+  - `GameManager.fadeOverlay`：全螢幕黑色 UI 節點，供 Retry / Main Menu 切場景前淡出；未綁時會直接切場景。
   - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels
   - `GameOverScene` title / username / score / exp / status labels、retry / menu / submit buttons
   - `AudioManager` BGM + six SFX clips

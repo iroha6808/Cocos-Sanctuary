@@ -127,14 +127,17 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 
 ### Core 系統
 
-- `Constants.ts`：已定義 HP / EXP / Score、Pause、Save、Leaderboard、Player / NPC death、Item collected、Merchant purchased 等事件。
+- `Constants.ts`：已定義 HP / EXP / Score、Pause、Save、Leaderboard、Combat hit、Player / NPC death、Item collected、Merchant purchased 等事件。
 - `EventCenter.ts`：已改成 default export，事件資料會保存原 callback、target、實際 handler；`off(eventName, callback, target)` 可正確移除特定監聽，也支援清除單一事件或全部事件。
 - `BaseEntity.ts`：提供 `type`、`maxHp`、`currentHp`、clamp 後的 `takeDamage()`、`heal()`、`onDamaged()`、`die()` 基底。
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard。
 - `AudioManager.ts`：支援 scene BGM 與 attack / hit / collect / buy / heal / skill 六種 SFX。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
 - `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`。
-- `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，場景切換時會清掉 static instance，避免第二輪按鍵失效。
+- `CameraRig.ts`：手動掛到 Main Camera，使用距離指數函數調整跟隨速度，搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。
+- `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
+- `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，並顯示 `pausePanel`。Retry / 回主畫面可透過 `fadeOverlay` 做 0.25 秒黑幕淡出，場景切換時會清掉 static instance，避免第二輪按鍵失效。
+- 原則：能在 Inspector 掛節點就不要寫死 `cc.find()` 路徑；目前 `GameManager.cameraRig`、`GameManager.playerNode`、`CameraRig.target` 都採手動綁定，避免改場景層級後壞掉。
 
 ### Player
 
@@ -158,6 +161,7 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - 可設定 `ownerFaction`、是否忽略同陣營、可命中的目標類型。
 - 支援 Player / Peace NPC / Neutral NPC / Hostile NPC faction 判斷。
 - 避免重複命中同一個目標。
+- 確認命中後發送 `COMBAT_HIT_CONFIRMED`，讓 `HitFeelManager` 做 hit stop / shake / flash。
 - 若目標有 `receiveAttack()`，優先呼叫；否則呼叫 `BaseEntity.takeDamage()`。
 
 ### CombatProjectile
@@ -165,7 +169,7 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - `CombatProjectile.ts` 實作遠程攻擊投射物。
 - `launch(owner, faction, velocity, damage, knockbackX, knockbackY)` 由 `NPC_AI` 呼叫。
 - 支援陣營過濾、忽略 owner hierarchy、同一目標只命中一次。
-- 命中目標時優先呼叫 `receiveAttack()`，命中實體地形或生命週期結束後 destroy。
+- 命中目標時發送 `COMBAT_HIT_CONFIRMED` 並優先呼叫 `receiveAttack()`；命中實體地形或生命週期結束後 destroy。
 - `visualNode` 可跟隨速度方向旋轉；若 prefab 有 `CoconutSprite` / `FireEffect`，會自動整理成 `VisualRoot`。
 
 ### Inventory / Items
@@ -359,7 +363,8 @@ GameOverScene
 
 ## Cocos Inspector 設定
 
-- `GameManager.ts`：接 `playerNode`、`pausePanel`、`fadeOverlay`；Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
+- `GameManager.ts`：接 `playerNode`、`cameraRig`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`pausePanel` 是 Esc 暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
+- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
 - `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay。
 - `GameOverScene.ts`：接 title / username / score / exp / status labels、fadeOverlay；按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`。

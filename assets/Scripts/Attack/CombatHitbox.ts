@@ -1,7 +1,8 @@
 import BaseEntity from "../Core/BaseEntity";
-import { EntityType } from "../Core/Constants";
+import { EntityType, GameEvent } from "../Core/Constants";
 import AudioManager, { SfxType } from "../Core/AudioManager";
 import EffectsManager, { EffectType } from "../Core/EffectsManager";
+import EventCenter from "../Core/EventCenter";
 
 const { ccclass, property } = cc._decorator;
 
@@ -173,8 +174,18 @@ export default class CombatHitbox extends cc.Component {
         };
 
         this.log(`Hit ${target.node.name}, damage=${this.damage}, knockback=(${this.knockbackX}, ${this.knockbackY})`);
+        const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
-        EffectsManager.play(EffectType.HIT, this.getNodeWorldPosition(target.node));
+        EffectsManager.play(EffectType.HIT, hitWorldPosition);
+        EventCenter.emit(GameEvent.COMBAT_HIT_CONFIRMED, {
+            attackerNode: this.attackerNode,
+            targetNode: target.node,
+            worldPosition: hitWorldPosition,
+            damage: this.damage,
+            knockbackX: this.knockbackX,
+            knockbackY: this.knockbackY,
+            sourceType: "melee"
+        });
 
         const receiver = target as any;
         if (receiver.receiveAttack) {
