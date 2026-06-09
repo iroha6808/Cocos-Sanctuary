@@ -740,6 +740,16 @@
     "_enabled": true,
     "playerNode": null,
     "showPhysicsDebugDraw": false,
+    "pausePanel": null,
+    "fadeOverlay": null,
+    "menuSceneName": "MenuScene",
+    "gameSceneName": "Game",
+    "gameOverSceneName": "GameOver",
+    "scorePerNpcKill": 100,
+    "expPerNpcKill": 20,
+    "scorePerItemCollected": 5,
+    "scorePerPurchase": 10,
+    "autoLoadRequestedSave": true,
     "_id": "c2ricBxJFBF7r4DwekDvzp"
   },
   {
@@ -17959,6 +17969,7 @@
     "expLabel": {
       "__id__": 305
     },
+    "scoreLabel": null,
     "hpBar": {
       "__id__": 310
     },
