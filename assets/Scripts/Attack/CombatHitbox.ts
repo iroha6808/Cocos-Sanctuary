@@ -125,7 +125,7 @@ export default class CombatHitbox extends cc.Component {
     private findTarget(startNode: cc.Node): BaseEntity | null {
         let current: cc.Node | null = startNode;
 
-        while (current && (current as any).getComponent) {
+        while (current && !(current instanceof cc.Scene) && (current as any).getComponent) {
             if (this.isAttackerNode(current)) {
                 return null;
             }
