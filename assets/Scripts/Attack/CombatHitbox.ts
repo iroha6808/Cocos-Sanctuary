@@ -1,5 +1,7 @@
 import BaseEntity from "../Core/BaseEntity";
 import { EntityType } from "../Core/Constants";
+import AudioManager, { SfxType } from "../Core/AudioManager";
+import EffectsManager, { EffectType } from "../Core/EffectsManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -171,6 +173,8 @@ export default class CombatHitbox extends cc.Component {
         };
 
         this.log(`Hit ${target.node.name}, damage=${this.damage}, knockback=(${this.knockbackX}, ${this.knockbackY})`);
+        AudioManager.play(SfxType.HIT);
+        EffectsManager.play(EffectType.HIT, this.getNodeWorldPosition(target.node));
 
         const receiver = target as any;
         if (receiver.receiveAttack) {
@@ -245,5 +249,11 @@ export default class CombatHitbox extends cc.Component {
             default:
                 return CombatFaction.NONE;
         }
+    }
+
+    private getNodeWorldPosition(node: cc.Node): cc.Vec2 {
+        return node.parent
+            ? node.parent.convertToWorldSpaceAR(node.position)
+            : node.position;
     }
 }

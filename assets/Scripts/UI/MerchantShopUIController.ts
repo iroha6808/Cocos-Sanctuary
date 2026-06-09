@@ -178,7 +178,6 @@ export default class MerchantShopUIController extends cc.Component {
 
         if (this.merchant.buy(item.itemId, this.buyAmount)) {
             this.buyAmount = 1;
-            InventoryManager.instance.addItem(item.itemId, this.buyAmount);
             this.refresh();
         }
     }

@@ -1,6 +1,10 @@
 const { ccclass, property } = cc._decorator;
 import { InventoryManager } from '../../Player/InventoryManager';
 import { getItemDefinition } from "../../Data/ItemData";
+import EventCenter from "../../Core/EventCenter";
+import { GameEvent } from "../../Core/Constants";
+import AudioManager, { SfxType } from "../../Core/AudioManager";
+import EffectsManager, { EffectType } from "../../Core/EffectsManager";
 
 export enum ItemMode{
     Object = 0, // 物件模式：純物理，不可吸附，不可撿起
@@ -201,8 +205,14 @@ export default class DropItem extends cc.Component {
         const name = this.itemName;
         const added = InventoryManager.instance.addItem(id, this.itemAmount);
 
-        if (added) cc.log(`[DropItem] ${name} 已加入背包`);
-        else cc.warn(`[DropItem] 背包已滿，${name} 無法加入`); 
+        if (added) {
+            cc.log(`[DropItem] ${name} 已加入背包`);
+            EventCenter.emit(GameEvent.ITEM_COLLECTED, id, this.itemAmount);
+            AudioManager.play(SfxType.COLLECT);
+            EffectsManager.play(EffectType.COLLECT, this.node.convertToWorldSpaceAR(cc.Vec2.ZERO));
+        } else {
+            cc.warn(`[DropItem] 背包已滿，${name} 無法加入`);
+        }
         this.node.destroy();
     }
 

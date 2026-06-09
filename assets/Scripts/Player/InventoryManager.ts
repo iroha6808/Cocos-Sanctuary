@@ -74,6 +74,33 @@ export class InventoryManager {
         return this.getItemsSnapshot();
     }
 
+    public getSaveSnapshot(): ItemAmount[] {
+        return this.items.map(item => ({
+            itemId: item.id,
+            count: item.count
+        }));
+    }
+
+    public setItemsFromSave(items: ItemAmount[]): boolean {
+        const previousItems = this.items;
+        this.items = [];
+
+        const result = this.buildTransactionResult([], items || []);
+        if (!result) {
+            this.items = previousItems;
+            return false;
+        }
+
+        this.items = result;
+        cc.systemEvent.emit("INVENTORY_CHANGED");
+        return true;
+    }
+
+    public clear(): void {
+        this.items = [];
+        cc.systemEvent.emit("INVENTORY_CHANGED");
+    }
+
     private buildTransactionResult(remove: ItemAmount[], add: ItemAmount[]): Item[] | null {
         const normalizedRemove = this.normalizeAmounts(remove);
         const normalizedAdd = this.normalizeAmounts(add);

@@ -9,6 +9,8 @@ import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
 import UIManager from "../UI/UIManager";
+import AudioManager, { SfxType } from "../Core/AudioManager";
+import EffectsManager, { EffectType } from "../Core/EffectsManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -135,7 +137,7 @@ export default class PlayerController extends BaseEntity {
 
     private onMouseDown(event: cc.Event.EventMouse) {
         if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) return;
-        if (this.inventoryUI && this.inventoryUI.active) return; 
+        if (this.inventoryUI && this.inventoryUI.active) return;
 
         if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
             this.attack();
@@ -170,7 +172,7 @@ export default class PlayerController extends BaseEntity {
             case cc.macro.KEY.d:
                 this.refreshMoveDirection();
                 break;
-            case cc.macro.KEY.space: 
+            case cc.macro.KEY.space:
                 if (isDown) this.jump();
                 break;
 
@@ -284,7 +286,7 @@ export default class PlayerController extends BaseEntity {
 
     private jump() {
         if (this.isDead || this.isHurting || this.isAttacking || this.isCraftingUIOpen() || !this.rb) return;
-        
+
         if (this.isInOcean) {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.oceanVerticalSpeed);
             return;
@@ -401,6 +403,7 @@ export default class PlayerController extends BaseEntity {
         }
 
         this.isInOcean = true;
+        EffectsManager.play(EffectType.WATER, this.getWorldPosition());
 
         if (this.rb) {
             this.originalGravityScale = (this.rb as any).gravityScale || 1;
@@ -479,6 +482,7 @@ export default class PlayerController extends BaseEntity {
         if (this.isAttacking || this.isHurting || this.isCraftingUIOpen()) return;
 
         this.isAttacking = true;
+        AudioManager.play(SfxType.ATTACK);
         this.playAnimation("PlayerAttack");
 
         if (this.attackHitbox) {
@@ -520,6 +524,8 @@ export default class PlayerController extends BaseEntity {
 
         this.isHurting = true;
         this.isAttacking = false;
+        AudioManager.play(SfxType.HIT);
+        EffectsManager.play(EffectType.HIT, this.getWorldPosition());
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
         this.playAnimation("PlayerHurt");
     }
@@ -560,6 +566,12 @@ export default class PlayerController extends BaseEntity {
         EventCenter.emit(GameEvent.PLAYER_DIED);
         cc.director.loadScene("GameOver");
     };
+
+    private getWorldPosition(): cc.Vec2 {
+        return this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
+            : this.node.position;
+    }
 
     onDestroy() {
         this.closeCrafting();
