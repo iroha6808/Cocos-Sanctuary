@@ -12,22 +12,25 @@ cc.Enum(DialogueUIState);
 export default class DialogueUIController extends cc.Component {
 
     @property(cc.Node)
-    public floatingRoot: cc.Node = null;
+    public floatingRoot: cc.Node = null!;
 
     @property(cc.Node)
-    public canvasNode: cc.Node = null;
+    public canvasNode: cc.Node = null!;
 
     @property(cc.Node)
-    public promptNode: cc.Node = null;
+    public mainCameraNode: cc.Node = null!;
+
+    @property(cc.Node)
+    public promptNode: cc.Node = null!;
 
     @property(cc.Label)
-    public promptLabel: cc.Label = null;
+    public promptLabel: cc.Label = null!;
 
     @property(cc.Node)
-    public dialoguePanel: cc.Node = null;
+    public dialoguePanel: cc.Node = null!;
 
     @property(cc.Label)
-    public dialogueLabel: cc.Label = null;
+    public dialogueLabel: cc.Label = null!;
 
     @property([cc.Label])
     public optionLabels: cc.Label[] = [];
@@ -42,7 +45,7 @@ export default class DialogueUIController extends cc.Component {
     public followOffset: cc.Vec2 = cc.v2(0, 80);
 
     @property(cc.Boolean)
-    public clampToCanvas: boolean = true;
+    public clampToCameraView: boolean = true;
 
     @property(cc.Float)
     public screenPadding: number = 24;
@@ -50,7 +53,8 @@ export default class DialogueUIController extends cc.Component {
     private state: DialogueUIState = DialogueUIState.Hidden;
     private options: string[] = [];
     private selectedIndex: number = 0;
-    private anchorTarget: cc.Node = null;
+    private anchorTarget: cc.Node = null!;
+    private mainCamera: cc.Camera = null!;
     private isDestroying: boolean = false;
 
     onLoad() {
@@ -59,7 +63,15 @@ export default class DialogueUIController extends cc.Component {
         }
 
         if (!this.canvasNode) {
-            this.canvasNode = cc.find("Canvas");
+            this.canvasNode = cc.find("Canvas") || null!;
+        }
+
+        if (!this.mainCameraNode) {
+            this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+        }
+
+        if (this.mainCameraNode) {
+            this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
         }
 
         this.bindOptionInput();
@@ -83,6 +95,7 @@ export default class DialogueUIController extends cc.Component {
 
     public showPrompt(text: string, anchorTarget?: cc.Node): void {
         this.state = DialogueUIState.Prompt;
+
         if (anchorTarget) {
             this.setAnchorTarget(anchorTarget);
         }
@@ -90,9 +103,11 @@ export default class DialogueUIController extends cc.Component {
         if (this.promptNode) {
             this.promptNode.active = true;
         }
+
         if (this.promptLabel) {
             this.promptLabel.string = text;
         }
+
         if (this.dialoguePanel) {
             this.dialoguePanel.active = false;
         }
@@ -115,6 +130,7 @@ export default class DialogueUIController extends cc.Component {
         this.state = DialogueUIState.Options;
         this.options = options ? options.slice() : [];
         this.selectedIndex = 0;
+
         if (anchorTarget) {
             this.setAnchorTarget(anchorTarget);
         }
@@ -122,9 +138,11 @@ export default class DialogueUIController extends cc.Component {
         if (this.promptNode) {
             this.promptNode.active = false;
         }
+
         if (this.dialoguePanel) {
             this.dialoguePanel.active = true;
         }
+
         if (this.dialogueLabel) {
             this.dialogueLabel.string = line || "";
         }
@@ -159,12 +177,14 @@ export default class DialogueUIController extends cc.Component {
         if (!this.isOptionsVisible() || index < 0 || index >= this.options.length) {
             return;
         }
+
         this.selectedIndex = index;
         this.refreshOptions();
     }
 
     public confirmOption(index: number): void {
         this.selectOption(index);
+
         if (this.isOptionsVisible()) {
             cc.systemEvent.emit("DIALOGUE_OPTION_CONFIRMED", this.selectedIndex);
         }
@@ -180,6 +200,7 @@ export default class DialogueUIController extends cc.Component {
         if (this.promptNode && cc.isValid(this.promptNode)) {
             this.promptNode.active = false;
         }
+
         if (this.dialoguePanel && cc.isValid(this.dialoguePanel)) {
             this.dialoguePanel.active = false;
         }
@@ -195,12 +216,14 @@ export default class DialogueUIController extends cc.Component {
         this.isDestroying = true;
         this.clearState();
         this.optionLabels = [];
-        this.floatingRoot = null;
-        this.canvasNode = null;
-        this.promptNode = null;
-        this.promptLabel = null;
-        this.dialoguePanel = null;
-        this.dialogueLabel = null;
+        this.floatingRoot = null!;
+        this.canvasNode = null!;
+        this.mainCameraNode = null!;
+        this.mainCamera = null!;
+        this.promptNode = null!;
+        this.promptLabel = null!;
+        this.dialoguePanel = null!;
+        this.dialogueLabel = null!;
     }
 
     public isPromptVisible(): boolean {
@@ -216,7 +239,7 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public clearAnchorTarget(): void {
-        this.anchorTarget = null;
+        this.anchorTarget = null!;
     }
 
     private refreshOptions(): void {
@@ -226,6 +249,7 @@ export default class DialogueUIController extends cc.Component {
 
         const labels = this.optionLabels || [];
         const options = this.options || [];
+
         for (let i = 0; i < labels.length; i++) {
             const label = labels[i];
             if (!label || !cc.isValid(label) || !label.node || !cc.isValid(label.node)) {
@@ -245,29 +269,28 @@ export default class DialogueUIController extends cc.Component {
 
     private bindOptionInput(): void {
         const labels = this.optionLabels || [];
+
         for (let index = 0; index < labels.length; index++) {
             const label = labels[index];
             if (!label || !label.node || (label.node as any).__dialogueInputBound) {
                 continue;
             }
+
             (label.node as any).__dialogueInputBound = true;
+
             label.node.on(cc.Node.EventType.MOUSE_DOWN, (event: cc.Event.EventMouse) => {
-                if (
-                    this.isOptionsVisible()
-                    && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT
-                ) {
+                if (this.isOptionsVisible() && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
                     this.selectOption(index);
                 }
             }, this);
+
             label.node.on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
-                if (
-                    this.isOptionsVisible()
-                    && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT
-                ) {
+                if (this.isOptionsVisible() && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
                     event.stopPropagation();
                     this.confirmOption(index);
                 }
             }, this);
+
             label.node.on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
                 if (this.isOptionsVisible()) {
                     event.stopPropagation();
@@ -281,7 +304,7 @@ export default class DialogueUIController extends cc.Component {
         this.state = DialogueUIState.Hidden;
         this.options = [];
         this.selectedIndex = 0;
-        this.anchorTarget = null;
+        this.anchorTarget = null!;
     }
 
     private updateFloatingPosition(): void {
@@ -295,41 +318,67 @@ export default class DialogueUIController extends cc.Component {
             return;
         }
 
-        let targetWorldPos = this.anchorTarget.parent
-            ? this.anchorTarget.parent.convertToWorldSpaceAR(this.anchorTarget.position)
-            : cc.v2(this.anchorTarget.x, this.anchorTarget.y);
+        let targetWorldPos = this.anchorTarget.convertToWorldSpaceAR(cc.v2(0, 0));
 
         targetWorldPos = cc.v2(
             targetWorldPos.x + this.followOffset.x,
             targetWorldPos.y + this.followOffset.y
         );
 
-        if (this.clampToCanvas && this.canvasNode) {
-            targetWorldPos = this.clampWorldPositionToCanvas(targetWorldPos);
+        if (this.clampToCameraView) {
+            targetWorldPos = this.clampWorldPositionToCameraView(targetWorldPos);
         }
 
         root.setPosition(rootParent.convertToNodeSpaceAR(targetWorldPos));
     }
 
-    private clampWorldPositionToCanvas(worldPos: cc.Vec2): cc.Vec2 {
-        if (!this.canvasNode) {
+    private clampWorldPositionToCameraView(worldPos: cc.Vec2): cc.Vec2 {
+        const bounds = this.getCameraVisibleWorldBounds();
+        if (!bounds) {
             return worldPos;
         }
 
-        const canvasLocalPos = this.canvasNode.convertToNodeSpaceAR(worldPos);
-        const halfWidth = this.canvasNode.width * 0.5;
-        const halfHeight = this.canvasNode.height * 0.5;
-        const minX = -halfWidth + this.screenPadding;
-        const maxX = halfWidth - this.screenPadding;
-        const minY = -halfHeight + this.screenPadding;
-        const maxY = halfHeight - this.screenPadding;
-
-        const clampedLocalPos = cc.v2(
-            Math.max(minX, Math.min(maxX, canvasLocalPos.x)),
-            Math.max(minY, Math.min(maxY, canvasLocalPos.y))
+        return cc.v2(
+            Math.max(bounds.minX + this.screenPadding, Math.min(bounds.maxX - this.screenPadding, worldPos.x)),
+            Math.max(bounds.minY + this.screenPadding, Math.min(bounds.maxY - this.screenPadding, worldPos.y))
         );
+    }
 
-        return this.canvasNode.convertToWorldSpaceAR(clampedLocalPos);
+    private getCameraVisibleWorldBounds(): {
+        minX: number;
+        maxX: number;
+        minY: number;
+        maxY: number;
+    } | null {
+        if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
+            this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+        }
+
+        if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
+            return null;
+        }
+
+        if (!this.mainCamera) {
+            this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
+        }
+
+        const cameraWorldPos = this.mainCameraNode.parent
+            ? this.mainCameraNode.parent.convertToWorldSpaceAR(cc.v2(this.mainCameraNode.x, this.mainCameraNode.y))
+            : cc.v2(this.mainCameraNode.x, this.mainCameraNode.y);
+
+        const viewWidth = this.canvasNode && this.canvasNode.width > 0 ? this.canvasNode.width : cc.winSize.width;
+        const viewHeight = this.canvasNode && this.canvasNode.height > 0 ? this.canvasNode.height : cc.winSize.height;
+        const zoomRatio = this.mainCamera && (this.mainCamera as any).zoomRatio ? (this.mainCamera as any).zoomRatio : 1;
+
+        const halfWidth = viewWidth * 0.5 / zoomRatio;
+        const halfHeight = viewHeight * 0.5 / zoomRatio;
+
+        return {
+            minX: cameraWorldPos.x - halfWidth,
+            maxX: cameraWorldPos.x + halfWidth,
+            minY: cameraWorldPos.y - halfHeight,
+            maxY: cameraWorldPos.y + halfHeight
+        };
     }
 
     private getDefaultFloatingRoot(): cc.Node {

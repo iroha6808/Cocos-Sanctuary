@@ -46,7 +46,7 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.y:
             return InputAction.DebugAddCraftItems;
         default:
-            return null;
+            return null!;
     }
 }
 
