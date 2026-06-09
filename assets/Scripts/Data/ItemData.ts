@@ -27,6 +27,18 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 7,
         rottenTime: 1800 // 30 minutes
     },
+    ambersphere: {
+        id: "ambersphere",
+        name: "Amber Sphere",
+        description: "A translucent orb of ancient resin with a spark of solar light trapped inside.",
+        iconPath: "smallore/ambersphere.png",
+    },
+    amethyst: {
+        id: "amethyst",
+        name: "Amethyst Spikes",
+        description: "A sharp, violently purple geode that cracks with static energy.",
+        iconPath: "smallore/amethyst.png",
+    },
     avacado: {
         id: "avacado",
         name: "Avacado",
@@ -44,6 +56,12 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 819
+    },
+    calcitecluster: {
+        id: "calcitecluster",
+        name: "Calcite Cluster",
+        description: "A brittle mineral cluster, often crushed for alchemy or mortar.",
+        iconPath: "smallore/calcitecluster.png",
     },
     cashew: {
         id: "cashew",
@@ -72,6 +90,24 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 8,
         rottenTime: 3241
     },
+    citrinegeode: {
+        id: "citrinegeode",
+        name: "Citrine Geode",
+        description: "A sharply angled gemstone used in high-tier crafting recipes.",
+        iconPath: "smallore/citrinegeode.png",
+    },
+    coallump: {
+        id: "coallump",
+        name: "Coal Lump",
+        description: "A common but vital lump of fuel, perfect for keeping torches lit.",
+        iconPath: "smallore/coallump.png",
+    },
+    cobaltore: {
+        id: "cobaltore",
+        name: "Cobalt Ore",
+        description: "A lightweight, durable ore with distinct porous patterns.",
+        iconPath: "smallore/cobaltore.png",
+    },
     coconut: {
         id: "coconut",
         name: "Coconut",
@@ -90,6 +126,12 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 1,
         rottenTime: 4096
     },
+    coppercluster: {
+        id: "coppercluster",
+        name: "Copper Cluster",
+        description: "A brittle cluster of raw copper ore, essential for early-game wiring.",
+        iconPath: "smallore/coppercluster.png",
+    },
     durian: {
         id: "durian",
         name: "Durian",
@@ -98,6 +140,18 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 6,
         staminaRestore: 7,
         rottenTime: 6767
+    },
+    firestone: {
+        id: "firestone",
+        name: "Firestone",
+        description: "A warm, angular stone containing a faint ember of volcanic heat.",
+        iconPath: "smallore/firestone.png",
+    },
+    fossilizedshell: {
+        id: "fossilizedshell",
+        name: "Fossilized Shell",
+        description: "A hardened piece of ancient remains, highly valued by historians.",
+        iconPath: "smallore/fossilizedshell.png",
     },
     grapes: {
         id: "grapes",
@@ -126,6 +180,24 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 1,
         rottenTime: 2100
     },
+    icecrystal: {
+        id: "icecrystal",
+        name: "Ice Crystal",
+        description: "A frosty mineral that never melts, radiating a freezing aura.",
+        iconPath: "smallore/icecrystal.png",
+    },
+    ironore: {
+        id: "ironore",
+        name: "Iron Ore",
+        description: "A sturdy, metallic block that serves as the backbone of industry.",
+        iconPath: "smallore/ironore.png",
+    },
+    jadeorb: {
+        id: "jadeorb",
+        name: "Jade Orb",
+        description: "A polished sphere of green jade, said to bring luck to its holder.",
+        iconPath: "smallore/jadeorb.png",
+    },
     kiwi: {
         id: "kiwi",
         name: "Kiwi",
@@ -134,6 +206,30 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 11,
         staminaRestore: 2,
         rottenTime: 985
+    },
+    lapislazuli: {
+        id: "lapislazuli",
+        name: "Lapis Lazuli",
+        description: "A deep blue stone highly prized by enchanters for its mystical properties.",
+        iconPath: "smallore/lapislazuli.png",
+    },
+    manapearl: {
+        id: "manapearl",
+        name: "Mana Pearl",
+        description: "A glowing orb concentrated with raw, pure magical energy.",
+        iconPath: "smallore/manapearl.png",
+    },
+    meteoritechunk: {
+        id: "meteoritechunk",
+        name: "Meteorite Chunk",
+        description: "A heavy chunk of space rock with an unusually high density.",
+        iconPath: "smallore/lapislazuli.png",
+    },
+    mossagate: {
+        id: "mossagate",
+        name: "Moss Agate",
+        description: "A dull green stone covered in a natural, protective layer of moss.",
+        iconPath: "smallore/mossagate.png",
     },
     mulberry: {
         id: "mulberry",
@@ -220,6 +316,18 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
         hpRestore: 110
     },
+    radslimechunk: {
+        id: "radslimechunk",
+        name: "Rad-Slime Chunk",
+        description: "A toxic, glowing mass that radiates a strange chemical heat.",
+        iconPath: "smallore/radslimechunk.png",
+    },
+    rawgold: {
+        id: "rawgold",
+        name: "Raw Gold",
+        description: "A soft, heavy lump of pure gold gleaming with natural luxury.",
+        iconPath: "smallore/rawgold.png",
+    },
     redberries: {
         id: "redberries",
         name: "redberries",
@@ -229,6 +337,30 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 1,
         rottenTime: 856
     },
+    rubycrystal: {
+        id: "rubycrystal",
+        name: "Ruby Crystal",
+        description: "A perfectly formed crystalline cluster that feels warm to the touch.",
+        iconPath: "smallore/rubycrystal.png",
+    },
+    silverbar: {
+        id: "silverbar",
+        name: "Silver Bar",
+        description: "A refined bar of precious silver, ready for smithing holy equipment.",
+        iconPath: "smallore/silverbar.png",
+    },
+    rosequartz: {
+        id: "rosequartz",
+        name: "Rose Quartz",
+        description: "A smooth, pale pink crystal radiating a soothing, gentle energy.",
+        iconPath: "smallore/rosequartz.png",
+    },
+    starmetalshard: {
+        id: "starmetalshard",
+        name: "Star Metal Shard",
+        description: "An angular fragment of a fallen star, harder than ordinary steel.",
+        iconPath: "smallore/starmetalshard.png",
+    },
     strawberry: {
         id: "strawberry",
         name: "Strawberry",
@@ -237,6 +369,18 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 25,
         staminaRestore: 2,
         rottenTime: 680
+    },
+    tealprism: {
+        id: "tealprism",
+        name: "Teal Prism",
+        description: "A rare crystal that refracts light into stunning oceanic hues.",
+        iconPath: "smallore/tealprism.png",
+    },
+    voidnugget: {
+        id: "voidnugget",
+        name: "Void Nugget",
+        description: "An unstable chunk of deep-underground ore infused with dark energy.",
+        iconPath: "smallore/voidnugget.png",
     },
     watermelonslice: {
         id: "watermelonslice",
