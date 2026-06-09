@@ -57,6 +57,7 @@ assets/
 - `Core/`
 - `Data/`
 - `Entity/`
+- `Input/`
 - `Map/`
 - `NPC/`
 - `Player/`
@@ -103,27 +104,26 @@ Canvas
 
 ### 操作與測試鍵
 
-鍵盤入口主要在 `assets/Scripts/Core/GameManager.ts`，再轉呼叫 `assets/Scripts/Player/PlayerController.ts` 的 `handleGameKeyDown()` / `handleGameKeyUp()`；UI 自己需要的鍵會在各 UI controller 內處理。
+Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把 key / mouse / wheel 轉成 `InputAction`，再依 `InputContext` stack 分派給 Pause、商店、對話、合成、背包或 Gameplay。
 
 | 操作 | 功能 | 實作位置 |
 | --- | --- | --- |
-| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `PlayerController.applyMoveKey()`、`refreshMoveDirection()`、`update()` |
-| `Space` | 跳躍；水域中改成上游。 | `PlayerController.applyMoveKey()`、`jump()`、`getOceanVerticalInput()` |
-| 滑鼠左鍵 | 玩家攻擊，播放 `PlayerAttack`，啟用 `CombatHitbox`。 | `PlayerController.onMouseDown()`、`attack()` |
-| 滑鼠右鍵 | 目前扣血測試已註解，不再觸發。 | `PlayerController.onMouseDown()` |
-| `B` | 開關背包 UI；打開時停止水平速度。 | `PlayerController.applyMoveKey()`、`toggleInventory()` |
-| `F` | 商人互動鍵：靠近商人時顯示對話，對話中確認選項，商店開啟時購買 / 關閉流程。 | `PlayerController.applyMoveKey()`、`tryInteractWithMerchant()`、`handleMerchantUIKey()` |
-| `Esc` | Game 中先讓商店 / 合成 UI 處理；沒被吃掉才 Pause / Resume。 | `GameManager.onKeyDown()`、`PlayerController.handleMerchantUIKey()`、`CraftingUIController.onKeyDown()` |
-| `R` | Game / GameOver 時重玩；Game 中不必先 Pause。 | `GameManager.onKeyDown()`、`GameOverScene.onKeyDown()` |
-| `M` | 切換靜音 / 取消靜音。 | `GameManager.onKeyDown()`、`GameOverScene.onKeyDown()`、`AudioManager.toggleMute()` |
-| `C` | 開關合成工作臺 UI。 | `CraftingUIController.onKeyDown()` |
-| `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `PlayerController.handleMerchantUIKey()` |
-| `Up` / `Down`、`W` / `S`、滑鼠滾輪 | 對話選項 / 商店商品上下選擇。 | `PlayerController.handleMerchantUIKey()`、`onMouseWheel()` |
+| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `InputBindings.getActionForKey()` -> `InputManager` -> `PlayerController.setMoveInput()` / `update()` |
+| `Space` | 跳躍；水域中改成上游。 | `InputAction.Jump` -> `PlayerController.jump()` / `getOceanVerticalInput()` |
+| 滑鼠左鍵 | Gameplay 時攻擊；Pause / UI context 會吃掉。 | `InputManager.onMouseDown()` -> `InputAction.Attack` -> `PlayerController.attack()` |
+| `B` | 開關背包 UI；背包開啟時 push `Inventory` context。 | `PlayerController.toggleInventory()` / `handleInventoryInput()` |
+| `F` | Gameplay 時互動；對話中確認；商店中購買。 | `PlayerController.handleGameplayInput()` / `handleDialogueInput()` / `handleMerchantShopInput()` |
+| `Esc` | 依最上層 context：關商店 / 關合成 / 關背包 / Pause Resume。 | `InputAction.Cancel`、`GameManager.handleGameplayInput()`、`handlePausedInput()` |
+| `R` | Game / GameOver 時重玩；Pause 中也可重玩。 | `InputAction.Retry`、`GameManager.handleGameplayInput()`、`GameOverScene.onKeyDown()` |
+| `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
+| `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
+| `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
+| `Up` / `Down`、`W` / `S`、滑鼠滾輪 | Gameplay 水中上下；UI context 中改成對話 / 商店上下選擇。 | `InputManager.onMouseWheel()`、`PlayerController` context handlers |
 | 水域中 `W` / `Up` / `Space` | 上游。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
 | 水域中 `S` / `Down` | 下潛。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
-| 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 | `PlayerController.handleMerchantUIKey()` |
-| `T` | 測試用：加入 `coconut x10` 到背包，作為商人交易貨幣。 | `PlayerController.applyMoveKey()` |
-| `Y` | 測試用：加入 `coconut`、`ore`、`apple` 各 10 個，方便測合成與交易。 | `PlayerController.applyMoveKey()` |
+| 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 | `MerchantShopUIController.handleInput()` |
+| `T` | 測試用：加入 `coconut x10` 到背包，作為商人交易貨幣。 | `InputAction.DebugAddCoconut` -> `PlayerController.debugAddCoconut()` |
+| `Y` | 測試用：加入 `coconut`、`ore`、`apple` 各 10 個，方便測合成與交易。 | `InputAction.DebugAddCraftItems` -> `PlayerController.debugAddCraftItems()` |
 
 ### Core 系統
 
@@ -133,7 +133,8 @@ Canvas
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard。
 - `AudioManager.ts`：支援 scene BGM 與 attack / hit / collect / buy / heal / skill 六種 SFX。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
-- `GameManager.ts`：Singleton、啟用物理、鍵盤入口、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，場景切換時會清掉 static instance，避免第二輪按鍵失效。
+- `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`。
+- `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，場景切換時會清掉 static instance，避免第二輪按鍵失效。
 
 ### Player
 
@@ -143,7 +144,7 @@ Canvas
 - 支援 `PlayerIdle`、`PlayerRun`、`PlayerAttack`、`PlayerHurt`、`PlayerDie` 動畫切換。
 - 攻擊時會啟用 `AttackHitbox` 子節點上的 `CombatHitbox`。
 - 攻擊、受傷、進入水域會觸發 `AudioManager` / `EffectsManager` feedback。
-- 鍵盤入口保留在 `GameManager`；GameManager 先呼叫 `PlayerController.handleGameKeyDown/Up()`，未被玩家 / 商店 / 合成 UI 吃掉的 Esc / R / M 才由 GameManager 自己處理。
+- 不直接監聽 keyboard；Gameplay context 只呼叫玩家能力方法，Dialogue / Merchant / Inventory context 由 PlayerController 協調流程。
 - 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED`，讓 `GameManager` 結算後載入 `GameOver` 場景。
 - 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
 - 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。

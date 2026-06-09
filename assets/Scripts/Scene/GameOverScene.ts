@@ -1,11 +1,9 @@
 import SaveService from "../Core/SaveService";
 import AudioManager, { SfxType } from "../Core/AudioManager";
+import { getActionForKey } from "../Input/InputBindings";
+import { InputAction } from "../Input/InputAction";
 
 const { ccclass, property } = cc._decorator;
-
-const KEY_ESCAPE = 27;
-const KEY_R = 82;
-const KEY_M = 77;
 
 @ccclass
 export default class GameOverScene extends cc.Component {
@@ -90,13 +88,18 @@ export default class GameOverScene extends cc.Component {
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
-        const keyCode = event.keyCode;
-        if (keyCode === cc.macro.KEY.r || keyCode === KEY_R) {
-            this.retry();
-        } else if (keyCode === cc.macro.KEY.escape || keyCode === KEY_ESCAPE) {
-            this.goToMainMenu();
-        } else if (keyCode === cc.macro.KEY.m || keyCode === KEY_M) {
-            AudioManager.toggleMute();
+        switch (getActionForKey(event.keyCode)) {
+            case InputAction.Retry:
+                this.retry();
+                return;
+            case InputAction.Cancel:
+                this.goToMainMenu();
+                return;
+            case InputAction.ToggleMute:
+                AudioManager.toggleMute();
+                return;
+            default:
+                return;
         }
     }
 

@@ -2,6 +2,9 @@ import CraftingSession from "../Crafting/CraftingSession";
 import { getItemDefinition } from "../Data/ItemData";
 import { InventoryManager } from "../Player/InventoryManager";
 import ItemIconLoader from "./ItemIconLoader";
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
 
 const { ccclass, property } = cc._decorator;
 
@@ -63,6 +66,7 @@ export default class CraftingUIController extends cc.Component {
     private dragVisual: CraftSlotView = null;
     private highlightedNode: cc.Node = null;
     private highlightedColor: cc.Color = null;
+    private inputManager: InputManager = null;
 
     private readonly enabledColor = cc.color(55, 150, 105);
     private readonly disabledColor = cc.color(95, 95, 95);
@@ -74,7 +78,7 @@ export default class CraftingUIController extends cc.Component {
             this.buildCraftingPanel();
         }
 
-        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        this.inputManager = InputManager.getOrCreate(this.node);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("CRAFTING_SESSION_CHANGED", this.refresh, this);
         this.bindGlobalDragEvents();
@@ -111,6 +115,9 @@ export default class CraftingUIController extends cc.Component {
         this.refresh();
 
         cc.log("[CraftingUI] opened: inventory left, crafting table right");
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Crafting, this.handleCraftingInput, this);
+        }
         cc.systemEvent.emit("CRAFTING_UI_OPENED");
         return true;
     }
@@ -131,6 +138,9 @@ export default class CraftingUIController extends cc.Component {
         this.selectedItemId = null;
         this.opened = false;
         this.setVisible(false);
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.Crafting, this);
+        }
         cc.log("[CraftingUI] closed");
         cc.systemEvent.emit("CRAFTING_UI_CLOSED");
         return true;
@@ -142,6 +152,19 @@ export default class CraftingUIController extends cc.Component {
 
     public isOpen(): boolean {
         return this.opened;
+    }
+
+    public handleInput(action: InputAction): boolean {
+        if (!this.opened) {
+            return false;
+        }
+
+        if (action === InputAction.Cancel || action === InputAction.Crafting) {
+            this.close();
+            return true;
+        }
+
+        return true;
     }
 
     public refresh(): void {
@@ -184,9 +207,11 @@ export default class CraftingUIController extends cc.Component {
     onDestroy() {
         this.isDestroying = true;
         this.cancelDrag();
-        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.off("CRAFTING_SESSION_CHANGED", this.refresh, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
         this.unbindGlobalDragEvents();
         if (!CraftingSession.shared.isEmpty()) {
             CraftingSession.shared.returnAllToInventory();
@@ -197,15 +222,12 @@ export default class CraftingUIController extends cc.Component {
         }
     }
 
-    private onKeyDown(event: cc.Event.EventKeyboard): void {
-        if (event.keyCode === cc.macro.KEY.c) {
-            cc.log("[CraftingUI] C pressed");
-            this.toggle();
-            return;
+    private handleCraftingInput(payload: InputPayload): boolean {
+        if (!payload.isDown) {
+            return true;
         }
-        if (event.keyCode === cc.macro.KEY.escape && this.opened) {
-            this.close();
-        }
+
+        return this.handleInput(payload.action);
     }
 
     private resolveSceneNodes(): void {

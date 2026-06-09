@@ -227,7 +227,7 @@ Canvas
 
 - `PlayerController.ts`
   - A/D 移動、Space 跳躍、滑鼠左鍵攻擊。
-  - 鍵盤入口保留在 `GameManager`，再轉呼叫 `PlayerController.handleGameKeyDown/Up()`；未被玩家 / UI 吃掉的 Esc / R / M 由 GameManager 處理。
+  - 鍵盤 / 滑鼠 / 滾輪入口集中在 `InputManager`，PlayerController 只接 `InputAction` 後執行玩家能力。
   - B 開關背包。
   - T 測試用：加入 `coconut x10`。
   - F 旅行商人互動：靠近 prompt、對話選項、開商店、關商店。
@@ -235,6 +235,11 @@ Canvas
   - 進入 OceanArea 後降低重力，W / Up / Space 上游，S / Down 下潛，離開後還原重力。
   - 攻擊、受傷、水域進入會呼叫 `AudioManager` / `EffectsManager`。
   - 持有 `DialogueUIController` 與 `MerchantShopUIController` reference。
+- `Input/`
+  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel、Retry。
+  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/R/M fallback。
+  - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Paused。
+  - `InputManager.ts` 統一監聽 Game 場景輸入，依 context stack 由上往下分派。
 - `InventoryManager.ts`
   - 背包 singleton。
   - `addItem()`、`removeItem()`、`getItemCount()`、`hasItem()`、`getItems()`。

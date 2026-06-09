@@ -11,6 +11,9 @@ import CraftingUIController from "../UI/CraftingUIController";
 import UIManager from "../UI/UIManager";
 import AudioManager, { SfxType } from "../Core/AudioManager";
 import EffectsManager, { EffectType } from "../Core/EffectsManager";
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
 
 const { ccclass, property } = cc._decorator;
 
@@ -61,7 +64,7 @@ export default class PlayerController extends BaseEntity {
     knockbackLockTime: number = 0.12;
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
-    private keyStates: { [key: number]: boolean } = {};
+    private keyStates: { [action: string]: boolean } = {};
 
     private anim: cc.Animation = null!;
     private currentAnimName: string = "";
@@ -81,6 +84,7 @@ export default class PlayerController extends BaseEntity {
 
     private isInOcean: boolean = false;
     private originalGravityScale: number = 1;
+    private inputManager: InputManager = null;
 
     onLoad() {
         super.onLoad();
@@ -95,12 +99,12 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
         EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
+        this.inputManager = InputManager.getOrCreate(this.node);
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Gameplay, this.handleGameplayInput, this);
+        }
 
         this.canvasNode = cc.find("Canvas") || null!;
-        if (this.canvasNode) {
-            this.canvasNode.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
-            this.canvasNode.on(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
-        }
 
         this.bodyNode = this.node.getChildByName("Sprite_Body") || null!;
         if (this.bodyNode) {
@@ -136,138 +140,160 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    private onMouseDown(event: cc.Event.EventMouse) {
-        if (this.inputLockedByGamePause) return;
-        if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) return;
-        if (this.inventoryUI && this.inventoryUI.active) return;
-
-        if (event.getButton() === cc.Event.EventMouse.BUTTON_LEFT) {
-            this.attack();
-        }
-    }
-
-    public handleGameKeyDown(keyCode: number): boolean {
-        return this.applyMoveKey(keyCode, true);
-    }
-
-    public handleGameKeyUp(keyCode: number): boolean {
-        return this.applyMoveKey(keyCode, false);
-    }
-
-    private applyMoveKey(keyCode: number, isDown: boolean): boolean {
+    private handleGameplayInput(payload: InputPayload): boolean {
         if (this.inputLockedByGamePause) {
-            return this.isPlayerControlKey(keyCode);
+            return this.isPlayerAction(payload.action);
         }
 
-        if (keyCode === cc.macro.KEY.escape) {
-            if (!isDown) {
-                return false;
-            }
-
-            if (this.isCraftingUIOpen()) {
-                this.moveDir.x = 0;
+        switch (payload.action) {
+            case InputAction.MoveLeft:
+            case InputAction.MoveRight:
+            case InputAction.MoveUp:
+            case InputAction.MoveDown:
+            case InputAction.NavigateUp:
+            case InputAction.NavigateDown:
+            case InputAction.Jump:
+                this.setMoveInput(payload.action, payload.isDown);
                 return true;
-            }
-
-            return this.handleMerchantUIKey(keyCode);
-        }
-
-        if (isDown && this.handleMerchantUIKey(keyCode)) {
-            return true;
-        }
-
-        if (!this.isPlayerControlKey(keyCode)) {
-            return false;
-        }
-
-        const wasDown = !!this.keyStates[keyCode];
-        if (wasDown === isDown) return false;
-
-        this.keyStates[keyCode] = isDown;
-
-        if (this.isCraftingUIOpen()) {
-            this.moveDir.x = 0;
-            return true;
-        }
-
-        switch (keyCode) {
-            case cc.macro.KEY.a:
-            case cc.macro.KEY.d:
-                this.refreshMoveDirection();
+            case InputAction.Attack:
+                if (payload.isDown) this.attack();
                 return true;
-            case cc.macro.KEY.space:
-                if (isDown) this.jump();
+            case InputAction.Interact:
+                if (payload.isDown) this.interact();
                 return true;
-
-            case cc.macro.KEY.b:
-                if (isDown) this.toggleInventory();
+            case InputAction.Inventory:
+                if (payload.isDown) this.toggleInventory();
                 return true;
-
-            case cc.macro.KEY.f:
-                if (isDown) this.tryInteractWithMerchant();
+            case InputAction.Crafting:
+                if (payload.isDown) this.toggleCrafting();
                 return true;
-
-            case cc.macro.KEY.t:
-                if (isDown) {
-                    InventoryManager.instance.addItem("coconut", 10);
-                }
+            case InputAction.DebugAddCoconut:
+                if (payload.isDown) this.debugAddCoconut();
                 return true;
-            case cc.macro.KEY.y:
-                if (isDown) {
-                    InventoryManager.instance.transact([], [
-                        { itemId: "coconut", count: 10 },
-                        { itemId: "ore", count: 10 },
-                        { itemId: "apple", count: 10 }
-                    ]);
-                    cc.log("[CraftingDebug] Added coconut, ore and apple x10.");
-                }
+            case InputAction.DebugAddCraftItems:
+                if (payload.isDown) this.debugAddCraftItems();
                 return true;
             default:
                 return false;
         }
     }
 
-    private isPlayerControlKey(keyCode: number): boolean {
-        switch (keyCode) {
-            case cc.macro.KEY.a:
-            case cc.macro.KEY.d:
-            case cc.macro.KEY.w:
-            case cc.macro.KEY.s:
-            case cc.macro.KEY.up:
-            case cc.macro.KEY.down:
-            case cc.macro.KEY.space:
-            case cc.macro.KEY.b:
-            case cc.macro.KEY.f:
-            case cc.macro.KEY.t:
-            case cc.macro.KEY.y:
-                return true;
-            default:
-                return false;
+    private handleInventoryInput(payload: InputPayload): boolean {
+        if (!payload.isDown) {
+            return this.isPlayerAction(payload.action);
         }
+
+        if (payload.action === InputAction.Inventory || payload.action === InputAction.Cancel) {
+            this.setInventoryOpen(false);
+            return true;
+        }
+
+        return this.isPlayerAction(payload.action) || payload.action === InputAction.Attack;
     }
 
-    private onMouseWheel(event: cc.Event.EventMouse) {
-        const scrollY = event.getScrollY();
-        if (scrollY === 0) {
-            return;
+    private handleDialogueInput(payload: InputPayload): boolean {
+        if (!payload.isDown) {
+            return true;
         }
 
-        if (this.dialogueUI && this.dialogueUI.isOptionsVisible()) {
-            if (scrollY < 0) {
-                this.dialogueUI.selectNext();
-            } else {
+        switch (payload.action) {
+            case InputAction.Cancel:
+                this.closeMerchantFlow();
+                return true;
+            case InputAction.MoveUp:
+            case InputAction.NavigateUp:
                 this.dialogueUI.selectPrev();
-            }
+                return true;
+            case InputAction.MoveDown:
+            case InputAction.NavigateDown:
+                this.dialogueUI.selectNext();
+                return true;
+            case InputAction.Confirm:
+            case InputAction.Interact:
+                this.confirmDialogueOption();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+    private handleMerchantShopInput(payload: InputPayload): boolean {
+        if (!payload.isDown) {
+            return true;
+        }
+
+        if (payload.action === InputAction.Cancel) {
+            this.closeMerchantFlow();
+            return true;
+        }
+
+        if (this.merchantShopUI && this.merchantShopUI.handleInput(payload.action)) {
+            return true;
+        }
+
+        return true;
+    }
+
+    public setMoveInput(action: InputAction, isDown: boolean): void {
+        const moveAction = this.toMoveAction(action);
+        if (!moveAction) {
             return;
         }
 
-        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
-            if (scrollY < 0) {
-                this.merchantShopUI.selectNextItem();
-            } else {
-                this.merchantShopUI.selectPrevItem();
-            }
+        const wasDown = !!this.keyStates[moveAction];
+        if (wasDown === isDown) {
+            return;
         }
+
+        this.keyStates[moveAction] = isDown;
+        if (moveAction === InputAction.Jump && isDown) {
+            this.jump();
+        }
+        this.refreshMoveDirection();
+    }
+
+    private toMoveAction(action: InputAction): InputAction {
+        switch (action) {
+            case InputAction.MoveLeft:
+            case InputAction.MoveRight:
+            case InputAction.MoveUp:
+            case InputAction.MoveDown:
+            case InputAction.Jump:
+                return action;
+            case InputAction.NavigateUp:
+                return InputAction.MoveUp;
+            case InputAction.NavigateDown:
+                return InputAction.MoveDown;
+            default:
+                return null;
+        }
+    }
+
+    private isPlayerAction(action: InputAction): boolean {
+        return !!this.toMoveAction(action)
+            || action === InputAction.Attack
+            || action === InputAction.Interact
+            || action === InputAction.Inventory
+            || action === InputAction.Crafting
+            || action === InputAction.DebugAddCoconut
+            || action === InputAction.DebugAddCraftItems;
+    }
+
+    public interact(): void {
+        this.tryInteractWithMerchant();
+    }
+
+    public debugAddCoconut(): void {
+        InventoryManager.instance.addItem("coconut", 10);
+    }
+
+    public debugAddCraftItems(): void {
+        InventoryManager.instance.transact([], [
+            { itemId: "coconut", count: 10 },
+            { itemId: "ore", count: 10 },
+            { itemId: "apple", count: 10 }
+        ]);
+        cc.log("[CraftingDebug] Added coconut, ore and apple x10.");
     }
 
     private tryInteractWithMerchant() {
@@ -296,14 +322,14 @@ export default class PlayerController extends BaseEntity {
         this.showMerchantOptions();
     }
 
-    private toggleInventory() {
+    public toggleInventory() {
         if (!this.inventoryUI) return;
 
         if (this.isCraftingUIOpen()) {
             if (!this.craftingUI.close()) {
                 return;
             }
-            this.inventoryUI.active = true;
+            this.setInventoryOpen(true);
             if (this.rb) {
                 this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
             }
@@ -317,7 +343,7 @@ export default class PlayerController extends BaseEntity {
             }
         }
 
-        this.inventoryUI.active = shouldOpen;
+        this.setInventoryOpen(shouldOpen);
         if (this.inventoryUI.active && this.dialogueUI && !this.isMerchantUIOpen()) {
             this.dialogueUI.hide();
             this.promptMerchant = null!;
@@ -328,7 +354,23 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    private jump() {
+    private setInventoryOpen(open: boolean): void {
+        if (!this.inventoryUI) {
+            return;
+        }
+
+        this.inventoryUI.active = open;
+        this.clearMovementInput();
+        if (this.inputManager) {
+            if (open) {
+                this.inputManager.pushContext(InputContext.Inventory, this.handleInventoryInput, this);
+            } else {
+                this.inputManager.popContext(InputContext.Inventory, this);
+            }
+        }
+    }
+
+    public jump() {
         if (this.isDead || this.isHurting || this.isAttacking || this.isCraftingUIOpen() || !this.rb) return;
 
         if (this.isInOcean) {
@@ -497,11 +539,14 @@ export default class PlayerController extends BaseEntity {
     private getOceanVerticalInput(): number {
         let input = 0;
 
-        if (this.keyStates[cc.macro.KEY.w] || this.keyStates[cc.macro.KEY.up] || this.keyStates[cc.macro.KEY.space]) {
+        if (
+            this.keyStates[InputAction.MoveUp]
+            || this.keyStates[InputAction.Jump]
+        ) {
             input += 1;
         }
 
-        if (this.keyStates[cc.macro.KEY.s] || this.keyStates[cc.macro.KEY.down]) {
+        if (this.keyStates[InputAction.MoveDown]) {
             input -= 1;
         }
 
@@ -524,8 +569,15 @@ export default class PlayerController extends BaseEntity {
         this.currentAnimName = animName;
     }
 
-    private attack() {
-        if (this.isAttacking || this.isHurting || this.isCraftingUIOpen()) return;
+    public attack() {
+        if (
+            this.inputLockedByGamePause
+            || this.isAttacking
+            || this.isHurting
+            || this.isMerchantUIOpen()
+            || this.isCraftingUIOpen()
+            || (this.inventoryUI && this.inventoryUI.active)
+        ) return;
 
         this.isAttacking = true;
         AudioManager.play(SfxType.ATTACK);
@@ -628,10 +680,8 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
         EventCenter.off(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
-
-        if (this.canvasNode && cc.isValid(this.canvasNode)) {
-            this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
-            this.canvasNode.off(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
         }
 
         if (this.anim && cc.isValid(this.anim)) {
@@ -645,6 +695,7 @@ export default class PlayerController extends BaseEntity {
         this.currentDialogueOptions = [];
         this.craftingUI = null;
         this.uiManager = null;
+        this.inputManager = null;
     }
 
     private updateMerchantPrompt() {
@@ -705,9 +756,20 @@ export default class PlayerController extends BaseEntity {
             if (this.dialogueUI) {
                 this.dialogueUI.hide();
             }
+            if (this.inputManager) {
+                this.inputManager.popContext(InputContext.Dialogue, this);
+            }
 
             if (this.merchantShopUI) {
                 this.merchantShopUI.open(this.currentMerchant);
+                this.clearMovementInput();
+                if (this.inputManager) {
+                    this.inputManager.pushContext(
+                        InputContext.MerchantShop,
+                        this.handleMerchantShopInput,
+                        this
+                    );
+                }
             }
 
             return;
@@ -722,6 +784,11 @@ export default class PlayerController extends BaseEntity {
     }
 
     private closeMerchantFlow() {
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.MerchantShop, this);
+            this.inputManager.popContext(InputContext.Dialogue, this);
+        }
+
         if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
             this.merchantShopUI.close();
         }
@@ -737,6 +804,7 @@ export default class PlayerController extends BaseEntity {
         this.currentMerchant = null!;
         this.promptMerchant = null!;
         this.currentDialogueOptions = [];
+        this.clearMovementInput();
     }
 
     private isMerchantUIOpen(): boolean {
@@ -746,7 +814,7 @@ export default class PlayerController extends BaseEntity {
         );
     }
 
-    private toggleCrafting(): void {
+    public toggleCrafting(): void {
         if (!this.craftingUI) {
             const host = cc.find("Canvas/UI Root/CraftingUIHost");
             this.craftingUI = host ? host.getComponent(CraftingUIController) : null;
@@ -768,10 +836,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        this.moveDir.x = 0;
-        if (this.rb) {
-            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
-        }
+        this.clearMovementInput();
     }
 
     private closeCrafting(): void {
@@ -780,7 +845,7 @@ export default class PlayerController extends BaseEntity {
                 return;
             }
         }
-        this.refreshMoveDirection();
+        this.clearMovementInput();
     }
 
     private isCraftingUIOpen(): boolean {
@@ -788,20 +853,17 @@ export default class PlayerController extends BaseEntity {
     }
 
     private refreshMoveDirection(): void {
-        const left = this.keyStates[cc.macro.KEY.a] ? 1 : 0;
-        const right = this.keyStates[cc.macro.KEY.d] ? 1 : 0;
+        const left = this.keyStates[InputAction.MoveLeft] ? 1 : 0;
+        const right = this.keyStates[InputAction.MoveRight] ? 1 : 0;
         this.moveDir.x = this.isCraftingUIOpen() ? 0 : right - left;
     }
 
     private onCraftingUIClosed(): void {
-        this.refreshMoveDirection();
+        this.clearMovementInput();
     }
 
     private onCraftingUIOpened(): void {
-        this.moveDir.x = 0;
-        if (this.rb) {
-            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
-        }
+        this.clearMovementInput();
     }
 
     private onGamePaused(): void {
@@ -819,65 +881,6 @@ export default class PlayerController extends BaseEntity {
         this.moveDir.x = 0;
         if (this.rb) {
             this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
-        }
-    }
-
-    private handleMerchantUIKey(keyCode: number): boolean {
-        const dialogueOpen = !!this.dialogueUI && this.dialogueUI.isOptionsVisible();
-        const shopOpen = !!this.merchantShopUI && this.merchantShopUI.isOpen();
-        if (!dialogueOpen && !shopOpen) {
-            return false;
-        }
-
-        if (keyCode === cc.macro.KEY.escape) {
-            this.closeMerchantFlow();
-            return true;
-        }
-
-        if (dialogueOpen) {
-            switch (keyCode) {
-                case cc.macro.KEY.w:
-                case cc.macro.KEY.up:
-                    this.dialogueUI.selectPrev();
-                    return true;
-                case cc.macro.KEY.s:
-                case cc.macro.KEY.down:
-                    this.dialogueUI.selectNext();
-                    return true;
-                case cc.macro.KEY.enter:
-                case cc.macro.KEY.f:
-                    this.confirmDialogueOption();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        switch (keyCode) {
-            case cc.macro.KEY.w:
-            case cc.macro.KEY.up:
-                this.merchantShopUI.selectPrevItem();
-                return true;
-            case cc.macro.KEY.s:
-            case cc.macro.KEY.down:
-                this.merchantShopUI.selectNextItem();
-                return true;
-
-            case cc.macro.KEY.left:
-                this.merchantShopUI.decreaseAmount();
-                return true;
-
-            case cc.macro.KEY.right:
-                this.merchantShopUI.increaseAmount();
-                return true;
-
-            case cc.macro.KEY.enter:
-            case cc.macro.KEY.f:
-                this.merchantShopUI.buySelected();
-                return true;
-
-            default:
-                return false;
         }
     }
 
@@ -901,5 +904,9 @@ export default class PlayerController extends BaseEntity {
             this.currentDialogueOptions.map(option => option.label),
             anchorNode
         );
+        this.clearMovementInput();
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Dialogue, this.handleDialogueInput, this);
+        }
     }
 }

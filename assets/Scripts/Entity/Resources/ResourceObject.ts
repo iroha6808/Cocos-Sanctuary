@@ -1,3 +1,6 @@
+import EventCenter from "../../Core/EventCenter";
+import { GameEvent } from "../../Core/Constants";
+
 const { ccclass, property } = cc._decorator;
 
 /**
@@ -26,18 +29,24 @@ export default class ResourceObject extends cc.Component {
     targetSprite: cc.Sprite = null!;
 
     protected hitCount: number = 0;
+    private inputLockedByGamePause: boolean = false;
 
     onLoad() {
         const canvas = cc.find('Canvas');
         if (canvas) canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
+        EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
     }
 
     onDestroy() {
         const canvas = cc.find('Canvas');
         if (canvas) canvas.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        EventCenter.off(GameEvent.GAME_PAUSED, this.onGamePaused, this);
+        EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
+        if (this.inputLockedByGamePause) return;
         const inventoryUI = cc.find('Canvas/UI Root/InventoryUI');
         if (inventoryUI && inventoryUI.active) return;
         if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) return;
@@ -116,5 +125,13 @@ export default class ResourceObject extends cc.Component {
 
     protected getWorldPos(): cc.Vec2 {
         return this.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+    }
+
+    private onGamePaused(): void {
+        this.inputLockedByGamePause = true;
+    }
+
+    private onGameResumed(): void {
+        this.inputLockedByGamePause = false;
     }
 }
