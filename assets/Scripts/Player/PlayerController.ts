@@ -151,6 +151,27 @@ export default class PlayerController extends BaseEntity {
     }
 
     private applyMoveKey(keyCode: number, isDown: boolean): boolean {
+        if (keyCode === cc.macro.KEY.escape) {
+            if (!isDown) {
+                return false;
+            }
+
+            if (this.isCraftingUIOpen()) {
+                this.moveDir.x = 0;
+                return true;
+            }
+
+            return this.handleMerchantUIKey(keyCode);
+        }
+
+        if (isDown && this.handleMerchantUIKey(keyCode)) {
+            return true;
+        }
+
+        if (!this.isPlayerControlKey(keyCode)) {
+            return false;
+        }
+
         const wasDown = !!this.keyStates[keyCode];
         if (wasDown === isDown) return false;
 
@@ -158,13 +179,6 @@ export default class PlayerController extends BaseEntity {
 
         if (this.isCraftingUIOpen()) {
             this.moveDir.x = 0;
-            if (keyCode === cc.macro.KEY.escape) {
-                return true;
-            }
-            return this.isPlayerControlKey(keyCode);
-        }
-
-        if (isDown && this.handleMerchantUIKey(keyCode)) {
             return true;
         }
 

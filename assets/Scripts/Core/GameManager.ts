@@ -10,6 +10,7 @@ const { ccclass, property } = cc._decorator;
 const KEY_ESCAPE = 27;
 const KEY_R = 82;
 const KEY_M = 77;
+const GLOBAL_KEY_DEBOUNCE_MS = 180;
 
 @ccclass
 export default class GameManager extends cc.Component {
@@ -56,7 +57,7 @@ export default class GameManager extends cc.Component {
     private exp: number = 0;
     private isPaused: boolean = false;
     private playerController: PlayerController = null;
-    private globalKeyStates: { [key: number]: boolean } = {};
+    private lastGlobalKeyTimes: { [key: number]: number } = {};
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -219,34 +220,47 @@ export default class GameManager extends cc.Component {
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
         const keyCode = event.keyCode;
-        if (this.globalKeyStates[keyCode]) {
-            return;
-        }
-        this.globalKeyStates[keyCode] = true;
-
         if (this.forwardPlayerKey(keyCode, true)) {
             return;
         }
 
         if (keyCode === cc.macro.KEY.escape || keyCode === KEY_ESCAPE) {
+            if (this.isGlobalKeyCoolingDown(keyCode)) {
+                return;
+            }
             this.togglePause();
             return;
         }
 
         if (keyCode === cc.macro.KEY.r || keyCode === KEY_R) {
+            if (this.isGlobalKeyCoolingDown(keyCode)) {
+                return;
+            }
             this.restartGame();
             return;
         }
 
         if (keyCode === cc.macro.KEY.m || keyCode === KEY_M) {
+            if (this.isGlobalKeyCoolingDown(keyCode)) {
+                return;
+            }
             AudioManager.toggleMute();
         }
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
         const keyCode = event.keyCode;
-        this.globalKeyStates[keyCode] = false;
         this.forwardPlayerKey(keyCode, false);
+    }
+
+    private isGlobalKeyCoolingDown(keyCode: number): boolean {
+        const now = Date.now();
+        const lastTime = this.lastGlobalKeyTimes[keyCode] || 0;
+        if (now - lastTime < GLOBAL_KEY_DEBOUNCE_MS) {
+            return true;
+        }
+        this.lastGlobalKeyTimes[keyCode] = now;
+        return false;
     }
 
     private forwardPlayerKey(keyCode: number, isDown: boolean): boolean {
