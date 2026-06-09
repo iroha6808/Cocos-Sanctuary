@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2db5f400-c399-4952-b087-45084e2aad3a",
+  "uuid": "531354de-c2c6-44bb-995f-d65d65ec8ae6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "peanuts": {
       "ver": "1.0.6",
-      "uuid": "11e49aa0-a6e4-49da-8b38-e8cecd8bacb8",
+      "uuid": "38e1f27c-7100-46d9-8ddb-75661b17d471",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2db5f400-c399-4952-b087-45084e2aad3a",
+      "rawTextureUuid": "531354de-c2c6-44bb-995f-d65d65ec8ae6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

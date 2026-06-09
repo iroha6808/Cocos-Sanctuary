@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9bde2e5c-371f-4fb4-ab9e-fc99542f2f59",
+  "uuid": "67c7220c-dc56-4e17-af11-6476811e2d9f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "dandelion": {
       "ver": "1.0.6",
-      "uuid": "da94abca-c860-470a-95ba-28b742925909",
+      "uuid": "b548b3ac-7a61-4223-83c7-7b04554ac776",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9bde2e5c-371f-4fb4-ab9e-fc99542f2f59",
+      "rawTextureUuid": "67c7220c-dc56-4e17-af11-6476811e2d9f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

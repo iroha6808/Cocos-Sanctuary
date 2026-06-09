@@ -1,6 +1,6 @@
 # Cocos Sanctuary Plan
 
-> 更新日期：2026-06-07
+> 更新日期：2026-06-09
 > 本檔只放高層規劃、目前進度、下一步與手動設定。詳細架構見 `structure.md`，功能追蹤見 `NOTE.md`。
 
 ## 目錄
@@ -8,6 +8,7 @@
 - [下一步優先順序](#下一步優先順序)
 - [企劃摘要](#企劃摘要)
 - [MVP 範圍](#mvp-範圍)
+- [評分規格對齊](#評分規格對齊)
 - [需求拆解](#需求拆解)
 - [目前進度](#目前進度)
 - [分工](#分工)
@@ -17,14 +18,13 @@
 
 ## 下一步優先順序
 
-掉落物、水
-1. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
-2. 實測水域：`OceanArea.ts` sensor collider 進出時是否正確切換玩家重力與游泳控制。
-3. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
-4. 統一回血 / 食物使用 API：`FoodBase.eat()` 仍找 `PlayerStats`，目前玩家主腳本是 `PlayerController`。
-5. 整理 item / prefab 命名：`greenapple`、`coffeebean`、`guazi` 與 `gauzi.ts` 檔名需確認一致。
-6. 補 `Score / EXP` 資料流與 UI：Score label、EXP 增加、NPC_DIED / 採集加分。
-7. 清理素材：`assets/resources/Purple Planet - Platformer Tileset` 含 `.ai`、`.cdr`、`.eps`、`.svg` 等來源檔，需手動確認是否保留。
+1. 修正交易 UI 座標：`MerchantShopUI` 目前固定在原 Background 座標，OceanArea 交易時會跑到畫面外；應改掛 Main Camera / Screen UI Root。
+2. 補 Final Project 流程分數缺口：暫停 / 繼續、GameOver 結算、回主畫面或重玩。
+3. 補課程技術配分缺口：Scoreboard / 排行榜、Firebase 存讀、BGM / SFX、粒子特效。
+4. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
+5. 實測水域：Camera 已跟玩家到水域，需確認 `OceanArea.ts` 進出時玩家重力 / 游泳控制穩定。
+6. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
+7. 統一回血 / 食物使用 API，並補 `Score / EXP` 資料流與 UI。
 
 ## 企劃摘要
 
@@ -60,6 +60,24 @@
 - [ ] 正式 Game Over 結算 UI
 - [ ] 地圖資料化 / TileRenderer
 
+## 評分規格對齊
+
+| 類別 | 配分 | 分項 / 分數 | 目前狀態 / 待補 |
+| --- | --- | --- | --- |
+| 遊戲流程 | 10% | 開頭動畫 Optional、主畫面、功能選單 / 參數、關卡選擇 Optional、進入遊戲、暫停 / 繼續、勝敗畫面、回主畫面或關卡選擇；流程需可重複玩 | Menu -> Game 已有；需補暫停 / 繼續、GameOver 結算、回主畫面或重玩 |
+| 帳號系統 | 7% | 註冊 / 登入 / 登出 3%；排行榜 4% | 尚未開始 |
+| 存檔 / 讀檔 | 6% | Firebase；每帳號固定存檔欄位，可覆寫或新增 | 尚未開始 |
+| 物理系統 | 13% | 正確重力與碰撞系統 | 已有 physics、碰撞、OceanArea；需實測 |
+| 遊戲音效 | 7% | 各場景 BGM 2%；五種不同音效 5% | 尚未整理 |
+| 遊戲操作 | 13% | 所有角色移動 4%；三種移動以外操作 9% | 玩家移動、攻擊、背包、商人互動、水中控制已有；需補操作展示 |
+| 遊戲動畫 | 12% | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC 基礎動畫已有；轉場、開場、結束需補 |
+| 遊戲特效 | 5% | 五種不同粒子特效 | 尚未開始 |
+| 版本控制 | 7% | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |
+| 遊戲技術合計 | 60% | 技術表原始總分 70，最高可拿 60 | 優先補帳號 / 排行榜、Firebase、音效、粒子 |
+| 進階功能 | 20% | 敵人 AI 0-6%；Node Pooling 0-4%；客製化渲染 0-4%；2.5D 0-2%；打擊感 0-3%；特殊運鏡 0-4%；客製化物理 0-4%；關卡編輯器 0-8%；自動地圖 0-4%；無限地圖 0-3%；魔王 0-2%；線上多人 0-8%；其他自由發揮 | 已有敵人 AI、水域特殊物理雛形；可補 projectile / drop Node Pooling、打擊感或運鏡 |
+| 美術風格 | 5% | 整體視覺一致性 | 素材量足夠；需統一可用素材、UI / 場景風格，並隔離 Unity 殘留檔 |
+| 主觀分數 | 15% | 完成度、體驗、展示效果 | 優先把採集、背包、商人、戰鬥、水域、死亡 / 重玩 demo loop 跑順 |
+
 ## 需求拆解
 
 ### 分工
@@ -76,7 +94,10 @@
 
 | 功能 | 風險原因 | 階段 |
 | --- | --- | --- |
+| Final Project 遊戲流程 | 暫停 / 繼續、正式 GameOver、回主畫面 / 重玩會直接影響流程 10% | MVP |
+| 課程技術配分缺口 | 帳號 / 排行榜、Firebase、音效、粒子尚未完整追蹤，會影響技術 60% | MVP |
 | 水域碰撞 / OceanArea | 需要 sensor collider、玩家 contact listener、進出水域時重力還原要穩 | MVP |
+| Camera / 商店 UI 座標 | Camera 已跟玩家移動，Dialogue 已能保持可見，但 MerchantShop UI 仍固定在舊世界座標 | MVP |
 | 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP 已接，EXP / Score / heal 尚未統一，食物仍找 `PlayerStats` | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
@@ -94,6 +115,8 @@
 | 食物資料表 | `ItemData` 已擴充水果 / 堅果，可支撐回血、體力、商店與掉落 | MVP |
 | 遠程 NPC | SkeletonMage + projectile 讓戰鬥展示差異更明顯 | MVP |
 | 水域探索 | OceanArea 讓地形不只地面，能展示水中控制 | MVP |
+| 敵人 AI / Node Pooling | 對應進階功能配分，可用在敵人、projectile、掉落物效能優化 | 延伸 |
+| 音效 / 粒子 / 打擊感 | 分數明確且展示效果明顯 | 延伸 |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP | 延伸 |
@@ -103,37 +126,20 @@
 
 ### 已完成
 
-- [x] Cocos Creator 2.4.8 專案建立
-- [x] Scenes：`Game`、`MenuScene`、`GameOver`
-- [x] Prefabs：Player、Slime、TravelingMerchant、Tree、Ore、FruitDrop、OreDrop、coconut
-- [x] Player 動畫：Idle、Run、Jump、Attack、Hurt、Die
-- [x] `Constants.ts` 定義事件與 EntityType
-- [x] `EventCenter.ts` 修正 callback / target / off 邏輯
-- [x] `GameManager.ts` 啟用 physics，監聽 `PLAYER_DIED`
-- [x] `PlayerController.ts` 支援 A/D、Space、左鍵攻擊、B 背包、F 商人、T debug coconut
-- [x] `CombatHitbox.ts` 支援 faction 過濾與單次命中
-- [x] `CombatProjectile.ts` 支援遠程投射物、陣營過濾、命中 / 地形 / timeout 銷毀
-- [x] `InventoryManager.ts` 支援 add/remove/count/has/get
-- [x] `InventoryUIController.ts` 監聽 `INVENTORY_CHANGED`
-- [x] `InventoryUIController.ts` 支援格子 icon、右鍵 action menu、使用 / 刪除
-- [x] `NPC_AI.ts` 支援 Peace / Neutral / Hostile、Wander / Chase、近戰攻擊、HP bar、死亡事件
-- [x] `NPC_AI.ts` 支援 `RANGED`、projectile 釋放延遲、瞄準模式、drop table
-- [x] `MerchantNPC.ts` 支援對話、交易、coconut 貨幣、庫存
-- [x] `MerchantSpawner.ts` 支援開場 / 定時生成與避免重複生成商人
-- [x] `NPCDialogue.ts` 統一 Trade / Chat / Leave 對話選項資料
-- [x] `DialogueUIController.ts` 與 `MerchantShopUIController.ts`
-- [x] `ResourceObject.ts` 支援 Tree / Ore 互動與掉落 prefab
-- [x] `DropItem.ts` / `FoodBase.ts` / `CollectibleItem.ts` 可加入背包
-- [x] `FoodBase.ts` 搬到 `Entity/Resources/food/`，水果 / 堅果腳本與 prefab 已大量補齊
-- [x] `ItemData.ts` 擴充水果 / 堅果 / potion / ore / wood 資料
-- [x] `OceanArea.ts` 與 `PlayerController` 水域移動 / 重力切換
-- [x] `MenuScene.ts` 提供從選單載入 `Game`
-- [x] `AppleTree.ts` / `OreRock.ts` 資源子類與掉落表
+- [x] 專案 / 場景基礎：Cocos Creator 2.4.8、`Game`、`MenuScene`、`GameOver`、主要 prefab 與 Player 基礎動畫
+- [x] Core：`Constants`、`EventCenter`、`GameManager` physics / `PLAYER_DIED` 監聽
+- [x] Player / Inventory：移動、跳躍、攻擊、受傷 / 死亡、B 背包、F 商人、T debug coconut、背包增刪查、icon、右鍵使用 / 刪除
+- [x] Combat / NPC：Peace / Neutral / Hostile、Wander / Chase、近戰、遠程 projectile、faction 過濾、HP bar、死亡事件、drop table
+- [x] Merchant：商人對話、交易、coconut 貨幣、庫存、生成 / 離開規則，Dialogue UI 已跟隨鏡頭可見範圍
+- [x] Resource / Item：Tree / Ore、AppleTree、OreRock、掉落物、FoodBase、CollectibleItem、ItemData 水果 / 堅果 / potion / ore / wood
+- [x] Map / Camera：`OceanArea` 水域移動 / 重力切換，Camera 可跟隨玩家到水域，商人依玩家附近生成
+- [x] UI：Inventory、Dialogue、Merchant Shop、HP / EXP HUD 外殼、Menu 進入 Game、玩家死亡切 GameOver
 
 ### 進行中
 
 - [ ] Inspector 綁定完整性檢查
 - [ ] 商店 / 背包 UI 實機流程測試
+- [ ] MerchantShop UI 改成 screen-space / camera-bound，避免 OceanArea 交易時離開畫面
 - [ ] 遠程攻擊與水域實機流程測試
 - [ ] 玩家回血與食物效果 API 統一
 
@@ -142,6 +148,13 @@
 - [ ] Score 系統
 - [ ] EXP 實際增加流程
 - [ ] Scoreboard / 排行榜
+- [ ] 帳號系統：註冊 / 登入 / 登出
+- [ ] Firebase 存檔 / 讀檔
+- [ ] 暫停 / 繼續遊戲
+- [ ] 回主畫面 / 重玩流程
+- [ ] 各場景 BGM 與至少五種 SFX
+- [ ] 五種粒子特效
+- [ ] Projectile / drop Node Pooling
 - [ ] `NPC_DIED` 接掉落物 / Score / EXP
 - [ ] `GameManager.onGameOver()` 結算 UI
 - [ ] 正式 MapManager / TileRenderer
@@ -206,6 +219,8 @@
 - [x] Inventory UI
 - [x] Dialogue UI
 - [x] Merchant Shop UI
+- [x] Dialogue UI 可跟著鏡頭可見範圍顯示
+- [ ] Merchant Shop UI 改掛 Screen UI Root / Main Camera 對齊畫面
 - [ ] Score label
 - [ ] Game Over 結算面板
 - [ ] UI prefab 整理
@@ -238,6 +253,7 @@
 - [ ] InventoryUI 接 `gridContainer`
 - [ ] DialogueUI 接 prompt、panel、option labels
 - [ ] MerchantShopUI 接 root、labels、itemListRoot、buyButton
+- [ ] MerchantShopUI root 放在跟隨 Main Camera 的 Screen UI Root，或由腳本每次 open 時轉成 camera/screen 座標
 
 ### Cocos Inspector 設定
 

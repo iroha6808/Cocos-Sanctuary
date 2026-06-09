@@ -16,6 +16,9 @@ export default class OreRock extends ResourceObject {
     @property({ type: [DropEntry], tooltip: '掉落表（可設多種，weight 控制機率）' })
     dropTable: DropEntry[] = [];
 
+    @property({ tooltip: '是否移除岩石' })
+    deplete: boolean = false;
+
     protected onDrop() {
         const pos = this.getWorldPos();
 
@@ -32,7 +35,7 @@ export default class OreRock extends ResourceObject {
 
     protected onDepleted() {
         cc.log('[OreRock] 礦石耗盡，移除節點');
-        this.node.destroy();
+        if (this.deplete) this.node.destroy();
     }
 
     private pickRandom(): DropEntry | null {

@@ -49,6 +49,7 @@ export default class MerchantShopUIController extends cc.Component {
     private buyAmount: number = 1;
 
     onLoad() {
+        this.bindItemListInput();
         this.close();
     }
 
@@ -69,6 +70,7 @@ export default class MerchantShopUIController extends cc.Component {
 
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
+        this.bindItemListInput();
         this.refresh();
     }
 
@@ -225,6 +227,35 @@ export default class MerchantShopUIController extends cc.Component {
                 label.string = "";
                 child.active = false;
             }
+        }
+    }
+
+    private bindItemListInput(): void {
+        if (!this.itemListRoot) {
+            return;
+        }
+
+        for (let index = 0; index < this.itemListRoot.children.length; index++) {
+            const child = this.itemListRoot.children[index];
+            if ((child as any).__merchantShopInputBound) {
+                continue;
+            }
+            (child as any).__merchantShopInputBound = true;
+            child.on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
+                if (
+                    this.isOpen()
+                    && event.getButton() === cc.Event.EventMouse.BUTTON_LEFT
+                ) {
+                    event.stopPropagation();
+                    this.selectItem(index);
+                }
+            }, this);
+            child.on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
+                if (this.isOpen()) {
+                    event.stopPropagation();
+                    this.selectItem(index);
+                }
+            }, this);
         }
     }
 }

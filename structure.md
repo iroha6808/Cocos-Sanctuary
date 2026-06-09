@@ -130,6 +130,7 @@ local plans/
 ```text
 Canvas
   Main Camera
+    CameraFollow                  # 目前會跟玩家移動到水域
   Background
   tempFloor
   Title
@@ -139,6 +140,7 @@ Canvas
   World Root
     OceanArea                      # PhysicsBoxCollider sensor + OceanArea
   UI Root
+    Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
     ExpLabel
     HpBar
       bar
@@ -243,6 +245,7 @@ Canvas
   - 週期性或開場生成旅行商人。
   - 可指定 `merchantPrefab`、`playerNode`、`spawnParent`、生成距離、生成間隔。
   - 若場上已有旅行商人，會重用現有商人，不重複生成。
+  - 生成位置依玩家世界座標計算；玩家在 OceanArea 時商人會生成在水域附近。
 
 ## Data
 
@@ -294,9 +297,11 @@ Canvas
 - `DialogueUIController.ts`
   - 控制商人 prompt 與選項 UI。
   - `showPrompt()`、`showOptions()`、`selectNext()`、`selectPrev()`、`hide()`。
+  - 使用 anchorTarget + clamp，讓商人對話維持在鏡頭可見範圍。
 - `MerchantShopUIController.ts`
   - 顯示商店商品、價格、庫存、玩家持有數、購買數量、貨幣數。
   - `open()`、`close()`、`refresh()`、`selectItem()`、`increaseAmount()`、`decreaseAmount()`、`buySelected()`。
+  - 目前仍偏固定世界座標；OceanArea 交易時可能跑出畫面，應改掛 Screen UI Root / Main Camera。
 
 ## Prefab / Inspector 重點
 
@@ -346,6 +351,7 @@ Canvas
   - `UIManager.expLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
+  - `MerchantShopPanel` 建議放在 Screen UI Root 或 Main Camera 子節點，避免 Camera 移動後跑出畫面。
 
 ## 主要流程
 
@@ -384,8 +390,10 @@ Player F
   -> MerchantNPC.beginInteraction()
   -> NPC_AI.beginTalk()
   -> DialogueUIController.showOptions()
+  -> dialogue clamped to camera-visible Canvas area
   -> MerchantNPC.openTrade()
   -> MerchantShopUIController.open()
+  -> shop should render in Screen UI Root / camera space
   -> MerchantNPC.buy()
   -> InventoryManager.removeItem("coconut")
   -> InventoryManager.addItem(item)

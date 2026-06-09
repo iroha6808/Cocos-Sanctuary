@@ -166,7 +166,11 @@ export default class MerchantNPC extends cc.Component {
             return false;
         }
 
-        if (!InventoryManager.instance.removeItem("coconut", cost)) {
+        if (!InventoryManager.instance.transact(
+            [{ itemId: "coconut", count: cost }],
+            [{ itemId: itemDefinition.id, count: amount }]
+        )) {
+            this.log("buy failed: inventory transaction was rejected.");
             return false;
         }
 
