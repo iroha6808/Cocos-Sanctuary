@@ -118,6 +118,13 @@ export default class PlayerController extends BaseEntity {
         this.setupMouseWheelInput();
 
         this.bodyNode = this.node.getChildByName("Sprite_Body") || null!;
+
+        this.node.zIndex = 100;
+
+        if (this.bodyNode) {
+            this.bodyNode.zIndex = 101;
+        }
+        
         if (this.bodyNode) {
             this.anim = this.bodyNode.getComponent(cc.Animation) || null!;
             if (this.anim) {
@@ -709,13 +716,9 @@ export default class PlayerController extends BaseEntity {
         cameraFollow.targetOffsetX = 0;
         cameraFollow.targetOffsetY = 160;
 
-        cameraFollow.useXLimit = true;
-        cameraFollow.minX = 0;
-        cameraFollow.maxX = 960;
-
-        cameraFollow.useYLimit = true;
-        cameraFollow.minY = -590;
-        cameraFollow.maxY = 0;
+        // 先給一組比舊版大的安全範圍
+        // 後面如果有更完整地圖資訊再精調
+        cameraFollow.setBounds(-2000, 4000, -1200, 400);
     }
 
     private applyRuntimeMovementTuning() {

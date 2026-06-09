@@ -30,7 +30,7 @@ export default class CameraFollow extends cc.Component {
     useXLimit: boolean = true;
 
     @property
-    minX: number = 0;
+    minX: number = -2000;
 
     @property
     maxX: number = 960;
@@ -86,6 +86,15 @@ export default class CameraFollow extends cc.Component {
             this.node.x = nextX;
             this.node.y = nextY;
         }
+    }
+
+    public setBounds(minX: number, maxX: number, minY: number, maxY: number): void {
+        this.useXLimit = true;
+        this.useYLimit = true;
+        this.minX = minX;
+        this.maxX = maxX;
+        this.minY = minY;
+        this.maxY = maxY;
     }
 
     private clamp(value: number, min: number, max: number): number {
