@@ -98,7 +98,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "3423051d-19ba-4348-ba59-9bd893bfc7a9"
+      "__uuid__": "48898303-7580-4428-99d7-6e919822e52a"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -151,7 +151,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "3423051d-19ba-4348-ba59-9bd893bfc7a9"
+      "__uuid__": "48898303-7580-4428-99d7-6e919822e52a"
     },
     "targetSprite": {
       "__id__": 2
