@@ -39,13 +39,14 @@ export default class CameraRig extends cc.Component {
     private zoomKickDuration: number = 0;
     private paused: boolean = false;
     private camera: cc.Camera = null;
+    private targetWarningShown: boolean = false;
 
     public static getOrCreate(cameraNode?: cc.Node): CameraRig {
         if (CameraRig.instance && cc.isValid(CameraRig.instance.node)) {
             return CameraRig.instance;
         }
 
-        const node = cameraNode || cc.find("Canvas/Main Camera") || cc.find("Main Camera");
+        const node = cameraNode;
         if (!node) {
             return null;
         }
@@ -68,11 +69,9 @@ export default class CameraRig extends cc.Component {
         this.baseZoom = this.camera ? this.camera.zoomRatio : 1;
         EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
-        this.resolveTarget();
     }
 
     start(): void {
-        this.resolveTarget();
         if (this.target) {
             this.lastTargetPosition = this.getTargetWorldPosition();
         }
@@ -143,8 +142,11 @@ export default class CameraRig extends cc.Component {
             return this.target;
         }
 
-        this.target = cc.find("Canvas/Player");
-        return this.target;
+        if (!this.targetWarningShown) {
+            cc.warn("[CameraRig] target is not assigned. Drag Player to CameraRig.target or GameManager.playerNode.");
+            this.targetWarningShown = true;
+        }
+        return null;
     }
 
     private getShakeOffset(dt: number): cc.Vec2 {

@@ -28,6 +28,9 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     fadeOverlay: cc.Node = null;
 
+    @property(CameraRig)
+    cameraRig: CameraRig = null;
+
     @property
     menuSceneName: string = "MenuScene";
 
@@ -57,7 +60,6 @@ export default class GameManager extends cc.Component {
     private isPaused: boolean = false;
     private physicsEnabledBeforePause: boolean = true;
     private inputManager: InputManager = null;
-    private cameraRig: CameraRig = null;
     private hitFeelManager: HitFeelManager = null;
 
     onLoad() {
@@ -78,9 +80,10 @@ export default class GameManager extends cc.Component {
         if (this.inputManager) {
             this.inputManager.pushContext(InputContext.Gameplay, this.handleGameplayInput, this);
         }
-        this.cameraRig = CameraRig.getOrCreate(cc.find("Canvas/Main Camera"));
         if (this.cameraRig && this.playerNode) {
             this.cameraRig.target = this.playerNode;
+        } else if (!this.cameraRig) {
+            cc.warn("[GameManager] cameraRig is not assigned; attach CameraRig.ts to Main Camera and drag it here.");
         }
         this.hitFeelManager = HitFeelManager.getOrCreate(this.node);
 
@@ -321,7 +324,7 @@ export default class GameManager extends cc.Component {
     }
 
     private createSaveData(username: string): SaveData {
-        const player = this.playerNode || cc.find("Canvas/Player");
+        const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
         const hp = playerEntity && typeof playerEntity.currentHp === "number" ? playerEntity.currentHp : 0;
         const maxHp = playerEntity && typeof playerEntity.maxHp === "number" ? playerEntity.maxHp : 1;
@@ -337,7 +340,7 @@ export default class GameManager extends cc.Component {
     }
 
     private restorePlayerHp(saveData: SaveData): void {
-        const player = this.playerNode || cc.find("Canvas/Player");
+        const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
         if (!playerEntity) {
             return;
@@ -346,6 +349,15 @@ export default class GameManager extends cc.Component {
         playerEntity.maxHp = Math.max(1, saveData.maxHp || playerEntity.maxHp || 1);
         playerEntity.currentHp = Math.max(0, Math.min(saveData.hp || playerEntity.maxHp, playerEntity.maxHp));
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, playerEntity.currentHp, playerEntity.maxHp);
+    }
+
+    private getPlayerNode(): cc.Node {
+        if (this.playerNode && cc.isValid(this.playerNode)) {
+            return this.playerNode;
+        }
+
+        cc.warn("[GameManager] playerNode is not assigned; drag Player to GameManager.playerNode.");
+        return null;
     }
 
     private loadSceneWithFade(sceneName: string): void {
