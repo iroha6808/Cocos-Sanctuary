@@ -6,6 +6,8 @@ import { InventoryManager } from "../Player/InventoryManager";
 import InputManager from "../Input/InputManager";
 import { InputAction, InputPayload } from "../Input/InputAction";
 import { InputContext } from "../Input/InputContext";
+import CameraRig from "./CameraRig";
+import HitFeelManager from "./HitFeelManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -55,6 +57,8 @@ export default class GameManager extends cc.Component {
     private isPaused: boolean = false;
     private physicsEnabledBeforePause: boolean = true;
     private inputManager: InputManager = null;
+    private cameraRig: CameraRig = null;
+    private hitFeelManager: HitFeelManager = null;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -74,6 +78,11 @@ export default class GameManager extends cc.Component {
         if (this.inputManager) {
             this.inputManager.pushContext(InputContext.Gameplay, this.handleGameplayInput, this);
         }
+        this.cameraRig = CameraRig.getOrCreate(cc.find("Canvas/Main Camera"));
+        if (this.cameraRig && this.playerNode) {
+            this.cameraRig.target = this.playerNode;
+        }
+        this.hitFeelManager = HitFeelManager.getOrCreate(this.node);
 
         // 啟用物理引擎
         const physicsManager = cc.director.getPhysicsManager();
@@ -226,6 +235,8 @@ export default class GameManager extends cc.Component {
         if (this.inputManager) {
             this.inputManager.clearOwner(this);
         }
+        this.cameraRig = null;
+        this.hitFeelManager = null;
     }
 
     private setPhysicsPaused(paused: boolean): void {
@@ -235,7 +246,8 @@ export default class GameManager extends cc.Component {
         }
 
         if (paused) {
-            this.physicsEnabledBeforePause = physicsManager.enabled;
+            const hitStopRunning = HitFeelManager.instance && HitFeelManager.instance.isHitStopRunning();
+            this.physicsEnabledBeforePause = hitStopRunning ? true : physicsManager.enabled;
             physicsManager.enabled = false;
             return;
         }
