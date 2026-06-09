@@ -1,6 +1,6 @@
 # Cocos Sanctuary 專案架構
 
-> 更新日期：2026-06-09
+> 更新日期：2026-06-10
 > 引擎：Cocos Creator 2.4.8
 > 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人、水域控制、資源掉落、背包與 UI。
 
@@ -149,8 +149,8 @@ Canvas
     OceanArea                      # PhysicsBoxCollider sensor + OceanArea
   UI Root
     Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
-    FadeOverlay                   # optional，Menu / Game / GameOver 轉場用
-    PausePanel                    # GameManager pause / resume / retry / menu / save
+    FadeOverlay                   # optional，全螢幕黑幕，Retry / Main Menu 切場景淡出用
+    PausePanel                    # Esc 暫停時顯示的 UI 容器，放 resume / retry / menu / save
     ExpLabel
     ScoreLabel
     HpBar
@@ -212,6 +212,7 @@ Canvas
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `GameManager.ts`
   - 遊戲初始化、PhysicsManager、CameraRig / HitFeelManager runtime 建立、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
+  - `pausePanel` 是暫停 UI 容器；`fadeOverlay` 是 Retry / Main Menu 切場景前的淡出黑幕。
 
 ## Attack
 
@@ -388,7 +389,8 @@ Canvas
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
   - `MerchantShopPanel` 建議放在 Screen UI Root 或 Main Camera 子節點，避免 Camera 移動後跑出畫面。
 - Flow / final grading
-  - `GameManager.pausePanel`、`fadeOverlay`
+  - `GameManager.pausePanel`：Esc 暫停時顯示的 UI 容器，可放 Resume / Retry / Main Menu / Save 按鈕。
+  - `GameManager.fadeOverlay`：全螢幕黑色 UI 節點，供 Retry / Main Menu 切場景前淡出；未綁時會直接切場景。
   - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels
   - `GameOverScene` title / username / score / exp / status labels、retry / menu / submit buttons
   - `AudioManager` BGM + six SFX clips

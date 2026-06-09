@@ -52,7 +52,7 @@ export default class HitFeelManager extends cc.Component {
             return HitFeelManager.instance;
         }
 
-        const targetNode = hostNode || cc.find("Canvas") || cc.director.getScene();
+        const targetNode = hostNode || cc.director.getScene();
         if (!targetNode) {
             return null;
         }
