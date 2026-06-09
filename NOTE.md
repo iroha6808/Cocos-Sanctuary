@@ -133,7 +133,7 @@ Canvas
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard。
 - `AudioManager.ts`：支援 scene BGM 與 attack / hit / collect / buy / heal / skill 六種 SFX。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
-- `GameManager.ts`：Singleton、啟用物理、鍵盤入口、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；場景切換時會清掉 static instance，避免第二輪按鍵失效。
+- `GameManager.ts`：Singleton、啟用物理、鍵盤入口、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，場景切換時會清掉 static instance，避免第二輪按鍵失效。
 
 ### Player
 

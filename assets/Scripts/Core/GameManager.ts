@@ -58,6 +58,7 @@ export default class GameManager extends cc.Component {
     private isPaused: boolean = false;
     private playerController: PlayerController = null;
     private lastGlobalKeyTimes: { [key: number]: number } = {};
+    private physicsEnabledBeforePause: boolean = true;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -129,6 +130,7 @@ export default class GameManager extends cc.Component {
         }
         this.isPaused = true;
         cc.director.getScheduler().setTimeScale(0);
+        this.setPhysicsPaused(true);
         if (this.pausePanel) {
             this.pausePanel.active = true;
         } else {
@@ -145,6 +147,7 @@ export default class GameManager extends cc.Component {
         }
         this.isPaused = false;
         cc.director.getScheduler().setTimeScale(1);
+        this.setPhysicsPaused(false);
         if (this.pausePanel) {
             this.pausePanel.active = false;
         }
@@ -207,6 +210,7 @@ export default class GameManager extends cc.Component {
 
     onDestroy() {
         cc.director.getScheduler().setTimeScale(1);
+        this.setPhysicsPaused(false);
         if (GameManager.instance === this) {
             GameManager.instance = null;
         }
@@ -272,6 +276,21 @@ export default class GameManager extends cc.Component {
         return isDown
             ? playerController.handleGameKeyDown(keyCode)
             : playerController.handleGameKeyUp(keyCode);
+    }
+
+    private setPhysicsPaused(paused: boolean): void {
+        const physicsManager = cc.director.getPhysicsManager();
+        if (!physicsManager) {
+            return;
+        }
+
+        if (paused) {
+            this.physicsEnabledBeforePause = physicsManager.enabled;
+            physicsManager.enabled = false;
+            return;
+        }
+
+        physicsManager.enabled = this.physicsEnabledBeforePause;
     }
 
     private resolvePlayerController(): PlayerController {

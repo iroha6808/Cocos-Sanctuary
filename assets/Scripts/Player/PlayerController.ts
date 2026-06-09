@@ -77,6 +77,7 @@ export default class PlayerController extends BaseEntity {
     private currentDialogueOptions: DialogueOption[] = [];
     private knockbackTimer: number = 0;
     private gameOverTransitionPending: boolean = false;
+    private inputLockedByGamePause: boolean = false;
 
     private isInOcean: boolean = false;
     private originalGravityScale: number = 1;
@@ -92,6 +93,8 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
         cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
+        EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
+        EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
         if (this.canvasNode) {
@@ -134,6 +137,7 @@ export default class PlayerController extends BaseEntity {
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
+        if (this.inputLockedByGamePause) return;
         if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) return;
         if (this.inventoryUI && this.inventoryUI.active) return;
 
@@ -151,6 +155,10 @@ export default class PlayerController extends BaseEntity {
     }
 
     private applyMoveKey(keyCode: number, isDown: boolean): boolean {
+        if (this.inputLockedByGamePause) {
+            return this.isPlayerControlKey(keyCode);
+        }
+
         if (keyCode === cc.macro.KEY.escape) {
             if (!isDown) {
                 return false;
@@ -394,6 +402,8 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
+        if (this.inputLockedByGamePause) return;
+
         if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
             this.closeMerchantFlow();
         }
@@ -616,6 +626,8 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
         cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
+        EventCenter.off(GameEvent.GAME_PAUSED, this.onGamePaused, this);
+        EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
 
         if (this.canvasNode && cc.isValid(this.canvasNode)) {
             this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
@@ -786,6 +798,24 @@ export default class PlayerController extends BaseEntity {
     }
 
     private onCraftingUIOpened(): void {
+        this.moveDir.x = 0;
+        if (this.rb) {
+            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+        }
+    }
+
+    private onGamePaused(): void {
+        this.inputLockedByGamePause = true;
+        this.clearMovementInput();
+    }
+
+    private onGameResumed(): void {
+        this.inputLockedByGamePause = false;
+        this.clearMovementInput();
+    }
+
+    private clearMovementInput(): void {
+        this.keyStates = {};
         this.moveDir.x = 0;
         if (this.rb) {
             this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
