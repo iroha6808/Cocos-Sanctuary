@@ -55,6 +55,8 @@ export default class CombatProjectile extends cc.Component {
     private hitTargets: cc.Node[] = [];
     private launched: boolean = false;
     private finishing: boolean = false;
+    private poolReturnHandler: (node: cc.Node) => void = null;
+    private poolReturnTarget: any = null;
 
     onLoad() {
         this.ensurePhysicsComponents();
@@ -118,6 +120,33 @@ export default class CombatProjectile extends cc.Component {
             `damage=${this.damage}, velocity=(${velocity.x.toFixed(1)}, ${velocity.y.toFixed(1)})`
         );
         return true;
+    }
+
+    public setPoolReturnHandler(handler: (node: cc.Node) => void, target?: any): void {
+        this.poolReturnHandler = handler;
+        this.poolReturnTarget = target || null;
+    }
+
+    public prepareForPool(): void {
+        this.unscheduleAllCallbacks();
+        this.launched = false;
+        this.finishing = false;
+        this.ownerNode = null;
+        this.damage = 0;
+        this.knockbackX = 0;
+        this.knockbackY = 0;
+        this.hitTargets = [];
+
+        if (this.rigidBody) {
+            this.rigidBody.linearVelocity = cc.v2(0, 0);
+            this.rigidBody.angularVelocity = 0;
+            this.rigidBody.awake = false;
+        }
+
+        if (this.collider) {
+            this.collider.enabled = false;
+            this.collider.apply();
+        }
     }
 
     onBeginContact(
@@ -323,7 +352,7 @@ export default class CombatProjectile extends cc.Component {
         this.finishing = true;
         this.launched = false;
         this.unscheduleAllCallbacks();
-        this.log(`destroyed: ${reason}`);
+        this.log(`finished: ${reason}`);
 
         if (this.collider) {
             this.collider.enabled = false;
@@ -332,6 +361,12 @@ export default class CombatProjectile extends cc.Component {
 
         if (cc.isValid(this.node)) {
             EffectsManager.play(EffectType.FIRE, this.getNodeWorldPosition(this.node));
+            if (this.poolReturnHandler) {
+                const handler = this.poolReturnHandler;
+                const target = this.poolReturnTarget;
+                handler.call(target, this.node);
+                return;
+            }
             this.node.destroy();
         }
     }

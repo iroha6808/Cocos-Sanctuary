@@ -14,7 +14,6 @@ export enum InputAction {
     NavigateDown = "NavigateDown",
     AdjustLeft = "AdjustLeft",
     AdjustRight = "AdjustRight",
-    Retry = "Retry",
     ToggleMute = "ToggleMute",
     DebugAddCoconut = "DebugAddCoconut",
     DebugAddCraftItems = "DebugAddCraftItems"

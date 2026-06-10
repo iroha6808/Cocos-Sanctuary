@@ -1,7 +1,6 @@
 import { InputAction } from "./InputAction";
 
 const KEY_ESCAPE = 27;
-const KEY_R = 82;
 const KEY_M = 77;
 
 export function getActionForKey(keyCode: number): InputAction {
@@ -35,9 +34,6 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.escape:
         case KEY_ESCAPE:
             return InputAction.Cancel;
-        case cc.macro.KEY.r:
-        case KEY_R:
-            return InputAction.Retry;
         case cc.macro.KEY.m:
         case KEY_M:
             return InputAction.ToggleMute;
@@ -58,7 +54,6 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.Crafting:
         case InputAction.Confirm:
         case InputAction.Cancel:
-        case InputAction.Retry:
         case InputAction.ToggleMute:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:

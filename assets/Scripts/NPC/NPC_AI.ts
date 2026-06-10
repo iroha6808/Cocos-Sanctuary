@@ -3,6 +3,7 @@ import EventCenter from "../Core/EventCenter";
 import { EntityType, GameEvent } from "../Core/Constants";
 import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
 import CombatProjectile from "../Attack/CombatProjectile";
+import NPCPathAgent from "./NPCPathAgent";
 
 const { ccclass, property } = cc._decorator;
 
@@ -219,6 +220,7 @@ export default class NPC_AI extends BaseEntity {
     private rangedReleasePending: boolean = false;
     private baseBodyScaleX: number = 1;
     private lastProjectileFlightTime: number = 0;
+    private pathAgent: NPCPathAgent = null;
 
     onLoad() {
         super.onLoad();
@@ -232,6 +234,7 @@ export default class NPC_AI extends BaseEntity {
         }
 
         this.rb = this.getComponent(cc.RigidBody);
+        this.pathAgent = this.getComponent(NPCPathAgent);
         this.lastX = this.node.x;
 
         if (!this.attackHitbox) {
@@ -367,7 +370,11 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
-        const direction = this.getTargetPositionInParent().sub(this.node.position);
+        const targetWorldPosition = this.getTargetWorldPosition();
+        const pathDirection = this.pathAgent
+            ? this.pathAgent.getSteeringDirection(targetWorldPosition, dt)
+            : null;
+        const direction = pathDirection || this.getTargetPositionInParent().sub(this.node.position);
         this.updateFacing(direction);
 
         if (distance <= this.attackRange) {

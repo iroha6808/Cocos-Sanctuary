@@ -55,6 +55,7 @@ assets/
 
 - `Attack/`
 - `Core/`
+- `Camera/`
 - `Data/`
 - `Entity/`
 - `Input/`
@@ -73,6 +74,7 @@ assets/
 - `assets/Textures/effects/fire effects/`：BurningCoconutProjectile 使用的火焰特效圖與 `fire_effect.anim`。
 - `assets/Textures/npcs/`：Slime 與 Skeleton Mage 角色素材 / 動畫。
 - `assets/resources/100 FOOD ASSETS/`：水果、堅果、蔬菜、花、菇類 icon 圖；注意這是小寫 `resources`，可供 `cc.resources.load()` 使用。
+- `assets/resources/smallore/`：礦物掉落物 icon，例如 ambersphere、amethyst、coallump、rawgold、voidnugget。
 - `assets/resources/Purple Planet - Platformer Tileset/`：地圖 / 礦物 / tile 相關素材，包含 png 與來源向量檔。
 
 ## Canvas 層級規劃
@@ -104,23 +106,31 @@ Canvas
 
 ### 操作與測試鍵
 
-Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把 key / mouse / wheel 轉成 `InputAction`，再依 `InputContext` stack 分派給 Pause、商店、對話、合成、背包或 Gameplay。
+Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 action / context；`a05605d` 之後 `PlayerController.ts` 也保留部分 gameplay key / mouse / wheel 直接處理。正式整理時要確認兩邊責任不要重疊。
 
 | 操作 | 功能 | 實作位置 |
 | --- | --- | --- |
-| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `InputBindings.getActionForKey()` -> `InputManager` -> `PlayerController.setMoveInput()` / `update()` |
-| `Space` | 跳躍；水域中改成上游。 | `InputAction.Jump` -> `PlayerController.jump()` / `getOceanVerticalInput()` |
-| 滑鼠左鍵 | Gameplay 時攻擊；Pause / UI context 會吃掉。 | `InputManager.onMouseDown()` -> `InputAction.Attack` -> `PlayerController.attack()` |
+| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `PlayerController.onKeyDown()` / `onKeyUp()` -> `applyMoveKey()` -> `update()` |
+| `Space` | 跳躍；水域中改成 boost / 上游邏輯。 | `PlayerController.applyMoveKey()` -> `jump()` / `boostInOcean()` / `getOceanVerticalInput()` |
+| 滑鼠左鍵 | Gameplay 時近戰攻擊；Pause / UI 時會被玩家狀態檢查擋掉。 | `PlayerController.setupMouseAttackInput()` -> `handleMouseAttack()` -> `attack()` |
+| 滑鼠右鍵 | 玩家槍射擊；Pause / UI / 背包 / 商店 / 合成開啟時不射擊。 | `PlayerGun.ts` -> `ProjectilePoolManager.spawn()` -> `CombatProjectile.launch()` |
+| `1` | 切到 Gun 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Gun)` |
+| `2` | 切到 Jetpack 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Jetpack)` |
+| `3` | 切到 Grapple 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Grapple)` |
+| Jetpack 模式 `Space` | 原本跳躍起手保留，按住時消耗 fuel 持續向上推進。 | `PlayerController.applyMoveKey()` + `PlayerToolController.updateJetpack()` |
+| Grapple 模式滑鼠右鍵 | Raycast 鉤非 sensor 實體地形，按住拉向鉤點，放開或超距解除。 | `PlayerToolController.tryAttachGrapple()` / `updateGrapple()` |
 | `B` | 開關背包 UI；背包開啟時 push `Inventory` context。 | `PlayerController.toggleInventory()` / `handleInventoryInput()` |
-| `F` | Gameplay 時互動；對話中確認；商店中購買。 | `PlayerController.handleGameplayInput()` / `handleDialogueInput()` / `handleMerchantShopInput()` |
+| `F` | Gameplay 時互動；優先商人，沒有商人才檢查車 / 船；載具中按 `F` 下車 / 下船。 | `PlayerController.tryInteractWithMerchant()`、`VehicleController.handleVehicleInput()` |
 | `Esc` | 依最上層 context：關商店 / 關合成 / 關背包 / Pause Resume。 | `InputAction.Cancel`、`GameManager.handleGameplayInput()`、`handlePausedInput()` |
-| `R` | Game / GameOver 時重玩；Pause 中也可重玩。 | `InputAction.Retry`、`GameManager.handleGameplayInput()`、`GameOverScene.onKeyDown()` |
 | `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
 | `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
 | `Up` / `Down`、`W` / `S`、滑鼠滾輪 | Gameplay 水中上下；UI context 中改成對話 / 商店上下選擇。 | `InputManager.onMouseWheel()`、`PlayerController` context handlers |
 | 水域中 `W` / `Up` / `Space` | 上游。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
 | 水域中 `S` / `Down` | 下潛。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
+| 空中 `S` / `Down` | 快速下墜。 | `PlayerController.tryFastFall()` |
+| 水域中 `Space` | 水中 boost，受 cooldown 限制。 | `PlayerController.boostInOcean()` |
+| 車 / 船中 `A/D/W/S/Space/F` | 載具控制；車用 A/D + Space 煞車，船用 A/D/W/S + Space 小加速，F 離開。 | `VehicleController` + `CarController` / `BoatController` |
 | 商店開啟時 `Left` / `Right` | 減少 / 增加購買數量。 | `MerchantShopUIController.handleInput()` |
 | `T` | 測試用：加入 `coconut x10` 到背包，作為商人交易貨幣。 | `InputAction.DebugAddCoconut` -> `PlayerController.debugAddCoconut()` |
 | `Y` | 測試用：加入 `coconut`、`ore`、`apple` 各 10 個，方便測合成與交易。 | `InputAction.DebugAddCraftItems` -> `PlayerController.debugAddCraftItems()` |
@@ -131,11 +141,16 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - `EventCenter.ts`：已改成 default export，事件資料會保存原 callback、target、實際 handler；`off(eventName, callback, target)` 可正確移除特定監聽，也支援清除單一事件或全部事件。
 - `BaseEntity.ts`：提供 `type`、`maxHp`、`currentHp`、clamp 後的 `takeDamage()`、`heal()`、`onDamaged()`、`die()` 基底。
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard。
-- `AudioManager.ts`：支援 scene BGM 與 attack / hit / collect / buy / heal / skill 六種 SFX。
+- `SaveService.ts`：新增 fake multiplayer realtime snapshot，支援 `upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
+- `AudioManager.ts`：支援 land / water BGM 雙 channel crossfade；監聽 `PLAYER_WATER_STATE_CHANGED`，水中淡到 `waterBgm`，未拖 `waterBgm` 時維持 `sceneBgm`。SFX 仍有 attack / hit / collect / buy / heal / skill 六種。
+- `ThemeManager.ts`：主題 / 色調切換雛形，可註冊 `tintTargets`、可選 `tintOverlay`，並提供 `applyTheme(themeName, duration)`；若開 `autoApplyOceanTheme`，會跟水域狀態切 default / ocean tint。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
-- `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`。
+- `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`；新增 `Vehicle` context，載具中優先吃 A/D/W/S/Space/F。
 - `CameraRig.ts`：手動掛到 Main Camera，使用距離指數函數調整跟隨速度，搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。
+- `CameraFollow.ts`：新增在 `assets/Scripts/Camera/`，提供簡單 smooth follow、X/Y 開關、offset 與 bounds；若使用它，就不要同時讓 `CameraRig` 控制同一台 Main Camera。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
+- `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、scene、position、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
+- `DamageNumberManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，顯示上飄傷害數字並播放 damage spark；GameManager 會 runtime 補一個。
 - `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，並顯示 `pausePanel`。Retry / 回主畫面可透過 `fadeOverlay` 做 0.25 秒黑幕淡出，場景切換時會清掉 static instance，避免第二輪按鍵失效。
 - 原則：能在 Inspector 掛節點就不要寫死 `cc.find()` 路徑；目前 `GameManager.cameraRig`、`GameManager.playerNode`、`CameraRig.target` 都採手動綁定，避免改場景層級後壞掉。
 
@@ -144,16 +159,24 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - 玩家類型設為 `EntityType.PLAYER`。
 - 啟用 Cocos Physics，並取得 `RigidBody` 控制移動。
 - 支援左右移動、跳躍、左右翻面。
+- 支援空中 fast fall、水中 boost、水中緩慢下沉、drag / control 參數。
 - 支援 `PlayerIdle`、`PlayerRun`、`PlayerAttack`、`PlayerHurt`、`PlayerDie` 動畫切換。
 - 攻擊時會啟用 `AttackHitbox` 子節點上的 `CombatHitbox`。
 - 攻擊、受傷、進入水域會觸發 `AudioManager` / `EffectsManager` feedback。
-- 不直接監聽 keyboard；Gameplay context 只呼叫玩家能力方法，Dialogue / Merchant / Inventory context 由 PlayerController 協調流程。
+- `a05605d` 後 Gameplay key / mouse / wheel 有部分回到 PlayerController 直接處理；Dialogue / Merchant / Inventory / Crafting 仍由 PlayerController 協調流程。
 - 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED`，讓 `GameManager` 結算後載入 `GameOver` 場景。
+- `PlayerGun.ts`：可掛在 Player 或 Player 子節點，監聽滑鼠右鍵，從 muzzle 對滑鼠世界座標發射玩家子彈；左鍵近戰不變。
+- `PlayerGun.ts`：會使用 `ProjectilePoolManager`，缺 manager 時 runtime 補在 Player 上；缺 projectile prefab 時只 warn。
+- `PlayerToolMode.ts`：定義 `Gun / Jetpack / Grapple` 三種工具模式。
+- `PlayerToolController.ts`：集中處理 `1/2/3`、Jetpack fuel、Grapple raycast / pull、工具 label / fuel bar 事件。
+- `PlayerToolController.ts` 會呼叫 `PlayerGun.setDirectRightMouseInput(false)`，避免工具模式右鍵和 PlayerGun 自己的右鍵監聽重複射擊。
 - 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
-- 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
-- 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`。
+- 可掃描場景中的 `MerchantNPC` 與 `VehicleInteractable`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk` / 車船 prompt；商人優先於載具。
+- `setExternalControlLocked(true, "vehicle")` 會擋玩家移動、攻擊、背包、合成與工具模式輸入；車船上載具時會用這個鎖。
+- 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`，沒有輸入時會以 `oceanSinkSpeed` 慢慢下沉。
 - 死亡載入 `GameOver` 前有 `gameOverTransitionPending`，避免重複切場景。
 - Main Camera 目前會跟隨玩家移動到水域；商人生成依玩家世界座標，所以玩家在水域時商人會生成在附近。
+- PlayerController 目前會嘗試 runtime setup `CameraFollow`；若場景已手動使用 `CameraRig`，要避免兩套同時控制 Main Camera。
 
 ### CombatHitbox
 
@@ -169,8 +192,16 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - `CombatProjectile.ts` 實作遠程攻擊投射物。
 - `launch(owner, faction, velocity, damage, knockbackX, knockbackY)` 由 `NPC_AI` 呼叫。
 - 支援陣營過濾、忽略 owner hierarchy、同一目標只命中一次。
-- 命中目標時發送 `COMBAT_HIT_CONFIRMED` 並優先呼叫 `receiveAttack()`；命中實體地形或生命週期結束後 destroy。
+- 命中目標時發送 `COMBAT_HIT_CONFIRMED` 並優先呼叫 `receiveAttack()`；命中實體地形或生命週期結束後預設 destroy。
+- `setPoolReturnHandler()` 可讓玩家槍子彈在命中 / 撞地 / lifetime 結束時回到 `cc.NodePool`，不 destroy。
 - `visualNode` 可跟隨速度方向旋轉；若 prefab 有 `CoconutSprite` / `FireEffect`，會自動整理成 `VisualRoot`。
+
+### Player Gun / Projectile Pool
+
+- `ProjectilePoolManager.ts`：玩家槍專用 `cc.NodePool`，支援 `projectilePrefab`、`projectileParent`、`prewarmCount`。
+- `spawn()` 會從 pool 取子彈或 instantiate fallback，設定 world position 後呼叫 `CombatProjectile.launch()`。
+- `recycleProjectile()` 會呼叫 `CombatProjectile.prepareForPool()`，重設 velocity、collider、hitTargets，再 `pool.put(node)`。
+- 目前第一版只套玩家右鍵槍，不改 NPC ranged projectile / 掉落物。
 
 ### Inventory / Items
 
@@ -180,8 +211,9 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - 背包最大格數目前為 `40`。
 - 背包變更時發送 `cc.systemEvent.emit("INVENTORY_CHANGED")`。
 - `InventoryUIController.ts`：監聽 `INVENTORY_CHANGED`，將道具數量顯示到 grid slot 的 `Label`，並支援 coconut / apple / ore icon。
+- `InventoryUIController.ts`：新增 `mainCameraNode`、`followMainCamera`、`clampToCameraView` 等欄位，背包開啟時可跟隨 Main Camera 並限制在鏡頭可見範圍。
 - `InventoryUIController.ts`：右鍵格子可開 action menu，支援 Use / Delete；目前 Use 只是扣道具，尚未套用回血效果。
-- `ItemData.ts`：目前定義 `coconut`、`potion`、`apple`、`ore`、`wood`，以及多種水果 / 堅果資料與 icon / HP / stamina / rotten time。
+- `ItemData.ts`：目前定義 `coconut`、`potion`、`apple`、`ore`、`wood`、多種水果 / 堅果，以及 smallore 礦物資料與 icon path。
 - `CollectibleItem.ts`：碰到 PlayerController 時可加入背包並 destroy 自己。
 
 ### Merchant / Dialogue / Shop
@@ -196,7 +228,7 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - `MerchantSpawner.ts`：生成位置跟玩家世界座標有關，Camera 跟到 OceanArea 後商人也可能出現在水域附近。
 - `NPCDialogue.ts`：統一 `Trade`、`Chat`、`Leave` 對話選項 ID 與資料格式。
 - `DialogueUIController.ts`：支援 Prompt、Options、選項高亮、滾輪切換、取得選取 index，並用 anchorTarget + clamp 讓對話留在鏡頭可見範圍。
-- `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態；目前 root 仍偏世界固定座標。
+- `MerchantShopUIController.ts`：支援開關商店、顯示 coconut 數量、商品列表、價格、庫存、玩家持有數、購買數量、購買按鈕狀態；新增跟 Main Camera 與 clamp 邏輯，OceanArea 交易時應保持在鏡頭可見範圍。
 
 ### NPC AI
 
@@ -212,6 +244,11 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - 支援卡住時自動跳躍。
 - 支援遠程 projectile prefab、生成點、parent、釋放延遲、瞄準模式、飛行時間、速度與擊退。
 - 支援 NPC drop table：死亡後可依機率生成 prefab 並設定 `DropItem.itemName` / `itemAmount`。
+- 可選掛 `NPCPathAgent.ts`：有 `PathGraph` 時先沿 waypoint 追玩家；找不到 graph / path 時 fallback 原本直接追擊。
+- `NPCPathAgent` 碰到帶 `Portal` 的 waypoint 會嘗試傳送，讓敵人能走 portal link 後繼續追玩家。
+- `MiniBossAI.ts`：傳送法師展示 Boss，依 HP ratio 進 phase 2，定時 teleport 到手動拖的 points，定時 summon minion prefab，Boss 死亡後發送 `BOSS_DEFEATED`。
+- `BossArenaController.ts`：掛在 arena sensor，玩家進入後啟動 Boss；Boss 死亡後可關 gate、開 reward、加 clear score。
+- `EnemyRespawner.ts`：玩家距離刷新。玩家進 activation range 才生成，離 despawn range 可清掉，維持 `maxAlive`。
 - 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
 - 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
 - NPC 目前功能重點：Dynamic RigidBody、hurtbox / attack hitbox、HP bar、jump / stuck 越障、受傷 / 死亡動畫與近遠程攻擊。
@@ -221,6 +258,8 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 - `ResourceObject.ts`：資源基底，處理滑鼠左鍵互動、互動距離、每幾下觸發一次掉落、共用 prefab spawn 工具。
 - `AppleTree.ts`：蘋果樹 / 灌木子類，支援 `maxApples`、`regenInterval`、蘋果掉落與 depleted 外觀。
 - `OreRock.ts`：礦石子類，支援 weighted drop table，掉落後 destroy。
+- `Orebase.ts`：礦物掉落基底，繼承 `DropItem`，支援落地、提示、撿起、加入背包、`ITEM_COLLECTED`、collect 音效 / 特效。
+- `Oredrops/*.ts`：smallore 礦物子類，包含 ambersphere、amethyst、calcitecluster、citrinegeode、coallump、cobaltore、coppercluster、firestone、fossilizedshell、icecrystal、ironore、jadeorb、lapislazuli、manapearl、meteoritechunk、mossagate、radslimechunk、rawgold、rosequartz、rubycrystal、silverbar、starmetalshard、tealprism、voidnugget。
 - `DropItem.ts`：掉落物會先飛出，碰到 ground / Ground / tempFloor 後停下；玩家靠近後吸附，收集成功會加入背包、發送 `ITEM_COLLECTED`、播放 collect SFX / particle 並 destroy。
 - `FoodBase.ts`：位於 `Entity/Resources/food/`，繼承 `DropItem`，食物掉落物可飛出、吸附玩家、收集時加入 `InventoryManager`。
 - `FoodBase.eat()` 會先找 `PlayerStats`，沒有時改用 `PlayerController.heal()`，並發送 HP 更新與 heal feedback。
@@ -229,16 +268,32 @@ Game 場景輸入入口集中在 `assets/Scripts/Input/InputManager.ts`。它把
 
 ### Map / Scene
 
-- `OceanArea.ts`：掛在水域 sensor collider 上；玩家進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
+- `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
+- `OceanArea.ts`：進出水域時會 emit `PLAYER_WATER_STATE_CHANGED(isInWater, oceanNode)`，給 `AudioManager` crossfade BGM 與 `ThemeManager` 可選色調切換使用。
+- `OceanLayerOrder.ts`：固定 OceanArea 子節點 zIndex / active / opacity，避免水域視覺層被蓋掉。
+- `OceanPrefabBuilder.ts`：可在 onLoad 清除舊 `GeneratedContent`，避免 ocean prefab 舊生成內容殘留。
+- `Portal.ts`：同場景成對傳送。兩個 portal 設同一個 `pairId`，玩家 / NPC 碰到 sensor 後傳到另一端 `exitOffset`，並用 cooldown 避免來回抖動。
+- `BouncePad.ts`：sensor 觸發後依節點 local up 或 local right 反彈 Player / NPC；預設 local up，所以旋轉節點就能改方向。
+- `PathNode.ts`：手動 waypoint，可用 `neighbors` 連線；若節點旁有 portal，可拖 `Portal` 當 link。
+- `PathGraph.ts`：收集子節點 `PathNode`，用簡單 A* 找 waypoint path，portal pair 會視為鄰接節點。
 - `MenuScene.ts`：選單場景用腳本，支援開始遊戲、讀取存檔進遊戲、註冊、登入、登出、設定面板、排行榜、靜音與 fade。
+
+### Vehicle
+
+- `VehicleInteractable.ts`：車 / 船共用靠近互動元件，提供 `interactionDistance`、`promptText`、`canInteract(player)`。
+- `VehicleController.ts`：處理上下載具、push `InputContext.Vehicle`、鎖住 PlayerController、把 Player 節點同步到 `seatNode`，離開時放到 `exitOffsetX/Y`。
+- `CarController.ts`：繼承 `VehicleController`，上車後 A/D 加速、Space 煞車。
+- `BoatController.ts`：繼承 `VehicleController`，上船後 A/D 左右、W/S 柔和上下、Space 小加速。
+- 載具中 Player 節點仍跟著 seat 移動，所以 `CameraRig.target = Player` 時鏡頭會跟著車 / 船；Player 可隱藏且 collider 可暫時關閉，離開載具後還原。
 - `GameOverScene.ts`：結算場景腳本，讀取 `SaveService.getLastRun()`，顯示玩家、Score、EXP，支援 Retry、Main Menu、Submit Score。
 
 ### UI
 
 - `UIManager.ts`：監聽 `PLAYER_HP_CHANGED`、`PLAYER_EXP_CHANGED`、`SCORE_CHANGED` 更新 HP / EXP / Score HUD。
 - `InventoryUIController.ts`：背包 grid UI。
-- `DialogueUIController.ts`：商人提示與對話選項 UI；已能跟隨商人並 clamp 到 Canvas 可見區域。
-- `MerchantShopUIController.ts`：商店 UI 與購買流程；應改成掛在 Screen UI Root / Main Camera 底下，或在 `open()` 時依 camera/screen 座標重新定位。
+- `DialogueUIController.ts`：商人提示與對話選項 UI；已能跟隨商人並 clamp 到 Main Camera 可見區域。
+- `CraftingUIController.ts`：合成 UI 新增跟 Main Camera / clamp 邏輯，並可配合 InventoryUI 一起定位。
+- `MerchantShopUIController.ts`：商店 UI 與購買流程；已新增跟 Main Camera / clamp 邏輯，需實測 OceanArea 交易。
 
 ## 主要事件流程
 
@@ -248,16 +303,31 @@ NPC_AI RANGED
   -> schedule releaseRangedProjectile()
   -> instantiate projectile prefab
   -> CombatProjectile.launch()
-  -> receiveAttack() / terrain hit / lifetime destroy
+  -> receiveAttack() / terrain hit / lifetime destroy or recycle
 ```
 
 ```text
 OceanArea.onBeginContact()
-  -> find PlayerController
+  -> bounds / trigger detect player
   -> PlayerController.enterOceanArea()
+  -> EventCenter.emit(PLAYER_WATER_STATE_CHANGED, true)
+  -> AudioManager.crossFadeToBgm(WATER)
   -> ocean movement update
-  -> OceanArea.onEndContact()
+  -> bounds detect exit
   -> PlayerController.exitOceanArea()
+  -> EventCenter.emit(PLAYER_WATER_STATE_CHANGED, false)
+  -> AudioManager.crossFadeToBgm(LAND)
+```
+
+```text
+Player F
+  -> find nearest MerchantNPC first
+  -> if no merchant, find nearest VehicleInteractable
+  -> VehicleController.tryMount(player)
+  -> PlayerController.setExternalControlLocked(true, "vehicle")
+  -> InputManager.pushContext(Vehicle)
+  -> CarController / BoatController consumes movement input
+  -> F again -> VehicleController.dismount()
 ```
 
 ```text
@@ -268,6 +338,14 @@ DropItem.collect()
   -> AudioManager / EffectsManager collect feedback
   -> INVENTORY_CHANGED
   -> InventoryUIController.refreshUI()
+  -> node.destroy()
+```
+
+```text
+Orebase.collect()
+  -> InventoryManager.addItem(smallore item id, 1)
+  -> EventCenter.emit(ITEM_COLLECTED)
+  -> AudioManager / EffectsManager collect feedback
   -> node.destroy()
 ```
 
@@ -283,9 +361,9 @@ MerchantSpawner.spawnMerchant()
 ```text
 Merchant dialogue / shop UI
   -> DialogueUIController.showOptions(anchorTarget=merchant)
-  -> clamp dialogue to visible Canvas area
+  -> clamp dialogue to Main Camera visible area
   -> MerchantShopUIController.open()
-  -> should show under Screen UI Root / Main Camera
+  -> follow Main Camera and clamp panel to camera bounds
 ```
 
 ```text
@@ -331,6 +409,16 @@ CombatHitbox.onBeginContact()
 ```
 
 ```text
+PlayerGun right click
+  -> PlayerGun.fireAtWorldPosition()
+  -> ProjectilePoolManager.spawn()
+  -> CombatProjectile.launch()
+  -> hit / terrain / lifetime
+  -> CombatProjectile.finish()
+  -> ProjectilePoolManager.recycleProjectile()
+```
+
+```text
 MerchantNPC.buy()
   -> 檢查商店庫存
   -> 檢查玩家 coconut 數量
@@ -361,26 +449,108 @@ GameOverScene
   -> submitScore() update leaderboard
 ```
 
+```text
+Player tool mode
+  -> 1 / 2 / 3 set PlayerToolMode
+  -> Gun: right click -> PlayerGun.fireAtWorldPosition()
+  -> Jetpack: hold Space -> consume fuel -> upward velocity
+  -> Grapple: right click raycast terrain -> pull player -> release detach
+```
+
+```text
+Damage numbers
+  -> CombatHitbox / CombatProjectile emit COMBAT_HIT_CONFIRMED
+  -> DamageNumberManager.showDamage()
+  -> runtime Label floats upward
+  -> EffectsManager DAMAGE_SPARK
+```
+
+```text
+Boss arena
+  -> BossArenaController sensor detects Player
+  -> MiniBossAI.activateBoss()
+  -> phase check by hp ratio
+  -> teleport / summon minions
+  -> NPC_DIED on boss
+  -> BOSS_DEFEATED
+  -> gate off / reward on / score reward
+```
+
+```text
+EnemyRespawner
+  -> check player distance
+  -> enter activation range
+  -> instantiate enemy prefab under spawnParent
+  -> set NPC_AI targetPlayer
+  -> leave despawn range
+  -> optional despawn alive enemies
+```
+
+```text
+Realtime fake multiplayer snapshot
+  -> RealtimeStateReporter.update()
+  -> read Player position / HP, GameManager score / exp, Inventory snapshot
+  -> SaveService.upsertRealtimePlayerState()
+  -> EventCenter.emit(REALTIME_STATE_UPDATED)
+```
+
+```text
+Portal / enemy pathing
+  -> NPC_AI.update()
+  -> NPCPathAgent.getSteeringDirection()
+  -> PathGraph.findPath()
+  -> PathNode.neighbors plus Portal paired node
+  -> NPC_AI.moveTowardTarget()
+  -> Portal.teleportActor() when close to portal waypoint
+```
+
 ## Cocos Inspector 設定
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`pausePanel` 是 Esc 暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
 - `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。
+- `CameraFollow.ts`：若使用，掛在 Main Camera，接 `target` 或設定 `targetPath`；不要和 `CameraRig.ts` 同時控制同一台 Main Camera。
+- `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
 - `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay。
 - `GameOverScene.ts`：接 title / username / score / exp / status labels、fadeOverlay；按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`。
-- `AudioManager.ts`：接 `sceneBgm` 與 attack / hit / collect / buy / heal / skill 六個 SFX clip。
+- `AudioManager.ts`：接 `sceneBgm`、可選 `waterBgm` 與 attack / hit / collect / buy / heal / skill 六個 SFX clip；`bgmFadeDuration` 控制水域 BGM 淡入淡出。
+- `ThemeManager.ts`：可選掛在 Game 或 UI Root；接 `tintOverlay` / `tintTargets`，`autoApplyOceanTheme` 勾起來後會跟 OceanArea 切 ocean tint。
 - `EffectsManager.ts`：接 `effectRoot` 與 `particleSpriteFrame`。
-- `MerchantShopPanel` 仍建議移到 Screen UI Root 或 Main Camera 子節點，避免 OceanArea 時跑出鏡頭。
+- `PlayerGun.ts`：掛在 Player 或 Player 子節點；接 `projectilePrefab`，可接 `muzzleNode` 與 `projectileParent`。子彈 prefab 必須有 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor。
+- `ProjectilePoolManager.ts`：可掛在 Player 或 Bullet_Layer；接同一個 projectile prefab，`prewarmCount` 建議 8-16。
+- `PlayerToolController.ts`：掛 Player；接 `playerGun`，可選接 `toolLabel`、`jetpackFuelBar`、`jetpackFlameRoot`、`grappleLineRoot`。
+- 車節點：掛 `VehicleInteractable.ts` + `CarController.ts`，接 `seatNode`，設定 `promptText = Press F to Drive`，並調 `exitOffsetX/Y`。
+- 船節點：掛 `VehicleInteractable.ts` + `BoatController.ts`，接 `seatNode`，設定 `promptText = Press F to Board`，並調速度 / boost 參數。
+- `DamageNumberManager.ts`：可掛 GameManager 或 UI Root；`numberRoot` 建議拖 UI Root，沒掛時 GameManager runtime 補。
+- `MiniBossAI.ts`：Boss prefab 同節點建議已有 `NPC_AI`；接 `npcAI`、`targetPlayer`、`teleportPoints`、`minionPrefabs`、`minionParent`。
+- `BossArenaController.ts`：掛 arena sensor；接 `boss` / `bossNode`、`playerNode`，可選接 `gateNode`、`clearRewardNode`。
+- `EnemyRespawner.ts`：掛刷怪點；接 `enemyPrefabs`、`playerNode`、`spawnParent`，調 activation / despawn range。
+- `Portal.ts`：兩個 Portal 節點設同一個 `pairId`，PhysicsCollider 要是 sensor；`exitOffset` 控制傳出後離 portal 多遠。
+- `BouncePad.ts`：節點掛 sensor collider，旋轉節點即可改變 local up 反彈方向；常用 `bounceSpeed` 約 600-900。
+- `PathGraph.ts`：建議放 `World Root/PathGraph`；PathNode 子節點用 `neighbors` 手動連線，入口 / 出口節點可拖 `Portal`。
+- `NPCPathAgent.ts`：掛在需要升級尋路的 NPC 上，`pathGraph` 可拖 PathGraph；不拖會找 `PathGraph.instance`。
+- `RealtimeStateReporter.ts`：可掛 GameManager 節點並拖 `playerNode`；若沒掛，`GameManager` 會 runtime 補一個。
+- `DialogueUIController`、`InventoryUIController`、`MerchantShopUIController`、`CraftingUIController` 若要跟鏡頭，接 `mainCameraNode`，或確認 fallback 能找到 Main Camera。
+- DropOre prefab 需掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key。
 
 ## 目前注意事項
 
 - `BaseEntity.takeDamage()` 已 clamp HP，並提供 `heal()`；Player / FoodBase 仍需實機測試回血 UI。
 - `PlayerController` 目前仍有 `T` 測試鍵，正式版應移除或包成 debug 開關。
+- `R` 快捷鍵已移除；重玩只保留 Pause / GameOver UI button 呼叫 `restartGame()` / `retry()`。
+- 右鍵槍目前用 browser canvas / Canvas mouse event 監聽；如果 Cocos 預覽器右鍵選單干擾，`PlayerGun` 會嘗試 prevent context menu。
+- 若 Player 同時掛 `PlayerToolController` 和 `PlayerGun`，`PlayerToolController` 會關掉 PlayerGun 的直接右鍵輸入，由工具模式統一分派。
+- Jetpack 模式按 Space 會和原本跳躍共存：按下瞬間仍可能先跳，持續按住才由 Jetpack 加速上升。
+- Grapple 第一版只鉤非 sensor 實體地形；不鉤敵人、掉落物、sensor trigger 或 UI。
+- Boss 本身仍依賴 `NPC_AI` 的受傷 / 死亡 / 遠程攻擊；`MiniBossAI` 負責 phase、傳送與召喚。
+- `PathGraph` 是手動 waypoint，不是 tilemap grid A*；PathNode 沒連好時 NPC 會 fallback 原本直接追擊。
+- Portal 只傳 Player / NPC，不傳 projectile；如果要子彈也能過傳送門，要另外接 `CombatProjectile` actor 判斷。
+- `RealtimeStateReporter` 是 localStorage 假多人資料，不會真的顯示其他玩家；目前只準備資料介面。
 - `GameManager.onGameOver()` 已寫入 last run / save / leaderboard；GameOver 畫面仍需手動接 `GameOverScene` labels/buttons。
 - `ResourceObject.findPlayer()` 目前固定找 `Canvas/Player`，場景節點路徑如果不同要調整。
 - Menu / Pause / GameOver / Audio / Effects 都是腳本已補，Cocos Editor 節點與 Inspector 欄位需照 `PLAN.md` 手動設定。
 - 遠程攻擊是否能打到玩家，取決於 SkeletonMage 的 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`、collider sensor 與 contact listener。
 - OceanArea 需要 `PhysicsBoxCollider` sensor，且 Player collider / rigidbody 要能觸發 contact。
-- MerchantShop UI 目前仍固定在原本 Background / 世界座標；在 OceanArea 交易時會跑到鏡頭外，需改掛 Screen UI Root / Main Camera 或在 `open()` 時轉成 camera/screen 座標。
-- Dialogue UI 已跟著商人並 clamp 到鏡頭可見範圍；商店 UI 尚未同步這個做法。
-- `ItemData.iconPath` 目前多數已改為 resources 相對路徑，但仍要實測大小寫與檔名，例如 `greenapple`、`coffeebean`、`guazi` / `gauzi.ts`。
+- Camera follow 目前有 `CameraRig` 和 `CameraFollow` 兩套，正式展示前要確認只啟用一套。
+- MerchantShop / Inventory / Crafting / Dialogue UI 已有跟 Main Camera / clamp 邏輯，但仍需在 OceanArea 實測。
+- `ItemData.iconPath` 目前多數已改為 resources 相對路徑，但仍要實測大小寫與檔名，例如 `greenApple`、`coffeebean`、`guazi` / `gauzi.ts`、smallore keys。
