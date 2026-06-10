@@ -24,9 +24,6 @@
     "_active": true,
     "_components": [
       {
-        "__id__": 5
-      },
-      {
         "__id__": 6
       },
       {
@@ -34,10 +31,13 @@
       },
       {
         "__id__": 8
+      },
+      {
+        "__id__": 9
       }
     ],
     "_prefab": {
-      "__id__": 9
+      "__id__": 10
     },
     "_opacity": 255,
     "_color": {
@@ -49,8 +49,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
+      "width": 30,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -98,10 +98,13 @@
     "_components": [
       {
         "__id__": 3
+      },
+      {
+        "__id__": 4
       }
     ],
     "_prefab": {
-      "__id__": 4
+      "__id__": 5
     },
     "_opacity": 255,
     "_color": {
@@ -113,8 +116,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
+      "width": 30,
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -166,10 +169,10 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "e3b1b6b1-46d8-45f0-bf67-e74e31384e89"
+      "__uuid__": "c663ea26-8318-408b-bbb0-27c62b8ab566"
     },
     "_type": 0,
-    "_sizeMode": 1,
+    "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -180,6 +183,28 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_atlas": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Animation",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 2
+    },
+    "_enabled": true,
+    "_defaultClip": {
+      "__uuid__": "33a4edd8-c198-4472-a5b0-ab54fcc72a62"
+    },
+    "_clips": [
+      {
+        "__uuid__": "33a4edd8-c198-4472-a5b0-ab54fcc72a62"
+      },
+      {
+        "__uuid__": "8070ebeb-96d5-4178-b7bf-24c9cb4343b9"
+      }
+    ],
+    "playOnLoad": false,
     "_id": ""
   },
   {
@@ -231,6 +256,23 @@
     "minMoveDeltaX": 1,
     "groundCheckVelocityY": 0.1,
     "attackHitbox": null,
+    "projectilePrefab": null,
+    "projectileSpawnNode": null,
+    "projectileParent": null,
+    "projectileSpawnDelay": 0.35,
+    "projectileAimMode": 1,
+    "projectileSpeed": 300,
+    "projectileFlightTime": 0.8,
+    "projectileMinFlightTime": 0.35,
+    "projectileMaxFlightTime": 1.25,
+    "projectileTargetOffsetY": 12,
+    "projectileKnockbackX": 180,
+    "projectileKnockbackY": 100,
+    "dropTable": [],
+    "dropSpawnOffsetY": 32,
+    "debugDropLog": false,
+    "knockbackResistance": 0,
+    "knockbackLockTime": 0.12,
     "_id": ""
   },
   {
@@ -244,6 +286,8 @@
     "debugLog": true,
     "useRandomStock": true,
     "stockItemCount": 3,
+    "maxLifeTime": 180,
+    "noTradeDespawnTime": 60,
     "_id": ""
   },
   {
@@ -292,8 +336,8 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 15,
-      "height": 19
+      "width": 30,
+      "height": 40
     },
     "_id": ""
   },

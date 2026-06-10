@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "talk_right",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.875,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "dc9efa22-e6aa-4f5c-a196-756bf6735ad0"
+            }
+          },
+          {
+            "frame": 0.25,
+            "value": {
+              "__uuid__": "509c2a2c-86e5-45d5-9c13-347b009ebcb8"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "7e3cd2c4-a58b-4ce2-92e6-093ae8933657"
+            }
+          },
+          {
+            "frame": 0.75,
+            "value": {
+              "__uuid__": "9bf4c4e5-e34a-4cd3-804d-13cb5d591606"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
