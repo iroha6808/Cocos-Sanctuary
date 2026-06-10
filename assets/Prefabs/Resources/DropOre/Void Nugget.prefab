@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Meteorite Chunk",
+    "_name": "Void Nugget",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,7 +45,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 64,
+      "width": 61,
       "height": 65
     },
     "_anchorPoint": {
@@ -57,7 +57,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        574.558,
+        650,
         -67.12,
         0,
         0,
@@ -159,89 +159,89 @@
     "points": [
       {
         "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -5,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 8,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 27,
-        "y": -25
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": -18
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": 5
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 19
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 18,
-        "y": 28
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 5,
+        "x": 2,
         "y": 32
       },
       {
         "__type__": "cc.Vec2",
-        "x": 0,
+        "x": -14,
+        "y": 21
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -20,
+        "y": 20
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": 11
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": -5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -28,
+        "y": -7
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -28,
+        "y": -22
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -18,
+        "y": -32
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -5,
+        "y": -32
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 11,
+        "y": -25
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 25,
+        "y": -17
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": -10
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": 6
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 25,
+        "y": 14
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 25,
+        "y": 24
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 18,
         "y": 32
       }
     ],
     "_id": ""
   },
   {
-    "__type__": "3c24fvL25BM0KbSCBANKSbw",
+    "__type__": "d7af6Gz3fRF7IaNC1/bcPYD",
     "_name": "",
     "_objFlags": 0,
     "node": {

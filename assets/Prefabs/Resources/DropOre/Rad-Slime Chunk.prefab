@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Ore",
+    "_name": "Rad-Slime Chunk",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 50
+      "width": 59,
+      "height": 64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,15 +57,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
-        0,
+        650,
+        -67.12,
         0,
         0,
         0,
         0,
         1,
-        1,
-        1,
+        0.5,
+        0.5,
         1
       ]
     },
@@ -97,11 +97,9 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "fd985b0b-a794-475f-b5ed-2dc526e3dc60"
-    },
+    "_spriteFrame": null,
     "_type": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -122,9 +120,9 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 0,
+    "_type": 1,
     "_allowSleep": true,
-    "_gravityScale": 0,
+    "_gravityScale": 1,
     "_linearDamping": 0,
     "_angularDamping": 0,
     "_linearVelocity": {
@@ -140,7 +138,7 @@
     "_id": ""
   },
   {
-    "__type__": "cc.PhysicsBoxCollider",
+    "__type__": "cc.PhysicsPolygonCollider",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -158,30 +156,148 @@
       "x": 0,
       "y": 0
     },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 75,
-      "height": 45
-    },
+    "points": [
+      {
+        "__type__": "cc.Vec2",
+        "x": -28,
+        "y": 26.3
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -28,
+        "y": 15.1
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -22,
+        "y": 5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -22,
+        "y": -1
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -28.5,
+        "y": -12
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -28.5,
+        "y": -22
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -19,
+        "y": -30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -9,
+        "y": -30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -7,
+        "y": -27
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 2,
+        "y": -27
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 5,
+        "y": -31
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 19.5,
+        "y": -31
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 26,
+        "y": -24
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 28,
+        "y": -18
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 28,
+        "y": -5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 23,
+        "y": -2
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 23,
+        "y": 20
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 19,
+        "y": 23
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 19,
+        "y": 27
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 8.5,
+        "y": 27
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 6,
+        "y": 24
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -3,
+        "y": 24
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -10,
+        "y": 30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -20,
+        "y": 30
+      }
+    ],
     "_id": ""
   },
   {
-    "__type__": "5176ezjdw1ACamxQvzyBkE/",
+    "__type__": "3bd34PbVDtNfLYI+QMRDeY3",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 1
     },
     "_enabled": true,
-    "resourceType": 1,
-    "maxDurability": 5,
-    "dropAmount": 1,
-    "dropPrefab": {
-      "__uuid__": "25176831-8b61-4622-bf50-997dbb5aaf27"
-    },
-    "depletedSpriteFrame": null,
-    "targetSprite": null,
-    "interactDistance": 120,
+    "itemAmount": 1,
+    "attractDistance": 56,
+    "collectDistance": 35,
+    "attractSpeed": 220,
+    "launchSpeedX": 240,
+    "launchSpeedY": 520,
+    "oreName": "ore",
+    "description": "",
+    "oreState": 1,
+    "interactLabel": null,
     "_id": ""
   },
   {

@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Meteorite Chunk",
+    "_name": "Rose Quartz",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -30,10 +30,13 @@
       },
       {
         "__id__": 5
+      },
+      {
+        "__id__": 6
       }
     ],
     "_prefab": {
-      "__id__": 6
+      "__id__": 7
     },
     "_opacity": 255,
     "_color": {
@@ -45,8 +48,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 64,
-      "height": 65
+      "width": 61,
+      "height": 67
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,7 +60,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        574.558,
+        650,
         -67.12,
         0,
         0,
@@ -159,89 +162,29 @@
     "points": [
       {
         "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -5,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 8,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 27,
-        "y": -25
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": -18
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": 5
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 19
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 18,
-        "y": 28
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 5,
+        "x": -6,
         "y": 32
       },
       {
         "__type__": "cc.Vec2",
-        "x": 0,
+        "x": -22.9,
+        "y": 15
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 22.9,
+        "y": 15
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7,
         "y": 32
       }
     ],
     "_id": ""
   },
   {
-    "__type__": "3c24fvL25BM0KbSCBANKSbw",
+    "__type__": "dd49fVzh0NLdr8u5BZQjsc9",
     "_name": "",
     "_objFlags": 0,
     "node": {
@@ -258,6 +201,28 @@
     "description": "",
     "oreState": 1,
     "interactLabel": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsCircleCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": -5
+    },
+    "_radius": 30,
     "_id": ""
   },
   {

@@ -31,7 +31,7 @@ export default class DropItem extends cc.Component {
     attractDistance: number = 56;
 
     @property({ tooltip: '收集距離' })
-    collectDistance: number = 28;
+    collectDistance: number = 35;
 
     @property({ tooltip: '吸引速度' })
     attractSpeed: number = 220;

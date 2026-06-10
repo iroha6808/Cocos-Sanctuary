@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Meteorite Chunk",
+    "_name": "Iron Ore",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 64,
-      "height": 65
+      "width": 62,
+      "height": 61
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,7 +57,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        574.558,
+        650,
         -67.12,
         0,
         0,
@@ -159,89 +159,44 @@
     "points": [
       {
         "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -5,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 8,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 27,
-        "y": -25
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": -18
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": 5
-      },
-      {
-        "__type__": "cc.Vec2",
         "x": 28,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 19
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 18,
         "y": 28
       },
       {
         "__type__": "cc.Vec2",
-        "x": 5,
-        "y": 32
+        "x": -20,
+        "y": 28
       },
       {
         "__type__": "cc.Vec2",
-        "x": 0,
-        "y": 32
+        "x": -28,
+        "y": 19
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": -26
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -24,
+        "y": -30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 17,
+        "y": -30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": -24
       }
     ],
     "_id": ""
   },
   {
-    "__type__": "3c24fvL25BM0KbSCBANKSbw",
+    "__type__": "03d83KCk+tPdKqQWDUd5Mwa",
     "_name": "",
     "_objFlags": 0,
     "node": {

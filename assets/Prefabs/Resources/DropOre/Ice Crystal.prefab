@@ -265,7 +265,7 @@
     "_enabled": true,
     "itemAmount": 1,
     "attractDistance": 56,
-    "collectDistance": 28,
+    "collectDistance": 35,
     "attractSpeed": 220,
     "launchSpeedX": 240,
     "launchSpeedY": 520,

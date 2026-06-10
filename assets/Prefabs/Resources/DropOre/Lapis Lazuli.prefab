@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Meteorite Chunk",
+    "_name": "Lapis Lazuli",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 64,
-      "height": 65
+      "width": 61,
+      "height": 59
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,7 +57,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        574.558,
+        650,
         -67.12,
         0,
         0,
@@ -159,89 +159,64 @@
     "points": [
       {
         "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -29,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -27,
-        "y": -20
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": -5,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 8,
-        "y": -31
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 27,
-        "y": -25
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": -18
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 30,
-        "y": 5
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 6
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 28,
-        "y": 19
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 18,
-        "y": 28
-      },
-      {
-        "__type__": "cc.Vec2",
-        "x": 5,
-        "y": 32
+        "x": 19,
+        "y": 30
       },
       {
         "__type__": "cc.Vec2",
         "x": 0,
-        "y": 32
+        "y": 30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -15,
+        "y": 18.9
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -23.9,
+        "y": 7
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": -5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": -17
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -18,
+        "y": -28
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 2,
+        "y": -28
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 22,
+        "y": -20
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": -5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": 15
       }
     ],
     "_id": ""
   },
   {
-    "__type__": "3c24fvL25BM0KbSCBANKSbw",
+    "__type__": "b0f86CwgydKU7Q88fRKRyis",
     "_name": "",
     "_objFlags": 0,
     "node": {
