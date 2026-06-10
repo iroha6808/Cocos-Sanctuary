@@ -16,6 +16,7 @@
 - [Entity / Resources / Food](#entity--resources--food)
 - [Map / Scene](#map--scene)
 - [UI](#ui)
+- [Vehicle](#vehicle)
 - [Prefab / Inspector 重點](#prefab--inspector-重點)
 - [主要流程](#主要流程)
 - [後續 TODO](#後續-todo)
@@ -73,6 +74,7 @@ assets/
       HitFeelManager.ts
       RealtimeStateReporter.ts
       SaveService.ts
+      ThemeManager.ts
     Data/
       ItemData.ts
       MerchantPool.ts
@@ -129,6 +131,11 @@ assets/
       InventoryUIController.ts
       DialogueUIController.ts
       MerchantShopUIController.ts
+    Vehicle/
+      BoatController.ts
+      CarController.ts
+      VehicleController.ts
+      VehicleInteractable.ts
     Utils/
       NewScript - 002.ts
     Scene/
@@ -177,6 +184,8 @@ Canvas
     PathGraph                      # PathGraph + PathNode children
     Portal_A_In / Portal_A_Out     # Portal + sensor collider，pairId 相同
     BouncePad                      # BouncePad + sensor collider，旋轉節點改反彈方向
+    Car                            # VehicleInteractable + CarController
+    Boat                           # VehicleInteractable + BoatController
     Bullet_Layer                   # PlayerGun / projectile pool 建議 parent
   UI Root
     Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
@@ -237,7 +246,10 @@ Canvas
   - localStorage 假後端，提供註冊、登入、登出、每帳號存讀檔、排行榜、最後一局結果。
   - fake multiplayer realtime snapshot：`upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
 - `AudioManager.ts`
-  - 場景 BGM 與六種 SFX：attack、hit、collect、buy、heal、skill。
+  - land / water BGM 雙 channel crossfade；監聽 `PLAYER_WATER_STATE_CHANGED`。
+  - 六種 SFX：attack、hit、collect、buy、heal、skill。
+- `ThemeManager.ts`
+  - 主題 / 色調切換雛形，可註冊 tint targets、控制 overlay tint，替後續 biome / 主題換色準備。
 - `EffectsManager.ts`
   - runtime particle 特效：hit、collect、heal、fire、water、gun muzzle、damage spark、boss teleport、boss summon、jetpack flame、grapple attach。
 - `DamageNumberManager.ts`
@@ -285,6 +297,7 @@ Canvas
   - B 開關背包。
   - T 測試用：加入 `coconut x10`。
   - F 旅行商人互動：靠近 prompt、對話選項、開商店、關商店。
+  - 若附近沒有商人，F 會檢查 `VehicleInteractable`，可上車 / 上船。
   - 滾輪切換對話選項或商店商品；商店中可用方向鍵與 Enter 測購買。
   - 進入 OceanArea 後降低重力，W / Up / Space 上游，S / Down 下潛，Space 可水中 boost，離開後還原重力。
   - 空中 S / Down 可 fast fall；斜坡 / 平台跳躍用 `isGrounded()` 修正。
@@ -302,7 +315,7 @@ Canvas
 - `Input/`
   - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel。
   - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M fallback；R 快捷鍵已移除。
-  - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Paused。
+  - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Vehicle、Paused。
   - `InputManager.ts` 統一監聽 Game 場景輸入，依 context stack 由上往下分派。
 - `InventoryManager.ts`
   - 背包 singleton。
@@ -389,6 +402,7 @@ Canvas
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
+  - 進出時 emit `PLAYER_WATER_STATE_CHANGED`，供水域 BGM crossfade 與 ThemeManager 使用。
 - `Map/OceanLayerOrder.ts`
   - 固定 SkyVisual / WaterVisual / SeaFloor / OceanTrigger / GeneratedContent 層級、active、opacity。
 - `Map/OceanPrefabBuilder.ts`
@@ -429,6 +443,17 @@ Canvas
   - 可跟 Main Camera 並 clamp 到鏡頭可見範圍，修正 OceanArea 交易 UI 跑出畫面問題。
 - `CraftingUIController.ts`
   - 合成 UI 可跟 Main Camera / clamp；開啟合成時可同步調整 InventoryUI 位置。
+
+## Vehicle
+
+- `VehicleInteractable.ts`
+  - 車 / 船共用互動距離與 prompt，供 PlayerController 掃描最近可互動載具。
+- `VehicleController.ts`
+  - 共用上下載具流程：鎖 PlayerController、push `InputContext.Vehicle`、同步 Player 到 `seatNode`、離開時放到 `exitOffsetX/Y`。
+- `CarController.ts`
+  - 地面車控制：A/D 加速、Space 煞車。
+- `BoatController.ts`
+  - 船控制：A/D 左右、W/S 柔和上下、Space 小加速。
 
 ## Prefab / Inspector 重點
 
@@ -482,6 +507,13 @@ Canvas
   - `playerGun` 拖同節點或子節點的 PlayerGun
   - 可選接 `toolLabel`、`jetpackFuelBar`、`jetpackFlameRoot`、`grappleLineRoot`
   - 操作：`1` Gun、`2` Jetpack、`3` Grapple；Jetpack 用 Space 上升
+- Car / Boat
+  - 車：掛 `VehicleInteractable` + `CarController` + RigidBody / collider，`promptText` 建議 `Press F to Drive`
+  - 船：掛 `VehicleInteractable` + `BoatController` + RigidBody / collider，`promptText` 建議 `Press F to Board`
+  - `seatNode` 拖座位點；`exitOffsetX/Y` 控制下車 / 下船位置
+- Audio / Theme
+  - `AudioManager.sceneBgm` 拖陸地 BGM，`waterBgm` 可選拖水域 BGM，`bgmFadeDuration` 控制淡入淡出
+  - `ThemeManager` 可選接 `tintOverlay`、`tintTargets`，勾 `autoApplyOceanTheme` 後進出水域會切 default / ocean tint
 - DamageNumberManager
   - 可掛 GameManager 或 UI Root；不掛時 GameManager runtime 補
   - `numberRoot` 建議拖 UI Root 或 HUD Layer
@@ -526,7 +558,7 @@ Canvas
   - `GameManager.fadeOverlay`：全螢幕黑色 UI 節點，供 Retry / Main Menu 切場景前淡出；未綁時會直接切場景。
   - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels
   - `GameOverScene` title / username / score / exp / status labels、retry / menu / submit buttons
-  - `AudioManager` BGM + six SFX clips
+  - `AudioManager` land / water BGM + six SFX clips
   - `EffectsManager.effectRoot` + `particleSpriteFrame`
 
 ## 主要流程
@@ -544,8 +576,12 @@ NPC_AI ranged attack
 ```text
 OceanArea contact
   -> PlayerController.enterOceanArea()
+  -> PLAYER_WATER_STATE_CHANGED(true)
+  -> AudioManager crossfade to waterBgm
   -> lower gravity and use ocean movement / sink / boost
   -> PlayerController.exitOceanArea()
+  -> PLAYER_WATER_STATE_CHANGED(false)
+  -> AudioManager crossfade to sceneBgm
   -> restore original gravity
 ```
 
@@ -585,6 +621,15 @@ Player F
   -> InventoryManager.addItem(item)
   -> EventCenter.emit(MERCHANT_PURCHASED)
   -> GameManager.addScore()
+```
+
+```text
+Player F near vehicle
+  -> find nearest VehicleInteractable after merchant check
+  -> VehicleController.tryMount()
+  -> PlayerController external control lock
+  -> InputContext.Vehicle handles A/D/W/S/Space/F
+  -> F again dismounts at exit offset
 ```
 
 ```text
@@ -631,4 +676,5 @@ Score / save / leaderboard
 3. 實測 SkeletonMage、OceanArea、DropOre、存讀檔、排行榜、音效與五種粒子特效。
 4. 確認 Main Camera 只啟用 `CameraRig` 或 `CameraFollow` 其中一套。
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
-6. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。
+6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
+7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。

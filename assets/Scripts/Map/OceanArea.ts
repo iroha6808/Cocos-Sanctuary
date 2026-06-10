@@ -1,11 +1,17 @@
 import PlayerController from "../Player/PlayerController";
+import EventCenter from "../Core/EventCenter";
+import { GameEvent } from "../Core/Constants";
 
-const { ccclass } = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class OceanArea extends cc.Component {
-    private player: PlayerController = null!;
-    private playerNode: cc.Node = null!;
+    @property(PlayerController)
+    public player: PlayerController = null!;
+
+    @property(cc.Node)
+    public playerNode: cc.Node = null!;
+
     private playerInside: boolean = false;
     private oceanCollider: cc.PhysicsBoxCollider = null!;
 
@@ -23,7 +29,11 @@ export default class OceanArea extends cc.Component {
             cc.warn("[OceanArea] Missing PhysicsBoxCollider on OceanTrigger.");
         }
 
-        this.findPlayer();
+        if (this.player && cc.isValid(this.player.node)) {
+            this.playerNode = this.player.node;
+        } else {
+            this.findPlayer();
+        }
     }
 
     update() {
@@ -41,12 +51,14 @@ export default class OceanArea extends cc.Component {
         if (isInsideNow && !this.playerInside) {
             this.playerInside = true;
             this.player.enterOceanArea();
+            EventCenter.emit(GameEvent.PLAYER_WATER_STATE_CHANGED, true, this.node);
             cc.log("[OceanArea] Player entered ocean area by bounds");
         }
 
         if (!isInsideNow && this.playerInside) {
             this.playerInside = false;
             this.player.exitOceanArea();
+            EventCenter.emit(GameEvent.PLAYER_WATER_STATE_CHANGED, false, this.node);
             cc.log("[OceanArea] Player exited ocean area by bounds");
         }
     }

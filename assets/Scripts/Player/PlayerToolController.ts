@@ -177,6 +177,10 @@ export default class PlayerToolController extends cc.Component {
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
+        if (this.isBlocked()) {
+            return;
+        }
+
         switch (event.keyCode) {
             case KEY_1:
                 this.setMode(PlayerToolMode.Gun);

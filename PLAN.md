@@ -19,10 +19,10 @@
 ## 下一步優先順序
 
 1. 確認 Main Camera 只用一套跟隨：`CameraRig` 和新增 `CameraFollow` 不要同時控制鏡頭，避免雙重位移。
-2. 手動掛新功能節點：PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
-3. 實測工具模式：`1` 槍、`2` 噴射背包 Space 上升、`3` 鉤索右鍵鉤地形。
-4. 實測 Boss / 刷怪：傳送法師 phase 2、召喚小怪、玩家距離刷新、Boss clear reward。
-5. 實測 Portal / BouncePad / PathGraph / PlayerGun / realtime snapshot。
+2. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
+3. 實測車 / 船：靠近顯示 prompt，按 `F` 上下，載具中玩家不能攻擊 / 開 UI / 用工具。
+4. 實測工具模式：`1` 槍、`2` 噴射背包 Space 上升、`3` 鉤索右鍵鉤地形。
+5. 實測 Boss / 刷怪、Portal / BouncePad / PathGraph / PlayerGun / realtime snapshot。
 6. 實測跟鏡頭 UI：`MerchantShopUI`、`InventoryUI`、`CraftingUI`、`DialogueUI` 已有 camera-bound / clamp 邏輯，需確認 OceanArea 不跑出畫面。
 7. 檢查 Cocos Editor Inspector 綁定：Player、NPC、Boss、Spawner、Projectile、OceanArea、Resource、UI。
 
@@ -65,6 +65,7 @@
 - [x] 工具模式：槍 / 噴射背包 / 鉤索腳本
 - [x] 傳送法師 Mini Boss、Boss Arena、敵人距離刷新腳本
 - [x] 傷害數字與額外 runtime 粒子效果
+- [x] 車 / 船互動腳本、水域 BGM crossfade、ThemeManager 雛形
 - [ ] 正式 Game Over 結算 UI
 - [ ] 地圖資料化 / TileRenderer
 
@@ -91,8 +92,8 @@
 | 帳號系統 | 7 | 註冊 / 登入 / 登出 3%；排行榜 4% | `SaveService` localStorage 假 Firebase 已補；待 UI 綁定 |
 | 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補；待 UI 綁定與真 Firebase 替換 |
 | 物理系統 | 13 | 正確重力系統和碰撞系統 | 已有 physics / collider / OceanArea / 斜坡跳躍修正；需實測 |
-| 遊戲音效 | 7 | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 BGM + 6 SFX；待拖 AudioClip |
-| 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、M、mouse、wheel、水中 boost、空中 fast fall；R 快捷鍵已移除 |
+| 遊戲音效 | 7 | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 land / water BGM crossfade + 6 SFX；待拖 AudioClip |
+| 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、M、mouse、wheel、水中 boost、空中 fast fall、車 / 船；R 快捷鍵已移除 |
 | 遊戲動畫 | 12 | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC 動畫已有；fade transition 已補；開場 / 結束 UI 動畫待補 |
 | 遊戲特效 | 5 | 五種不同粒子特效 | `EffectsManager` 已補 hit / collect / heal / fire / water；待粒子圖 |
 | 版本控制 | 7 | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |
@@ -145,6 +146,7 @@
 | PlayerGun prefab 綁定 | 槍需要 projectile prefab 有 `CombatProjectile`、RigidBody、PhysicsCollider；未綁只 warn | 延伸 |
 | Tool mode 輸入重疊 | `PlayerController` 仍直接處理 Space / mouse；ToolController 會關掉 PlayerGun 直接右鍵，但 Space 在 Jetpack 仍會先保留原跳躍 | 延伸 |
 | Boss 手動設定 | Boss 依賴 NPC_AI、teleport points、minion prefabs；沒拖 prefab 只會少召喚 | 延伸 |
+| Vehicle / Player 鎖控制 | 車船上載具時會鎖 PlayerController 並把 Player 同步到 seat；若 seat / exitOffset / collider 沒設好，可能卡地形 | 延伸 |
 | item / prefab 命名一致性 | smallore 礦物、`greenApple`、`coffeebean`、`guazi` / `gauzi.ts` 命名混用，可能影響資料查找或 prefab 綁定 | MVP |
 | Game Over | `GameManager.onGameOver()` 已寫 last run / save / leaderboard；GameOver labels/buttons 需手動接 | MVP |
 | 素材清理 | `assets/Textures` 與 `assets/resources` 有大量來源檔 / 動畫 / 圖集，需要人工判斷 | 延伸 |
@@ -166,6 +168,7 @@
 | 工具模式 / 噴射背包 / 鉤索 | 展示操作爽感，對主觀分數有感 | 延伸 |
 | Boss / 自動刷新 / 傷害數字 | 展示戰鬥完整度，能串 AI、粒子、Score | 延伸 |
 | 音效 / 粒子 / 打擊感 / 運鏡 | 分數明確且展示效果明顯，已用 hit stop、shake、flash、CameraRig 補強 | 延伸 |
+| 車 / 船 / 水域 BGM | 讓陸地與水域探索差異更明顯，也替未來主題 / 色調切換鋪路 | 延伸 |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
 | PvP | 企劃亮點但成本高，先不進 MVP | 延伸 |
@@ -175,8 +178,8 @@
 
 | 狀態 | 摘要 |
 | --- | --- |
-| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、smallore、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number 腳本 |
-| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
+| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、smallore、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number、車 / 船、BGM crossfade 腳本 |
+| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 車船 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
 | 未完成 | Firebase 真後端替換、正式 UI 美術、MapManager / TileRenderer、素材清理、多人角色顯示 UI |
 
 ## 分工
@@ -193,12 +196,13 @@
 
 | 模組 | 已有 | 待補 |
 | --- | --- | --- |
-| Core | `EventCenter`、`Constants`、`SaveService`、score / exp、pause / save / leaderboard、`CameraRig`、`HitFeelManager`、`RealtimeStateReporter`、`DamageNumberManager` | Firebase 真後端替換、正式 GameOver 視覺、多人 UI |
-| Player / Inventory | 移動、跳躍、fast fall、攻擊、右鍵槍、工具模式、Jetpack、Grapple、背包、水中控制、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish、確認 InputManager / PlayerController 輸入責任 |
+| Core | `EventCenter`、`Constants`、`SaveService`、score / exp、pause / save / leaderboard、`AudioManager` land / water crossfade、`ThemeManager`、`CameraRig`、`HitFeelManager`、`RealtimeStateReporter`、`DamageNumberManager` | Firebase 真後端替換、正式 GameOver 視覺、多人 UI、正式色調 / shader |
+| Player / Inventory | 移動、跳躍、fast fall、攻擊、右鍵槍、工具模式、Jetpack、Grapple、背包、水中控制、外部控制鎖、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish、確認 InputManager / PlayerController 輸入責任 |
 | NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、Boss、距離刷怪、商人交易、drop table | SkeletonMage / Boss / Respawner 實測、PathNode 手動連線 |
 | Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
 | UI | HP / EXP / Score HUD、Inventory、Dialogue、Merchant Shop、Crafting、Menu / GameOver 腳本 API；多數 panel 已可跟 Main Camera / clamp | 手動接 Menu / Pause / GameOver panels，實測 OceanArea UI |
 | Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | MapManager、TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
+| Vehicle | `VehicleInteractable`、`VehicleController`、`CarController`、`BoatController` | 車 / 船 prefab 視覺、seat / exitOffset / collider 手動調整 |
 
 ## 手動設定
 
@@ -222,7 +226,8 @@
 - [ ] DialogueUI / InventoryUI / MerchantShopUI / CraftingUI 若要跟鏡頭，接 `mainCameraNode` 或確認 fallback 可找到 Main Camera
 - [ ] MerchantShopUI 接 root、labels、itemListRoot、buyButton
 - [ ] MerchantShopUI root 放在跟隨 Main Camera 的 Screen UI Root，或使用腳本 open/update 時的 camera world 座標與 clamp 邏輯
-- [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`
+- [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、可選 `waterBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`；`bgmFadeDuration` 控制進出水域淡入淡出。
+- [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
 - [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player
 - [ ] 若改用 `CameraFollow.ts`，不要同時啟用 `CameraRig.ts` 控制同一台 Main Camera
@@ -243,6 +248,8 @@
 - [ ] Boss prefab 掛 `NPC_AI.ts` + `MiniBossAI.ts`；`MiniBossAI` 拖 `npcAI`、`targetPlayer`、`teleportPoints`、`minionPrefabs`、`minionParent`。
 - [ ] Boss Arena sensor 節點掛 `BossArenaController.ts`，拖 `boss` / `bossNode`、`playerNode`、可選 `gateNode`、`clearRewardNode`。
 - [ ] 刷怪點掛 `EnemyRespawner.ts`，拖 `enemyPrefabs`、`playerNode`、`spawnParent`，調 `activationRange` / `despawnRange` / `maxAlive`。
+- [ ] 車節點掛 `VehicleInteractable.ts` + `CarController.ts` + `RigidBody` / collider；`promptText` 可設 `Press F to Drive`，`seatNode` 拖座位點，調 `exitOffsetX/Y`。
+- [ ] 船節點掛 `VehicleInteractable.ts` + `BoatController.ts` + `RigidBody` / collider；`promptText` 可設 `Press F to Board`，船建議放在 OceanArea 附近，調 `horizontalSpeed` / `verticalSpeed` / `boostAcceleration`。
 - [ ] MenuScene 接 `mainPanel`、`loginPanel`、`settingsPanel`、`leaderboardPanel`、`fadeOverlay`、username / password EditBox、status / current user / leaderboard Labels
 - [ ] Menu 按鈕綁 `goToGameScene()`、`loadSavedGame()`、`register()`、`login()`、`logout()`、`showMain()`、`showLogin()`、`showSettings()`、`showLeaderboard()`、`toggleMute()`
 - [ ] GameOver 場景掛 `GameOverScene.ts`，接 title / username / score / exp / status Labels 與 fadeOverlay

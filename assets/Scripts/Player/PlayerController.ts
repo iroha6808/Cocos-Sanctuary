@@ -9,6 +9,7 @@ import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDia
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
+import VehicleInteractable from "../Vehicle/VehicleInteractable";
 
 const { ccclass, property } = cc._decorator;
 
@@ -86,9 +87,11 @@ export default class PlayerController extends BaseEntity {
     private canvasNode: cc.Node = null!;
     private currentMerchant: MerchantNPC = null!;
     private promptMerchant: MerchantNPC = null!;
+    private promptVehicle: VehicleInteractable = null!;
     private currentDialogueOptions: DialogueOption[] = [];
     private knockbackTimer: number = 0;
     private gameOverTransitionPending: boolean = false;
+    private externalControlLocks: { [reason: string]: boolean } = {};
 
     private isInOcean: boolean = false;
     private originalGravityScale: number = 1;
@@ -223,6 +226,11 @@ export default class PlayerController extends BaseEntity {
 
         this.keyStates[keyCode] = isDown;
 
+        if (this.isExternalControlLocked()) {
+            this.blockPlayerControlForUI();
+            return;
+        }
+
         if (this.isCraftingUIOpen()) {
             if (isDown && keyCode === cc.macro.KEY.c) {
                 this.toggleCrafting();
@@ -348,14 +356,26 @@ export default class PlayerController extends BaseEntity {
         }
 
         const merchant = this.promptMerchant || this.findNearestMerchant();
-        if (!merchant || !merchant.canInteract(this.node)) {
-            cc.log("[PlayerController] No merchant in interaction range.");
+        if (merchant && merchant.canInteract(this.node)) {
+            this.currentMerchant = merchant;
+            merchant.beginInteraction(this.node);
+            this.showMerchantOptions();
             return;
         }
 
-        this.currentMerchant = merchant;
-        merchant.beginInteraction(this.node);
-        this.showMerchantOptions();
+        const vehicle = this.promptVehicle || this.findNearestVehicle();
+        if (vehicle && vehicle.canInteract(this.node)) {
+            const controller = vehicle.getVehicleController();
+            if (controller && typeof controller.tryMount === "function" && controller.tryMount(this.node)) {
+                if (this.dialogueUI) {
+                    this.dialogueUI.hidePrompt();
+                }
+                this.promptVehicle = null!;
+                return;
+            }
+        }
+
+        cc.log("[PlayerController] No merchant or vehicle in interaction range.");
     }
 
     private toggleInventory() {
@@ -464,7 +484,7 @@ export default class PlayerController extends BaseEntity {
     }
 
     public canUseGameplayAction(): boolean {
-        if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
+        if (this.isDead || this.isExternalControlLocked() || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
             return false;
         }
 
@@ -473,6 +493,25 @@ export default class PlayerController extends BaseEntity {
         }
 
         return true;
+    }
+
+    public setExternalControlLocked(locked: boolean, reason: string = "external"): void {
+        this.externalControlLocks[reason] = locked;
+        if (!locked) {
+            delete this.externalControlLocks[reason];
+            return;
+        }
+
+        this.blockPlayerControlForUI();
+        if (this.dialogueUI) {
+            this.dialogueUI.hidePrompt();
+        }
+        this.promptMerchant = null!;
+        this.promptVehicle = null!;
+    }
+
+    public isExternalControlLocked(): boolean {
+        return Object.keys(this.externalControlLocks).some(key => this.externalControlLocks[key]);
     }
 
     private findNearestMerchant(): MerchantNPC {
@@ -526,6 +565,56 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
+    private findNearestVehicle(): VehicleInteractable {
+        const root = this.canvasNode || cc.find("Canvas");
+        if (!root) {
+            return null!;
+        }
+
+        const vehicles: VehicleInteractable[] = [];
+        this.collectVehicles(root, vehicles);
+
+        let nearest: VehicleInteractable = null!;
+        let nearestDistance = Number.MAX_VALUE;
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
+
+        for (const vehicle of vehicles) {
+            if (!vehicle || !cc.isValid(vehicle.node)) {
+                continue;
+            }
+
+            const vehicleWorldPos = vehicle.node.parent
+                ? vehicle.node.parent.convertToWorldSpaceAR(cc.v2(vehicle.node.x, vehicle.node.y))
+                : cc.v2(vehicle.node.x, vehicle.node.y);
+
+            const distance = vehicleWorldPos.sub(playerWorldPos).mag();
+            if (distance < nearestDistance) {
+                nearest = vehicle;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    private collectVehicles(root: cc.Node, result: VehicleInteractable[]) {
+        if (!root) {
+            return;
+        }
+
+        const vehicle = root.getComponent(VehicleInteractable);
+        if (vehicle) {
+            result.push(vehicle);
+        }
+
+        const children = (root as any).children || [];
+        for (const child of children) {
+            this.collectVehicles(child, result);
+        }
+    }
+
     update(dt: number) {
         if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
             this.closeMerchantFlow();
@@ -534,6 +623,11 @@ export default class PlayerController extends BaseEntity {
         this.updateMerchantPrompt();
         this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
         this.oceanBoostTimer = Math.max(0, this.oceanBoostTimer - dt);
+
+        if (this.isExternalControlLocked()) {
+            this.blockPlayerControlForUI();
+            return;
+        }
 
         if (this.isCraftingUIOpen()) {
             this.blockPlayerControlForUI();
@@ -963,11 +1057,12 @@ export default class PlayerController extends BaseEntity {
         this.merchantShopUI = null!;
         this.currentMerchant = null!;
         this.promptMerchant = null!;
+        this.promptVehicle = null!;
         this.currentDialogueOptions = [];
     }
 
     private updateMerchantPrompt() {
-        if (!this.dialogueUI || this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
+        if (!this.dialogueUI || this.isDead || this.isExternalControlLocked() || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
             return;
         }
 
@@ -982,11 +1077,20 @@ export default class PlayerController extends BaseEntity {
         const merchant = this.findNearestMerchant();
         if (merchant && merchant.canInteract(this.node)) {
             this.promptMerchant = merchant;
+            this.promptVehicle = null!;
             this.dialogueUI.showPrompt("Press F to Talk", merchant.node);
             return;
         }
 
         this.promptMerchant = null!;
+        const vehicle = this.findNearestVehicle();
+        if (vehicle && vehicle.canInteract(this.node)) {
+            this.promptVehicle = vehicle;
+            this.dialogueUI.showPrompt(vehicle.promptText || "Press F to Ride", vehicle.node);
+            return;
+        }
+
+        this.promptVehicle = null!;
         this.dialogueUI.hidePrompt();
     }
 
