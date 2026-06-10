@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "applebush",
+    "_name": "Fossilized Shell",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -45,8 +45,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
-      "height": 50
+      "width": 67,
+      "height": 68
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -57,15 +57,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        195.484,
-        -243.455,
+        568.833,
+        -60.142,
         0,
         0,
         0,
         0,
         1,
-        1,
-        1,
+        0.5,
+        0.5,
         1
       ]
     },
@@ -97,11 +97,9 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_spriteFrame": {
-      "__uuid__": "7717d449-82b8-48df-b351-a75b6673e0d4"
-    },
+    "_spriteFrame": null,
     "_type": 0,
-    "_sizeMode": 0,
+    "_sizeMode": 1,
     "_fillType": 0,
     "_fillCenter": {
       "__type__": "cc.Vec2",
@@ -122,9 +120,9 @@
       "__id__": 1
     },
     "_enabled": true,
-    "_type": 0,
+    "_type": 1,
     "_allowSleep": true,
-    "_gravityScale": 0,
+    "_gravityScale": 1,
     "_linearDamping": 0,
     "_angularDamping": 0,
     "_linearVelocity": {
@@ -137,30 +135,6 @@
     "enabledContactListener": false,
     "bullet": false,
     "awakeOnLoad": true,
-    "_id": ""
-  },
-  {
-    "__type__": "4567cQgQolB+LfI/eqCd459",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "hitsPerDrop": 3,
-    "dropAmount": 1,
-    "interactDistance": 160,
-    "depletedSpriteFrame": {
-      "__uuid__": "7717d449-82b8-48df-b351-a75b6673e0d4"
-    },
-    "targetSprite": {
-      "__id__": 2
-    },
-    "applePrefab": {
-      "__uuid__": "3f2566c1-584f-426b-a58f-be4b2b4ad326"
-    },
-    "maxApples": 10,
-    "regenInterval": 60,
     "_id": ""
   },
   {
@@ -185,35 +159,95 @@
     "points": [
       {
         "__type__": "cc.Vec2",
-        "x": -50,
-        "y": -25
+        "x": -33,
+        "y": -16.1
       },
       {
         "__type__": "cc.Vec2",
-        "x": 50,
-        "y": -25
+        "x": -17,
+        "y": -33
       },
       {
         "__type__": "cc.Vec2",
-        "x": 40,
-        "y": 15
+        "x": 5,
+        "y": -33
       },
       {
         "__type__": "cc.Vec2",
-        "x": 30,
-        "y": -23
+        "x": 33,
+        "y": -18
       },
       {
         "__type__": "cc.Vec2",
-        "x": -30,
-        "y": -23
+        "x": 32,
+        "y": -14
       },
       {
         "__type__": "cc.Vec2",
-        "x": -40,
-        "y": 15
+        "x": 25,
+        "y": -13
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 19,
+        "y": -8
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 19,
+        "y": 2
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 24,
+        "y": 13.5
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 24,
+        "y": 32
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 16,
+        "y": 30
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 7,
+        "y": 25
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -9,
+        "y": 12
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -24,
+        "y": 24
       }
     ],
+    "_id": ""
+  },
+  {
+    "__type__": "42786OdJg9Gl680i6IZIDoa",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "itemAmount": 1,
+    "attractDistance": 56,
+    "collectDistance": 28,
+    "attractSpeed": 220,
+    "launchSpeedX": 240,
+    "launchSpeedY": 520,
+    "oreName": "ore",
+    "description": "",
+    "oreState": 1,
+    "interactLabel": null,
     "_id": ""
   },
   {

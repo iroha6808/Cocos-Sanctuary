@@ -223,7 +223,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "meteoritechunk",
         name: "Meteorite Chunk",
         description: "A heavy chunk of space rock with an unusually high density.",
-        iconPath: "smallore/lapislazuli.png",
+        iconPath: "smallore/meteoritechunk.png",
     },
     mossagate: {
         id: "mossagate",
