@@ -110,13 +110,13 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 
 | 操作 | 功能 | 實作位置 |
 | --- | --- | --- |
-| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `InputBindings.getActionForKey()` -> `InputManager` -> `PlayerController.setMoveInput()` / `update()` |
-| `Space` | 跳躍；水域中改成上游。 | `InputAction.Jump` -> `PlayerController.jump()` / `getOceanVerticalInput()` |
-| 滑鼠左鍵 | Gameplay 時攻擊；Pause / UI context 會吃掉。 | `InputManager.onMouseDown()` -> `InputAction.Attack` -> `PlayerController.attack()` |
+| `A` / `D` | 左右移動，使用 RigidBody `linearVelocity`。 | `PlayerController.onKeyDown()` / `onKeyUp()` -> `applyMoveKey()` -> `update()` |
+| `Space` | 跳躍；水域中改成 boost / 上游邏輯。 | `PlayerController.applyMoveKey()` -> `jump()` / `boostInOcean()` / `getOceanVerticalInput()` |
+| 滑鼠左鍵 | Gameplay 時近戰攻擊；Pause / UI 時會被玩家狀態檢查擋掉。 | `PlayerController.setupMouseAttackInput()` -> `handleMouseAttack()` -> `attack()` |
+| 滑鼠右鍵 | 玩家槍射擊；Pause / UI / 背包 / 商店 / 合成開啟時不射擊。 | `PlayerGun.ts` -> `ProjectilePoolManager.spawn()` -> `CombatProjectile.launch()` |
 | `B` | 開關背包 UI；背包開啟時 push `Inventory` context。 | `PlayerController.toggleInventory()` / `handleInventoryInput()` |
 | `F` | Gameplay 時互動；對話中確認；商店中購買。 | `PlayerController.handleGameplayInput()` / `handleDialogueInput()` / `handleMerchantShopInput()` |
 | `Esc` | 依最上層 context：關商店 / 關合成 / 關背包 / Pause Resume。 | `InputAction.Cancel`、`GameManager.handleGameplayInput()`、`handlePausedInput()` |
-| `R` | Game / GameOver 時重玩；Pause 中也可重玩。 | `InputAction.Retry`、`GameManager.handleGameplayInput()`、`GameOverScene.onKeyDown()` |
 | `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
 | `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
@@ -135,12 +135,14 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `EventCenter.ts`：已改成 default export，事件資料會保存原 callback、target、實際 handler；`off(eventName, callback, target)` 可正確移除特定監聽，也支援清除單一事件或全部事件。
 - `BaseEntity.ts`：提供 `type`、`maxHp`、`currentHp`、clamp 後的 `takeDamage()`、`heal()`、`onDamaged()`、`die()` 基底。
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard。
+- `SaveService.ts`：新增 fake multiplayer realtime snapshot，支援 `upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
 - `AudioManager.ts`：支援 scene BGM 與 attack / hit / collect / buy / heal / skill 六種 SFX。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
 - `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`。
 - `CameraRig.ts`：手動掛到 Main Camera，使用距離指數函數調整跟隨速度，搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。
 - `CameraFollow.ts`：新增在 `assets/Scripts/Camera/`，提供簡單 smooth follow、X/Y 開關、offset 與 bounds；若使用它，就不要同時讓 `CameraRig` 控制同一台 Main Camera。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
+- `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、scene、position、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
 - `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，並顯示 `pausePanel`。Retry / 回主畫面可透過 `fadeOverlay` 做 0.25 秒黑幕淡出，場景切換時會清掉 static instance，避免第二輪按鍵失效。
 - 原則：能在 Inspector 掛節點就不要寫死 `cc.find()` 路徑；目前 `GameManager.cameraRig`、`GameManager.playerNode`、`CameraRig.target` 都採手動綁定，避免改場景層級後壞掉。
 
@@ -155,6 +157,8 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - 攻擊、受傷、進入水域會觸發 `AudioManager` / `EffectsManager` feedback。
 - `a05605d` 後 Gameplay key / mouse / wheel 有部分回到 PlayerController 直接處理；Dialogue / Merchant / Inventory / Crafting 仍由 PlayerController 協調流程。
 - 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED`，讓 `GameManager` 結算後載入 `GameOver` 場景。
+- `PlayerGun.ts`：可掛在 Player 或 Player 子節點，監聽滑鼠右鍵，從 muzzle 對滑鼠世界座標發射玩家子彈；左鍵近戰不變。
+- `PlayerGun.ts`：會使用 `ProjectilePoolManager`，缺 manager 時 runtime 補在 Player 上；缺 projectile prefab 時只 warn。
 - 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
 - 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
 - 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`，沒有輸入時會以 `oceanSinkSpeed` 慢慢下沉。
@@ -176,8 +180,16 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `CombatProjectile.ts` 實作遠程攻擊投射物。
 - `launch(owner, faction, velocity, damage, knockbackX, knockbackY)` 由 `NPC_AI` 呼叫。
 - 支援陣營過濾、忽略 owner hierarchy、同一目標只命中一次。
-- 命中目標時發送 `COMBAT_HIT_CONFIRMED` 並優先呼叫 `receiveAttack()`；命中實體地形或生命週期結束後 destroy。
+- 命中目標時發送 `COMBAT_HIT_CONFIRMED` 並優先呼叫 `receiveAttack()`；命中實體地形或生命週期結束後預設 destroy。
+- `setPoolReturnHandler()` 可讓玩家槍子彈在命中 / 撞地 / lifetime 結束時回到 `cc.NodePool`，不 destroy。
 - `visualNode` 可跟隨速度方向旋轉；若 prefab 有 `CoconutSprite` / `FireEffect`，會自動整理成 `VisualRoot`。
+
+### Player Gun / Projectile Pool
+
+- `ProjectilePoolManager.ts`：玩家槍專用 `cc.NodePool`，支援 `projectilePrefab`、`projectileParent`、`prewarmCount`。
+- `spawn()` 會從 pool 取子彈或 instantiate fallback，設定 world position 後呼叫 `CombatProjectile.launch()`。
+- `recycleProjectile()` 會呼叫 `CombatProjectile.prepareForPool()`，重設 velocity、collider、hitTargets，再 `pool.put(node)`。
+- 目前第一版只套玩家右鍵槍，不改 NPC ranged projectile / 掉落物。
 
 ### Inventory / Items
 
@@ -220,6 +232,8 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - 支援卡住時自動跳躍。
 - 支援遠程 projectile prefab、生成點、parent、釋放延遲、瞄準模式、飛行時間、速度與擊退。
 - 支援 NPC drop table：死亡後可依機率生成 prefab 並設定 `DropItem.itemName` / `itemAmount`。
+- 可選掛 `NPCPathAgent.ts`：有 `PathGraph` 時先沿 waypoint 追玩家；找不到 graph / path 時 fallback 原本直接追擊。
+- `NPCPathAgent` 碰到帶 `Portal` 的 waypoint 會嘗試傳送，讓敵人能走 portal link 後繼續追玩家。
 - 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
 - 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
 - NPC 目前功能重點：Dynamic RigidBody、hurtbox / attack hitbox、HP bar、jump / stuck 越障、受傷 / 死亡動畫與近遠程攻擊。
@@ -242,6 +256,10 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
 - `OceanLayerOrder.ts`：固定 OceanArea 子節點 zIndex / active / opacity，避免水域視覺層被蓋掉。
 - `OceanPrefabBuilder.ts`：可在 onLoad 清除舊 `GeneratedContent`，避免 ocean prefab 舊生成內容殘留。
+- `Portal.ts`：同場景成對傳送。兩個 portal 設同一個 `pairId`，玩家 / NPC 碰到 sensor 後傳到另一端 `exitOffset`，並用 cooldown 避免來回抖動。
+- `BouncePad.ts`：sensor 觸發後依節點 local up 或 local right 反彈 Player / NPC；預設 local up，所以旋轉節點就能改方向。
+- `PathNode.ts`：手動 waypoint，可用 `neighbors` 連線；若節點旁有 portal，可拖 `Portal` 當 link。
+- `PathGraph.ts`：收集子節點 `PathNode`，用簡單 A* 找 waypoint path，portal pair 會視為鄰接節點。
 - `MenuScene.ts`：選單場景用腳本，支援開始遊戲、讀取存檔進遊戲、註冊、登入、登出、設定面板、排行榜、靜音與 fade。
 - `GameOverScene.ts`：結算場景腳本，讀取 `SaveService.getLastRun()`，顯示玩家、Score、EXP，支援 Retry、Main Menu、Submit Score。
 
@@ -261,7 +279,7 @@ NPC_AI RANGED
   -> schedule releaseRangedProjectile()
   -> instantiate projectile prefab
   -> CombatProjectile.launch()
-  -> receiveAttack() / terrain hit / lifetime destroy
+  -> receiveAttack() / terrain hit / lifetime destroy or recycle
 ```
 
 ```text
@@ -352,6 +370,16 @@ CombatHitbox.onBeginContact()
 ```
 
 ```text
+PlayerGun right click
+  -> PlayerGun.fireAtWorldPosition()
+  -> ProjectilePoolManager.spawn()
+  -> CombatProjectile.launch()
+  -> hit / terrain / lifetime
+  -> CombatProjectile.finish()
+  -> ProjectilePoolManager.recycleProjectile()
+```
+
+```text
 MerchantNPC.buy()
   -> 檢查商店庫存
   -> 檢查玩家 coconut 數量
@@ -382,6 +410,24 @@ GameOverScene
   -> submitScore() update leaderboard
 ```
 
+```text
+Realtime fake multiplayer snapshot
+  -> RealtimeStateReporter.update()
+  -> read Player position / HP, GameManager score / exp, Inventory snapshot
+  -> SaveService.upsertRealtimePlayerState()
+  -> EventCenter.emit(REALTIME_STATE_UPDATED)
+```
+
+```text
+Portal / enemy pathing
+  -> NPC_AI.update()
+  -> NPCPathAgent.getSteeringDirection()
+  -> PathGraph.findPath()
+  -> PathNode.neighbors plus Portal paired node
+  -> NPC_AI.moveTowardTarget()
+  -> Portal.teleportActor() when close to portal waypoint
+```
+
 ## Cocos Inspector 設定
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`pausePanel` 是 Esc 暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
@@ -393,6 +439,13 @@ GameOverScene
 - `GameOverScene.ts`：接 title / username / score / exp / status labels、fadeOverlay；按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`。
 - `AudioManager.ts`：接 `sceneBgm` 與 attack / hit / collect / buy / heal / skill 六個 SFX clip。
 - `EffectsManager.ts`：接 `effectRoot` 與 `particleSpriteFrame`。
+- `PlayerGun.ts`：掛在 Player 或 Player 子節點；接 `projectilePrefab`，可接 `muzzleNode` 與 `projectileParent`。子彈 prefab 必須有 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor。
+- `ProjectilePoolManager.ts`：可掛在 Player 或 Bullet_Layer；接同一個 projectile prefab，`prewarmCount` 建議 8-16。
+- `Portal.ts`：兩個 Portal 節點設同一個 `pairId`，PhysicsCollider 要是 sensor；`exitOffset` 控制傳出後離 portal 多遠。
+- `BouncePad.ts`：節點掛 sensor collider，旋轉節點即可改變 local up 反彈方向；常用 `bounceSpeed` 約 600-900。
+- `PathGraph.ts`：建議放 `World Root/PathGraph`；PathNode 子節點用 `neighbors` 手動連線，入口 / 出口節點可拖 `Portal`。
+- `NPCPathAgent.ts`：掛在需要升級尋路的 NPC 上，`pathGraph` 可拖 PathGraph；不拖會找 `PathGraph.instance`。
+- `RealtimeStateReporter.ts`：可掛 GameManager 節點並拖 `playerNode`；若沒掛，`GameManager` 會 runtime 補一個。
 - `DialogueUIController`、`InventoryUIController`、`MerchantShopUIController`、`CraftingUIController` 若要跟鏡頭，接 `mainCameraNode`，或確認 fallback 能找到 Main Camera。
 - DropOre prefab 需掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key。
 
@@ -400,6 +453,11 @@ GameOverScene
 
 - `BaseEntity.takeDamage()` 已 clamp HP，並提供 `heal()`；Player / FoodBase 仍需實機測試回血 UI。
 - `PlayerController` 目前仍有 `T` 測試鍵，正式版應移除或包成 debug 開關。
+- `R` 快捷鍵已移除；重玩只保留 Pause / GameOver UI button 呼叫 `restartGame()` / `retry()`。
+- 右鍵槍目前用 browser canvas / Canvas mouse event 監聽；如果 Cocos 預覽器右鍵選單干擾，`PlayerGun` 會嘗試 prevent context menu。
+- `PathGraph` 是手動 waypoint，不是 tilemap grid A*；PathNode 沒連好時 NPC 會 fallback 原本直接追擊。
+- Portal 只傳 Player / NPC，不傳 projectile；如果要子彈也能過傳送門，要另外接 `CombatProjectile` actor 判斷。
+- `RealtimeStateReporter` 是 localStorage 假多人資料，不會真的顯示其他玩家；目前只準備資料介面。
 - `GameManager.onGameOver()` 已寫入 last run / save / leaderboard；GameOver 畫面仍需手動接 `GameOverScene` labels/buttons。
 - `ResourceObject.findPlayer()` 目前固定找 `Canvas/Player`，場景節點路徑如果不同要調整。
 - Menu / Pause / GameOver / Audio / Effects 都是腳本已補，Cocos Editor 節點與 Inspector 欄位需照 `PLAN.md` 手動設定。

@@ -202,8 +202,7 @@ export default class PlayerController extends BaseEntity {
     }
 
     private handleMouseAttack(button: number) {
-        if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) return;
-        if (this.inventoryUI && this.inventoryUI.active) return;
+        if (!this.canUseGameplayAction()) return;
 
         if (button === cc.Event.EventMouse.BUTTON_LEFT || button === 0) {
             this.attack();
@@ -462,6 +461,18 @@ export default class PlayerController extends BaseEntity {
 
         this.applyKnockback(attackerNode, hitInfo);
         this.takeDamage(amount);
+    }
+
+    public canUseGameplayAction(): boolean {
+        if (this.isDead || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
+            return false;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
+            return false;
+        }
+
+        return true;
     }
 
     private findNearestMerchant(): MerchantNPC {

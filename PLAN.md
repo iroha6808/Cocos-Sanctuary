@@ -19,11 +19,11 @@
 ## 下一步優先順序
 
 1. 確認 Main Camera 只用一套跟隨：`CameraRig` 和新增 `CameraFollow` 不要同時控制鏡頭，避免雙重位移。
-2. 實測跟鏡頭 UI：`MerchantShopUI`、`InventoryUI`、`CraftingUI`、`DialogueUI` 已有 camera-bound / clamp 邏輯，需確認 OceanArea 不跑出畫面。
-3. 實測礦物掉落：`DropOre` prefabs、`Orebase.ts`、`ItemData.ts` 的 smallore icon / item id / collect 流程。
-4. 補 Final Project 流程分數缺口：暫停 / 繼續、GameOver 結算、回主畫面或重玩。
-5. 補課程技術配分缺口：Scoreboard / 排行榜、Firebase 存讀、BGM / SFX、粒子特效。
-6. 實測遠程攻擊：`SkeletonMage.prefab`、`CombatProjectile.ts`、`BurningCoconutProjectile.prefab` 的傷害、擊退、陣營與銷毀流程。
+2. 手動掛新功能節點：Portal pair、BouncePad sensor、PlayerGun projectile prefab、PathGraph / PathNode、NPCPathAgent。
+3. 實測槍與 node pooling：右鍵射擊、子彈命中 / 地形 / lifetime 回 pool，Pause / UI 時不可射擊。
+4. 實測敵人 path finding：Hostile NPC 掛 `NPCPathAgent` 後能沿 waypoint 追玩家，路徑失敗時 fallback 舊追擊。
+5. 實測假多人資料：`RealtimeStateReporter` 寫入 localStorage snapshot，確認位置、HP、Score、EXP、背包摘要會更新。
+6. 實測跟鏡頭 UI：`MerchantShopUI`、`InventoryUI`、`CraftingUI`、`DialogueUI` 已有 camera-bound / clamp 邏輯，需確認 OceanArea 不跑出畫面。
 7. 檢查 Cocos Editor Inspector 綁定：Player、NPC、SkeletonMage、Projectile、OceanArea、Resource、UI。
 
 ## 企劃摘要
@@ -58,6 +58,10 @@
 - [x] GameOver 場景切換
 - [x] EXP / Score 資料流
 - [x] Score UI 腳本
+- [x] 傳送門 / 方向彈跳板腳本
+- [x] 玩家右鍵槍與玩家子彈 `cc.NodePool`
+- [x] waypoint path graph 與 portal link 尋路腳本
+- [x] localStorage 假多人 realtime snapshot API
 - [ ] 正式 Game Over 結算 UI
 - [ ] 地圖資料化 / TileRenderer
 
@@ -85,7 +89,7 @@
 | 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補；待 UI 綁定與真 Firebase 替換 |
 | 物理系統 | 13 | 正確重力系統和碰撞系統 | 已有 physics / collider / OceanArea / 斜坡跳躍修正；需實測 |
 | 遊戲音效 | 7 | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 BGM + 6 SFX；待拖 AudioClip |
-| 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、R、M、mouse、wheel、水中 boost、空中 fast fall |
+| 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、M、mouse、wheel、水中 boost、空中 fast fall；R 快捷鍵已移除 |
 | 遊戲動畫 | 12 | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC 動畫已有；fade transition 已補；開場 / 結束 UI 動畫待補 |
 | 遊戲特效 | 5 | 五種不同粒子特效 | `EffectsManager` 已補 hit / collect / heal / fire / water；待粒子圖 |
 | 版本控制 | 7 | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |
@@ -95,12 +99,12 @@
 
 | 類別 | 舉例 / 分數 | 目前對應 |
 | --- | --- | --- |
-| 遊戲控制 | 敵人 AI Path finding 0-6%；Node Pooling 效能優化 0-4% | 已有敵人 AI；Node Pooling 可補 projectile / drop |
+| 遊戲控制 | 敵人 AI Path finding 0-6%；Node Pooling 效能優化 0-4% | `PathGraph` / `NPCPathAgent` 已補；玩家槍子彈池已補，待手動掛 prefab |
 | 遊戲渲染 | 客製化渲染效果 Shader 0-4%；2.5D 0-2% | 暫未做 |
-| 遊戲特效 | 打擊感 0-3%；特殊遊戲連續 0-4% | `HitFeelManager` 已補 hit stop / flash / shake |
+| 遊戲特效 | 打擊感 0-3%；特殊遊戲運鏡 0-4% | 橡皮筋鏡頭、`HitFeelManager` 已補 hit stop / flash / shake |
 | 物理系統 | 客製化物理系統，例如外太空無重力場景 0-4% | `OceanArea` 水中物理可展示 |
 | 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | MapManager / TileRenderer 尚未補 |
-| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | 暫不進 MVP |
+| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把玩家狀態寫進 localStorage 假後端，待 UI / 真同步 |
 | 其他 | 同學可以自由發揮 | 打擊感、橡皮筋鏡頭可當展示亮點 |
 | Notice | 最高可拿 20% | 優先保住打擊感 / 運鏡 / AI / 水中物理 |
 
@@ -134,6 +138,8 @@
 | 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP、EXP、Score、食物回血 API 已接；仍需實機測試 UI / save 還原 | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
+| Portal / PathGraph 手動節點 | 尋路效果仰賴 PathNode 鄰接與 Portal pair 設定，缺節點會 fallback 直接追擊 | 延伸 |
+| PlayerGun prefab 綁定 | 槍需要 projectile prefab 有 `CombatProjectile`、RigidBody、PhysicsCollider；未綁只 warn | 延伸 |
 | item / prefab 命名一致性 | smallore 礦物、`greenApple`、`coffeebean`、`guazi` / `gauzi.ts` 命名混用，可能影響資料查找或 prefab 綁定 | MVP |
 | Game Over | `GameManager.onGameOver()` 已寫 last run / save / leaderboard；GameOver labels/buttons 需手動接 | MVP |
 | 素材清理 | `assets/Textures` 與 `assets/resources` 有大量來源檔 / 動畫 / 圖集，需要人工判斷 | 延伸 |
@@ -150,6 +156,8 @@
 | 水域探索 | OceanArea 讓地形不只地面，能展示水中控制 | MVP |
 | 礦物掉落物 | 新增多種 smallore icon、資料與 DropOre prefab，讓採礦展示更完整 | MVP |
 | 敵人 AI / Node Pooling | 對應進階功能配分，可用在敵人、projectile、掉落物效能優化 | 延伸 |
+| 傳送門 / 彈跳板 | 可展示關卡機制、敵人追擊與方向物理互動 | 延伸 |
+| 假多人 realtime state | 先有資料介面，之後可替換 Firebase / multiplayer UI | 延伸 |
 | 音效 / 粒子 / 打擊感 / 運鏡 | 分數明確且展示效果明顯，已用 hit stop、shake、flash、CameraRig 補強 | 延伸 |
 | 水果回血 / 礦物製作 | 讓資源有用途，不只是加分 | 延伸 |
 | 升級 / 死亡動畫 | 展示效果明顯 | 延伸 |
@@ -160,9 +168,9 @@
 
 | 狀態 | 摘要 |
 | --- | --- |
-| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、smallore 礦物掉落、Camera follow / CameraRig、HitFeel 打擊感、Dialogue / Shop / HUD 外殼 |
-| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 合成 / 遠程攻擊 / 水域實測、camera-bound UI 修正驗證 |
-| 未完成 | Firebase 真後端替換、正式 UI 美術、Node Pooling、MapManager / TileRenderer、素材清理 |
+| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、smallore 礦物掉落、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot 腳本 |
+| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 傳送門 / 彈跳板 / 槍 / 尋路實測 |
+| 未完成 | Firebase 真後端替換、正式 UI 美術、MapManager / TileRenderer、素材清理、多人角色顯示 UI |
 
 ## 分工
 
@@ -178,12 +186,12 @@
 
 | 模組 | 已有 | 待補 |
 | --- | --- | --- |
-| Core | `EventCenter`、`Constants`、physics / death event、`SaveService`、score / exp、pause / retry / save / leaderboard、`CameraRig`、`HitFeelManager` | Firebase 真後端替換、正式 GameOver 視覺 |
-| Player / Inventory | 移動、跳躍、fast fall、攻擊、受傷 / 死亡、背包、item icon、水中控制 / boost、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish、確認 InputManager / PlayerController 輸入責任 |
-| NPC / Merchant | 三類 NPC、巡邏 / 追擊、近遠程攻擊、商人對話 / 交易 / 生成、drop table | SkeletonMage 實測、交易流程測試 |
+| Core | `EventCenter`、`Constants`、physics / death event、`SaveService`、score / exp、pause / retry / save / leaderboard、`CameraRig`、`HitFeelManager`、`RealtimeStateReporter` | Firebase 真後端替換、正式 GameOver 視覺、多人 UI |
+| Player / Inventory | 移動、跳躍、fast fall、攻擊、右鍵槍、受傷 / 死亡、背包、item icon、水中控制 / boost、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish、確認 InputManager / PlayerController 輸入責任 |
+| NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、商人對話 / 交易 / 生成、drop table | SkeletonMage 實測、交易流程測試、PathNode 手動連線 |
 | Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
 | UI | HP / EXP / Score HUD、Inventory、Dialogue、Merchant Shop、Crafting、Menu / GameOver 腳本 API；多數 panel 已可跟 Main Camera / clamp | 手動接 Menu / Pause / GameOver panels，實測 OceanArea UI |
-| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、Camera 跟隨玩家到水域 | MapManager、TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
+| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | MapManager、TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
 
 ## 手動設定
 
@@ -214,6 +222,14 @@
 - [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceExponentScale` / `lookAheadScale`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
+- [ ] Player 或 Player 子節點掛 `PlayerGun.ts`；`projectilePrefab` 拖玩家子彈 prefab，`muzzleNode` 可拖槍口節點，`projectileParent` 建議拖 Bullet_Layer。
+- [ ] 玩家子彈 prefab 要有 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor；`canHitPeaceNpc` / `canHitNeutralNpc` / `canHitHostileNpc` 依需求開啟。
+- [ ] 可選：Player 或 Bullet_Layer 掛 `ProjectilePoolManager.ts`，拖同一個 projectile prefab，調 `prewarmCount`；沒掛時 `PlayerGun` 會 runtime 補在 Player 上。
+- [ ] 成對 Portal 節點各掛 `Portal.ts`、PhysicsCollider sensor；兩個 portal 設同一個 `pairId`，調 `exitOffset` / `cooldown`。
+- [ ] BouncePad 節點掛 `BouncePad.ts`、PhysicsCollider sensor；旋轉節點即可改變 local up 反彈方向，調 `bounceSpeed`。
+- [ ] PathGraph root 掛 `PathGraph.ts`；子節點掛 `PathNode.ts`，用 `neighbors` 手動連線，portal 入口 / 出口附近的 PathNode 可拖對應 `Portal`。
+- [ ] 需要升級尋路的 Hostile NPC 掛 `NPCPathAgent.ts`；可拖 `PathGraph`，不拖則使用 `PathGraph.instance`。
+- [ ] GameManager 節點可掛 `RealtimeStateReporter.ts` 並拖 `playerNode`；沒掛時 GameManager 會 runtime 補一個。
 - [ ] MenuScene 接 `mainPanel`、`loginPanel`、`settingsPanel`、`leaderboardPanel`、`fadeOverlay`、username / password EditBox、status / current user / leaderboard Labels
 - [ ] Menu 按鈕綁 `goToGameScene()`、`loadSavedGame()`、`register()`、`login()`、`logout()`、`showMain()`、`showLogin()`、`showSettings()`、`showLeaderboard()`、`toggleMute()`
 - [ ] GameOver 場景掛 `GameOverScene.ts`，接 title / username / score / exp / status Labels 與 fadeOverlay

@@ -58,6 +58,7 @@ assets/
     Attack/
       CombatHitbox.ts
       CombatProjectile.ts
+      ProjectilePoolManager.ts
     Camera/
       CameraFollow.ts
     Core/
@@ -69,6 +70,7 @@ assets/
       EventCenter.ts
       GameManager.ts
       HitFeelManager.ts
+      RealtimeStateReporter.ts
       SaveService.ts
     Data/
       ItemData.ts
@@ -98,15 +100,21 @@ assets/
             cashew.ts ... pistachio.ts
     Map/
       NewScript - 001.ts
+      BouncePad.ts
       OceanArea.ts
       OceanLayerOrder.ts
       OceanPrefabBuilder.ts
+      PathGraph.ts
+      PathNode.ts
+      Portal.ts
     NPC/
       NPC_AI.ts
+      NPCPathAgent.ts
       MerchantNPC.ts
       MerchantSpawner.ts
       NPCDialogue.ts
     Player/
+      PlayerGun.ts
       PlayerController.ts
       InventoryManager.ts
       CollectibleItem.ts
@@ -156,8 +164,13 @@ Canvas
     AudioManager                    # BGM + SFX，需拖 AudioClip
     EffectsManager                  # runtime particle，需拖 effectRoot / particleSpriteFrame
     MerchantSpawner                # 建議掛在這裡或 NPC root 上
+    RealtimeStateReporter          # 可手動掛；未掛時 GameManager runtime 補
   World Root
     OceanArea                      # PhysicsBoxCollider sensor + OceanArea / OceanLayerOrder
+    PathGraph                      # PathGraph + PathNode children
+    Portal_A_In / Portal_A_Out     # Portal + sensor collider，pairId 相同
+    BouncePad                      # BouncePad + sensor collider，旋轉節點改反彈方向
+    Bullet_Layer                   # PlayerGun / projectile pool 建議 parent
   UI Root
     Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
     FadeOverlay                   # optional，全螢幕黑幕，Retry / Main Menu 切場景淡出用
@@ -213,6 +226,7 @@ Canvas
   - 全域事件中心，提供 `on()`、`emit()`、`off()`、`clear()`。
 - `SaveService.ts`
   - localStorage 假後端，提供註冊、登入、登出、每帳號存讀檔、排行榜、最後一局結果。
+  - fake multiplayer realtime snapshot：`upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
 - `AudioManager.ts`
   - 場景 BGM 與六種 SFX：attack、hit、collect、buy、heal、skill。
 - `EffectsManager.ts`
@@ -223,6 +237,9 @@ Canvas
   - 簡單 smooth follow，支援 X/Y 跟隨、offset、bounds；和 `CameraRig` 二選一使用。
 - `HitFeelManager.ts`
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
+- `RealtimeStateReporter.ts`
+  - 定期把玩家名稱、場景、位置、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage。
+  - 目前是多人功能資料介面，不會顯示其他玩家。
 - `GameManager.ts`
   - 遊戲初始化、PhysicsManager、CameraRig / HitFeelManager runtime 建立、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
   - `pausePanel` 是暫停 UI 容器；`fadeOverlay` 是 Retry / Main Menu 切場景前的淡出黑幕。
@@ -240,9 +257,13 @@ Canvas
 - `CombatProjectile.ts`
   - 遠程攻擊共用投射物，使用 Dynamic RigidBody 與 sensor collider。
   - 接收 owner、陣營、初速度、傷害與擊退，沿用 `CombatHitInfo` 傳遞受傷資料。
-  - 排除攻擊者與同陣營、每個目標只命中一次，命中實體、地形或超時後銷毀。
+  - 排除攻擊者與同陣營、每個目標只命中一次，命中實體、地形或超時後預設銷毀；玩家槍子彈可回 pool。
   - 發射與命中時呼叫音效 / fire particle，命中時 emit `COMBAT_HIT_CONFIRMED`。
+  - 可被 `ProjectilePoolManager` 設定 return handler，玩家槍子彈命中 / 撞地 / lifetime 結束後回 pool。
   - `VisualRoot` 會依速度方向旋轉；若 prefab 只有 `CoconutSprite` 與 `FireEffect`，載入時會自動建立視覺根節點。
+- `ProjectilePoolManager.ts`
+  - 玩家槍專用 `cc.NodePool`。
+  - 支援 prefab、parent、prewarm count；目前不改 NPC projectile / drops。
 
 ## Player
 
@@ -257,9 +278,12 @@ Canvas
   - 空中 S / Down 可 fast fall；斜坡 / 平台跳躍用 `isGrounded()` 修正。
   - 攻擊、受傷、水域進入會呼叫 `AudioManager` / `EffectsManager`。
   - 持有 `DialogueUIController` 與 `MerchantShopUIController` reference。
+- `PlayerGun.ts`
+  - 掛 Player 或 Player 子節點，滑鼠右鍵發射玩家子彈。
+  - 缺 `ProjectilePoolManager` 時會 runtime 補在 Player 上；缺 projectile prefab 時只 warn。
 - `Input/`
-  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel、Retry。
-  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/R/M fallback。
+  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel。
+  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M fallback；R 快捷鍵已移除。
   - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Paused。
   - `InputManager.ts` 統一監聽 Game 場景輸入，依 context stack 由上往下分派。
 - `InventoryManager.ts`
@@ -282,7 +306,11 @@ Canvas
   - 受傷、死亡、停用或銷毀會取消尚未釋放的投射物。
   - 左右翻面會保留 `Sprite_Body` 原始縮放，只改變 X 軸正負號。
   - 支援受傷、死亡、血條、動畫狀態、跳躍越障。
+  - 若同節點掛 `NPCPathAgent`，CHASE_TARGET 會先用 waypoint path；找不到 path 時 fallback 原本直接追擊。
   - 提供商人需要的 `pauseMovement()`、`resumeMovement()`、`stopMovement()`、`beginTalk()`、`endTalk()`、`beginTrading()`、`endTrading()`、`isPlayerInInteractRange()`。
+- `NPCPathAgent.ts`
+  - 依 `PathGraph` 回傳 waypoint steering direction。
+  - 支援走到 portal waypoint 後呼叫 `Portal.teleportActor()`，讓敵人能走傳送門 link。
 - `MerchantNPC.ts`
   - 旅行商人專屬狀態：`Wandering`、`Talking`、`Trading`、`Leaving`。
   - 設定自身為 `NPC_PEACE`、`WANDER`、不攻擊。
@@ -340,6 +368,18 @@ Canvas
   - 固定 SkyVisual / WaterVisual / SeaFloor / OceanTrigger / GeneratedContent 層級、active、opacity。
 - `Map/OceanPrefabBuilder.ts`
   - 可在 onLoad 清掉舊 `GeneratedContent`，避免 prefab 生成內容殘留。
+- `Map/Portal.ts`
+  - 同場景成對傳送，兩個 portal 用同一個 `pairId`。
+  - 支援 Player / NPC、`exitOffset`、cooldown，避免傳送後來回抖動。
+- `Map/BouncePad.ts`
+  - sensor 觸發後依節點 local up / local right 反彈 Player / NPC。
+  - 預設 local up；旋轉彈跳板即可改朝上、斜上或水平彈出。
+- `Map/PathNode.ts`
+  - 手動 waypoint，可在 Inspector 設 `neighbors`。
+  - 若是 portal 入口 / 出口附近節點，可拖 `Portal` 形成 link。
+- `Map/PathGraph.ts`
+  - 收集子節點 `PathNode`，用簡單 A* 找路。
+  - path missing 時由 `NPC_AI` fallback 直接追擊。
 - `Scene/MenuScene.ts`
   - 選單場景用腳本，支援開始遊戲、讀檔進遊戲、註冊、登入、登出、設定、排行榜、靜音與 fade。
 - `Scene/GameOverScene.ts`
@@ -406,6 +446,24 @@ Canvas
   - `CombatProjectile`
   - `RigidBody` + PhysicsCollider，collider 為 sensor。
   - 可接 `VisualRoot`，或由 `CoconutSprite` / `FireEffect` 自動建立視覺根節點。
+- PlayerGun / player projectile
+  - Player 或子節點掛 `PlayerGun`
+  - `projectilePrefab` 拖玩家子彈 prefab
+  - `muzzleNode` 可拖槍口節點；`projectileParent` 建議拖 Bullet_Layer
+  - 子彈 prefab 需要 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor
+  - 可選掛 `ProjectilePoolManager`，`prewarmCount` 建議 8-16
+- Portal
+  - Portal 節點需要 `Portal.ts` + sensor collider
+  - 成對 Portal 設同一個 `pairId`
+  - Player / NPC collider 要能觸發 contact listener
+- BouncePad
+  - BouncePad 節點需要 `BouncePad.ts` + sensor collider
+  - 旋轉節點決定反彈方向，`bounceSpeed` 決定力道
+- PathGraph / PathNode
+  - World Root 下建立 PathGraph root，掛 `PathGraph.ts`
+  - 子節點掛 `PathNode.ts`，用 `neighbors` 手動連線
+  - portal 入口 / 出口附近 PathNode 可拖對應 Portal component
+  - 需要尋路的 NPC 掛 `NPCPathAgent.ts`
 - OceanArea
   - `PhysicsBoxCollider` 設為 sensor。
   - 掛 `OceanArea.ts`，需讓 Player collider 能觸發 contact callback。
