@@ -9,6 +9,7 @@ import { InputContext } from "../Input/InputContext";
 import CameraRig from "./CameraRig";
 import HitFeelManager from "./HitFeelManager";
 import RealtimeStateReporter from "./RealtimeStateReporter";
+import DamageNumberManager from "./DamageNumberManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -63,6 +64,7 @@ export default class GameManager extends cc.Component {
     private inputManager: InputManager = null;
     private hitFeelManager: HitFeelManager = null;
     private realtimeStateReporter: RealtimeStateReporter = null;
+    private damageNumberManager: DamageNumberManager = null;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -88,6 +90,7 @@ export default class GameManager extends cc.Component {
             cc.warn("[GameManager] cameraRig is not assigned; attach CameraRig.ts to Main Camera and drag it here.");
         }
         this.hitFeelManager = HitFeelManager.getOrCreate(this.node);
+        this.damageNumberManager = DamageNumberManager.getOrCreate(this.node);
         this.realtimeStateReporter = this.getOrCreateRealtimeReporter();
 
         // 啟用物理引擎
@@ -256,6 +259,7 @@ export default class GameManager extends cc.Component {
         this.cameraRig = null;
         this.hitFeelManager = null;
         this.realtimeStateReporter = null;
+        this.damageNumberManager = null;
     }
 
     private setPhysicsPaused(paused: boolean): void {

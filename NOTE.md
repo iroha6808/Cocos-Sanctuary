@@ -114,6 +114,11 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 | `Space` | 跳躍；水域中改成 boost / 上游邏輯。 | `PlayerController.applyMoveKey()` -> `jump()` / `boostInOcean()` / `getOceanVerticalInput()` |
 | 滑鼠左鍵 | Gameplay 時近戰攻擊；Pause / UI 時會被玩家狀態檢查擋掉。 | `PlayerController.setupMouseAttackInput()` -> `handleMouseAttack()` -> `attack()` |
 | 滑鼠右鍵 | 玩家槍射擊；Pause / UI / 背包 / 商店 / 合成開啟時不射擊。 | `PlayerGun.ts` -> `ProjectilePoolManager.spawn()` -> `CombatProjectile.launch()` |
+| `1` | 切到 Gun 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Gun)` |
+| `2` | 切到 Jetpack 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Jetpack)` |
+| `3` | 切到 Grapple 模式。 | `PlayerToolController.onKeyDown()` -> `setMode(PlayerToolMode.Grapple)` |
+| Jetpack 模式 `Space` | 原本跳躍起手保留，按住時消耗 fuel 持續向上推進。 | `PlayerController.applyMoveKey()` + `PlayerToolController.updateJetpack()` |
+| Grapple 模式滑鼠右鍵 | Raycast 鉤非 sensor 實體地形，按住拉向鉤點，放開或超距解除。 | `PlayerToolController.tryAttachGrapple()` / `updateGrapple()` |
 | `B` | 開關背包 UI；背包開啟時 push `Inventory` context。 | `PlayerController.toggleInventory()` / `handleInventoryInput()` |
 | `F` | Gameplay 時互動；對話中確認；商店中購買。 | `PlayerController.handleGameplayInput()` / `handleDialogueInput()` / `handleMerchantShopInput()` |
 | `Esc` | 依最上層 context：關商店 / 關合成 / 關背包 / Pause Resume。 | `InputAction.Cancel`、`GameManager.handleGameplayInput()`、`handlePausedInput()` |
@@ -143,6 +148,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `CameraFollow.ts`：新增在 `assets/Scripts/Camera/`，提供簡單 smooth follow、X/Y 開關、offset 與 bounds；若使用它，就不要同時讓 `CameraRig` 控制同一台 Main Camera。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
 - `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、scene、position、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
+- `DamageNumberManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，顯示上飄傷害數字並播放 damage spark；GameManager 會 runtime 補一個。
 - `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，並顯示 `pausePanel`。Retry / 回主畫面可透過 `fadeOverlay` 做 0.25 秒黑幕淡出，場景切換時會清掉 static instance，避免第二輪按鍵失效。
 - 原則：能在 Inspector 掛節點就不要寫死 `cc.find()` 路徑；目前 `GameManager.cameraRig`、`GameManager.playerNode`、`CameraRig.target` 都採手動綁定，避免改場景層級後壞掉。
 
@@ -159,6 +165,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - 受傷時發送 `PLAYER_HP_CHANGED`，死亡動畫結束後發送 `PLAYER_DIED`，讓 `GameManager` 結算後載入 `GameOver` 場景。
 - `PlayerGun.ts`：可掛在 Player 或 Player 子節點，監聽滑鼠右鍵，從 muzzle 對滑鼠世界座標發射玩家子彈；左鍵近戰不變。
 - `PlayerGun.ts`：會使用 `ProjectilePoolManager`，缺 manager 時 runtime 補在 Player 上；缺 projectile prefab 時只 warn。
+- `PlayerToolMode.ts`：定義 `Gun / Jetpack / Grapple` 三種工具模式。
+- `PlayerToolController.ts`：集中處理 `1/2/3`、Jetpack fuel、Grapple raycast / pull、工具 label / fuel bar 事件。
+- `PlayerToolController.ts` 會呼叫 `PlayerGun.setDirectRightMouseInput(false)`，避免工具模式右鍵和 PlayerGun 自己的右鍵監聽重複射擊。
 - 背包或商人 UI 開啟時，玩家移動 / 攻擊流程會暫停。
 - 可掃描場景中的 `MerchantNPC`，靠近時透過 `DialogueUIController` 顯示 `Press F to Talk`。
 - 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`，沒有輸入時會以 `oceanSinkSpeed` 慢慢下沉。
@@ -234,6 +243,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - 支援 NPC drop table：死亡後可依機率生成 prefab 並設定 `DropItem.itemName` / `itemAmount`。
 - 可選掛 `NPCPathAgent.ts`：有 `PathGraph` 時先沿 waypoint 追玩家；找不到 graph / path 時 fallback 原本直接追擊。
 - `NPCPathAgent` 碰到帶 `Portal` 的 waypoint 會嘗試傳送，讓敵人能走 portal link 後繼續追玩家。
+- `MiniBossAI.ts`：傳送法師展示 Boss，依 HP ratio 進 phase 2，定時 teleport 到手動拖的 points，定時 summon minion prefab，Boss 死亡後發送 `BOSS_DEFEATED`。
+- `BossArenaController.ts`：掛在 arena sensor，玩家進入後啟動 Boss；Boss 死亡後可關 gate、開 reward、加 clear score。
+- `EnemyRespawner.ts`：玩家距離刷新。玩家進 activation range 才生成，離 despawn range 可清掉，維持 `maxAlive`。
 - 支援方向動畫：`idle_front/right/back`、`move_*`、`attack_*`、`damaged_*`，死亡使用 `death`。
 - 支援 NPC HP bar 更新、死亡隱藏血條、發送 `NPC_DIED`。
 - NPC 目前功能重點：Dynamic RigidBody、hurtbox / attack hitbox、HP bar、jump / stuck 越障、受傷 / 死亡動畫與近遠程攻擊。
@@ -411,6 +423,43 @@ GameOverScene
 ```
 
 ```text
+Player tool mode
+  -> 1 / 2 / 3 set PlayerToolMode
+  -> Gun: right click -> PlayerGun.fireAtWorldPosition()
+  -> Jetpack: hold Space -> consume fuel -> upward velocity
+  -> Grapple: right click raycast terrain -> pull player -> release detach
+```
+
+```text
+Damage numbers
+  -> CombatHitbox / CombatProjectile emit COMBAT_HIT_CONFIRMED
+  -> DamageNumberManager.showDamage()
+  -> runtime Label floats upward
+  -> EffectsManager DAMAGE_SPARK
+```
+
+```text
+Boss arena
+  -> BossArenaController sensor detects Player
+  -> MiniBossAI.activateBoss()
+  -> phase check by hp ratio
+  -> teleport / summon minions
+  -> NPC_DIED on boss
+  -> BOSS_DEFEATED
+  -> gate off / reward on / score reward
+```
+
+```text
+EnemyRespawner
+  -> check player distance
+  -> enter activation range
+  -> instantiate enemy prefab under spawnParent
+  -> set NPC_AI targetPlayer
+  -> leave despawn range
+  -> optional despawn alive enemies
+```
+
+```text
 Realtime fake multiplayer snapshot
   -> RealtimeStateReporter.update()
   -> read Player position / HP, GameManager score / exp, Inventory snapshot
@@ -441,6 +490,11 @@ Portal / enemy pathing
 - `EffectsManager.ts`：接 `effectRoot` 與 `particleSpriteFrame`。
 - `PlayerGun.ts`：掛在 Player 或 Player 子節點；接 `projectilePrefab`，可接 `muzzleNode` 與 `projectileParent`。子彈 prefab 必須有 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor。
 - `ProjectilePoolManager.ts`：可掛在 Player 或 Bullet_Layer；接同一個 projectile prefab，`prewarmCount` 建議 8-16。
+- `PlayerToolController.ts`：掛 Player；接 `playerGun`，可選接 `toolLabel`、`jetpackFuelBar`、`jetpackFlameRoot`、`grappleLineRoot`。
+- `DamageNumberManager.ts`：可掛 GameManager 或 UI Root；`numberRoot` 建議拖 UI Root，沒掛時 GameManager runtime 補。
+- `MiniBossAI.ts`：Boss prefab 同節點建議已有 `NPC_AI`；接 `npcAI`、`targetPlayer`、`teleportPoints`、`minionPrefabs`、`minionParent`。
+- `BossArenaController.ts`：掛 arena sensor；接 `boss` / `bossNode`、`playerNode`，可選接 `gateNode`、`clearRewardNode`。
+- `EnemyRespawner.ts`：掛刷怪點；接 `enemyPrefabs`、`playerNode`、`spawnParent`，調 activation / despawn range。
 - `Portal.ts`：兩個 Portal 節點設同一個 `pairId`，PhysicsCollider 要是 sensor；`exitOffset` 控制傳出後離 portal 多遠。
 - `BouncePad.ts`：節點掛 sensor collider，旋轉節點即可改變 local up 反彈方向；常用 `bounceSpeed` 約 600-900。
 - `PathGraph.ts`：建議放 `World Root/PathGraph`；PathNode 子節點用 `neighbors` 手動連線，入口 / 出口節點可拖 `Portal`。
@@ -455,6 +509,10 @@ Portal / enemy pathing
 - `PlayerController` 目前仍有 `T` 測試鍵，正式版應移除或包成 debug 開關。
 - `R` 快捷鍵已移除；重玩只保留 Pause / GameOver UI button 呼叫 `restartGame()` / `retry()`。
 - 右鍵槍目前用 browser canvas / Canvas mouse event 監聽；如果 Cocos 預覽器右鍵選單干擾，`PlayerGun` 會嘗試 prevent context menu。
+- 若 Player 同時掛 `PlayerToolController` 和 `PlayerGun`，`PlayerToolController` 會關掉 PlayerGun 的直接右鍵輸入，由工具模式統一分派。
+- Jetpack 模式按 Space 會和原本跳躍共存：按下瞬間仍可能先跳，持續按住才由 Jetpack 加速上升。
+- Grapple 第一版只鉤非 sensor 實體地形；不鉤敵人、掉落物、sensor trigger 或 UI。
+- Boss 本身仍依賴 `NPC_AI` 的受傷 / 死亡 / 遠程攻擊；`MiniBossAI` 負責 phase、傳送與召喚。
 - `PathGraph` 是手動 waypoint，不是 tilemap grid A*；PathNode 沒連好時 NPC 會 fallback 原本直接追擊。
 - Portal 只傳 Player / NPC，不傳 projectile；如果要子彈也能過傳送門，要另外接 `CombatProjectile` actor 判斷。
 - `RealtimeStateReporter` 是 localStorage 假多人資料，不會真的顯示其他玩家；目前只準備資料介面。

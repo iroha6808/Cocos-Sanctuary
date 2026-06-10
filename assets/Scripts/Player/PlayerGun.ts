@@ -1,6 +1,7 @@
 import GameManager from "../Core/GameManager";
 import ProjectilePoolManager from "../Attack/ProjectilePoolManager";
 import { CombatFaction } from "../Attack/CombatHitbox";
+import EffectsManager, { EffectType } from "../Core/EffectsManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -35,6 +36,9 @@ export default class PlayerGun extends cc.Component {
 
     @property(cc.Boolean)
     public debugLog: boolean = false;
+
+    @property(cc.Boolean)
+    public directRightMouseInput: boolean = true;
 
     private canvasNode: cc.Node = null;
     private browserMouseDownHandler: any = null;
@@ -81,10 +85,15 @@ export default class PlayerGun extends cc.Component {
         }
 
         this.lastFireAt = Date.now();
+        EffectsManager.play(EffectType.GUN_MUZZLE, spawnWorld);
         if (this.debugLog) {
             cc.log(`[PlayerGun] fire direction=(${direction.x.toFixed(2)}, ${direction.y.toFixed(2)}).`);
         }
         return true;
+    }
+
+    public setDirectRightMouseInput(enabled: boolean): void {
+        this.directRightMouseInput = enabled;
     }
 
     private canFire(): boolean {
@@ -124,6 +133,9 @@ export default class PlayerGun extends cc.Component {
                 if (event.button !== 2) {
                     return;
                 }
+                if (!this.directRightMouseInput) {
+                    return;
+                }
                 this.fireAtWorldPosition(this.getMouseWorldPosition(event));
                 if (event.preventDefault) {
                     event.preventDefault();
@@ -156,6 +168,9 @@ export default class PlayerGun extends cc.Component {
 
     private onNodeMouseDown(event: cc.Event.EventMouse): void {
         if (event.getButton() !== cc.Event.EventMouse.BUTTON_RIGHT) {
+            return;
+        }
+        if (!this.directRightMouseInput) {
             return;
         }
         this.fireAtWorldPosition(this.getEventWorldPosition(event));

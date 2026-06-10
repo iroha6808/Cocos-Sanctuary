@@ -66,6 +66,7 @@ assets/
       BaseEntity.ts
       CameraRig.ts
       Constants.ts
+      DamageNumberManager.ts
       EffectsManager.ts
       EventCenter.ts
       GameManager.ts
@@ -110,11 +111,16 @@ assets/
     NPC/
       NPC_AI.ts
       NPCPathAgent.ts
+      MiniBossAI.ts
+      BossArenaController.ts
+      EnemyRespawner.ts
       MerchantNPC.ts
       MerchantSpawner.ts
       NPCDialogue.ts
     Player/
       PlayerGun.ts
+      PlayerToolController.ts
+      PlayerToolMode.ts
       PlayerController.ts
       InventoryManager.ts
       CollectibleItem.ts
@@ -163,6 +169,7 @@ Canvas
     GameManager
     AudioManager                    # BGM + SFX，需拖 AudioClip
     EffectsManager                  # runtime particle，需拖 effectRoot / particleSpriteFrame
+    DamageNumberManager             # 可手動掛；未掛時 GameManager runtime 補
     MerchantSpawner                # 建議掛在這裡或 NPC root 上
     RealtimeStateReporter          # 可手動掛；未掛時 GameManager runtime 補
   World Root
@@ -209,6 +216,8 @@ Canvas
   NPC
     TravelingMerchant              # 可手動放，也可由 MerchantSpawner 生成
     SkeletonMage                   # 遠程 NPC prefab
+    MiniBoss                       # NPC_AI + MiniBossAI
+    EnemyRespawner                 # 距離刷怪點
   coconuts
   InventoryUI
     GridContainer
@@ -230,7 +239,10 @@ Canvas
 - `AudioManager.ts`
   - 場景 BGM 與六種 SFX：attack、hit、collect、buy、heal、skill。
 - `EffectsManager.ts`
-  - runtime particle 特效：hit、collect、heal、fire、water。
+  - runtime particle 特效：hit、collect、heal、fire、water、gun muzzle、damage spark、boss teleport、boss summon、jetpack flame、grapple attach。
+- `DamageNumberManager.ts`
+  - 監聽 `COMBAT_HIT_CONFIRMED`，用 pooled runtime Label 顯示上飄傷害數字。
+  - GameManager 會 runtime 補一個；也可手動掛到 UI Root 並指定 `numberRoot`。
 - `CameraRig.ts`
   - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick。
 - `CameraFollow.ts`
@@ -281,6 +293,12 @@ Canvas
 - `PlayerGun.ts`
   - 掛 Player 或 Player 子節點，滑鼠右鍵發射玩家子彈。
   - 缺 `ProjectilePoolManager` 時會 runtime 補在 Player 上；缺 projectile prefab 時只 warn。
+- `PlayerToolMode.ts`
+  - 定義 Gun / Jetpack / Grapple 三種工具模式。
+- `PlayerToolController.ts`
+  - 掛 Player，使用 `1/2/3` 切工具模式。
+  - Gun 模式右鍵呼叫 `PlayerGun`；Jetpack 模式 Space 消耗 fuel 上升；Grapple 模式右鍵 raycast 非 sensor 地形並拉玩家。
+  - 可接 tool label、fuel bar、jetpack flame root、grapple line root。
 - `Input/`
   - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel。
   - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M fallback；R 快捷鍵已移除。
@@ -311,6 +329,13 @@ Canvas
 - `NPCPathAgent.ts`
   - 依 `PathGraph` 回傳 waypoint steering direction。
   - 支援走到 portal waypoint 後呼叫 `Portal.teleportActor()`，讓敵人能走傳送門 link。
+- `MiniBossAI.ts`
+  - 傳送法師 Mini Boss 控制層，搭配同節點 `NPC_AI`。
+  - 依 HP ratio 切 phase 2，定時瞬移到 teleport points，定時召喚 minion prefab。
+- `BossArenaController.ts`
+  - Arena sensor 控制器，玩家進入後啟動 Boss；Boss defeated 後可關 gate、顯示 reward、加分。
+- `EnemyRespawner.ts`
+  - 玩家距離型刷怪點，靠近才生成，離遠可 despawn，維持 `maxAlive`。
 - `MerchantNPC.ts`
   - 旅行商人專屬狀態：`Wandering`、`Talking`、`Trading`、`Leaving`。
   - 設定自身為 `NPC_PEACE`、`WANDER`、不攻擊。
@@ -452,6 +477,27 @@ Canvas
   - `muzzleNode` 可拖槍口節點；`projectileParent` 建議拖 Bullet_Layer
   - 子彈 prefab 需要 `CombatProjectile`、`RigidBody`、`PhysicsCollider` sensor
   - 可選掛 `ProjectilePoolManager`，`prewarmCount` 建議 8-16
+- PlayerToolController
+  - Player 掛 `PlayerToolController`
+  - `playerGun` 拖同節點或子節點的 PlayerGun
+  - 可選接 `toolLabel`、`jetpackFuelBar`、`jetpackFlameRoot`、`grappleLineRoot`
+  - 操作：`1` Gun、`2` Jetpack、`3` Grapple；Jetpack 用 Space 上升
+- DamageNumberManager
+  - 可掛 GameManager 或 UI Root；不掛時 GameManager runtime 補
+  - `numberRoot` 建議拖 UI Root 或 HUD Layer
+- MiniBoss
+  - Boss prefab 掛 `NPC_AI` + `MiniBossAI`
+  - `MiniBossAI.npcAI` 拖同節點 NPC_AI
+  - `teleportPoints` 拖 arena 內手動放的點
+  - `minionPrefabs` 拖小怪 prefab，`minionParent` 拖 NPC root
+- BossArenaController
+  - Arena trigger 節點掛 `BossArenaController` + sensor collider
+  - 接 `boss` / `bossNode`、`playerNode`
+  - 可選接 `gateNode`、`clearRewardNode`
+- EnemyRespawner
+  - 刷怪點掛 `EnemyRespawner`
+  - 接 `enemyPrefabs`、`playerNode`、`spawnParent`
+  - 調 `activationRange`、`despawnRange`、`maxAlive`、`spawnCooldown`
 - Portal
   - Portal 節點需要 `Portal.ts` + sensor collider
   - 成對 Portal 設同一個 `pairId`
