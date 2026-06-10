@@ -59,7 +59,7 @@ export default class FoodBase extends DropItem {
     }
 
     collect() {
-        const id   = (this.foodName || this.itemName).toLowerCase();
+        const id   = (this.itemName || this.foodName).toLowerCase();
         const name = this.foodName || this.itemName;
 
         cc.log(`[FoodBase] 嘗試將 ${name} 加入背包...`);

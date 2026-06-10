@@ -1,0 +1,357 @@
+[
+  {
+    "__type__": "cc.Prefab",
+    "_name": "",
+    "_objFlags": 0,
+    "_native": "",
+    "data": {
+      "__id__": 1
+    },
+    "optimizationPolicy": 0,
+    "asyncLoadAssets": false,
+    "readonly": false
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "Blue Potion",
+    "_objFlags": 0,
+    "_parent": null,
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 2
+      },
+      {
+        "__id__": 3
+      },
+      {
+        "__id__": 4
+      },
+      {
+        "__id__": 5
+      },
+      {
+        "__id__": 6
+      }
+    ],
+    "_prefab": {
+      "__id__": 7
+    },
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 291,
+      "height": 450
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_trs": {
+      "__type__": "TypedArray",
+      "ctor": "Float64Array",
+      "array": [
+        651.068,
+        -97.331,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0.1,
+        0.1,
+        1
+      ]
+    },
+    "_eulerAngles": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "_groupIndex": 0,
+    "groupIndex": 0,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.Sprite",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_materials": [
+      {
+        "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
+      }
+    ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
+    "_spriteFrame": null,
+    "_type": 0,
+    "_sizeMode": 1,
+    "_fillType": 0,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_atlas": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.RigidBody",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "_type": 1,
+    "_allowSleep": true,
+    "_gravityScale": 1,
+    "_linearDamping": 0,
+    "_angularDamping": 0,
+    "_linearVelocity": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_angularVelocity": 0,
+    "_fixedRotation": false,
+    "enabledContactListener": false,
+    "bullet": false,
+    "awakeOnLoad": true,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsPolygonCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "points": [
+      {
+        "__type__": "cc.Vec2",
+        "x": -24,
+        "y": 220
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -46,
+        "y": 207
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -46,
+        "y": 160
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -55,
+        "y": 155
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -55,
+        "y": 130
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -50,
+        "y": 130
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -50,
+        "y": 20
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -140,
+        "y": -138
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -140,
+        "y": -175
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -120,
+        "y": -195
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -100,
+        "y": -210
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -80,
+        "y": -215
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -40,
+        "y": -225
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 40,
+        "y": -225
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 80,
+        "y": -215
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 100,
+        "y": -210
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 120,
+        "y": -200
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 140,
+        "y": -175
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 140,
+        "y": -138
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 50,
+        "y": 20
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 50,
+        "y": 130
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 46,
+        "y": 120
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 55,
+        "y": 130
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 55,
+        "y": 155
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 46,
+        "y": 160
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 46,
+        "y": 207
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 24,
+        "y": 220
+      }
+    ],
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsCircleCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": -63.8
+    },
+    "_radius": 1,
+    "_id": ""
+  },
+  {
+    "__type__": "f04a0+U48FHA5DAc5X1PXFz",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "itemAmount": 1,
+    "attractDistance": 56,
+    "collectDistance": 35,
+    "attractSpeed": 220,
+    "launchSpeedX": 240,
+    "launchSpeedY": 520,
+    "foodName": "",
+    "description": "",
+    "hpRestore": 0,
+    "staminaRestore": 0,
+    "rottenTime": 0,
+    "foodState": 1,
+    "interactLabel": null,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 1
+    },
+    "asset": {
+      "__id__": 0
+    },
+    "fileId": "",
+    "sync": false
+  }
+]

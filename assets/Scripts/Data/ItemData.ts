@@ -57,6 +57,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 2,
         rottenTime: 819
     },
+    bluepotion: {
+        id: "bluepotion",
+        name: "Blue Potion",
+        description: "Potion for high stamina restore.",
+        iconPath: "potions/bluepotion.png",
+        hpRestore: 100,
+        staminaRestore: 800
+    },
     calcitecluster: {
         id: "calcitecluster",
         name: "Calcite Cluster",
@@ -310,10 +318,10 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         rottenTime: 1415
     },
     potion: {
-        id: "potion",
+        id: "redpotion",
         name: "Potion",
         description: "A simple healing potion.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/nuts/coffeebean.png",
+        iconPath: "potions/redpotion.png",
         hpRestore: 110
     },
     radslimechunk: {
@@ -336,6 +344,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 16,
         staminaRestore: 1,
         rottenTime: 856
+    },
+    redpotion: {
+        id: "redpotion",
+        name: "Red Potion",
+        description: "Potion for high hp restore.",
+        iconPath: "potions/redpotion.png",
+        hpRestore: 800,
+        staminaRestore: 100
     },
     rubycrystal: {
         id: "rubycrystal",
@@ -400,6 +416,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "wood_plank",
         name: "Wood Plank",
         description: "Processed wood used for building."
+    },
+    yellowpotion: {
+        id: "yellowpotion",
+        name: "Yellow Potion",
+        description: "Potion for balance restore.",
+        iconPath: "potions/yellowpotion.png",
+        hpRestore: 450,
+        staminaRestore: 450
     },
     ore_block: {
         id: "ore_block",
