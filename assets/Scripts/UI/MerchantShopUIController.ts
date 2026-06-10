@@ -2,6 +2,7 @@ import { getItemDefinition } from "../Data/ItemData";
 import { MerchantStockItem } from "../Data/MerchantPool";
 import MerchantNPC from "../NPC/MerchantNPC";
 import { InventoryManager } from "../Player/InventoryManager";
+import { InputAction } from "../Input/InputAction";
 
 const { ccclass, property } = cc._decorator;
 
@@ -178,7 +179,6 @@ export default class MerchantShopUIController extends cc.Component {
 
         if (this.merchant.buy(item.itemId, this.buyAmount)) {
             this.buyAmount = 1;
-            InventoryManager.instance.addItem(item.itemId, this.buyAmount);
             this.refresh();
         }
     }
@@ -186,6 +186,38 @@ export default class MerchantShopUIController extends cc.Component {
     public isOpen(): boolean {
         const rootNode = this.root || this.node;
         return !!rootNode && rootNode.active;
+    }
+
+    public handleInput(action: InputAction): boolean {
+        if (!this.isOpen()) {
+            return false;
+        }
+
+        switch (action) {
+            case InputAction.MoveUp:
+            case InputAction.NavigateUp:
+                this.selectPrevItem();
+                return true;
+            case InputAction.MoveDown:
+            case InputAction.NavigateDown:
+                this.selectNextItem();
+                return true;
+            case InputAction.AdjustLeft:
+                this.decreaseAmount();
+                return true;
+            case InputAction.AdjustRight:
+                this.increaseAmount();
+                return true;
+            case InputAction.Confirm:
+            case InputAction.Interact:
+                this.buySelected();
+                return true;
+            case InputAction.Cancel:
+                this.close();
+                return true;
+            default:
+                return false;
+        }
     }
 
     private getItems(): MerchantStockItem[] {

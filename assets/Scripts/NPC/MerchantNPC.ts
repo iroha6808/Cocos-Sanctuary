@@ -1,9 +1,11 @@
-import { EntityType } from "../Core/Constants";
+import { EntityType, GameEvent } from "../Core/Constants";
+import EventCenter from "../Core/EventCenter";
 import { getItemDefinition } from "../Data/ItemData";
 import { getDefaultMerchantStock, MerchantStockItem, rollMerchantStock } from "../Data/MerchantPool";
 import { InventoryManager } from "../Player/InventoryManager";
 import NPC_AI, { NPCAttackType, NPCMoveMode } from "./NPC_AI";
 import { DialogueContent, DialogueOptionId } from "./NPCDialogue";
+import AudioManager, { SfxType } from "../Core/AudioManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -174,12 +176,9 @@ export default class MerchantNPC extends cc.Component {
             return false;
         }
 
-        InventoryManager.instance.addItem(
-            itemDefinition.id,
-            amount
-        );
-
         stockItem.stock -= amount;
+        EventCenter.emit(GameEvent.MERCHANT_PURCHASED, itemDefinition.id, amount, cost);
+        AudioManager.play(SfxType.BUY);
         this.log(`bought ${itemDefinition.name} x${amount}, cost=${cost}, stockLeft=${stockItem.stock}`);
         return true;
     }

@@ -57,15 +57,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        0,
-        0,
+        250,
+        200,
         0,
         0,
         0,
         0,
         1,
-        1,
-        1,
+        10,
+        10,
         1
       ]
     },
@@ -171,7 +171,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "822ec387-2d99-468e-96bc-06aaecb542f1"
+      "__uuid__": "6681838c-1cbf-4e3f-9bca-255daedcfdda"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -224,7 +224,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "822ec387-2d99-468e-96bc-06aaecb542f1"
+      "__uuid__": "6681838c-1cbf-4e3f-9bca-255daedcfdda"
     },
     "targetSprite": {
       "__id__": 3
@@ -430,7 +430,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "62cd7217-b06f-407f-bb57-5648479ddef5"
+      "__uuid__": "14ae62d8-050d-4d67-8c51-e8a2098cf606"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -483,7 +483,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "62cd7217-b06f-407f-bb57-5648479ddef5"
+      "__uuid__": "14ae62d8-050d-4d67-8c51-e8a2098cf606"
     },
     "targetSprite": {
       "__id__": 11
@@ -689,7 +689,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "d5398762-3376-40b4-973e-6db5b18bba8e"
+      "__uuid__": "46b8acd3-7a57-42cf-8e05-0cd6b20efb47"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -742,7 +742,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "d5398762-3376-40b4-973e-6db5b18bba8e"
+      "__uuid__": "46b8acd3-7a57-42cf-8e05-0cd6b20efb47"
     },
     "targetSprite": {
       "__id__": 19
@@ -958,7 +958,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "c42bb018-ad91-4e49-ae7c-1dfa2ac812f5"
+      "__uuid__": "b992d017-01c2-4924-8b46-a6fb2710a273"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -1011,7 +1011,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "c42bb018-ad91-4e49-ae7c-1dfa2ac812f5"
+      "__uuid__": "b992d017-01c2-4924-8b46-a6fb2710a273"
     },
     "targetSprite": {
       "__id__": 27

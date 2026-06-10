@@ -4,13 +4,13 @@ const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class BaseEntity extends cc.Component {
-    
+
     @property({ type: cc.Enum(EntityType) })
     public type: EntityType = EntityType.NPC_PEACE;
 
     @property(cc.Float)
     public maxHp: number = 100;
-    
+
     public currentHp: number = 100;
 
     onLoad() {
@@ -18,12 +18,26 @@ export default class BaseEntity extends cc.Component {
     }
 
     public takeDamage(amount: number) {
-        this.currentHp -= amount;
+        if (amount <= 0 || this.currentHp <= 0) {
+            return;
+        }
+
+        this.currentHp = Math.max(0, this.currentHp - amount);
         this.onDamaged();
 
         if (this.currentHp <= 0) {
             this.die();
         }
+    }
+
+    public heal(amount: number): number {
+        if (amount <= 0 || this.currentHp <= 0) {
+            return 0;
+        }
+
+        const before = this.currentHp;
+        this.currentHp = Math.min(this.maxHp, this.currentHp + amount);
+        return this.currentHp - before;
     }
 
     protected onDamaged() {

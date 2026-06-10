@@ -60,15 +60,15 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        889.228,
-        -111.218,
+        -250,
+        0,
         0,
         0,
         0,
         0,
         1,
-        1,
-        1,
+        10,
+        10,
         1
       ]
     },
@@ -174,7 +174,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "79796d3f-fd9c-42a6-bf09-c6797e3f3816"
+      "__uuid__": "e962323c-294b-470a-a7d9-fff0b97898fc"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -227,7 +227,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "79796d3f-fd9c-42a6-bf09-c6797e3f3816"
+      "__uuid__": "e962323c-294b-470a-a7d9-fff0b97898fc"
     },
     "targetSprite": {
       "__id__": 3
@@ -473,7 +473,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -526,7 +526,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "targetSprite": {
       "__id__": 11
@@ -762,7 +762,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -815,7 +815,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "targetSprite": {
       "__id__": 19
@@ -1051,7 +1051,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -1104,7 +1104,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "6e9947ed-4df4-45ea-a197-dd7cc2f669f3"
+      "__uuid__": "c62a4970-ab8a-43b4-ad3b-ed8058c31488"
     },
     "targetSprite": {
       "__id__": 27
@@ -1340,7 +1340,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "3423051d-19ba-4348-ba59-9bd893bfc7a9"
+      "__uuid__": "48898303-7580-4428-99d7-6e919822e52a"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -1393,7 +1393,7 @@
     "dropAmount": 1,
     "interactDistance": 160,
     "depletedSpriteFrame": {
-      "__uuid__": "3423051d-19ba-4348-ba59-9bd893bfc7a9"
+      "__uuid__": "48898303-7580-4428-99d7-6e919822e52a"
     },
     "targetSprite": {
       "__id__": 35

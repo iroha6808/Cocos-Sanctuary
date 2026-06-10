@@ -1,6 +1,10 @@
 const { ccclass, property } = cc._decorator;
 import DropItem from '../DropItem';
 import { InventoryManager } from '../../../Player/InventoryManager';
+import EventCenter from '../../../Core/EventCenter';
+import { GameEvent } from '../../../Core/Constants';
+import AudioManager, { SfxType } from '../../../Core/AudioManager';
+import EffectsManager, { EffectType } from '../../../Core/EffectsManager';
 
 export enum ItemMode{
     Object = 0, // 物件模式：純物理，不可吸附，不可撿起
@@ -24,10 +28,10 @@ export default class FoodBase extends DropItem {
     @property({ tooltip: '腐敗時間（秒）' }) rottenTime: number = 0;
     @property({ tooltip: '食物狀態' })         foodState: ItemState = ItemState.Resting;
     @property({ tooltip: '互動提示標籤' }) interactLabel: cc.Node = null!;
-    itemName: string = "food"; 
+    itemName: string = "food";
     rottenTimer: number = 0;
     isRotten: boolean   = false;
-    
+
     onLoad() {
         super.onLoad();
         cc.log(`[FoodBase] onLoad → ${this.foodName || this.itemName}, rottenTime=${this.rottenTime}`);
@@ -57,7 +61,7 @@ export default class FoodBase extends DropItem {
     collect() {
         const id   = (this.foodName || this.itemName).toLowerCase();
         const name = this.foodName || this.itemName;
-        
+
         cc.log(`[FoodBase] 嘗試將 ${name} 加入背包...`);
         if (!InventoryManager.instance) {
             cc.error('[FoodBase] 無法找到 InventoryManager，無法加入背包');
@@ -65,8 +69,14 @@ export default class FoodBase extends DropItem {
         }
         const added = InventoryManager.instance.addItem(id, 1);
 
-        if (added) cc.log(`[FoodBase] ${name} 已加入背包`);
-        else cc.warn(`[FoodBase] 背包已滿，${name} 無法加入`);
+        if (added) {
+            cc.log(`[FoodBase] ${name} 已加入背包`);
+            EventCenter.emit(GameEvent.ITEM_COLLECTED, id, 1);
+            AudioManager.play(SfxType.COLLECT);
+            EffectsManager.play(EffectType.COLLECT, this.node.convertToWorldSpaceAR(cc.Vec2.ZERO));
+        } else {
+            cc.warn(`[FoodBase] 背包已滿，${name} 無法加入`);
+        }
         this.node.destroy();
     }
 
@@ -76,12 +86,24 @@ export default class FoodBase extends DropItem {
             stats.restoreHp(this.hpRestore);
             stats.restoreStamina(this.staminaRestore);
             cc.log(`[FoodBase] ${this.foodName} 吃掉，恢復 HP=${this.hpRestore} 體力=${this.staminaRestore}`);
-        } else cc.error('[FoodBase] Player 缺少 PlayerStats 組件');
+        } else {
+            const entity = player.getComponent('PlayerController') as any;
+            if (entity && typeof entity.heal === "function") {
+                entity.heal(this.hpRestore);
+                EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, entity.currentHp, entity.maxHp);
+                cc.log(`[FoodBase] ${this.foodName} 吃掉，恢復 HP=${this.hpRestore}`);
+            } else {
+                cc.error('[FoodBase] Player 缺少 PlayerStats / PlayerController 組件');
+                return;
+            }
+        }
+        AudioManager.play(SfxType.HEAL);
+        EffectsManager.play(EffectType.HEAL, player.convertToWorldSpaceAR(cc.Vec2.ZERO));
         this.node.destroy();
     }
 
     update(dt: number) {
-        super.update(dt); 
+        super.update(dt);
 
         if (this.mode !== ItemMode.Object) return;
         if (this.rottenTime < 0) return;
@@ -126,7 +148,7 @@ export default class FoodBase extends DropItem {
         this.stopOnGround();
         this.rb.linearDamping  = 8;
         this.rb.angularDamping = 8;
-        
+
         if (this.collider) this.collider.sensor = true;
     }
 

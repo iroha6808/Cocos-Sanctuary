@@ -19,6 +19,9 @@ export default class UIManager extends cc.Component {
     @property(cc.Label)
     expLabel: cc.Label = null;
 
+    @property(cc.Label)
+    scoreLabel: cc.Label = null;
+
     @property(cc.ProgressBar)
     hpBar: cc.ProgressBar = null;
 
@@ -27,6 +30,7 @@ export default class UIManager extends cc.Component {
     onLoad() {
         EventCenter.on(GameEvent.PLAYER_HP_CHANGED, this.onHpUpdated, this);
         EventCenter.on(GameEvent.PLAYER_EXP_CHANGED, this.onExpUpdated, this);
+        EventCenter.on(GameEvent.SCORE_CHANGED, this.onScoreUpdated, this);
     }
 
     public tryOpenModal(type: ModalUIType): boolean {
@@ -64,8 +68,15 @@ export default class UIManager extends cc.Component {
         }
     }
 
+    private onScoreUpdated(currentScore: number) {
+        if (this.scoreLabel) {
+            this.scoreLabel.string = `Score: ${currentScore}`;
+        }
+    }
+
     onDestroy() {
         EventCenter.off(GameEvent.PLAYER_HP_CHANGED, this.onHpUpdated, this);
         EventCenter.off(GameEvent.PLAYER_EXP_CHANGED, this.onExpUpdated, this);
+        EventCenter.off(GameEvent.SCORE_CHANGED, this.onScoreUpdated, this);
     }
 }

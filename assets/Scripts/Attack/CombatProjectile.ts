@@ -1,6 +1,9 @@
 import BaseEntity from "../Core/BaseEntity";
-import { EntityType } from "../Core/Constants";
+import { EntityType, GameEvent } from "../Core/Constants";
 import { CombatFaction, CombatHitInfo } from "./CombatHitbox";
+import AudioManager, { SfxType } from "../Core/AudioManager";
+import EffectsManager, { EffectType } from "../Core/EffectsManager";
+import EventCenter from "../Core/EventCenter";
 
 const { ccclass, property } = cc._decorator;
 
@@ -106,6 +109,7 @@ export default class CombatProjectile extends cc.Component {
         this.rigidBody.enabledContactListener = true;
         this.rigidBody.linearVelocity = velocity.clone();
         this.rigidBody.awake = true;
+        AudioManager.play(SfxType.SKILL);
 
         const safeLifeTime = Math.max(0.05, this.lifeTime);
         this.scheduleOnce(this.finishByLifetime, safeLifeTime);
@@ -285,6 +289,18 @@ export default class CombatProjectile extends cc.Component {
         };
 
         this.log(`hit ${target.node.name}, damage=${this.damage}`);
+        const hitWorldPosition = this.getNodeWorldPosition(target.node);
+        AudioManager.play(SfxType.HIT);
+        EffectsManager.play(EffectType.FIRE, hitWorldPosition);
+        EventCenter.emit(GameEvent.COMBAT_HIT_CONFIRMED, {
+            attackerNode: this.ownerNode,
+            targetNode: target.node,
+            worldPosition: hitWorldPosition,
+            damage: this.damage,
+            knockbackX: this.knockbackX,
+            knockbackY: this.knockbackY,
+            sourceType: "projectile"
+        });
 
         const receiver = target as any;
         if (typeof receiver.receiveAttack === "function") {
@@ -315,6 +331,7 @@ export default class CombatProjectile extends cc.Component {
         }
 
         if (cc.isValid(this.node)) {
+            EffectsManager.play(EffectType.FIRE, this.getNodeWorldPosition(this.node));
             this.node.destroy();
         }
     }
@@ -358,5 +375,11 @@ export default class CombatProjectile extends cc.Component {
         if (this.debugLog) {
             cc.log(`[CombatProjectile:${this.node.name}] ${message}`);
         }
+    }
+
+    private getNodeWorldPosition(node: cc.Node): cc.Vec2 {
+        return node.parent
+            ? node.parent.convertToWorldSpaceAR(node.position)
+            : node.position;
     }
 }
