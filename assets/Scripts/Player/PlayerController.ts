@@ -450,7 +450,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+        if (this.isGrounded()) {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
         }
     }
@@ -550,22 +550,29 @@ export default class PlayerController extends BaseEntity {
         const isMovingX = this.moveDir.x !== 0;
         const targetSpeedX = this.moveDir.x * this.moveSpeed * 0.8;
 
+        let targetSpeedY = this.rb.linearVelocity.y;
+
         if (this.isFastFallPressed() && !this.isGrounded()) {
-            this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, -this.fastFallSpeed);
+            targetSpeedY = -this.fastFallSpeed;
+        } 
+        else if (this.isGrounded() && isMovingX) {
+            if (targetSpeedY < -0.5 && targetSpeedY > -300) {
+                targetSpeedY = -150; 
+            }
         }
 
-        this.rb.linearVelocity = cc.v2(targetSpeedX, this.rb.linearVelocity.y);
+        this.rb.linearVelocity = cc.v2(targetSpeedX, targetSpeedY);
 
         if (isMovingX) {
             if (this.bodyNode) {
                 this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
             }
 
-            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1 || this.isGrounded()) {
                 this.playAnimation("PlayerRun");
             }
         } else {
-            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1 || this.isGrounded()) {
                 this.playAnimation("PlayerIdle");
             }
         }
@@ -745,7 +752,46 @@ export default class PlayerController extends BaseEntity {
             return false;
         }
 
-        return Math.abs(this.rb.linearVelocity.y) <= 0.05;
+        // 1. 靜止平地判定 (保留以節省效能)
+        if (Math.abs(this.rb.linearVelocity.y) <= 0.05) {
+            return true;
+        }
+
+        // 2. 終極三叉戟射線判定 (無視 Anchor，完美貼合斜坡)
+        const physicsManager = cc.director.getPhysicsManager();
+        
+        // 取得角色在世界座標中的實際外框大小，不管 Anchor 設在哪裡都絕對精準
+        const bbox = this.node.getBoundingBoxToWorld();
+
+        // 射線起點：角色腳底板往上 5 像素 (避免剛好貼地穿透)
+        const startY = bbox.yMin + 5;
+        // 射線終點：往下探測 20 像素 (足以應付各種斜坡落差)
+        const endY = bbox.yMin - 20;
+
+        // 從左腳、胯下、右腳打出三條探測線，只要有一條踩到地就算數
+        const rayXs = [bbox.xMin + 5, bbox.xMin + (bbox.width / 2), bbox.xMax - 5];
+
+        for (let x of rayXs) {
+            const startPos = cc.v2(x, startY);
+            const endPos = cc.v2(x, endY);
+            const results = physicsManager.rayCast(startPos, endPos, cc.RayCastType.All);
+
+            for (let i = 0; i < results.length; i++) {
+                const hitCollider = results[i].collider;
+                const hitNode = hitCollider.node;
+
+                // 排除自己、武器以及感應區 (Sensor)
+                if (hitNode !== this.node && !hitNode.isChildOf(this.node) && !hitCollider.sensor) {
+                    // 放寬向上速度限制！
+                    // 走上斜坡時 Y 速度可能破百，只要不是被炸飛或大跳中 (速度 > 300)，就當作乖乖踩在地上
+                    if (this.rb.linearVelocity.y < 300) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private tryFastFall() {

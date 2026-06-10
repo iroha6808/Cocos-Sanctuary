@@ -350,25 +350,17 @@ export default class CraftingUIController extends cc.Component {
         }
 
         const inventoryTargetCenter = cc.v2(
-            cameraWorldPos.x - 340,
+            cameraWorldPos.x - 200, 
             cameraWorldPos.y + this.craftingPanelOffsetY
         );
 
         const craftingTargetCenter = cc.v2(
-            cameraWorldPos.x + 340,
+            cameraWorldPos.x + 250, 
             cameraWorldPos.y + this.craftingPanelOffsetY
         );
 
         this.inventoryUI.setPosition(this.inventoryUI.parent.convertToNodeSpaceAR(inventoryTargetCenter));
         this.root.setPosition(this.root.parent.convertToNodeSpaceAR(craftingTargetCenter));
-
-        this.alignNodeContentCenterToWorld(this.inventoryUI, inventoryTargetCenter);
-        this.alignNodeContentCenterToWorld(this.root, craftingTargetCenter);
-
-        if (this.clampToCameraView) {
-            this.clampNodeToCameraView(this.inventoryUI);
-            this.clampNodeToCameraView(this.root);
-        }
 
         this.ensureUIRenderOrder();
     }
@@ -515,25 +507,33 @@ export default class CraftingUIController extends cc.Component {
         if (!node || !cc.isValid(node) || !node.activeInHierarchy) {
             return;
         }
+        if (node.name === "DescriptionTooltip" || 
+            node.name === "ActionMenu" || 
+            node.name === "SelectionFrame" || 
+            node.name === "CraftingDragVisual") {
+            return;
+        }
+        const hasVisualComponent = node.getComponent(cc.RenderComponent);
+        if (hasVisualComponent) {
+            const rect = node.getBoundingBoxToWorld();
+            if (rect && rect.width > 1 && rect.height > 1) {
+                const xMin = rect.x;
+                const xMax = rect.x + rect.width;
+                const yMin = rect.y;
+                const yMax = rect.y + rect.height;
 
-        const rect = node.getBoundingBoxToWorld();
-        if (rect && rect.width > 1 && rect.height > 1) {
-            const xMin = rect.x;
-            const xMax = rect.x + rect.width;
-            const yMin = rect.y;
-            const yMax = rect.y + rect.height;
-
-            if (!result.hasValue) {
-                result.hasValue = true;
-                result.xMin = xMin;
-                result.xMax = xMax;
-                result.yMin = yMin;
-                result.yMax = yMax;
-            } else {
-                result.xMin = Math.min(result.xMin, xMin);
-                result.xMax = Math.max(result.xMax, xMax);
-                result.yMin = Math.min(result.yMin, yMin);
-                result.yMax = Math.max(result.yMax, yMax);
+                if (!result.hasValue) {
+                    result.hasValue = true;
+                    result.xMin = xMin;
+                    result.xMax = xMax;
+                    result.yMin = yMin;
+                    result.yMax = yMax;
+                } else {
+                    result.xMin = Math.min(result.xMin, xMin);
+                    result.xMax = Math.max(result.xMax, xMax);
+                    result.yMin = Math.min(result.yMin, yMin);
+                    result.yMax = Math.max(result.yMax, yMax);
+                }
             }
         }
 

@@ -166,7 +166,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         id: "greenapple",
         name: "greenapple",
         description: "A crisp and tart apple.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/greenapple.png",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/greenApple.png",
         hpRestore: 5,
         staminaRestore: 7,
         rottenTime: 1900

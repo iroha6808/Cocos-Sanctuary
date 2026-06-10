@@ -266,27 +266,6 @@ export default class InventoryUIController extends cc.Component {
 
         this.node.setPosition(this.node.parent.convertToNodeSpaceAR(targetCenterWorldPos));
         this.node.zIndex = this.uiZIndex;
-
-        const contentBounds = this.getVisibleContentWorldBounds(this.node);
-        if (contentBounds) {
-            const contentCenterX = (contentBounds.xMin + contentBounds.xMax) * 0.5;
-            const contentCenterY = (contentBounds.yMin + contentBounds.yMax) * 0.5;
-
-            const deltaX = targetCenterWorldPos.x - contentCenterX;
-            const deltaY = targetCenterWorldPos.y - contentCenterY;
-
-            const panelWorldPos = this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y));
-            const correctedWorldPos = cc.v2(
-                panelWorldPos.x + deltaX,
-                panelWorldPos.y + deltaY
-            );
-
-            this.node.setPosition(this.node.parent.convertToNodeSpaceAR(correctedWorldPos));
-        }
-
-        if (this.clampToCameraView) {
-            this.clampCurrentPanelToCameraView();
-        }
     }
 
     private getCameraWorldPosition(): cc.Vec2 | null {
@@ -420,25 +399,32 @@ export default class InventoryUIController extends cc.Component {
             return;
         }
 
-        const rect = node.getBoundingBoxToWorld();
+        if (node === this.descriptionTooltip || node === this.actionMenu || node === this.selectionFrame) {
+            return;
+        }
 
-        if (rect && rect.width > 1 && rect.height > 1) {
-            const xMin = rect.x;
-            const xMax = rect.x + rect.width;
-            const yMin = rect.y;
-            const yMax = rect.y + rect.height;
+        const hasVisualComponent = node.getComponent(cc.RenderComponent);
+        if (hasVisualComponent) {
+            const rect = node.getBoundingBoxToWorld();
 
-            if (!result.hasValue) {
-                result.hasValue = true;
-                result.xMin = xMin;
-                result.xMax = xMax;
-                result.yMin = yMin;
-                result.yMax = yMax;
-            } else {
-                result.xMin = Math.min(result.xMin, xMin);
-                result.xMax = Math.max(result.xMax, xMax);
-                result.yMin = Math.min(result.yMin, yMin);
-                result.yMax = Math.max(result.yMax, yMax);
+            if (rect && rect.width > 1 && rect.height > 1) {
+                const xMin = rect.x;
+                const xMax = rect.x + rect.width;
+                const yMin = rect.y;
+                const yMax = rect.y + rect.height;
+
+                if (!result.hasValue) {
+                    result.hasValue = true;
+                    result.xMin = xMin;
+                    result.xMax = xMax;
+                    result.yMin = yMin;
+                    result.yMax = yMax;
+                } else {
+                    result.xMin = Math.min(result.xMin, xMin);
+                    result.xMax = Math.max(result.xMax, xMax);
+                    result.yMin = Math.min(result.yMin, yMin);
+                    result.yMax = Math.max(result.yMax, yMax);
+                }
             }
         }
 
