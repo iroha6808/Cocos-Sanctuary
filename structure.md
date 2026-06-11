@@ -414,8 +414,8 @@ Canvas
 
 - `Map/AutoMapGenerator.ts`
   - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
-  - 預設先在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，再整體偏移 `(-480,-320)`；只清 `AutoRock_` prefix 節點。
-  - 使用 seeded random、短平台鏈、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
+  - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
+  - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -573,7 +573,7 @@ Canvas
 - Rocksets
   - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
   - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
-  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，再偏移 `(-480,-320)`；平台不用全連通，但用短鏈、`minJumpGap`、`slopeChance` 增加可跳躍連通性。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels

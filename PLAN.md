@@ -227,7 +227,7 @@
 - [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
 - [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
 - [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
-- [ ] AutoMapGenerator 預設先在 `x -5000~0`、`y -2000~0` 生成，再整體偏移 `(-480,-320)`；`minJumpGap` / `maxJumpGap` / `slopeChance` 可調連通性與斜坡比例。
+- [ ] AutoMapGenerator 預設直接在 `x -5000~0`、`y -2000~0` 生成，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`

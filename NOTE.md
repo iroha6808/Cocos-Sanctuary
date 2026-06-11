@@ -289,8 +289,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 ### Map / Scene
 
 - `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5 後自動生成跳躍平台。
-- AutoMapGenerator 預設先在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，再整體偏移 `outputOffsetX/Y = -480/-320`；只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
-- 生成策略：多條短平台鏈 + 少量隨機補點，`minJumpGap/maxJumpGap` 控制平台距離，`slopeChance` 控制 Rockleft / Rockright 出現率。
+- AutoMapGenerator 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
+- 生成策略：先拼出 `FlatRun / RampUp / RampDown / Hill / Valley` 平台組合，再把整組放進地圖；pattern 內部接近連通，pattern 之間保留跳躍距離。
+- `minPatternCount/maxPatternCount` 控制平台組數，`slopePatternChance` 控制斜坡組比例，`minSlopePatternCount` 保證至少幾組含 Rockleft / Rockright；`scatterCount` 只補少量散點。
 - Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。
 - `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
 - `OceanArea.ts`：進出水域時會 emit `PLAYER_WATER_STATE_CHANGED(isInWater, oceanNode)`，給 `AudioManager` crossfade BGM 與 `ThemeManager` 可選色調切換使用。

@@ -24,6 +24,15 @@ interface RockPlacement {
     bounds: PlacementBounds;
 }
 
+type PatternType = "FlatRun" | "RampUp" | "RampDown" | "Hill" | "Valley";
+
+interface PatternPlacement {
+    placements: RockPlacement[];
+    bounds: PlacementBounds;
+    hasSlope: boolean;
+    endGroundY: number;
+}
+
 @ccclass
 export default class AutoMapGenerator extends cc.Component {
 
@@ -54,12 +63,6 @@ export default class AutoMapGenerator extends cc.Component {
     @property(cc.Boolean)
     clearGeneratedOnStart: boolean = true;
 
-    @property(cc.Integer)
-    minPlatformCount: number = 18;
-
-    @property(cc.Integer)
-    maxPlatformCount: number = 28;
-
     @property
     minX: number = -5000;
 
@@ -88,22 +91,34 @@ export default class AutoMapGenerator extends cc.Component {
     edgePadding: number = 40;
 
     @property
-    outputOffsetX: number = -480;
+    connectGapMin: number = 0;
 
     @property
-    outputOffsetY: number = -320;
+    connectGapMax: number = 24;
 
     @property
-    minJumpGap: number = 90;
+    patternGapMinX: number = 220;
 
     @property
-    maxJumpGap: number = 260;
+    patternGapMaxX: number = 520;
 
     @property
-    chainVerticalJitter: number = 120;
+    patternVerticalJitter: number = 120;
+
+    @property(cc.Integer)
+    minPatternCount: number = 5;
+
+    @property(cc.Integer)
+    maxPatternCount: number = 8;
+
+    @property(cc.Integer)
+    minSlopePatternCount: number = 2;
 
     @property
-    slopeChance: number = 0.35;
+    slopePatternChance: number = 0.65;
+
+    @property(cc.Integer)
+    scatterCount: number = 3;
 
     @property(cc.Boolean)
     showDebugBounds: boolean = false;
@@ -188,45 +203,68 @@ export default class AutoMapGenerator extends cc.Component {
 
     private createPlacements(specs: RockSpec[]): RockPlacement[] {
         const placements: RockPlacement[] = [];
-        const minCount = Math.max(1, Math.min(this.minPlatformCount, this.maxPlatformCount));
-        const maxCount = Math.max(minCount, this.maxPlatformCount);
-        const targetCount = this.randomInt(minCount, maxCount);
-        const chainCount = Math.max(2, Math.min(5, this.rowCount));
-        const perChainTarget = Math.ceil(targetCount / chainCount);
+        const patternBounds: PlacementBounds[] = [];
+        const minPatternCount = Math.max(1, Math.min(this.minPatternCount, this.maxPatternCount));
+        const maxPatternCount = Math.max(minPatternCount, this.maxPatternCount);
+        const targetPatternCount = this.randomInt(minPatternCount, maxPatternCount);
+        const minSlopePatterns = Math.min(this.minSlopePatternCount, targetPatternCount);
+        let slopePatternCount = 0;
+        let cursorX = this.minX + this.edgePadding + this.randomRange(0, 160);
+        let rowIndex = 0;
+        let baseGroundY = this.getPatternBaseY(rowIndex);
+        let attempts = 0;
 
-        for (let chainIndex = 0; chainIndex < chainCount && placements.length < targetCount; chainIndex++) {
-            let startX = this.minX + this.edgePadding + this.randomRange(0, 220) + chainIndex * 70;
-            let groundY = this.getChainBaseY(chainIndex, chainCount);
-            let placedInChain = 0;
-            let guard = 0;
+        while (patternBounds.length < targetPatternCount && attempts < targetPatternCount * 80) {
+            attempts++;
+            const remainingSlots = targetPatternCount - patternBounds.length;
+            const remainingSlopeNeed = Math.max(0, minSlopePatterns - slopePatternCount);
+            const forceSlope = remainingSlopeNeed >= remainingSlots;
+            const patternType = this.pickPatternType(forceSlope);
+            const groundY = this.clampPatternGroundY(
+                baseGroundY + this.randomRange(-this.patternVerticalJitter, this.patternVerticalJitter)
+            );
+            const pattern = this.createPattern(patternType, cursorX, groundY, specs);
 
-            while (startX < this.maxX - this.edgePadding && placements.length < targetCount && placedInChain < perChainTarget + 3 && guard < 24) {
-                guard++;
-                const spec = this.pickChainSpec(specs, groundY);
-                const placement = this.createPlacementAt(spec, startX, groundY);
-                if (placement && this.isSeparated(placement.bounds, placements)) {
-                    placements.push(placement);
-                    placedInChain++;
-                    groundY = this.getNextGroundY(spec, groundY);
-                } else {
-                    groundY = this.clampGroundY(groundY + this.randomRange(-this.chainVerticalJitter, this.chainVerticalJitter));
+            if (pattern && this.isPatternSeparated(pattern.bounds, patternBounds)) {
+                for (let i = 0; i < pattern.placements.length; i++) {
+                    placements.push(pattern.placements[i]);
                 }
+                patternBounds.push(pattern.bounds);
+                if (pattern.hasSlope) {
+                    slopePatternCount++;
+                }
+                cursorX = pattern.bounds.x + pattern.bounds.width + this.randomRange(this.patternGapMinX, this.patternGapMaxX);
+                baseGroundY = this.clampPatternGroundY(
+                    pattern.endGroundY + this.randomRange(-this.patternVerticalJitter, this.patternVerticalJitter)
+                );
+            } else {
+                cursorX += this.randomRange(this.patternGapMinX * 0.5, this.patternGapMaxX * 0.5);
+            }
 
-                startX += spec.width + this.randomRange(this.minJumpGap, this.maxJumpGap);
+            if (cursorX > this.maxX - this.edgePadding - 768) {
+                rowIndex++;
+                cursorX = this.minX + this.edgePadding + this.randomRange(0, 180);
+                baseGroundY = this.getPatternBaseY(rowIndex);
             }
         }
 
-        const maxAttempts = targetCount * 60;
-        for (let attempt = 0; attempt < maxAttempts && placements.length < targetCount; attempt++) {
+        const scatterTarget = Math.max(0, this.scatterCount);
+        const maxAttempts = scatterTarget * 50;
+        let scatterPlaced = 0;
+        for (let attempt = 0; attempt < maxAttempts && scatterPlaced < scatterTarget; attempt++) {
             const spec = this.pickSpec(specs);
             const placement = this.createRandomPlacement(spec);
             if (placement && this.isSeparated(placement.bounds, placements)) {
                 placements.push(placement);
+                scatterPlaced++;
             }
         }
 
-        if (placements.length < minCount) {
-            cc.warn("[AutoMapGenerator] Generated only " + placements.length + " rocks. Reduce minSeparation or platform count.");
+        if (patternBounds.length < minPatternCount) {
+            cc.warn("[AutoMapGenerator] Generated only " + patternBounds.length + " patterns. Reduce minSeparation or pattern count.");
+        }
+        if (slopePatternCount < minSlopePatterns) {
+            cc.warn("[AutoMapGenerator] Generated only " + slopePatternCount + " slope patterns. Check Rockleft/Rockright prefabs or reduce minSlopePatternCount.");
         }
         return placements;
     }
@@ -263,62 +301,159 @@ export default class AutoMapGenerator extends cc.Component {
         if (!this.isInsideRange(bounds)) {
             return null;
         }
-        return this.applyOutputOffset({ spec, position, bounds });
+        return { spec, position, bounds };
     }
 
-    private pickChainSpec(specs: RockSpec[], groundY: number): RockSpec {
-        const horizontalSpecs = specs.filter((spec) => spec.slope === "none");
-        const slopeSpecs = specs.filter((spec) => this.canPlaceSlope(spec, groundY));
-        if (slopeSpecs.length > 0 && this.nextRandom() < this.slopeChance) {
-            return slopeSpecs[this.randomInt(0, slopeSpecs.length - 1)];
+    private createPattern(type: PatternType, startX: number, groundY: number, specs: RockSpec[]): PatternPlacement {
+        const sequence = this.createPatternSequence(type, specs);
+        if (sequence.length === 0) {
+            return null;
         }
-        return this.pickSpec(horizontalSpecs.length > 0 ? horizontalSpecs : specs);
-    }
 
-    private canPlaceSlope(spec: RockSpec, groundY: number): boolean {
-        if (spec.slope === "left") {
-            return groundY >= this.minY + this.edgePadding
-                && groundY + spec.height <= this.maxY - this.edgePadding;
-        }
-        if (spec.slope === "right") {
-            return groundY - spec.height >= this.minY + this.edgePadding
-                && groundY <= this.maxY - this.edgePadding;
-        }
-        return false;
-    }
+        const placements: RockPlacement[] = [];
+        let cursorX = startX;
+        let cursorY = groundY;
+        let hasSlope = false;
 
-    private getNextGroundY(spec: RockSpec, currentY: number): number {
-        if (spec.slope === "left") {
-            return this.clampGroundY(currentY + spec.height);
-        }
-        if (spec.slope === "right") {
-            return this.clampGroundY(currentY - spec.height);
-        }
-        return this.clampGroundY(currentY + this.randomRange(-this.chainVerticalJitter, this.chainVerticalJitter));
-    }
-
-    private getChainBaseY(chainIndex: number, chainCount: number): number {
-        const low = this.minY + this.edgePadding + 175;
-        const high = this.maxY - this.edgePadding;
-        const t = chainCount <= 1 ? 0.5 : chainIndex / (chainCount - 1);
-        return this.clampGroundY(low + (high - low) * t + this.randomRange(-this.verticalJitter, this.verticalJitter));
-    }
-
-    private clampGroundY(value: number): number {
-        return this.clamp(value, this.minY + this.edgePadding + 175, this.maxY - this.edgePadding);
-    }
-
-    private applyOutputOffset(placement: RockPlacement): RockPlacement {
-        return {
-            spec: placement.spec,
-            position: cc.v2(placement.position.x + this.outputOffsetX, placement.position.y + this.outputOffsetY),
-            bounds: {
-                x: placement.bounds.x + this.outputOffsetX,
-                y: placement.bounds.y + this.outputOffsetY,
-                width: placement.bounds.width,
-                height: placement.bounds.height
+        for (let i = 0; i < sequence.length; i++) {
+            const spec = sequence[i];
+            const placement = this.createPlacementAt(spec, cursorX, cursorY);
+            if (!placement) {
+                return null;
             }
+
+            placements.push(placement);
+            if (spec.slope !== "none") {
+                hasSlope = true;
+            }
+
+            cursorX += spec.width + this.randomRange(this.connectGapMin, this.connectGapMax);
+            cursorY = this.getConnectedNextGroundY(spec, cursorY);
+        }
+
+        const bounds = this.combineBounds(placements);
+        if (!this.isInsideRange(bounds)) {
+            return null;
+        }
+        return { placements, bounds, hasSlope, endGroundY: cursorY };
+    }
+
+    private createPatternSequence(type: PatternType, specs: RockSpec[]): RockSpec[] {
+        const leftSlope = this.getSpecByKey(specs, "Rockleft");
+        const rightSlope = this.getSpecByKey(specs, "Rockright");
+        const sequence: RockSpec[] = [];
+
+        if (type === "FlatRun") {
+            const count = this.randomInt(2, 4);
+            for (let i = 0; i < count; i++) {
+                sequence.push(this.pickHorizontalSpec(specs));
+            }
+            return sequence;
+        }
+
+        if (type === "RampUp" && leftSlope) {
+            sequence.push(this.pickHorizontalSpec(specs), leftSlope, this.pickHorizontalSpec(specs));
+        } else if (type === "RampDown" && rightSlope) {
+            sequence.push(this.pickHorizontalSpec(specs), rightSlope, this.pickHorizontalSpec(specs));
+        } else if (type === "Hill" && leftSlope && rightSlope) {
+            sequence.push(leftSlope, this.pickHorizontalSpec(specs), rightSlope);
+        } else if (type === "Valley" && leftSlope && rightSlope) {
+            sequence.push(rightSlope, this.pickHorizontalSpec(specs), leftSlope);
+        }
+
+        return sequence.length > 0 ? sequence : [this.pickHorizontalSpec(specs), this.pickHorizontalSpec(specs)];
+    }
+
+    private pickPatternType(forceSlope: boolean): PatternType {
+        const slopeTypes: PatternType[] = ["RampUp", "RampDown", "Hill", "Valley"];
+        if (forceSlope || this.nextRandom() < this.slopePatternChance) {
+            return slopeTypes[this.randomInt(0, slopeTypes.length - 1)];
+        }
+        return "FlatRun";
+    }
+
+    private pickHorizontalSpec(specs: RockSpec[]): RockSpec {
+        const horizontalSpecs: RockSpec[] = [];
+        for (let i = 0; i < specs.length; i++) {
+            if (specs[i].slope === "none") {
+                horizontalSpecs.push(specs[i]);
+            }
+        }
+        return horizontalSpecs.length > 0
+            ? this.pickSpec(horizontalSpecs)
+            : specs[0];
+    }
+
+    private getSpecByKey(specs: RockSpec[], key: string): RockSpec {
+        for (let i = 0; i < specs.length; i++) {
+            if (specs[i].key === key) {
+                return specs[i];
+            }
+        }
+        return null;
+    }
+
+    private getConnectedNextGroundY(spec: RockSpec, currentY: number): number {
+        if (spec.slope === "left") {
+            return currentY + spec.height;
+        }
+        if (spec.slope === "right") {
+            return currentY - spec.height;
+        }
+        return currentY;
+    }
+
+    private getPatternBaseY(rowIndex: number): number {
+        const rows = Math.max(1, this.rowCount);
+        const row = rowIndex % rows;
+        const low = this.minY + this.edgePadding + 512;
+        const high = this.maxY - this.edgePadding - 512;
+        if (high <= low) {
+            return (this.minY + this.maxY) * 0.5;
+        }
+        const t = rows === 1 ? 0.5 : row / (rows - 1);
+        return this.clampPatternGroundY(low + (high - low) * t + this.randomRange(-this.verticalJitter, this.verticalJitter));
+    }
+
+    private clampPatternGroundY(value: number): number {
+        const low = this.minY + this.edgePadding + 512;
+        const high = this.maxY - this.edgePadding - 512;
+        if (high <= low) {
+            return (this.minY + this.maxY) * 0.5;
+        }
+        return this.clamp(value, low, high);
+    }
+
+    private combineBounds(placements: RockPlacement[]): PlacementBounds {
+        let minX = placements[0].bounds.x;
+        let minY = placements[0].bounds.y;
+        let maxX = placements[0].bounds.x + placements[0].bounds.width;
+        let maxY = placements[0].bounds.y + placements[0].bounds.height;
+
+        for (let i = 1; i < placements.length; i++) {
+            const bounds = placements[i].bounds;
+            minX = Math.min(minX, bounds.x);
+            minY = Math.min(minY, bounds.y);
+            maxX = Math.max(maxX, bounds.x + bounds.width);
+            maxY = Math.max(maxY, bounds.y + bounds.height);
+        }
+
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
         };
+    }
+
+    private isPatternSeparated(bounds: PlacementBounds, patternBounds: PlacementBounds[]): boolean {
+        const expanded = this.expandBounds(bounds, this.minSeparation);
+        for (let i = 0; i < patternBounds.length; i++) {
+            if (this.intersects(expanded, patternBounds[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private randomSurfaceY(height: number, useTopSurface: boolean): number {
@@ -371,12 +506,7 @@ export default class AutoMapGenerator extends cc.Component {
 
         graphics.lineWidth = 3;
         graphics.strokeColor = new cc.Color(80, 180, 255, 180);
-        graphics.rect(
-            this.minX + this.outputOffsetX,
-            this.minY + this.outputOffsetY,
-            this.maxX - this.minX,
-            this.maxY - this.minY
-        );
+        graphics.rect(this.minX, this.minY, this.maxX - this.minX, this.maxY - this.minY);
         graphics.stroke();
 
         graphics.lineWidth = 2;
