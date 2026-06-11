@@ -309,7 +309,8 @@ export default class CameraRig extends cc.Component {
         this.overviewTime = Math.min(this.overviewDuration, this.overviewTime + Math.max(0, dt));
         const rawT = this.overviewDuration > 0 ? this.overviewTime / this.overviewDuration : 1;
         const t = this.smoothStep(rawT);
-        const nextWorld = this.lerpVec2(this.overviewStartWorld, this.overviewTargetWorld, t);
+        const nextWorld = this.lerpVec2(this.overviewStartWorld, this.overviewTargetWorld, t)
+            .add(this.getShakeOffset(dt));
         this.setNodeWorldPosition(this.node, nextWorld);
         this.camera.zoomRatio = this.lerp(this.overviewStartZoom, this.overviewTargetZoom, t);
 

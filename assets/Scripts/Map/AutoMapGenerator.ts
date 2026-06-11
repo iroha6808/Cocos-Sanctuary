@@ -66,10 +66,13 @@ export default class AutoMapGenerator extends cc.Component {
     autoGenerateOnStart: boolean = false;
 
     @property(cc.Boolean)
+    manualTriggerOnly: boolean = true;
+
+    @property(cc.Boolean)
     clearGeneratedOnStart: boolean = true;
 
     @property(cc.Float)
-    generationStepInterval: number = 0.07;
+    generationStepInterval: number = 0.25;
 
     @property(cc.Boolean)
     cancelCurrentGenerationBeforeRestart: boolean = false;
@@ -78,10 +81,25 @@ export default class AutoMapGenerator extends cc.Component {
     frameCameraDuringTimedGeneration: boolean = true;
 
     @property(cc.Float)
-    cameraFrameDuration: number = 0.45;
+    cameraFrameDuration: number = 1.6;
 
     @property(cc.Float)
-    cameraReturnDuration: number = 0.45;
+    startAfterCameraDelay: number = 0.5;
+
+    @property(cc.Float)
+    returnAfterGenerationDelay: number = 1.0;
+
+    @property(cc.Float)
+    cameraReturnDuration: number = 1.6;
+
+    @property(cc.Boolean)
+    shakeCameraOnSpawn: boolean = true;
+
+    @property(cc.Float)
+    spawnShakeDuration: number = 0.08;
+
+    @property(cc.Float)
+    spawnShakeAmplitude: number = 6;
 
     @property
     minX: number = -5000;
@@ -150,9 +168,11 @@ export default class AutoMapGenerator extends cc.Component {
     private timedPlacements: RockPlacement[] = [];
     private timedSpawnIndex: number = 0;
     private isTimedGenerationRunning: boolean = false;
+    private waitingToStartTimedGeneration: boolean = false;
+    private waitingToReturnCamera: boolean = false;
 
     start(): void {
-        if (this.autoGenerateOnStart) {
+        if (!this.manualTriggerOnly && this.autoGenerateOnStart) {
             this.regenerate();
         }
     }
@@ -197,6 +217,9 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     public beginTimedGeneration(): boolean {
+        if (this.waitingToReturnCamera) {
+            this.stopTimedGeneration(false);
+        }
         if (this.isTimedGenerationRunning) {
             if (!this.cancelCurrentGenerationBeforeRestart) {
                 cc.warn("[AutoMapGenerator] Timed generation is already running.");
@@ -227,6 +250,8 @@ export default class AutoMapGenerator extends cc.Component {
         this.timedPlacements = placements;
         this.timedSpawnIndex = 0;
         this.isTimedGenerationRunning = true;
+        this.waitingToStartTimedGeneration = true;
+        this.waitingToReturnCamera = false;
 
         if (this.showDebugBounds) {
             this.drawDebugBounds(root, placements);
@@ -236,11 +261,10 @@ export default class AutoMapGenerator extends cc.Component {
             this.finishTimedGeneration();
             return true;
         }
-        this.schedule(
-            this.spawnNextTimedPlacement,
-            Math.max(0.01, this.generationStepInterval)
+        this.scheduleOnce(
+            this.startTimedPlacementSpawning,
+            Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay)
         );
-        this.spawnNextTimedPlacement();
         return true;
     }
 
@@ -650,6 +674,7 @@ export default class AutoMapGenerator extends cc.Component {
 
         const index = this.timedSpawnIndex;
         this.spawnRock(this.timedRoot, this.timedPlacements[index], index);
+        this.shakeCameraForSpawn();
         this.timedSpawnIndex++;
         EventCenter.emit(GameEvent.MAP_GENERATION_PROGRESS, this.timedSpawnIndex, this.timedPlacements.length);
 
@@ -658,33 +683,64 @@ export default class AutoMapGenerator extends cc.Component {
         }
     }
 
+    private startTimedPlacementSpawning(): void {
+        if (!this.isTimedGenerationRunning) {
+            return;
+        }
+
+        this.waitingToStartTimedGeneration = false;
+        this.schedule(
+            this.spawnNextTimedPlacement,
+            Math.max(0.01, this.generationStepInterval)
+        );
+        this.spawnNextTimedPlacement();
+    }
+
     private finishTimedGeneration(): void {
         if (!this.isTimedGenerationRunning) {
             return;
         }
 
         this.unschedule(this.spawnNextTimedPlacement);
+        this.unschedule(this.startTimedPlacementSpawning);
         const placements = this.timedPlacements.slice();
         this.isTimedGenerationRunning = false;
+        this.waitingToStartTimedGeneration = false;
+        this.waitingToReturnCamera = true;
         this.timedRoot = null;
         this.timedPlacements = [];
         this.timedSpawnIndex = 0;
         this.publishMapGenerationState(placements);
-        this.returnCameraToTarget();
+        this.scheduleOnce(this.returnCameraToTargetAfterDelay, Math.max(0, this.returnAfterGenerationDelay));
     }
 
     private stopTimedGeneration(returnCamera: boolean): void {
-        if (!this.isTimedGenerationRunning) {
+        if (!this.isTimedGenerationRunning && !this.waitingToStartTimedGeneration && !this.waitingToReturnCamera) {
             return;
         }
 
         this.unschedule(this.spawnNextTimedPlacement);
+        this.unschedule(this.startTimedPlacementSpawning);
+        this.unschedule(this.returnCameraToTargetAfterDelay);
         this.isTimedGenerationRunning = false;
+        this.waitingToStartTimedGeneration = false;
+        this.waitingToReturnCamera = false;
         this.timedRoot = null;
         this.timedPlacements = [];
         this.timedSpawnIndex = 0;
         if (returnCamera) {
             this.returnCameraToTarget();
+        }
+    }
+
+    private shakeCameraForSpawn(): void {
+        if (!this.shakeCameraOnSpawn || this.spawnShakeAmplitude <= 0 || this.spawnShakeDuration <= 0) {
+            return;
+        }
+
+        const rig = CameraRig.instance;
+        if (rig && cc.isValid(rig.node)) {
+            rig.addShake(this.spawnShakeDuration, this.spawnShakeAmplitude);
         }
     }
 
@@ -836,7 +892,13 @@ export default class AutoMapGenerator extends cc.Component {
 
     private onSaveLoaded(saveData: SaveData): void {
         if (saveData && saveData.mapState) {
-            this.applyMapGenerationState(saveData.mapState, true);
+            this.applyMapGenerationState(saveData.mapState, false);
+            SaveService.setCurrentMapGenerationState(saveData.mapState);
         }
+    }
+
+    private returnCameraToTargetAfterDelay(): void {
+        this.waitingToReturnCamera = false;
+        this.returnCameraToTarget();
     }
 }
