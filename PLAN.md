@@ -17,7 +17,7 @@
 - [Git 流程](#git-流程)
 
 ## 下一步優先順序
-目前自動生成範圍改成按按鍵後才開始生成 每0.07秒顯示(或生成)一塊新地形 生成途中將鏡頭拉至整個生成範圍 結束後再回到玩家
+目前自動生成範圍改成按按鍵後才開始生成，鏡頭先慢慢拉至整個生成範圍，等 0.5 秒後每 0.25 秒顯示(或生成)一塊新地形，生成完再等 1 秒回到玩家
 1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
 2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
 3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
@@ -206,7 +206,7 @@
 | NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、Boss、距離刷怪、商人交易、TravelingMerchant sprite / idle / talk clips、drop table | SkeletonMage / Boss / Respawner 實測、商人動畫播放實測、PathNode 手動連線 |
 | Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、potions、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
 | UI | HP / EXP / Score HUD、Inventory、Dialogue、Merchant Shop、Crafting、Menu / GameOver 腳本 API；多數 panel 已可跟 Main Camera / clamp | 手動接 Menu / Pause / GameOver panels，實測 OceanArea UI |
-| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、AutoMapGenerator、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
+| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、AutoMapGenerator 逐塊生成、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
 | Vehicle | `VehicleInteractable`、`VehicleController`、`CarController`、`BoatController` | 車 / 船 prefab 視覺、seat / exitOffset / collider 手動調整 |
 
 ## 手動設定
@@ -227,7 +227,8 @@
 - [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
 - [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
 - [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
-- [ ] AutoMapGenerator 預設直接在 `x -5000~0`、`y -2000~0` 生成，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例。存檔會保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
+- [ ] AutoMapGenerator 的 `manualTriggerOnly` 預設開啟；開場 / 讀檔只套 seed 與參數不生成，Gameplay 按 `G` 後鏡頭用 `cameraFrameDuration = 1.6` 秒拉遠，等 `startAfterCameraDelay = 0.5` 秒，再在 `x -5000~0`、`y -2000~0` 每 `generationStepInterval = 0.25` 秒逐塊生成並小幅震動，完成後等 `returnAfterGenerationDelay = 1.0` 秒再回玩家。
+- [ ] AutoMapGenerator 使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例；存檔保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
@@ -239,9 +240,9 @@
 - [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、可選 `waterBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`；`bgmFadeDuration` 控制進出水域淡入淡出。
 - [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
-- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player
+- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator。
 - [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
-- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
+- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep` / `overviewPadding` / `overviewMinZoomRatio`，或 `AutoMapGenerator.spawnShakeDuration/spawnShakeAmplitude`、`HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
 - [ ] Player 或 Player 子節點掛 `PlayerGun.ts`；`projectilePrefab` 拖玩家子彈 prefab，`muzzleNode` 可拖槍口節點，`projectileParent` 建議拖 Bullet_Layer。
@@ -267,7 +268,7 @@
 
 ### Cocos Inspector 設定
 
-- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
+- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，AutoMapGenerator 拖到 `autoMapGenerator`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
 - [ ] 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp`、`moveSpeed`、`jumpForce`、`attackDamage`。
 - [ ] `PlayerController.ts` 需要接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`、`craftingUI`。
 - [ ] 玩家節點建議有 `RigidBody`、`Sprite_Body`、`AttackHitbox` 子節點。

@@ -12,6 +12,7 @@ import RealtimeStateReporter from "./RealtimeStateReporter";
 import DamageNumberManager from "./DamageNumberManager";
 import MonsterSpawner from "../NPC/MonsterSpawner";
 import PhysicsTagValidator from "./PhysicsTagValidator";
+import AutoMapGenerator from "../Map/AutoMapGenerator";
 
 const { ccclass, property } = cc._decorator;
 
@@ -34,6 +35,9 @@ export default class GameManager extends cc.Component {
 
     @property(CameraRig)
     cameraRig: CameraRig = null;
+
+    @property(AutoMapGenerator)
+    autoMapGenerator: AutoMapGenerator = null;
 
     @property
     menuSceneName: string = "MenuScene";
@@ -344,6 +348,9 @@ export default class GameManager extends cc.Component {
             case InputAction.CameraZoomOut:
                 this.adjustCameraZoom(-1);
                 return true;
+            case InputAction.GenerateMap:
+                this.beginAutoMapGeneration();
+                return true;
             default:
                 return false;
         }
@@ -356,6 +363,29 @@ export default class GameManager extends cc.Component {
             return;
         }
         rig.adjustBaseZoom(direction);
+    }
+
+    private beginAutoMapGeneration(): void {
+        const generator = this.getAutoMapGenerator();
+        if (!generator || !cc.isValid(generator.node)) {
+            cc.warn("[GameManager] autoMapGenerator is not assigned; drag Canvas/platform/auto generate AutoMapGenerator here.");
+            return;
+        }
+        generator.beginTimedGeneration();
+    }
+
+    private getAutoMapGenerator(): AutoMapGenerator {
+        if (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)) {
+            return this.autoMapGenerator;
+        }
+
+        const scene = cc.director.getScene();
+        if (!scene) {
+            return null;
+        }
+        const generators = scene.getComponentsInChildren(AutoMapGenerator);
+        this.autoMapGenerator = generators.length > 0 ? generators[0] : null;
+        return this.autoMapGenerator;
     }
 
     private getInputManager(): InputManager {

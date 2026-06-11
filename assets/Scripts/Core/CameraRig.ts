@@ -37,6 +37,12 @@ export default class CameraRig extends cc.Component {
     @property(cc.Float)
     public zoomStep: number = 0.1;
 
+    @property(cc.Float)
+    public overviewPadding: number = 220;
+
+    @property(cc.Float)
+    public overviewMinZoomRatio: number = 0.08;
+
     private lastTargetPosition: cc.Vec2 = null;
     private shakeTime: number = 0;
     private shakeDuration: number = 0;
@@ -49,6 +55,14 @@ export default class CameraRig extends cc.Component {
     private paused: boolean = false;
     private camera: cc.Camera = null;
     private targetWarningShown: boolean = false;
+    private overviewActive: boolean = false;
+    private overviewReturning: boolean = false;
+    private overviewStartWorld: cc.Vec2 = cc.v2(0, 0);
+    private overviewTargetWorld: cc.Vec2 = cc.v2(0, 0);
+    private overviewStartZoom: number = 1;
+    private overviewTargetZoom: number = 1;
+    private overviewTime: number = 0;
+    private overviewDuration: number = 0;
 
     public static getOrCreate(cameraNode?: cc.Node): CameraRig {
         if (CameraRig.instance && cc.isValid(CameraRig.instance.node)) {
@@ -88,6 +102,11 @@ export default class CameraRig extends cc.Component {
 
     lateUpdate(dt: number): void {
         if (this.paused) {
+            return;
+        }
+
+        if (this.overviewActive) {
+            this.updateOverview(dt);
             return;
         }
 
@@ -143,9 +162,42 @@ export default class CameraRig extends cc.Component {
         const minZoom = Math.max(0.1, Math.min(this.minZoomRatio, this.maxZoomRatio));
         const maxZoom = Math.max(minZoom, this.maxZoomRatio);
         this.baseZoom = this.clamp(this.baseZoom + this.zoomStep * direction, minZoom, maxZoom);
-        if (this.zoomKickTime <= 0) {
+        if (this.zoomKickTime <= 0 && !this.overviewActive) {
             this.camera.zoomRatio = this.baseZoom;
         }
+    }
+
+    public frameWorldRect(minX: number, minY: number, maxX: number, maxY: number, duration: number = 0.45): void {
+        if (!this.camera) {
+            this.camera = this.getComponent(cc.Camera);
+        }
+        if (!this.camera) {
+            return;
+        }
+
+        const safeMinX = Math.min(minX, maxX);
+        const safeMaxX = Math.max(minX, maxX);
+        const safeMinY = Math.min(minY, maxY);
+        const safeMaxY = Math.max(minY, maxY);
+        const center = cc.v2((safeMinX + safeMaxX) * 0.5, (safeMinY + safeMaxY) * 0.5);
+        const width = Math.max(1, safeMaxX - safeMinX + this.overviewPadding * 2);
+        const height = Math.max(1, safeMaxY - safeMinY + this.overviewPadding * 2);
+        const visibleSize = cc.winSize || cc.size(960, 640);
+        const zoomX = visibleSize.width / width;
+        const zoomY = visibleSize.height / height;
+        const targetZoom = Math.max(this.overviewMinZoomRatio, Math.min(zoomX, zoomY));
+
+        this.beginOverviewMove(center, targetZoom, duration, false);
+    }
+
+    public returnToTarget(duration: number = 0.45): void {
+        if (!this.camera) {
+            this.camera = this.getComponent(cc.Camera);
+        }
+        const targetWorld = this.target && cc.isValid(this.target)
+            ? this.getTargetWorldPosition()
+            : this.getNodeWorldPosition(this.node);
+        this.beginOverviewMove(targetWorld, this.baseZoom, duration, true);
     }
 
     onDestroy(): void {
@@ -231,6 +283,47 @@ export default class CameraRig extends cc.Component {
         this.camera.zoomRatio = this.baseZoom + this.zoomKick * progress;
     }
 
+    private beginOverviewMove(targetWorld: cc.Vec2, targetZoom: number, duration: number, returning: boolean): void {
+        if (!this.camera) {
+            return;
+        }
+
+        this.overviewActive = true;
+        this.overviewReturning = returning;
+        this.overviewStartWorld = this.getNodeWorldPosition(this.node);
+        this.overviewTargetWorld = targetWorld.clone();
+        this.overviewStartZoom = this.camera.zoomRatio;
+        this.overviewTargetZoom = Math.max(0.01, targetZoom);
+        this.overviewDuration = Math.max(0.01, duration);
+        this.overviewTime = 0;
+        this.shakeTime = 0;
+        this.impulse = cc.v2(0, 0);
+    }
+
+    private updateOverview(dt: number): void {
+        if (!this.camera) {
+            this.overviewActive = false;
+            return;
+        }
+
+        this.overviewTime = Math.min(this.overviewDuration, this.overviewTime + Math.max(0, dt));
+        const rawT = this.overviewDuration > 0 ? this.overviewTime / this.overviewDuration : 1;
+        const t = this.smoothStep(rawT);
+        const nextWorld = this.lerpVec2(this.overviewStartWorld, this.overviewTargetWorld, t)
+            .add(this.getShakeOffset(dt));
+        this.setNodeWorldPosition(this.node, nextWorld);
+        this.camera.zoomRatio = this.lerp(this.overviewStartZoom, this.overviewTargetZoom, t);
+
+        if (rawT >= 1 && this.overviewReturning) {
+            this.overviewActive = false;
+            this.overviewReturning = false;
+            this.camera.zoomRatio = this.baseZoom;
+            this.lastTargetPosition = this.target && cc.isValid(this.target)
+                ? this.getTargetWorldPosition()
+                : null;
+        }
+    }
+
     private onGamePaused(): void {
         this.paused = true;
     }
@@ -274,5 +367,22 @@ export default class CameraRig extends cc.Component {
 
     private clamp(value: number, min: number, max: number): number {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private lerp(a: number, b: number, t: number): number {
+        return a + (b - a) * this.clamp(t, 0, 1);
+    }
+
+    private lerpVec2(a: cc.Vec2, b: cc.Vec2, t: number): cc.Vec2 {
+        const safeT = this.clamp(t, 0, 1);
+        return cc.v2(
+            this.lerp(a.x, b.x, safeT),
+            this.lerp(a.y, b.y, safeT)
+        );
+    }
+
+    private smoothStep(t: number): number {
+        const value = this.clamp(t, 0, 1);
+        return value * value * (3 - 2 * value);
     }
 }

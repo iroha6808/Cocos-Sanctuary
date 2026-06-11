@@ -1,6 +1,7 @@
 import EventCenter from "../Core/EventCenter";
 import { GameEvent } from "../Core/Constants";
 import SaveService, { MapGenerationState, SaveData } from "../Core/SaveService";
+import CameraRig from "../Core/CameraRig";
 
 const { ccclass, property } = cc._decorator;
 
@@ -62,10 +63,43 @@ export default class AutoMapGenerator extends cc.Component {
     seed: string = "sanctuary-jump-map-1";
 
     @property(cc.Boolean)
-    autoGenerateOnStart: boolean = true;
+    autoGenerateOnStart: boolean = false;
+
+    @property(cc.Boolean)
+    manualTriggerOnly: boolean = true;
 
     @property(cc.Boolean)
     clearGeneratedOnStart: boolean = true;
+
+    @property(cc.Float)
+    generationStepInterval: number = 0.25;
+
+    @property(cc.Boolean)
+    cancelCurrentGenerationBeforeRestart: boolean = false;
+
+    @property(cc.Boolean)
+    frameCameraDuringTimedGeneration: boolean = true;
+
+    @property(cc.Float)
+    cameraFrameDuration: number = 1.6;
+
+    @property(cc.Float)
+    startAfterCameraDelay: number = 0.5;
+
+    @property(cc.Float)
+    returnAfterGenerationDelay: number = 1.0;
+
+    @property(cc.Float)
+    cameraReturnDuration: number = 1.6;
+
+    @property(cc.Boolean)
+    shakeCameraOnSpawn: boolean = true;
+
+    @property(cc.Float)
+    spawnShakeDuration: number = 0.08;
+
+    @property(cc.Float)
+    spawnShakeAmplitude: number = 6;
 
     @property
     minX: number = -5000;
@@ -130,9 +164,15 @@ export default class AutoMapGenerator extends cc.Component {
     private randomState: number = 1;
     private lastGeneratedPatternCount: number = 0;
     private lastGeneratedSlopePatternCount: number = 0;
+    private timedRoot: cc.Node = null;
+    private timedPlacements: RockPlacement[] = [];
+    private timedSpawnIndex: number = 0;
+    private isTimedGenerationRunning: boolean = false;
+    private waitingToStartTimedGeneration: boolean = false;
+    private waitingToReturnCamera: boolean = false;
 
     start(): void {
-        if (this.autoGenerateOnStart) {
+        if (!this.manualTriggerOnly && this.autoGenerateOnStart) {
             this.regenerate();
         }
     }
@@ -143,9 +183,11 @@ export default class AutoMapGenerator extends cc.Component {
 
     onDisable(): void {
         EventCenter.off(GameEvent.SAVE_LOADED, this.onSaveLoaded, this);
+        this.stopTimedGeneration(false);
     }
 
     public regenerate(): void {
+        this.stopTimedGeneration(true);
         const root = this.getRoot();
         if (!root) {
             cc.warn("[AutoMapGenerator] targetRoot is missing.");
@@ -172,6 +214,58 @@ export default class AutoMapGenerator extends cc.Component {
         if (this.showDebugBounds) {
             this.drawDebugBounds(root, placements);
         }
+    }
+
+    public beginTimedGeneration(): boolean {
+        if (this.waitingToReturnCamera) {
+            this.stopTimedGeneration(false);
+        }
+        if (this.isTimedGenerationRunning) {
+            if (!this.cancelCurrentGenerationBeforeRestart) {
+                cc.warn("[AutoMapGenerator] Timed generation is already running.");
+                return false;
+            }
+            this.stopTimedGeneration(false);
+        }
+
+        const root = this.getRoot();
+        if (!root) {
+            cc.warn("[AutoMapGenerator] targetRoot is missing.");
+            return false;
+        }
+
+        if (this.clearGeneratedOnStart) {
+            this.clearGenerated(root);
+        }
+
+        const specs = this.createSpecs();
+        if (specs.length === 0) {
+            cc.warn("[AutoMapGenerator] No rock prefabs assigned.");
+            return false;
+        }
+
+        this.resetRandom();
+        const placements = this.createPlacements(specs);
+        this.timedRoot = root;
+        this.timedPlacements = placements;
+        this.timedSpawnIndex = 0;
+        this.isTimedGenerationRunning = true;
+        this.waitingToStartTimedGeneration = true;
+        this.waitingToReturnCamera = false;
+
+        if (this.showDebugBounds) {
+            this.drawDebugBounds(root, placements);
+        }
+        this.frameCameraForGeneration();
+        if (placements.length === 0) {
+            this.finishTimedGeneration();
+            return true;
+        }
+        this.scheduleOnce(
+            this.startTimedPlacementSpawning,
+            Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay)
+        );
+        return true;
     }
 
     public applyMapGenerationState(state: MapGenerationState, regenerateNow: boolean = true): void {
@@ -564,6 +658,135 @@ export default class AutoMapGenerator extends cc.Component {
         graphics.stroke();
     }
 
+    private spawnNextTimedPlacement(): void {
+        if (!this.isTimedGenerationRunning) {
+            return;
+        }
+        if (!this.timedRoot || !cc.isValid(this.timedRoot)) {
+            this.stopTimedGeneration(true);
+            return;
+        }
+
+        if (this.timedSpawnIndex >= this.timedPlacements.length) {
+            this.finishTimedGeneration();
+            return;
+        }
+
+        const index = this.timedSpawnIndex;
+        this.spawnRock(this.timedRoot, this.timedPlacements[index], index);
+        this.shakeCameraForSpawn();
+        this.timedSpawnIndex++;
+        EventCenter.emit(GameEvent.MAP_GENERATION_PROGRESS, this.timedSpawnIndex, this.timedPlacements.length);
+
+        if (this.timedSpawnIndex >= this.timedPlacements.length) {
+            this.finishTimedGeneration();
+        }
+    }
+
+    private startTimedPlacementSpawning(): void {
+        if (!this.isTimedGenerationRunning) {
+            return;
+        }
+
+        this.waitingToStartTimedGeneration = false;
+        this.schedule(
+            this.spawnNextTimedPlacement,
+            Math.max(0.01, this.generationStepInterval)
+        );
+        this.spawnNextTimedPlacement();
+    }
+
+    private finishTimedGeneration(): void {
+        if (!this.isTimedGenerationRunning) {
+            return;
+        }
+
+        this.unschedule(this.spawnNextTimedPlacement);
+        this.unschedule(this.startTimedPlacementSpawning);
+        const placements = this.timedPlacements.slice();
+        this.isTimedGenerationRunning = false;
+        this.waitingToStartTimedGeneration = false;
+        this.waitingToReturnCamera = true;
+        this.timedRoot = null;
+        this.timedPlacements = [];
+        this.timedSpawnIndex = 0;
+        this.publishMapGenerationState(placements);
+        this.scheduleOnce(this.returnCameraToTargetAfterDelay, Math.max(0, this.returnAfterGenerationDelay));
+    }
+
+    private stopTimedGeneration(returnCamera: boolean): void {
+        if (!this.isTimedGenerationRunning && !this.waitingToStartTimedGeneration && !this.waitingToReturnCamera) {
+            return;
+        }
+
+        this.unschedule(this.spawnNextTimedPlacement);
+        this.unschedule(this.startTimedPlacementSpawning);
+        this.unschedule(this.returnCameraToTargetAfterDelay);
+        this.isTimedGenerationRunning = false;
+        this.waitingToStartTimedGeneration = false;
+        this.waitingToReturnCamera = false;
+        this.timedRoot = null;
+        this.timedPlacements = [];
+        this.timedSpawnIndex = 0;
+        if (returnCamera) {
+            this.returnCameraToTarget();
+        }
+    }
+
+    private shakeCameraForSpawn(): void {
+        if (!this.shakeCameraOnSpawn || this.spawnShakeAmplitude <= 0 || this.spawnShakeDuration <= 0) {
+            return;
+        }
+
+        const rig = CameraRig.instance;
+        if (rig && cc.isValid(rig.node)) {
+            rig.addShake(this.spawnShakeDuration, this.spawnShakeAmplitude);
+        }
+    }
+
+    private frameCameraForGeneration(): void {
+        if (!this.frameCameraDuringTimedGeneration) {
+            return;
+        }
+
+        const rig = CameraRig.instance;
+        if (!rig || !cc.isValid(rig.node)) {
+            return;
+        }
+
+        const rect = this.getGenerationWorldRect();
+        rig.frameWorldRect(rect.minX, rect.minY, rect.maxX, rect.maxY, this.cameraFrameDuration);
+    }
+
+    private returnCameraToTarget(): void {
+        if (!this.frameCameraDuringTimedGeneration) {
+            return;
+        }
+
+        const rig = CameraRig.instance;
+        if (rig && cc.isValid(rig.node)) {
+            rig.returnToTarget(this.cameraReturnDuration);
+        }
+    }
+
+    private getGenerationWorldRect(): { minX: number; minY: number; maxX: number; maxY: number } {
+        const root = this.getRoot();
+        const bottomLeft = cc.v2(this.minX, this.minY);
+        const topRight = cc.v2(this.maxX, this.maxY);
+        const worldBottomLeft = root && cc.isValid(root)
+            ? root.convertToWorldSpaceAR(bottomLeft)
+            : bottomLeft;
+        const worldTopRight = root && cc.isValid(root)
+            ? root.convertToWorldSpaceAR(topRight)
+            : topRight;
+        return {
+            minX: Math.min(worldBottomLeft.x, worldTopRight.x),
+            minY: Math.min(worldBottomLeft.y, worldTopRight.y),
+            maxX: Math.max(worldBottomLeft.x, worldTopRight.x),
+            maxY: Math.max(worldBottomLeft.y, worldTopRight.y)
+        };
+    }
+
     private pickSpec(specs: RockSpec[]): RockSpec {
         let total = 0;
         for (let i = 0; i < specs.length; i++) {
@@ -669,7 +892,13 @@ export default class AutoMapGenerator extends cc.Component {
 
     private onSaveLoaded(saveData: SaveData): void {
         if (saveData && saveData.mapState) {
-            this.applyMapGenerationState(saveData.mapState, true);
+            this.applyMapGenerationState(saveData.mapState, false);
+            SaveService.setCurrentMapGenerationState(saveData.mapState);
         }
+    }
+
+    private returnCameraToTargetAfterDelay(): void {
+        this.waitingToReturnCamera = false;
+        this.returnCameraToTarget();
     }
 }
