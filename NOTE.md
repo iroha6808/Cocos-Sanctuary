@@ -290,13 +290,13 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 
 ### Map / Scene
 
-- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5；目前預設不開場生成，按 `G` 才開始逐塊生成。
+- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5；`manualTriggerOnly` 預設開啟，所以開場 / 讀檔只套參數不生成，按 `G` 才開始逐塊生成。
 - AutoMapGenerator 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
 - 生成策略：先拼出 `FlatRun / RampUp / RampDown / Hill / Valley` 平台組合，再把整組放進地圖；pattern 內部接近連通，pattern 之間保留跳躍距離。
-- `beginTimedGeneration()` 會預先算出 placements，然後每 `generationStepInterval = 0.07` 秒 spawn 一塊地形並 emit `MAP_GENERATION_PROGRESS(current, total)`；生成中重按 `G` 預設不重入。
-- 逐塊生成時會呼叫 `CameraRig.frameWorldRect()` 看完整生成範圍；完成後 `CameraRig.returnToTarget()` 回到玩家，期間玩家仍可移動。
+- `beginTimedGeneration()` 會預先算出 placements，呼叫 `CameraRig.frameWorldRect()` 用 `cameraFrameDuration = 1.6` 秒看完整生成範圍，等 `startAfterCameraDelay = 0.5` 秒後，每 `generationStepInterval = 0.25` 秒 spawn 一塊地形、觸發小幅 camera shake，並 emit `MAP_GENERATION_PROGRESS(current, total)`；生成中重按 `G` 預設不重入。
+- 逐塊生成完成後會先等 `returnAfterGenerationDelay = 1.0` 秒，再呼叫 `CameraRig.returnToTarget()` 回到玩家；期間玩家仍可移動。
 - AutoMapGenerator 每次生成後會把 `seed`、範圍、pattern 數、斜坡數、rock 數與主要參數寫入 `SaveService.currentMap` 並 emit `MAP_GENERATION_UPDATED`；存檔只保存這份 map state，不保存 runtime 生成出的所有節點。
-- 讀檔觸發 `SAVE_LOADED` 時，AutoMapGenerator 會套用 `saveData.mapState` 並重新生成，確保同一個存檔回到同一張自動地圖。
+- 讀檔觸發 `SAVE_LOADED` 時，AutoMapGenerator 只套用 `saveData.mapState` 的 seed / range / settings 並更新 current map；不會立刻生成，等玩家按 `G` 後才用同一組參數生成。
 - `minPatternCount/maxPatternCount` 控制平台組數，`slopePatternChance` 控制斜坡組比例，`minSlopePatternCount` 保證至少幾組含 Rockleft / Rockright；`scatterCount` 只補少量散點。
 - Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。
 - `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -545,7 +545,8 @@ Auto map save/load
   -> load save
   -> EventCenter.emit(SAVE_LOADED, saveData)
   -> AutoMapGenerator.applyMapGenerationState(saveData.mapState)
-  -> regenerate same seed / range / settings
+  -> wait for G
+  -> generate same seed / range / settings
 ```
 
 ```text
@@ -555,10 +556,13 @@ Auto map timed generation
   -> GameManager.beginAutoMapGeneration()
   -> AutoMapGenerator.beginTimedGeneration()
   -> CameraRig.frameWorldRect(generation range)
+  -> wait cameraFrameDuration + startAfterCameraDelay
   -> spawn one AutoRock_* every generationStepInterval
+  -> CameraRig.addShake(spawnShakeDuration, spawnShakeAmplitude)
   -> EventCenter.emit(MAP_GENERATION_PROGRESS, current, total)
   -> SaveService.setCurrentMapGenerationState()
   -> EventCenter.emit(MAP_GENERATION_UPDATED, state)
+  -> wait returnAfterGenerationDelay
   -> CameraRig.returnToTarget()
 ```
 
@@ -575,7 +579,7 @@ Portal / enemy pathing
 ## Cocos Inspector 設定
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`autoMapGenerator`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 上的 AutoMapGenerator。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
-- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。
+- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。overview 期間也會套用 `addShake()`，所以地圖逐塊生成可看到震動。
 - `CameraFollow.ts`：legacy 備用腳本，預設 `useXLimit/useYLimit` 關閉；目前不建議掛在 Main Camera，避免和 `CameraRig.ts` 同時控制相機。
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
