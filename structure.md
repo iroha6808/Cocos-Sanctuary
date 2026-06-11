@@ -266,7 +266,7 @@ Canvas
 - `CameraRig.ts`
   - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
 - `CameraFollow.ts`
-  - 簡單 smooth follow，支援 X/Y 跟隨、offset、bounds；和 `CameraRig` 二選一使用。
+  - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `RealtimeStateReporter.ts`
@@ -414,8 +414,8 @@ Canvas
 
 - `Map/AutoMapGenerator.ts`
   - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
-  - 預設先在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，再整體偏移 `(-480,-320)`；只清 `AutoRock_` prefix 節點。
-  - 使用 seeded random、短平台鏈、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
+  - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
+  - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -573,7 +573,7 @@ Canvas
 - Rocksets
   - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
   - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
-  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，再偏移 `(-480,-320)`；平台不用全連通，但用短鏈、`minJumpGap`、`slopeChance` 增加可跳躍連通性。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels
@@ -700,7 +700,7 @@ Score / save / leaderboard
 1. 將 `local plans/` 作為後續 step 文件來源。
 2. 手動完成 Menu / Pause / GameOver / Audio / Effects 的 Inspector 綁定。
 3. 實測 SkeletonMage、OceanArea、DropOre、存讀檔、排行榜、音效與五種粒子特效。
-4. 確認 Main Camera 只啟用 `CameraRig` 或 `CameraFollow` 其中一套。
+4. 確認 Main Camera 只啟用 `CameraRig`；不要再掛 legacy `CameraFollow`。
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
 6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
 7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。
