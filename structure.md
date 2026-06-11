@@ -1,8 +1,8 @@
 # Cocos Sanctuary 專案架構
 
-> 更新日期：2026-06-10
+> 更新日期：2026-06-11
 > 引擎：Cocos Creator 2.4.8
-> 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人、水域控制、資源掉落、背包與 UI。
+> 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人動畫、水域控制、車船互動、potions、Rocksets、資源掉落、背包與 UI。
 
 ## 目錄
 
@@ -41,8 +41,14 @@ assets/
     Projectiles/
       BurningCoconutProjectile.prefab
     Resources/
+      Rocksets/
+        Rockleft.prefab ... Rockright.prefab
       DropOre/
         Amber Sphere.prefab ... Raw Gold.prefab
+      potions/
+        Blue Potion.prefab
+        Red Potion.prefab
+        Yellow Potion.prefab
       Tree.prefab
       Ore.prefab
       FruitDrop.prefab
@@ -91,6 +97,10 @@ assets/
           appletree.ts
         food/
           FoodBase.ts
+          potions/
+            bluepotion.ts
+            redpotion.ts
+            yellowpotion.ts
           fruits/
             apple.ts
             avacado.ts
@@ -102,6 +112,7 @@ assets/
             acorn.ts
             cashew.ts ... pistachio.ts
     Map/
+      AutoMapGenerator.ts
       NewScript - 001.ts
       BouncePad.ts
       OceanArea.ts
@@ -148,6 +159,21 @@ assets/
     npcs/sprites/characters/
 
   resources/
+    npcs/
+      sprites/
+        characters/
+          merchant/
+            Idle1/
+              1.png ... 4.png
+              idle_rigjt.anim
+            Speak1/
+              1.png ... 4.png
+              talk_right.anim
+    potions/
+      bluepotion.png
+      redpotion.png
+      yellowpotion.png
+      potions.png
     100 FOOD ASSETS/
       Assets/food/food/
         fruits1/
@@ -163,45 +189,21 @@ local plans/
   note.md
 ```
 
-## 目前 Scene 建議結構
+## 目前 Game.fire Canvas 結構
 
 ```text
 Canvas
   Main Camera
-    CameraRig or CameraFollow      # 二選一，避免雙重控制鏡頭
-  Background
-  tempFloor
-  Title
+    Background
   Core Controllers
-    GameManager
-    AudioManager                    # BGM + SFX，需拖 AudioClip
-    EffectsManager                  # runtime particle，需拖 effectRoot / particleSpriteFrame
-    DamageNumberManager             # 可手動掛；未掛時 GameManager runtime 補
-    MerchantSpawner                # 建議掛在這裡或 NPC root 上
-    RealtimeStateReporter          # 可手動掛；未掛時 GameManager runtime 補
   World Root
-    OceanArea                      # PhysicsBoxCollider sensor + OceanArea / OceanLayerOrder
-    PathGraph                      # PathGraph + PathNode children
-    Portal_A_In / Portal_A_Out     # Portal + sensor collider，pairId 相同
-    BouncePad                      # BouncePad + sensor collider，旋轉節點改反彈方向
-    Car                            # VehicleInteractable + CarController
-    Boat                           # VehicleInteractable + BoatController
-    Bullet_Layer                   # PlayerGun / projectile pool 建議 parent
   UI Root
-    Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
-    FadeOverlay                   # optional，全螢幕黑幕，Retry / Main Menu 切場景淡出用
-    PausePanel                    # Esc 暫停時顯示的 UI 容器，放 resume / retry / menu / save
     ExpLabel
-    ScoreLabel
     HpBar
       bar
-    MerchantPrompt
-      Label
-    DialoguePanel
-      DialogueLabel
-      OptionTrade
-      OptionChat
-      OptionLeave
+    FloatingDialogueRoot
+      PromptBubble / PromptLabel
+      DialogueBubble / DialogueLabel / OptionTrade / OptionChat / OptionLeave
     MerchantShopPanel
       CurrencyLabel
       ItemList
@@ -217,20 +219,26 @@ Canvas
       BuyButton
       AmountMinusButton
       AmountPlusButton
-    MenuPanels                    # MenuScene main/login/settings/leaderboard panels
-    GameOverPanel                 # GameOverScene labels/buttons
+    CraftingUIHost
+      CraftingUIRoot
   Player
-  Ore
-  Tree
+    Sprite_Body
+    AttackHitbox
+  Orerock
+  applebush
+  Meteorite Chunk
   NPC
-    TravelingMerchant              # 可手動放，也可由 MerchantSpawner 生成
-    SkeletonMage                   # 遠程 NPC prefab
-    MiniBoss                       # NPC_AI + MiniBossAI
-    EnemyRespawner                 # 距離刷怪點
+    Slime
+    Boar
+    SkeletonMage
   coconuts
-  InventoryUI
-    GridContainer
+  platform
+    auto generate
+      AutoRock_* runtime nodes
+    Rockleft / Rockright / Rockplatform3 / 4 / 5 copies
 ```
+
+建議新增但目前需手動放置的節點：`AudioManager`、`EffectsManager`、`DamageNumberManager`、`MerchantSpawner`、`RealtimeStateReporter`、`Car`、`Boat`、`PathGraph`、`Portal`、`BouncePad`。
 
 ## Core
 
@@ -361,6 +369,9 @@ Canvas
   - 可指定 `merchantPrefab`、`playerNode`、`spawnParent`、生成距離、生成間隔。
   - 若場上已有旅行商人，會重用現有商人，不重複生成。
   - 生成位置依玩家世界座標計算；玩家在 OceanArea 時商人會生成在水域附近。
+- `TravelingMerchant.prefab`
+  - `8b456ff` 後已接新商人 sprite 與 `cc.Animation`。
+  - animation clips 來源為 `resources/npcs/sprites/characters/merchant/Idle1/idle_rigjt.anim` 與 `Speak1/talk_right.anim`。
 
 ## Data
 
@@ -392,6 +403,8 @@ Canvas
 - `FoodBase.ts`
   - 食物基底，處理 falling / ground / collect 類行為。
   - 食物收集進背包；吃掉時優先找 `PlayerStats`，沒有則使用 `PlayerController.heal()`。
+- `food/potions/*.ts`
+  - Blue / Red / Yellow Potion 食物類腳本，搭配 `assets/Prefabs/Resources/potions/` prefab 與 `assets/resources/potions/` 圖。
 - `fruits/*.ts`、`nuts/*.ts`
   - 從 `ItemData` 套用食物名稱、描述、回血、體力與腐敗時間。
 - `coconut.ts`
@@ -399,6 +412,10 @@ Canvas
 
 ## Map / Scene
 
+- `Map/AutoMapGenerator.ts`
+  - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
+  - 預設範圍 local `x = -5000 ~ 0`、`y = -2000 ~ 0`；只清 `AutoRock_` prefix 節點。
+  - 使用 seeded random、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -477,6 +494,9 @@ Canvas
     - `Stock Item Count`
     - `Max Life Time`
     - `No Trade Despawn Time`
+  - `cc.Animation`
+    - default clip：商人 idle
+    - clips：idle / talk
   - `RigidBody` + body collider。
 - MerchantSpawner
   - `merchantPrefab`：`assets/Prefabs/NPCs/TravelingMerchant.prefab`
@@ -548,6 +568,12 @@ Canvas
   - Ocean root 可掛 `OceanLayerOrder.ts`；需要清舊生成內容時掛 `OceanPrefabBuilder.ts`。
 - DropOre
   - prefab 掛對應 `Oredrops/*.ts` 子類或 `Orebase.ts`，並確認 item id 對上 `ItemData` smallore key。
+- Potions
+  - `Blue Potion` / `Red Potion` / `Yellow Potion` prefab 建議掛對應 potion script，確認 item id 與 `ItemData` 一致。
+- Rocksets
+  - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
+  - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`；平台不用全連通，但用 `minSeparation` 避免卡在一起。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels

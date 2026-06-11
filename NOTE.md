@@ -1,5 +1,7 @@
 # Cocos Sanctuary Note
 
+> 更新日期：2026-06-11
+
 ## 目錄
 
 - [Git 規則](#git-規則)
@@ -64,6 +66,7 @@ assets/
 - `Player/`
 - `Scene/`
 - `UI/`
+- `Vehicle/`
 - `Utils/`
 
 `Utils/` 目前仍以測試腳本為主；主要已實作功能集中在 `Core/`、`Player/`、`NPC/`、`Attack/`、`Data/`、`Entity/Resources/`、`Entity/Resources/food/`、`Map/`、`Scene/`、`UI/`。
@@ -73,31 +76,47 @@ assets/
 - `assets/Textures/Buttons/`：商店 / UI 可用按鈕圖。
 - `assets/Textures/effects/fire effects/`：BurningCoconutProjectile 使用的火焰特效圖與 `fire_effect.anim`。
 - `assets/Textures/npcs/`：Slime 與 Skeleton Mage 角色素材 / 動畫。
+- `assets/resources/npcs/sprites/characters/merchant/`：TravelingMerchant 新商人 sprite，包含 `Idle1/idle_rigjt.anim` 與 `Speak1/talk_right.anim`。
 - `assets/resources/100 FOOD ASSETS/`：水果、堅果、蔬菜、花、菇類 icon 圖；注意這是小寫 `resources`，可供 `cc.resources.load()` 使用。
 - `assets/resources/smallore/`：礦物掉落物 icon，例如 ambersphere、amethyst、coallump、rawgold、voidnugget。
+- `assets/resources/potions/`：blue / red / yellow potion 圖與合併圖。
 - `assets/resources/Purple Planet - Platformer Tileset/`：地圖 / 礦物 / tile 相關素材，包含 png 與來源向量檔。
+- `assets/Prefabs/Map/` 與 `assets/Prefabs/Resources/Rocksets/`：Rockleft / Rockright / Rockplatform3 / 4 / 5 地形 prefab。
+- `assets/Prefabs/Resources/potions/`：Blue / Red / Yellow Potion prefab。
 
 ## Canvas 層級規劃
 
+目前 `assets/Scenes/Game.fire` 讀到的 Canvas 層級：
+
 ```text
 Canvas
- ├── Main Camera
- │    └── CameraFollow / follow Player
- │
- ├── [Core_Controllers]    # 系統大腦區，不可見
- │    └── GameManager      # 掛載 GameManager.ts
- │
- ├── [World_Root]          # 遊戲世界區，所有有座標的東西都在這
- │    ├── Map_Layer        # 地圖層：NTHU 校園、海洋、地下 TileMap
- │    ├── Item_Layer       # 掉落物層：椰子、礦石等動態生成物
- │    ├── Entity_Layer     # 實體層：玩家、NPC
- │    └── Bullet_Layer     # 投射物層：弓箭、遠程攻擊子彈
- │
- └── [UI_Root]             # 介面區，永遠在世界畫面上層
-      ├── HUD_Layer        # 常駐介面：血條、氧氣條、道具欄，掛載 UIManager.ts
-      ├── PopUp_Layer      # 彈出介面：排行榜、升級進化提示
-      └── Screen_Layer     # 全螢幕介面：死亡結算畫面
-          └── MerchantShopPanel  # 建議放這裡或 Main Camera 子節點，避免世界座標跑出畫面
+├── Main Camera
+│   └── Background
+├── Core Controllers
+├── World Root
+├── UI Root
+│   ├── ExpLabel
+│   ├── HpBar
+│   ├── FloatingDialogueRoot
+│   │   ├── PromptBubble / PromptLabel
+│   │   └── DialogueBubble / DialogueLabel / OptionTrade / OptionChat / OptionLeave
+│   ├── MerchantShopPanel
+│   └── CraftingUIHost / CraftingUIRoot
+├── Player
+│   ├── Sprite_Body
+│   └── AttackHitbox
+├── Orerock
+├── applebush
+├── Meteorite Chunk
+├── NPC
+│   ├── Slime
+│   ├── Boar
+│   └── SkeletonMage
+├── coconuts
+└── platform
+    ├── auto generate
+    │   └── AutoRock_* runtime nodes
+    └── Rockleft / Rockright / Rockplatform3 / 4 / 5 copies
 ```
 
 ## Code Trace：已實作功能
@@ -268,6 +287,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 
 ### Map / Scene
 
+- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5 後自動生成跳躍平台。
+- AutoMapGenerator 預設生成範圍是 local `x = -5000 ~ 0`、`y = -2000 ~ 0`，只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
+- Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。
 - `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
 - `OceanArea.ts`：進出水域時會 emit `PLAYER_WATER_STATE_CHANGED(isInWater, oceanNode)`，給 `AudioManager` crossfade BGM 與 `ThemeManager` 可選色調切換使用。
 - `OceanLayerOrder.ts`：固定 OceanArea 子節點 zIndex / active / opacity，避免水域視覺層被蓋掉。

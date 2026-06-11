@@ -134,7 +134,7 @@
     },
     "_angularVelocity": 0,
     "_fixedRotation": false,
-    "enabledContactListener": false,
+    "enabledContactListener": true,
     "bullet": false,
     "awakeOnLoad": true,
     "_id": ""
@@ -173,16 +173,13 @@
       "__id__": 1
     },
     "_enabled": true,
-    "resourceType": 0,
-    "maxDurability": 3,
+    "hitsPerDrop": 3,
     "dropAmount": 1,
-    "dropPrefab": {
-      "__uuid__": "c0951289-09c7-45ea-a229-23c9d7a63314"
-    },
+    "interactDistance": 120,
     "depletedSpriteFrame": {
       "__uuid__": "8b7fbc2a-1bf3-4230-b94f-1dc1a7077f1a"
     },
-    "interactDistance": 120,
+    "targetSprite": null,
     "_id": ""
   },
   {
