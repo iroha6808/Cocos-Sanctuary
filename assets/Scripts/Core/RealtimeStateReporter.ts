@@ -47,18 +47,25 @@ export default class RealtimeStateReporter extends cc.Component {
 
         const playerEntity = player.getComponent("PlayerController") as any;
         const username = SaveService.getCurrentUsername() || "guest";
+        const inventorySummary = InventoryManager.instance.getSaveSnapshot();
         const worldPosition = player.parent
             ? player.parent.convertToWorldSpaceAR(player.position)
             : cc.v2(player.x, player.y);
         const state: RealtimePlayerState = {
+            clientId: SaveService.getClientId(),
+            sessionId: SaveService.getSessionId(),
             username,
+            displayName: username,
             scene: this.sceneName || cc.director.getScene().name || "Game",
             position: { x: worldPosition.x, y: worldPosition.y },
             hp: playerEntity && typeof playerEntity.currentHp === "number" ? playerEntity.currentHp : 0,
             maxHp: playerEntity && typeof playerEntity.maxHp === "number" ? playerEntity.maxHp : 1,
             score: GameManager.instance ? GameManager.instance.getScore() : 0,
             exp: GameManager.instance ? GameManager.instance.getExp() : 0,
-            inventorySummary: InventoryManager.instance.getSaveSnapshot(),
+            inventorySummary,
+            inventorySlotCount: inventorySummary.length,
+            inventoryTotalCount: this.getInventoryTotalCount(inventorySummary),
+            status: GameManager.instance && GameManager.instance.isGamePaused() ? "paused" : "online",
             updatedAt: Date.now()
         };
 
@@ -80,5 +87,9 @@ export default class RealtimeStateReporter extends cc.Component {
             return this.playerNode;
         }
         return null;
+    }
+
+    private getInventoryTotalCount(items: { itemId: string; count: number }[]): number {
+        return (items || []).reduce((total, item) => total + Math.max(0, Math.floor(item.count || 0)), 0);
     }
 }

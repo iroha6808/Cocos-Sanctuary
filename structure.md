@@ -252,7 +252,10 @@ Canvas
   - 全域事件中心，提供 `on()`、`emit()`、`off()`、`clear()`。
 - `SaveService.ts`
   - localStorage 假後端，提供註冊、登入、登出、每帳號存讀檔、排行榜、最後一局結果。
+  - 使用者 metadata：`createdAt`、`lastLoginAt`、`lastLogoutAt`、`loginCount`。
   - fake multiplayer realtime snapshot：`upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
+  - debug / future Firebase bridge：`getBackendSnapshot()` 回傳 current user、client/session、users、saves、leaderboard、realtime players、current map、last run、storage keys。
+  - 自動地圖只存 seed / 範圍 / pattern 統計 / 主要參數，不存 runtime 生成節點。
 - `AudioManager.ts`
   - land / water BGM 雙 channel crossfade；監聽 `PLAYER_WATER_STATE_CHANGED`。
   - 六種 SFX：attack、hit、collect、buy、heal、skill。
@@ -270,7 +273,7 @@ Canvas
 - `HitFeelManager.ts`
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `RealtimeStateReporter.ts`
-  - 定期把玩家名稱、場景、位置、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage。
+  - 定期把玩家名稱、clientId、sessionId、場景、位置、HP、Score、EXP、背包摘要 / 統計、online / paused 狀態寫入 `SaveService` localStorage。
   - 目前是多人功能資料介面，不會顯示其他玩家。
 - `GameManager.ts`
   - 遊戲初始化、PhysicsManager、CameraRig / HitFeelManager runtime 建立、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
@@ -415,6 +418,8 @@ Canvas
 - `Map/AutoMapGenerator.ts`
   - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
   - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
+  - 生成後呼叫 `SaveService.setCurrentMapGenerationState()` 並 emit `MAP_GENERATION_UPDATED`。
+  - 讀到 `SAVE_LOADED` 且存檔有 `mapState` 時，會套用 seed / range / settings 再重生同一張地圖。
   - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
