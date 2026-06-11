@@ -3,6 +3,8 @@ import { EntityType, GameEvent } from "../Core/Constants";
 import AudioManager, { SfxType } from "../Core/AudioManager";
 import EffectsManager, { EffectType } from "../Core/EffectsManager";
 import EventCenter from "../Core/EventCenter";
+import PhysicsContactFilter from "../Core/PhysicsContactFilter";
+import { PhysicsTag } from "../Core/PhysicsTags";
 
 const { ccclass, property } = cc._decorator;
 
@@ -231,6 +233,11 @@ export default class CombatHitbox extends cc.Component {
 
         this.collider.sensor = true;
         (this.collider as any).enabledContactListener = true;
+        PhysicsContactFilter.ensureForNode(
+            this.node,
+            PhysicsTag.ATTACK_HITBOX,
+            this.debugLog
+        );
     }
 
     private hasHit(node: cc.Node): boolean {

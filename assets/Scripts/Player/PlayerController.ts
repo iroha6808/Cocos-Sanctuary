@@ -9,6 +9,8 @@ import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
 import VehicleInteractable from "../Vehicle/VehicleInteractable";
+import PhysicsContactFilter from "../Core/PhysicsContactFilter";
+import { PhysicsTag } from "../Core/PhysicsTags";
 
 const { ccclass, property } = cc._decorator;
 
@@ -141,6 +143,7 @@ export default class PlayerController extends BaseEntity {
         if (this.rb) {
             this.originalGravityScale = (this.rb as any).gravityScale || 1;
         }
+        PhysicsContactFilter.ensureForNode(this.node, PhysicsTag.PLAYER_BODY);
 
         if (!this.attackHitbox) {
             const hitboxNode = this.node.getChildByName("AttackHitbox");

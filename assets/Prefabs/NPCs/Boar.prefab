@@ -698,7 +698,7 @@
     "itemName": "Item",
     "minAmount": 1,
     "maxAmount": 1,
-    "dropChance": 1
+    "dropChance": 0.5
   },
   {
     "__type__": "cc.RigidBody",

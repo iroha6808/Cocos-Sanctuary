@@ -4,6 +4,8 @@ import { EntityType, GameEvent } from "../Core/Constants";
 import CombatHitbox, { CombatFaction, CombatHitInfo } from "../Attack/CombatHitbox";
 import CombatProjectile from "../Attack/CombatProjectile";
 import NPCPathAgent from "./NPCPathAgent";
+import PhysicsContactFilter from "../Core/PhysicsContactFilter";
+import { PhysicsTag } from "../Core/PhysicsTags";
 
 const { ccclass, property } = cc._decorator;
 
@@ -234,6 +236,11 @@ export default class NPC_AI extends BaseEntity {
         }
 
         this.rb = this.getComponent(cc.RigidBody);
+        PhysicsContactFilter.ensureForNode(
+            this.node,
+            PhysicsTag.NPC_BODY,
+            this.debugLog
+        );
         this.pathAgent = this.getComponent(NPCPathAgent);
         this.lastX = this.node.x;
 
@@ -534,6 +541,11 @@ export default class NPC_AI extends BaseEntity {
             dropNode.setPosition(
                 this.node.x + randomOffsetX,
                 this.node.y + this.dropSpawnOffsetY
+            );
+            PhysicsContactFilter.ensureForNode(
+                dropNode,
+                PhysicsTag.DROP_ITEM,
+                this.debugDropLog
             );
 
             const dropScript = dropNode.getComponent("DropItem") as any;

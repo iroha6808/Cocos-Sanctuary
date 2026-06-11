@@ -10,6 +10,8 @@ import CameraRig from "./CameraRig";
 import HitFeelManager from "./HitFeelManager";
 import RealtimeStateReporter from "./RealtimeStateReporter";
 import DamageNumberManager from "./DamageNumberManager";
+import MonsterSpawner from "../NPC/MonsterSpawner";
+import PhysicsTagValidator from "./PhysicsTagValidator";
 
 const { ccclass, property } = cc._decorator;
 
@@ -57,6 +59,15 @@ export default class GameManager extends cc.Component {
     @property(cc.Boolean)
     autoLoadRequestedSave: boolean = true;
 
+    @property(cc.Boolean)
+    enableAutomaticMonsterSpawning: boolean = true;
+
+    @property(cc.Boolean)
+    monsterSpawnDebugLog: boolean = false;
+
+    @property(cc.Boolean)
+    physicsTagDebugLog: boolean = false;
+
     private score: number = 0;
     private exp: number = 0;
     private isPaused: boolean = false;
@@ -97,6 +108,20 @@ export default class GameManager extends cc.Component {
         const physicsManager = cc.director.getPhysicsManager();
         physicsManager.enabled = true;
         physicsManager.debugDrawFlags = this.showPhysicsDebugDraw ? 1 : 0;
+        const physicsTagValidator = PhysicsTagValidator.getOrCreate(this.node);
+        if (physicsTagValidator) {
+            physicsTagValidator.debugLog = this.physicsTagDebugLog;
+            physicsTagValidator.validateNow();
+        }
+        if (this.enableAutomaticMonsterSpawning) {
+            const monsterSpawner = MonsterSpawner.getOrCreate(this.node);
+            if (monsterSpawner) {
+                monsterSpawner.debugLog = this.monsterSpawnDebugLog;
+                if (monsterSpawner.positionResolver) {
+                    monsterSpawner.positionResolver.debugLog = this.monsterSpawnDebugLog;
+                }
+            }
+        }
 
         if (this.pausePanel) {
             this.pausePanel.active = false;
