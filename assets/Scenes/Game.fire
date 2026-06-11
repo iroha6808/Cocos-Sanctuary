@@ -20204,6 +20204,12 @@
     "rowCount": 5,
     "verticalJitter": 90,
     "edgePadding": 40,
+    "outputOffsetX": -480,
+    "outputOffsetY": -320,
+    "minJumpGap": 90,
+    "maxJumpGap": 260,
+    "chainVerticalJitter": 120,
+    "slopeChance": 0.35,
     "showDebugBounds": false,
     "_id": "ca0lvy61ND0pKoFufXpfSo"
   },
