@@ -87,6 +87,24 @@ export default class AutoMapGenerator extends cc.Component {
     @property
     edgePadding: number = 40;
 
+    @property
+    outputOffsetX: number = -480;
+
+    @property
+    outputOffsetY: number = -320;
+
+    @property
+    minJumpGap: number = 90;
+
+    @property
+    maxJumpGap: number = 260;
+
+    @property
+    chainVerticalJitter: number = 120;
+
+    @property
+    slopeChance: number = 0.35;
+
     @property(cc.Boolean)
     showDebugBounds: boolean = false;
 
@@ -145,8 +163,8 @@ export default class AutoMapGenerator extends cc.Component {
         this.addSpec(specs, "Rockplatform3", this.rockPlatform3Prefab, 76.8 * scale, 17.5 * scale, 0.5, 0.5, 4, "none");
         this.addSpec(specs, "Rockplatform4", this.rockPlatform4Prefab, 102.4 * scale, 17.5 * scale, 0.375, 0.5, 3, "none");
         this.addSpec(specs, "Rockplatform5", this.rockPlatform5Prefab, 128 * scale, 17.5 * scale, 0.3, 0.5, 2, "none");
-        this.addSpec(specs, "Rockleft", this.rockLeftPrefab, 76.8 * scale, 51.2 * scale, 0.833, 0.75, 1, "left");
-        this.addSpec(specs, "Rockright", this.rockRightPrefab, 76.8 * scale, 51.2 * scale, -0.17, 0.75, 1, "right");
+        this.addSpec(specs, "Rockleft", this.rockLeftPrefab, 76.8 * scale, 51.2 * scale, 0.833, 0.75, 3, "left");
+        this.addSpec(specs, "Rockright", this.rockRightPrefab, 76.8 * scale, 51.2 * scale, -0.17, 0.75, 3, "right");
         return specs;
     }
 
@@ -173,15 +191,36 @@ export default class AutoMapGenerator extends cc.Component {
         const minCount = Math.max(1, Math.min(this.minPlatformCount, this.maxPlatformCount));
         const maxCount = Math.max(minCount, this.maxPlatformCount);
         const targetCount = this.randomInt(minCount, maxCount);
-        const maxAttempts = targetCount * 90;
+        const chainCount = Math.max(2, Math.min(5, this.rowCount));
+        const perChainTarget = Math.ceil(targetCount / chainCount);
 
+        for (let chainIndex = 0; chainIndex < chainCount && placements.length < targetCount; chainIndex++) {
+            let startX = this.minX + this.edgePadding + this.randomRange(0, 220) + chainIndex * 70;
+            let groundY = this.getChainBaseY(chainIndex, chainCount);
+            let placedInChain = 0;
+            let guard = 0;
+
+            while (startX < this.maxX - this.edgePadding && placements.length < targetCount && placedInChain < perChainTarget + 3 && guard < 24) {
+                guard++;
+                const spec = this.pickChainSpec(specs, groundY);
+                const placement = this.createPlacementAt(spec, startX, groundY);
+                if (placement && this.isSeparated(placement.bounds, placements)) {
+                    placements.push(placement);
+                    placedInChain++;
+                    groundY = this.getNextGroundY(spec, groundY);
+                } else {
+                    groundY = this.clampGroundY(groundY + this.randomRange(-this.chainVerticalJitter, this.chainVerticalJitter));
+                }
+
+                startX += spec.width + this.randomRange(this.minJumpGap, this.maxJumpGap);
+            }
+        }
+
+        const maxAttempts = targetCount * 60;
         for (let attempt = 0; attempt < maxAttempts && placements.length < targetCount; attempt++) {
             const spec = this.pickSpec(specs);
-            const placement = this.createPlacement(spec);
-            if (!placement) {
-                continue;
-            }
-            if (this.isSeparated(placement.bounds, placements)) {
+            const placement = this.createRandomPlacement(spec);
+            if (placement && this.isSeparated(placement.bounds, placements)) {
                 placements.push(placement);
             }
         }
@@ -192,7 +231,7 @@ export default class AutoMapGenerator extends cc.Component {
         return placements;
     }
 
-    private createPlacement(spec: RockSpec): RockPlacement {
+    private createRandomPlacement(spec: RockSpec): RockPlacement {
         const minX = this.minX + this.edgePadding;
         const maxX = this.maxX - this.edgePadding - spec.width;
         if (maxX <= minX) {
@@ -200,19 +239,23 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         const startX = this.randomRange(minX, maxX);
+        const groundY = spec.slope === "left"
+            ? this.randomSurfaceY(spec.height, false)
+            : this.randomSurfaceY(spec.height, true);
+        return this.createPlacementAt(spec, startX, groundY);
+    }
+
+    private createPlacementAt(spec: RockSpec, startX: number, groundY: number): RockPlacement {
         let bounds: PlacementBounds = null;
         let position = cc.v2(0, 0);
 
         if (spec.slope === "left") {
-            const startY = this.randomSurfaceY(spec.height, false);
-            bounds = { x: startX, y: startY, width: spec.width, height: spec.height };
-            position = cc.v2(startX + spec.anchorX * spec.width, startY + spec.anchorY * spec.height);
+            bounds = { x: startX, y: groundY, width: spec.width, height: spec.height };
+            position = cc.v2(startX + spec.anchorX * spec.width, groundY + spec.anchorY * spec.height);
         } else if (spec.slope === "right") {
-            const topY = this.randomSurfaceY(spec.height, true);
-            bounds = { x: startX, y: topY - spec.height, width: spec.width, height: spec.height };
-            position = cc.v2(startX - spec.anchorX * spec.width, topY - (1 - spec.anchorY) * spec.height);
+            bounds = { x: startX, y: groundY - spec.height, width: spec.width, height: spec.height };
+            position = cc.v2(startX - spec.anchorX * spec.width, groundY - (1 - spec.anchorY) * spec.height);
         } else {
-            const groundY = this.randomSurfaceY(spec.height, true);
             bounds = { x: startX, y: groundY - spec.height, width: spec.width, height: spec.height };
             position = cc.v2(startX + spec.anchorX * spec.width, groundY - (1 - spec.anchorY) * spec.height);
         }
@@ -220,7 +263,62 @@ export default class AutoMapGenerator extends cc.Component {
         if (!this.isInsideRange(bounds)) {
             return null;
         }
-        return { spec, position, bounds };
+        return this.applyOutputOffset({ spec, position, bounds });
+    }
+
+    private pickChainSpec(specs: RockSpec[], groundY: number): RockSpec {
+        const horizontalSpecs = specs.filter((spec) => spec.slope === "none");
+        const slopeSpecs = specs.filter((spec) => this.canPlaceSlope(spec, groundY));
+        if (slopeSpecs.length > 0 && this.nextRandom() < this.slopeChance) {
+            return slopeSpecs[this.randomInt(0, slopeSpecs.length - 1)];
+        }
+        return this.pickSpec(horizontalSpecs.length > 0 ? horizontalSpecs : specs);
+    }
+
+    private canPlaceSlope(spec: RockSpec, groundY: number): boolean {
+        if (spec.slope === "left") {
+            return groundY >= this.minY + this.edgePadding
+                && groundY + spec.height <= this.maxY - this.edgePadding;
+        }
+        if (spec.slope === "right") {
+            return groundY - spec.height >= this.minY + this.edgePadding
+                && groundY <= this.maxY - this.edgePadding;
+        }
+        return false;
+    }
+
+    private getNextGroundY(spec: RockSpec, currentY: number): number {
+        if (spec.slope === "left") {
+            return this.clampGroundY(currentY + spec.height);
+        }
+        if (spec.slope === "right") {
+            return this.clampGroundY(currentY - spec.height);
+        }
+        return this.clampGroundY(currentY + this.randomRange(-this.chainVerticalJitter, this.chainVerticalJitter));
+    }
+
+    private getChainBaseY(chainIndex: number, chainCount: number): number {
+        const low = this.minY + this.edgePadding + 175;
+        const high = this.maxY - this.edgePadding;
+        const t = chainCount <= 1 ? 0.5 : chainIndex / (chainCount - 1);
+        return this.clampGroundY(low + (high - low) * t + this.randomRange(-this.verticalJitter, this.verticalJitter));
+    }
+
+    private clampGroundY(value: number): number {
+        return this.clamp(value, this.minY + this.edgePadding + 175, this.maxY - this.edgePadding);
+    }
+
+    private applyOutputOffset(placement: RockPlacement): RockPlacement {
+        return {
+            spec: placement.spec,
+            position: cc.v2(placement.position.x + this.outputOffsetX, placement.position.y + this.outputOffsetY),
+            bounds: {
+                x: placement.bounds.x + this.outputOffsetX,
+                y: placement.bounds.y + this.outputOffsetY,
+                width: placement.bounds.width,
+                height: placement.bounds.height
+            }
+        };
     }
 
     private randomSurfaceY(height: number, useTopSurface: boolean): number {
@@ -273,7 +371,12 @@ export default class AutoMapGenerator extends cc.Component {
 
         graphics.lineWidth = 3;
         graphics.strokeColor = new cc.Color(80, 180, 255, 180);
-        graphics.rect(this.minX, this.minY, this.maxX - this.minX, this.maxY - this.minY);
+        graphics.rect(
+            this.minX + this.outputOffsetX,
+            this.minY + this.outputOffsetY,
+            this.maxX - this.minX,
+            this.maxY - this.minY
+        );
         graphics.stroke();
 
         graphics.lineWidth = 2;

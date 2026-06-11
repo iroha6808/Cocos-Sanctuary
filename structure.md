@@ -264,7 +264,7 @@ Canvas
   - 監聽 `COMBAT_HIT_CONFIRMED`，用 pooled runtime Label 顯示上飄傷害數字。
   - GameManager 會 runtime 補一個；也可手動掛到 UI Root 並指定 `numberRoot`。
 - `CameraRig.ts`
-  - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick。
+  - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
 - `CameraFollow.ts`
   - 簡單 smooth follow，支援 X/Y 跟隨、offset、bounds；和 `CameraRig` 二選一使用。
 - `HitFeelManager.ts`
@@ -321,8 +321,8 @@ Canvas
   - Gun 模式右鍵呼叫 `PlayerGun`；Jetpack 模式 Space 消耗 fuel 上升；Grapple 模式右鍵 raycast 非 sensor 地形並拉玩家。
   - 可接 tool label、fuel bar、jetpack flame root、grapple line root。
 - `Input/`
-  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel。
-  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M fallback；R 快捷鍵已移除。
+  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel、CameraZoomIn、CameraZoomOut。
+  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M/`+/-` fallback；R 快捷鍵已移除。
   - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Vehicle、Paused。
   - `InputManager.ts` 統一監聽 Game 場景輸入，依 context stack 由上往下分派。
 - `InventoryManager.ts`
@@ -414,8 +414,8 @@ Canvas
 
 - `Map/AutoMapGenerator.ts`
   - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
-  - 預設範圍 local `x = -5000 ~ 0`、`y = -2000 ~ 0`；只清 `AutoRock_` prefix 節點。
-  - 使用 seeded random、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
+  - 預設先在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，再整體偏移 `(-480,-320)`；只清 `AutoRock_` prefix 節點。
+  - 使用 seeded random、短平台鏈、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -573,7 +573,7 @@ Canvas
 - Rocksets
   - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
   - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
-  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`；平台不用全連通，但用 `minSeparation` 避免卡在一起。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，再偏移 `(-480,-320)`；平台不用全連通，但用短鏈、`minJumpGap`、`slopeChance` 增加可跳躍連通性。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels

@@ -290,6 +290,12 @@ export default class GameManager extends cc.Component {
             case InputAction.ToggleMute:
                 AudioManager.toggleMute();
                 return true;
+            case InputAction.CameraZoomIn:
+                this.adjustCameraZoom(1);
+                return true;
+            case InputAction.CameraZoomOut:
+                this.adjustCameraZoom(-1);
+                return true;
             default:
                 return true;
         }
@@ -307,9 +313,24 @@ export default class GameManager extends cc.Component {
             case InputAction.ToggleMute:
                 AudioManager.toggleMute();
                 return true;
+            case InputAction.CameraZoomIn:
+                this.adjustCameraZoom(1);
+                return true;
+            case InputAction.CameraZoomOut:
+                this.adjustCameraZoom(-1);
+                return true;
             default:
                 return false;
         }
+    }
+
+    private adjustCameraZoom(direction: number): void {
+        const rig = this.cameraRig || CameraRig.instance;
+        if (!rig || !cc.isValid(rig.node)) {
+            cc.warn("[GameManager] cameraRig is not assigned; cannot adjust camera zoom.");
+            return;
+        }
+        rig.adjustBaseZoom(direction);
     }
 
     private getInputManager(): InputManager {

@@ -28,6 +28,15 @@ export default class CameraRig extends cc.Component {
     @property(cc.Float)
     public lookAheadMax: number = 70;
 
+    @property(cc.Float)
+    public minZoomRatio: number = 0.55;
+
+    @property(cc.Float)
+    public maxZoomRatio: number = 1.8;
+
+    @property(cc.Float)
+    public zoomStep: number = 0.1;
+
     private lastTargetPosition: cc.Vec2 = null;
     private shakeTime: number = 0;
     private shakeDuration: number = 0;
@@ -124,6 +133,19 @@ export default class CameraRig extends cc.Component {
         this.zoomKick = Math.max(this.zoomKick, amount);
         this.zoomKickDuration = Math.max(0.01, duration);
         this.zoomKickTime = this.zoomKickDuration;
+    }
+
+    public adjustBaseZoom(direction: number): void {
+        if (!this.camera || direction === 0) {
+            return;
+        }
+
+        const minZoom = Math.max(0.1, Math.min(this.minZoomRatio, this.maxZoomRatio));
+        const maxZoom = Math.max(minZoom, this.maxZoomRatio);
+        this.baseZoom = this.clamp(this.baseZoom + this.zoomStep * direction, minZoom, maxZoom);
+        if (this.zoomKickTime <= 0) {
+            this.camera.zoomRatio = this.baseZoom;
+        }
     }
 
     onDestroy(): void {
@@ -243,5 +265,9 @@ export default class CameraRig extends cc.Component {
             return value;
         }
         return value.mul(maxLength / length);
+    }
+
+    private clamp(value: number, min: number, max: number): number {
+        return Math.max(min, Math.min(max, value));
     }
 }
