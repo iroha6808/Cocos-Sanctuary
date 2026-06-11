@@ -1441,4 +1441,18 @@ export default class PlayerController extends BaseEntity {
             this.playAnimation('PlayerIdle');
         }
     }
+
+    public heal(amount: number) {
+        if (this.isDead) return;
+        if (this.currentHp >= this.maxHp) {
+            cc.log(`[PlayerController] HP 已滿 (${this.currentHp}/${this.maxHp})，無法再補血。`);
+            return;
+        }
+        this.currentHp += amount;
+        if (this.currentHp > this.maxHp) {
+            this.currentHp = this.maxHp;
+        }
+        cc.log(`[PlayerController] 補血 +${amount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
+        EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
+    }
 }
