@@ -17,7 +17,7 @@
 - [Git 流程](#git-流程)
 
 ## 下一步優先順序
-
+目前自動生成範圍改成按按鍵後才開始生成 每0.07秒顯示(或生成)一塊新地形 生成途中將鏡頭拉至整個生成範圍 結束後再回到玩家
 1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
 2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
 3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
@@ -93,8 +93,8 @@
 
 | 項目 | 分數 | 細節 | 狀態 |
 | --- | --- | --- | --- |
-| 帳號系統 | 7 | 註冊 / 登入 / 登出 3%；排行榜 4% | `SaveService` localStorage 假 Firebase 已補；待 UI 綁定 |
-| 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補；待 UI 綁定與真 Firebase 替換 |
+| 帳號系統 | 7 | 註冊 / 登入 / 登出 3%；排行榜 4% | `SaveService` localStorage 假 Firebase 已補，含 login/logout metadata 與 backend snapshot；待 UI 綁定 |
+| 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補，save summaries 可查分數 / HP / 背包統計 / map seed；待 UI 綁定與真 Firebase 替換 |
 | 物理系統 | 13 | 正確重力系統和碰撞系統 | 已有 physics / collider / OceanArea / 斜坡跳躍修正；需實測 |
 | 遊戲音效 | 7 | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 land / water BGM crossfade + 6 SFX；待拖 AudioClip |
 | 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、M、mouse、wheel、水中 boost、空中 fast fall、車 / 船；R 快捷鍵已移除 |
@@ -112,7 +112,7 @@
 | 遊戲特效 | 打擊感 0-3%；特殊遊戲運鏡 0-4% | 橡皮筋鏡頭、`HitFeelManager` 已補 hit stop / flash / shake |
 | 物理系統 | 客製化物理系統，例如外太空無重力場景 0-4% | `OceanArea` 水中物理可展示 |
 | 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | 傳送法師 Mini Boss / Boss Arena 已補腳本；AutoMapGenerator 已補腳本 |
-| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把玩家狀態寫進 localStorage 假後端，待 UI / 真同步 |
+| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把 client/session、位置、HP、score、exp、背包統計、狀態寫進 localStorage 假後端，待 UI / 真同步 |
 | 其他 | 同學可以自由發揮 | 打擊感、橡皮筋鏡頭可當展示亮點 |
 | Notice | 最高可拿 20% | 優先保住打擊感 / 運鏡 / AI / 水中物理 |
 
@@ -169,7 +169,7 @@
 | 礦物掉落物 | 新增多種 smallore icon、資料與 DropOre prefab，讓採礦展示更完整 | MVP |
 | 敵人 AI / Node Pooling | 對應進階功能配分，可用在敵人、projectile、掉落物效能優化 | 延伸 |
 | 傳送門 / 彈跳板 | 可展示關卡機制、敵人追擊與方向物理互動 | 延伸 |
-| 假多人 realtime state | 先有資料介面，之後可替換 Firebase / multiplayer UI | 延伸 |
+| 假多人 / 假後端 state | 先有 client/session、玩家狀態、背包統計、current map state 與 `getBackendSnapshot()`，之後可替換 Firebase / multiplayer UI | 延伸 |
 | 工具模式 / 噴射背包 / 鉤索 | 展示操作爽感，對主觀分數有感 | 延伸 |
 | Boss / 自動刷新 / 傷害數字 | 展示戰鬥完整度，能串 AI、粒子、Score | 延伸 |
 | 音效 / 粒子 / 打擊感 / 運鏡 | 分數明確且展示效果明顯，已用 hit stop、shake、flash、CameraRig 補強 | 延伸 |
@@ -227,7 +227,7 @@
 - [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
 - [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
 - [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
-- [ ] AutoMapGenerator 預設直接在 `x -5000~0`、`y -2000~0` 生成，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例。
+- [ ] AutoMapGenerator 預設直接在 `x -5000~0`、`y -2000~0` 生成，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例。存檔會保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
@@ -253,7 +253,7 @@
 - [ ] BouncePad 節點掛 `BouncePad.ts`、PhysicsCollider sensor；旋轉節點即可改變 local up 反彈方向，調 `bounceSpeed`。
 - [ ] PathGraph root 掛 `PathGraph.ts`；子節點掛 `PathNode.ts`，用 `neighbors` 手動連線，portal 入口 / 出口附近的 PathNode 可拖對應 `Portal`。
 - [ ] 需要升級尋路的 Hostile NPC 掛 `NPCPathAgent.ts`；可拖 `PathGraph`，不拖則使用 `PathGraph.instance`。
-- [ ] GameManager 節點可掛 `RealtimeStateReporter.ts` 並拖 `playerNode`；沒掛時 GameManager 會 runtime 補一個。
+- [ ] GameManager 節點可掛 `RealtimeStateReporter.ts` 並拖 `playerNode`；沒掛時 GameManager 會 runtime 補一個。Fake backend 可用 `SaveService.getBackendSnapshot()` 查 users / saves / leaderboard / realtime players / current map / storage keys。
 - [ ] GameManager 或 UI Root 可掛 `DamageNumberManager.ts`；沒掛時 GameManager 會 runtime 補一個，`numberRoot` 可拖 UI Root。
 - [ ] Boss prefab 掛 `NPC_AI.ts` + `MiniBossAI.ts`；`MiniBossAI` 拖 `npcAI`、`targetPlayer`、`teleportPoints`、`minionPrefabs`、`minionParent`。
 - [ ] Boss Arena sensor 節點掛 `BossArenaController.ts`，拖 `boss` / `bossNode`、`playerNode`、可選 `gateNode`、`clearRewardNode`。
