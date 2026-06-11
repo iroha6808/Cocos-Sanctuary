@@ -266,7 +266,7 @@ Canvas
 - `CameraRig.ts`
   - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
 - `CameraFollow.ts`
-  - 簡單 smooth follow，支援 X/Y 跟隨、offset、bounds；和 `CameraRig` 二選一使用。
+  - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `RealtimeStateReporter.ts`
@@ -700,7 +700,7 @@ Score / save / leaderboard
 1. 將 `local plans/` 作為後續 step 文件來源。
 2. 手動完成 Menu / Pause / GameOver / Audio / Effects 的 Inspector 綁定。
 3. 實測 SkeletonMage、OceanArea、DropOre、存讀檔、排行榜、音效與五種粒子特效。
-4. 確認 Main Camera 只啟用 `CameraRig` 或 `CameraFollow` 其中一套。
+4. 確認 Main Camera 只啟用 `CameraRig`；不要再掛 legacy `CameraFollow`。
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
 6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
 7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。

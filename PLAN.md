@@ -18,7 +18,7 @@
 
 ## 下一步優先順序
 
-1. 確認 Main Camera 只用一套跟隨：`CameraRig` 和新增 `CameraFollow` 不要同時控制鏡頭，避免雙重位移。
+1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
 2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
 3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
 4. 實測車 / 船：靠近顯示 prompt，按 `F` 上下，載具中玩家不能攻擊 / 開 UI / 用工具。
@@ -142,7 +142,7 @@
 | Final Project 遊戲流程 | 暫停 / 繼續、正式 GameOver、回主畫面 / 重玩會直接影響流程 10% | MVP |
 | 課程技術配分缺口 | 帳號 / 排行榜、Firebase、音效、粒子尚未完整追蹤，會影響技術 60% | MVP |
 | 水域碰撞 / OceanArea | 需要 sensor collider、玩家 contact listener、進出水域時重力還原要穩 | MVP |
-| Camera / UI 座標 | Camera 已跟玩家移動，Dialogue / MerchantShop / Inventory / Crafting 已有跟鏡頭與 clamp 邏輯；需實測與避免雙 camera follow | MVP |
+| Camera / UI 座標 | Camera 以 `CameraRig` 跟玩家移動，Dialogue / MerchantShop / Inventory / Crafting 已有跟鏡頭與 clamp 邏輯 | MVP |
 | 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP、EXP、Score、食物回血 API 已接；仍需實機測試 UI / save 還原 | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
@@ -240,7 +240,7 @@
 - [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
 - [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player
-- [ ] 若改用 `CameraFollow.ts`，不要同時啟用 `CameraRig.ts` 控制同一台 Main Camera
+- [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
 - [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceExponentScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`

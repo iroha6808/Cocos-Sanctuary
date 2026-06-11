@@ -416,6 +416,9 @@
     "maxDistance": 120,
     "lookAheadScale": 0.14,
     "lookAheadMax": 70,
+    "minZoomRatio": 0.1,
+    "maxZoomRatio": 1.8,
+    "zoomStep": 0.1,
     "_id": "68lnp8QThC7qeo/b5SUGnz"
   },
   {
@@ -804,7 +807,7 @@
     "type": 0,
     "maxHp": 100,
     "moveSpeed": 200,
-    "jumpForce": 400,
+    "jumpForce": 500,
     "fastFallSpeed": 520,
     "oceanMoveSpeed": 90,
     "oceanVerticalSpeed": 120,
@@ -17637,6 +17640,29 @@
       "b": 127,
       "a": 255
     },
+    "buildUIAtRuntime": true,
+    "runtimePanelOffsetY": 0,
+    "panelColor": {
+      "__type__": "cc.Color",
+      "r": 24,
+      "g": 32,
+      "b": 41,
+      "a": 248
+    },
+    "subPanelColor": {
+      "__type__": "cc.Color",
+      "r": 33,
+      "g": 45,
+      "b": 57,
+      "a": 250
+    },
+    "selectedColor": {
+      "__type__": "cc.Color",
+      "r": 60,
+      "g": 82,
+      "b": 101,
+      "a": 255
+    },
     "_id": "24Wtw/ZM9Awp9RgsJyWOUQ"
   },
   {
@@ -20193,8 +20219,6 @@
     "seed": "sanctuary-jump-map-1",
     "autoGenerateOnStart": true,
     "clearGeneratedOnStart": true,
-    "minPlatformCount": 18,
-    "maxPlatformCount": 28,
     "minX": -5000,
     "maxX": 0,
     "minY": -2000,
@@ -20204,12 +20228,16 @@
     "rowCount": 5,
     "verticalJitter": 90,
     "edgePadding": 40,
-    "outputOffsetX": -480,
-    "outputOffsetY": -320,
-    "minJumpGap": 90,
-    "maxJumpGap": 260,
-    "chainVerticalJitter": 120,
-    "slopeChance": 0.35,
+    "connectGapMin": 0,
+    "connectGapMax": 24,
+    "patternGapMinX": 220,
+    "patternGapMaxX": 520,
+    "patternVerticalJitter": 120,
+    "minPatternCount": 5,
+    "maxPatternCount": 8,
+    "minSlopePatternCount": 2,
+    "slopePatternChance": 0.65,
+    "scatterCount": 3,
     "showDebugBounds": false,
     "_id": "ca0lvy61ND0pKoFufXpfSo"
   },

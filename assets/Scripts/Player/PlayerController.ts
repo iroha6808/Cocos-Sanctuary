@@ -1,4 +1,3 @@
-import CameraFollow from "../Camera/CameraFollow";
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter";
 import { GameEvent, EntityType } from "../Core/Constants";
@@ -106,7 +105,6 @@ export default class PlayerController extends BaseEntity {
         super.onLoad();
         this.type = EntityType.PLAYER;
         this.applyRuntimeMovementTuning();
-        this.setupCameraFollow();
 
         const physicsManager = cc.director.getPhysicsManager();
         physicsManager.enabled = true;
@@ -822,34 +820,6 @@ export default class PlayerController extends BaseEntity {
         }
 
         return input;
-    }
-
-    private setupCameraFollow() {
-        const cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
-
-        if (!cameraNode) {
-            cc.warn("[PlayerController] Main Camera not found.");
-            return;
-        }
-
-        let cameraFollow = cameraNode.getComponent(CameraFollow);
-
-        if (!cameraFollow) {
-            cameraFollow = cameraNode.addComponent(CameraFollow);
-        }
-
-        cameraFollow.target = this.node;
-        cameraFollow.targetPath = "";
-        cameraFollow.followX = true;
-        cameraFollow.followY = true;
-        cameraFollow.smoothFollow = true;
-        cameraFollow.smoothSpeed = 6;
-        cameraFollow.targetOffsetX = 0;
-        cameraFollow.targetOffsetY = 160;
-
-        // 先給一組比舊版大的安全範圍
-        // 後面如果有更完整地圖資訊再精調
-        cameraFollow.setBounds(-2000, 4000, -1200, 400);
     }
 
     private applyRuntimeMovementTuning() {

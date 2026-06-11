@@ -167,7 +167,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
 - `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`；新增 `Vehicle` context，載具中優先吃 A/D/W/S/Space/F。
 - `CameraRig.ts`：手動掛到 Main Camera，使用距離指數函數調整跟隨速度，搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡；`minZoomRatio/maxZoomRatio/zoomStep` 控制 `+/-` 測試縮放。
-- `CameraFollow.ts`：新增在 `assets/Scripts/Camera/`，提供簡單 smooth follow、X/Y 開關、offset 與 bounds；若使用它，就不要同時讓 `CameraRig` 控制同一台 Main Camera。
+- `CameraFollow.ts`：舊版簡單 smooth follow，已不再由 PlayerController runtime 補掛；正式展示以 `CameraRig.ts` 為主。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
 - `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、scene、position、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
 - `DamageNumberManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，顯示上飄傷害數字並播放 damage spark；GameManager 會 runtime 補一個。
@@ -196,7 +196,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - 進入 `OceanArea` 後切換水中狀態：降低 gravityScale、水平速度改用 `oceanMoveSpeed`，垂直方向改用 `oceanVerticalSpeed`，沒有輸入時會以 `oceanSinkSpeed` 慢慢下沉。
 - 死亡載入 `GameOver` 前有 `gameOverTransitionPending`，避免重複切場景。
 - Main Camera 目前會跟隨玩家移動到水域；商人生成依玩家世界座標，所以玩家在水域時商人會生成在附近。
-- PlayerController 目前會嘗試 runtime setup `CameraFollow`；若場景已手動使用 `CameraRig`，要避免兩套同時控制 Main Camera。
+- PlayerController 已停止 runtime setup `CameraFollow`；Main Camera 跟隨統一由手動掛載的 `CameraRig.ts` 控制，避免雙重位移。
 
 ### CombatHitbox
 
@@ -533,7 +533,7 @@ Portal / enemy pathing
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`pausePanel` 是 Esc 暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
 - `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍。
-- `CameraFollow.ts`：若使用，掛在 Main Camera，接 `target` 或設定 `targetPath`；不要和 `CameraRig.ts` 同時控制同一台 Main Camera。
+- `CameraFollow.ts`：legacy 備用腳本，預設 `useXLimit/useYLimit` 關閉；目前不建議掛在 Main Camera，避免和 `CameraRig.ts` 同時控制相機。
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
 - `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay。
@@ -576,6 +576,6 @@ Portal / enemy pathing
 - Menu / Pause / GameOver / Audio / Effects 都是腳本已補，Cocos Editor 節點與 Inspector 欄位需照 `PLAN.md` 手動設定。
 - 遠程攻擊是否能打到玩家，取決於 SkeletonMage 的 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`、collider sensor 與 contact listener。
 - OceanArea 需要 `PhysicsBoxCollider` sensor，且 Player collider / rigidbody 要能觸發 contact。
-- Camera follow 目前有 `CameraRig` 和 `CameraFollow` 兩套，正式展示前要確認只啟用一套。
+- Camera follow 以 `CameraRig` 為主；`CameraFollow` 保留為 legacy 備用，不應再自動或手動掛到 Main Camera。
 - MerchantShop / Inventory / Crafting / Dialogue UI 已有跟 Main Camera / clamp 邏輯，但仍需在 OceanArea 實測。
 - `ItemData.iconPath` 目前多數已改為 resources 相對路徑，但仍要實測大小寫與檔名，例如 `greenApple`、`coffeebean`、`guazi` / `gauzi.ts`、smallore keys。

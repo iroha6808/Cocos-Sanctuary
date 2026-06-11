@@ -27,7 +27,7 @@ export default class CameraFollow extends cc.Component {
     targetOffsetY: number = 160;
 
     @property
-    useXLimit: boolean = true;
+    useXLimit: boolean = false;
 
     @property
     minX: number = -2000;
@@ -95,6 +95,11 @@ export default class CameraFollow extends cc.Component {
         this.maxX = maxX;
         this.minY = minY;
         this.maxY = maxY;
+    }
+
+    public clearBounds(): void {
+        this.useXLimit = false;
+        this.useYLimit = false;
     }
 
     private clamp(value: number, min: number, max: number): number {
