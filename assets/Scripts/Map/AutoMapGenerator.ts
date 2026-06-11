@@ -1,3 +1,7 @@
+import EventCenter from "../Core/EventCenter";
+import { GameEvent } from "../Core/Constants";
+import SaveService, { MapGenerationState, SaveData } from "../Core/SaveService";
+
 const { ccclass, property } = cc._decorator;
 
 interface RockSpec {
@@ -124,11 +128,21 @@ export default class AutoMapGenerator extends cc.Component {
     showDebugBounds: boolean = false;
 
     private randomState: number = 1;
+    private lastGeneratedPatternCount: number = 0;
+    private lastGeneratedSlopePatternCount: number = 0;
 
     start(): void {
         if (this.autoGenerateOnStart) {
             this.regenerate();
         }
+    }
+
+    onEnable(): void {
+        EventCenter.on(GameEvent.SAVE_LOADED, this.onSaveLoaded, this);
+    }
+
+    onDisable(): void {
+        EventCenter.off(GameEvent.SAVE_LOADED, this.onSaveLoaded, this);
     }
 
     public regenerate(): void {
@@ -153,9 +167,39 @@ export default class AutoMapGenerator extends cc.Component {
         for (let i = 0; i < placements.length; i++) {
             this.spawnRock(root, placements[i], i);
         }
+        this.publishMapGenerationState(placements);
 
         if (this.showDebugBounds) {
             this.drawDebugBounds(root, placements);
+        }
+    }
+
+    public applyMapGenerationState(state: MapGenerationState, regenerateNow: boolean = true): void {
+        if (!state) {
+            return;
+        }
+
+        this.seed = state.seed || this.seed;
+        if (state.bounds) {
+            this.minX = state.bounds.minX;
+            this.maxX = state.bounds.maxX;
+            this.minY = state.bounds.minY;
+            this.maxY = state.bounds.maxY;
+        }
+        this.prefabScale = state.prefabScale || this.prefabScale;
+        if (state.settings) {
+            this.rowCount = state.settings.rowCount || this.rowCount;
+            this.minSeparation = state.settings.minSeparation || this.minSeparation;
+            this.connectGapMin = state.settings.connectGapMin || this.connectGapMin;
+            this.connectGapMax = state.settings.connectGapMax || this.connectGapMax;
+            this.minPatternCount = state.settings.minPatternCount || this.minPatternCount;
+            this.maxPatternCount = state.settings.maxPatternCount || this.maxPatternCount;
+            this.minSlopePatternCount = state.settings.minSlopePatternCount || this.minSlopePatternCount;
+            this.slopePatternChance = state.settings.slopePatternChance || this.slopePatternChance;
+        }
+
+        if (regenerateNow) {
+            this.regenerate();
         }
     }
 
@@ -266,6 +310,8 @@ export default class AutoMapGenerator extends cc.Component {
         if (slopePatternCount < minSlopePatterns) {
             cc.warn("[AutoMapGenerator] Generated only " + slopePatternCount + " slope patterns. Check Rockleft/Rockright prefabs or reduce minSlopePatternCount.");
         }
+        this.lastGeneratedPatternCount = patternBounds.length;
+        this.lastGeneratedSlopePatternCount = slopePatternCount;
         return placements;
     }
 
@@ -578,5 +624,52 @@ export default class AutoMapGenerator extends cc.Component {
 
     private clamp(value: number, min: number, max: number): number {
         return Math.max(min, Math.min(max, value));
+    }
+
+    private publishMapGenerationState(placements: RockPlacement[]): void {
+        let slopeRockCount = 0;
+        for (let i = 0; i < placements.length; i++) {
+            if (placements[i].spec.slope !== "none") {
+                slopeRockCount++;
+            }
+        }
+
+        const state: MapGenerationState = {
+            mapId: this.node ? this.node.name || "auto-map" : "auto-map",
+            seed: this.seed,
+            generatorVersion: "pattern-jump-v2",
+            bounds: {
+                minX: this.minX,
+                maxX: this.maxX,
+                minY: this.minY,
+                maxY: this.maxY
+            },
+            prefabScale: this.prefabScale,
+            patternCount: this.lastGeneratedPatternCount,
+            slopePatternCount: this.lastGeneratedSlopePatternCount,
+            rockCount: placements.length,
+            slopeRockCount,
+            scatterCount: Math.max(0, this.scatterCount),
+            settings: {
+                rowCount: this.rowCount,
+                minSeparation: this.minSeparation,
+                connectGapMin: this.connectGapMin,
+                connectGapMax: this.connectGapMax,
+                minPatternCount: this.minPatternCount,
+                maxPatternCount: this.maxPatternCount,
+                minSlopePatternCount: this.minSlopePatternCount,
+                slopePatternChance: this.slopePatternChance
+            },
+            updatedAt: Date.now()
+        };
+
+        SaveService.setCurrentMapGenerationState(state);
+        EventCenter.emit(GameEvent.MAP_GENERATION_UPDATED, state);
+    }
+
+    private onSaveLoaded(saveData: SaveData): void {
+        if (saveData && saveData.mapState) {
+            this.applyMapGenerationState(saveData.mapState, true);
+        }
     }
 }
