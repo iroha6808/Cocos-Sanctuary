@@ -89,9 +89,6 @@ export default class GameOverScene extends cc.Component {
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
         switch (getActionForKey(event.keyCode)) {
-            case InputAction.Retry:
-                this.retry();
-                return;
             case InputAction.Cancel:
                 this.goToMainMenu();
                 return;

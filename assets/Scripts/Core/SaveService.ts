@@ -29,6 +29,21 @@ export interface LastRunData {
     updatedAt: number;
 }
 
+export interface RealtimePlayerState {
+    username: string;
+    scene: string;
+    position: {
+        x: number;
+        y: number;
+    };
+    hp: number;
+    maxHp: number;
+    score: number;
+    exp: number;
+    inventorySummary: ItemAmount[];
+    updatedAt: number;
+}
+
 export interface AuthResult {
     ok: boolean;
     message: string;
@@ -41,6 +56,7 @@ export default class SaveService {
     private static readonly LEADERBOARD_KEY = "cocos_sanctuary.leaderboard";
     private static readonly LOAD_NEXT_KEY = "cocos_sanctuary.load_next_game";
     private static readonly LAST_RUN_KEY = "cocos_sanctuary.last_run";
+    private static readonly REALTIME_PLAYERS_KEY = "cocos_sanctuary.realtime.players";
 
     public static register(username: string, password: string): AuthResult {
         const cleanUsername = this.normalizeUsername(username);
@@ -185,6 +201,50 @@ export default class SaveService {
         });
     }
 
+    public static upsertRealtimePlayerState(data: RealtimePlayerState): RealtimePlayerState[] {
+        if (!data) {
+            return this.getRealtimePlayers();
+        }
+
+        const username = this.normalizeUsername(data.username) || "guest";
+        const entries = this.getRealtimePlayers();
+        const existing = entries.find(entry => entry.username === username);
+        const safeState = this.normalizeRealtimeState(data, username);
+
+        if (existing) {
+            existing.scene = safeState.scene;
+            existing.position = safeState.position;
+            existing.hp = safeState.hp;
+            existing.maxHp = safeState.maxHp;
+            existing.score = safeState.score;
+            existing.exp = safeState.exp;
+            existing.inventorySummary = safeState.inventorySummary;
+            existing.updatedAt = safeState.updatedAt;
+        } else {
+            entries.push(safeState);
+        }
+
+        entries.sort((a, b) => b.updatedAt - a.updatedAt);
+        this.writeJson(this.REALTIME_PLAYERS_KEY, entries);
+        return this.getRealtimePlayers();
+    }
+
+    public static getRealtimePlayers(): RealtimePlayerState[] {
+        const entries = this.readJson<RealtimePlayerState[]>(this.REALTIME_PLAYERS_KEY, []);
+        return (entries || [])
+            .filter(entry => !!entry && !!entry.username)
+            .map(entry => this.normalizeRealtimeState(entry, this.normalizeUsername(entry.username) || "guest"))
+            .sort((a, b) => b.updatedAt - a.updatedAt);
+    }
+
+    public static clearStaleRealtimePlayers(staleAfterMs: number = 10000): RealtimePlayerState[] {
+        const now = Date.now();
+        const safeStaleAfterMs = Math.max(1000, staleAfterMs || 10000);
+        const entries = this.getRealtimePlayers().filter(entry => now - entry.updatedAt <= safeStaleAfterMs);
+        this.writeJson(this.REALTIME_PLAYERS_KEY, entries);
+        return entries;
+    }
+
     private static setCurrentUser(username: string): void {
         cc.sys.localStorage.setItem(this.CURRENT_USER_KEY, username);
     }
@@ -206,6 +266,24 @@ export default class SaveService {
             totals[item.itemId] = (totals[item.itemId] || 0) + Math.floor(item.count);
         }
         return Object.keys(totals).map(itemId => ({ itemId, count: totals[itemId] }));
+    }
+
+    private static normalizeRealtimeState(data: RealtimePlayerState, username: string): RealtimePlayerState {
+        const position = data.position || { x: 0, y: 0 };
+        return {
+            username,
+            scene: data.scene || "Game",
+            position: {
+                x: isFinite(position.x) ? position.x : 0,
+                y: isFinite(position.y) ? position.y : 0
+            },
+            hp: Math.max(0, Math.floor(data.hp || 0)),
+            maxHp: Math.max(1, Math.floor(data.maxHp || 1)),
+            score: Math.max(0, Math.floor(data.score || 0)),
+            exp: Math.max(0, Math.floor(data.exp || 0)),
+            inventorySummary: this.normalizeInventory(data.inventorySummary || []),
+            updatedAt: data.updatedAt || Date.now()
+        };
     }
 
     private static readJson<T>(key: string, fallback: T): T {

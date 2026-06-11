@@ -23,14 +23,18 @@ export default class OreRock extends ResourceObject {
         const pos = this.getWorldPos();
 
         for (let i = 0; i < this.dropAmount; i++) {
-            const entry = this.pickRandom();
-            if (!entry) continue;
-            const offsetX = (Math.random() - 0.5) * 40;
-            this.spawnPrefab(entry.prefab, pos.x + offsetX, pos.y + 40);
+            this.scheduleOnce(() => {
+                const entry = this.pickRandom();
+                if (!entry) return;
+                const offsetX = (Math.random() - 0.5) * 40;
+                this.spawnPrefab(entry.prefab, pos.x + offsetX, pos.y + 40);
+            }, i * 0.12);  // 每顆間隔 0.12 秒
         }
 
-        cc.log(`[OreRock] 掉落 ${this.dropAmount} 個礦石`);
-        this.onDepleted();
+        cc.log(`[OreRock] 掉落 ${this.dropAmount} 個礦石（逐一噴出）`);
+        this.scheduleOnce(() => {
+            this.onDepleted();
+        }, this.dropAmount * 0.12);
     }
 
     protected onDepleted() {

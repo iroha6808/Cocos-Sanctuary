@@ -63,8 +63,8 @@ export default class CombatHitbox extends cc.Component {
     @property(cc.Boolean)
     public canHitHostileNpc: boolean = true;
 
-    protected collider: cc.PhysicsCollider = null;
-    protected attackerNode: cc.Node = null;
+    protected collider: cc.PhysicsCollider = null!;
+    protected attackerNode: cc.Node = null!;
     protected damage: number = 0;
     protected hitTargets: cc.Node[] = [];
 
@@ -73,7 +73,7 @@ export default class CombatHitbox extends cc.Component {
         this.deactivate();
     }
 
-    public activate(facingRight: boolean, damage: number, attackerNode: cc.Node) {
+    public activate(facingRight: boolean, damage: number, attackerNode: cc.Node, duration: number = -1) {
         this.unscheduleAllCallbacks();
 
         this.attackerNode = attackerNode;
@@ -89,9 +89,13 @@ export default class CombatHitbox extends cc.Component {
         this.setColliderEnabled(true);
         this.log(`enabled damage=${this.damage}, localPos=(${this.node.x}, ${this.node.y})`);
 
-        this.scheduleOnce(() => {
-            this.deactivate();
-        }, this.activeTime);
+        const finalActiveTime = duration >= 0 ? duration : this.activeTime;
+
+        if (finalActiveTime > 0) {
+            this.scheduleOnce(() => {
+                this.deactivate();
+            }, finalActiveTime);
+        }
     }
 
     public deactivate() {
@@ -118,9 +122,10 @@ export default class CombatHitbox extends cc.Component {
         this.unscheduleAllCallbacks();
     }
 
-    private findTarget(startNode: cc.Node): BaseEntity {
-        let current = startNode;
-        while (current && (current as any).getComponent) {
+    private findTarget(startNode: cc.Node): BaseEntity | null {
+        let current: cc.Node | null = startNode;
+
+        while (current && !(current instanceof cc.Scene) && (current as any).getComponent) {
             if (this.isAttackerNode(current)) {
                 return null;
             }
@@ -174,6 +179,7 @@ export default class CombatHitbox extends cc.Component {
         };
 
         this.log(`Hit ${target.node.name}, damage=${this.damage}, knockback=(${this.knockbackX}, ${this.knockbackY})`);
+
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
         EffectsManager.play(EffectType.HIT, hitWorldPosition);
@@ -236,7 +242,7 @@ export default class CombatHitbox extends cc.Component {
             return false;
         }
 
-        let current = node;
+        let current: cc.Node | null = node;
         while (current) {
             if (current === this.attackerNode) {
                 return true;
@@ -263,8 +269,10 @@ export default class CombatHitbox extends cc.Component {
     }
 
     private getNodeWorldPosition(node: cc.Node): cc.Vec2 {
+        const localPos = cc.v2(node.x, node.y);
+
         return node.parent
-            ? node.parent.convertToWorldSpaceAR(node.position)
-            : node.position;
+            ? node.parent.convertToWorldSpaceAR(localPos)
+            : localPos;
     }
 }

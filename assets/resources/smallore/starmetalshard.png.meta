@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "dbf1d072-9e11-4756-b3a9-08a9f071a6d0",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 112,
+  "height": 92,
+  "platformSettings": {},
+  "subMetas": {
+    "starmetalshard": {
+      "ver": "1.0.6",
+      "uuid": "e7828e10-a30c-4578-b243-4a8d5480bc36",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "dbf1d072-9e11-4756-b3a9-08a9f071a6d0",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 5.5,
+      "offsetY": 3.5,
+      "trimX": 30,
+      "trimY": 10,
+      "width": 63,
+      "height": 65,
+      "rawWidth": 112,
+      "rawHeight": 92,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

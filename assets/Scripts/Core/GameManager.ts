@@ -8,6 +8,8 @@ import { InputAction, InputPayload } from "../Input/InputAction";
 import { InputContext } from "../Input/InputContext";
 import CameraRig from "./CameraRig";
 import HitFeelManager from "./HitFeelManager";
+import RealtimeStateReporter from "./RealtimeStateReporter";
+import DamageNumberManager from "./DamageNumberManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -61,6 +63,8 @@ export default class GameManager extends cc.Component {
     private physicsEnabledBeforePause: boolean = true;
     private inputManager: InputManager = null;
     private hitFeelManager: HitFeelManager = null;
+    private realtimeStateReporter: RealtimeStateReporter = null;
+    private damageNumberManager: DamageNumberManager = null;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -86,6 +90,8 @@ export default class GameManager extends cc.Component {
             cc.warn("[GameManager] cameraRig is not assigned; attach CameraRig.ts to Main Camera and drag it here.");
         }
         this.hitFeelManager = HitFeelManager.getOrCreate(this.node);
+        this.damageNumberManager = DamageNumberManager.getOrCreate(this.node);
+        this.realtimeStateReporter = this.getOrCreateRealtimeReporter();
 
         // 啟用物理引擎
         const physicsManager = cc.director.getPhysicsManager();
@@ -225,6 +231,18 @@ export default class GameManager extends cc.Component {
         EventCenter.emit(GameEvent.PLAYER_EXP_CHANGED, this.exp);
     }
 
+    public isGamePaused(): boolean {
+        return this.isPaused;
+    }
+
+    public getScore(): number {
+        return this.score;
+    }
+
+    public getExp(): number {
+        return this.exp;
+    }
+
     onDestroy() {
         cc.director.getScheduler().setTimeScale(1);
         this.setPhysicsPaused(false);
@@ -240,6 +258,8 @@ export default class GameManager extends cc.Component {
         }
         this.cameraRig = null;
         this.hitFeelManager = null;
+        this.realtimeStateReporter = null;
+        this.damageNumberManager = null;
     }
 
     private setPhysicsPaused(paused: boolean): void {
@@ -267,9 +287,6 @@ export default class GameManager extends cc.Component {
             case InputAction.Cancel:
                 this.resumeGame();
                 return true;
-            case InputAction.Retry:
-                this.restartGame();
-                return true;
             case InputAction.ToggleMute:
                 AudioManager.toggleMute();
                 return true;
@@ -287,9 +304,6 @@ export default class GameManager extends cc.Component {
             case InputAction.Cancel:
                 this.togglePause();
                 return true;
-            case InputAction.Retry:
-                this.restartGame();
-                return true;
             case InputAction.ToggleMute:
                 AudioManager.toggleMute();
                 return true;
@@ -303,6 +317,16 @@ export default class GameManager extends cc.Component {
             this.inputManager = InputManager.getOrCreate(this.node);
         }
         return this.inputManager;
+    }
+
+    private getOrCreateRealtimeReporter(): RealtimeStateReporter {
+        let reporter = this.getComponent(RealtimeStateReporter);
+        if (!reporter) {
+            reporter = this.node.addComponent(RealtimeStateReporter);
+        }
+        reporter.playerNode = this.playerNode;
+        reporter.sceneName = this.gameSceneName || "Game";
+        return reporter;
     }
 
     private onNpcDied(): void {

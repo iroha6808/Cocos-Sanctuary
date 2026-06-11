@@ -140,32 +140,6 @@
     "_id": ""
   },
   {
-    "__type__": "cc.PhysicsBoxCollider",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "tag": 0,
-    "_density": 1,
-    "_sensor": false,
-    "_friction": 0,
-    "_restitution": 0,
-    "body": null,
-    "_offset": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 100,
-      "height": 45
-    },
-    "_id": ""
-  },
-  {
     "__type__": "4567cQgQolB+LfI/eqCd459",
     "_name": "",
     "_objFlags": 0,
@@ -187,6 +161,59 @@
     },
     "maxApples": 10,
     "regenInterval": 60,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsPolygonCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 0,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0.2,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "points": [
+      {
+        "__type__": "cc.Vec2",
+        "x": -50,
+        "y": -25
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 50,
+        "y": -25
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 40,
+        "y": 15
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": 30,
+        "y": -23
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -30,
+        "y": -23
+      },
+      {
+        "__type__": "cc.Vec2",
+        "x": -40,
+        "y": 15
+      }
+    ],
     "_id": ""
   },
   {

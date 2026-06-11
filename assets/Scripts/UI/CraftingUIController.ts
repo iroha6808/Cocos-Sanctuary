@@ -33,45 +33,62 @@ interface DragState {
 export default class CraftingUIController extends cc.Component {
 
     @property(cc.Node)
-    public root: cc.Node = null;
+    public root: cc.Node = null!;
 
     @property(cc.Node)
-    public inventoryUI: cc.Node = null;
+    public inventoryUI: cc.Node = null!;
 
     @property(cc.Boolean)
     public buildUIAtRuntime: boolean = true;
 
+    @property(cc.Node)
+    public mainCameraNode: cc.Node = null!;
+
+    @property(cc.Boolean)
+    public followMainCamera: boolean = true;
+
+    @property(cc.Boolean)
+    public clampToCameraView: boolean = true;
+
+    @property(cc.Float)
+    public screenPadding: number = 24;
+
+    @property(cc.Float)
+    public craftingPanelOffsetY: number = 0;
+
     private opened: boolean = false;
-    private selectedItemId: string = null;
+    private selectedItemId: string = null!;
     private craftingSlots: CraftSlotView[] = [];
-    private resultSlot: CraftSlotView = null;
-    private recipeNameLabel: cc.Label = null;
-    private recipeDescriptionLabel: cc.Label = null;
-    private craftableCountLabel: cc.Label = null;
-    private selectedItemLabel: cc.Label = null;
-    private statusLabel: cc.Label = null;
-    private craftButton: cc.Button = null;
-    private craftMaxButton: cc.Button = null;
-    private inventoryGrid: cc.Node = null;
+    private resultSlot: CraftSlotView = null!;
+    private recipeNameLabel: cc.Label = null!;
+    private recipeDescriptionLabel: cc.Label = null!;
+    private craftableCountLabel: cc.Label = null!;
+    private selectedItemLabel: cc.Label = null!;
+    private statusLabel: cc.Label = null!;
+    private craftButton: cc.Button = null!;
+    private craftMaxButton: cc.Button = null!;
+    private inventoryGrid: cc.Node = null!;
     private inventoryWasActive: boolean = false;
-    private inventoryOriginalPosition: cc.Vec2 = null;
-    private inventoryOriginalScale: cc.Vec2 = null;
+    private inventoryOriginalPosition: cc.Vec2 = null!;
+    private inventoryOriginalScale: cc.Vec2 = null!;
     private inventoryWidgets: cc.Widget[] = [];
     private inventoryWidgetStates: boolean[] = [];
     private inventoryListenersBound: boolean = false;
     private isDestroying: boolean = false;
-    private canvasNode: cc.Node = null;
-    private dragEventNode: cc.Node = null;
-    private dragState: DragState = null;
-    private dragVisual: CraftSlotView = null;
-    private highlightedNode: cc.Node = null;
-    private highlightedColor: cc.Color = null;
-    private inputManager: InputManager = null;
+    private canvasNode: cc.Node = null!;
+    private mainCamera: cc.Camera = null!;
+    private dragEventNode: cc.Node = null!;
+    private dragState: DragState = null!;
+    private dragVisual: CraftSlotView = null!;
+    private highlightedNode: cc.Node = null!;
+    private highlightedColor: cc.Color = null!;
+    private inputManager: InputManager = null!;
 
     private readonly enabledColor = cc.color(55, 150, 105);
     private readonly disabledColor = cc.color(95, 95, 95);
 
     onLoad() {
+        this.setupReferences();
         this.resolveSceneNodes();
         this.ensureUIRenderOrder();
         if (this.buildUIAtRuntime) {
@@ -88,7 +105,17 @@ export default class CraftingUIController extends cc.Component {
         );
     }
 
+
+    update() {
+        if (!this.opened || !this.followMainCamera) {
+            return;
+        }
+
+        this.updatePanelPosition();
+    }
+
     public open(): boolean {
+        this.setupReferences();
         this.resolveSceneNodes();
         if (!this.root || !this.inventoryUI) {
             cc.warn("[CraftingUI] Root or InventoryUI is missing.");
@@ -111,6 +138,7 @@ export default class CraftingUIController extends cc.Component {
         this.ensureUIRenderOrder();
         this.layoutInventoryAndCrafting();
         this.setVisible(true);
+        this.updatePanelPosition();
         this.bindInventorySelection();
         this.refresh();
 
@@ -135,12 +163,22 @@ export default class CraftingUIController extends cc.Component {
         }
 
         this.restoreInventory();
-        this.selectedItemId = null;
+
+        const inventoryController = this.inventoryUI
+            ? this.inventoryUI.getComponent("InventoryUIController") as any
+            : null;
+        if (inventoryController) {
+            inventoryController.followMainCamera = true;
+        }
+
+        this.selectedItemId = null!;
         this.opened = false;
         this.setVisible(false);
+
         if (this.inputManager) {
             this.inputManager.popContext(InputContext.Crafting, this);
         }
+
         cc.log("[CraftingUI] closed");
         cc.systemEvent.emit("CRAFTING_UI_CLOSED");
         return true;
@@ -173,7 +211,7 @@ export default class CraftingUIController extends cc.Component {
         }
 
         if (this.selectedItemId && !InventoryManager.instance.hasItem(this.selectedItemId)) {
-            this.selectedItemId = null;
+            this.selectedItemId = null!;
         }
 
         this.refreshCraftingGrid();
@@ -230,19 +268,40 @@ export default class CraftingUIController extends cc.Component {
         return this.handleInput(payload.action);
     }
 
+    
+    private setupReferences(): void {
+        if (!this.canvasNode) {
+            this.canvasNode = cc.find("Canvas") || null!;
+        }
+
+        if (!this.mainCameraNode) {
+            this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+        }
+
+        if (this.mainCameraNode) {
+            this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
+        }
+    }
+
     private resolveSceneNodes(): void {
         if (!this.root) {
-            this.root = this.node.getChildByName("CraftingUIRoot");
+            this.root = this.node.getChildByName("CraftingUIRoot") || null!;
         }
         if (!this.inventoryUI) {
-            this.inventoryUI = cc.find("Canvas/InventoryUI");
+            this.inventoryUI = cc.find("Canvas/InventoryUI") || null!;
         }
         if (!this.canvasNode) {
-            this.canvasNode = cc.find("Canvas");
+            this.canvasNode = cc.find("Canvas") || null!;
+        }
+        if (!this.mainCameraNode) {
+            this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+        }
+        if (!this.mainCamera && this.mainCameraNode) {
+            this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
         }
         if (this.inventoryUI && !this.inventoryGrid) {
             const container = this.inventoryUI.getChildByName("GridContainer");
-            this.inventoryGrid = container ? container.getChildByName("New Layout") : null;
+            this.inventoryGrid = container ? (container.getChildByName("New Layout") || null!) : null!;
         }
     }
 
@@ -254,36 +313,232 @@ export default class CraftingUIController extends cc.Component {
         const host = this.root.parent;
         const uiRoot = host ? host.parent : null;
         if (uiRoot) {
-            // UI Root is a Canvas child. Keep it above Player, NPCs, resources, and terrain.
             uiRoot.zIndex = 100000;
         }
         if (host) {
             host.zIndex = 1000;
         }
         this.root.zIndex = 1000;
+        if (this.inventoryUI && cc.isValid(this.inventoryUI)) {
+            this.inventoryUI.zIndex = 1000;
+        }
     }
 
     private layoutInventoryAndCrafting(): void {
-        const canvas = this.canvasNode || cc.find("Canvas");
-        const width = canvas ? canvas.width : 960;
-        const height = canvas ? canvas.height : 640;
+        if (!this.inventoryUI || !this.root) {
+            return;
+        }
 
-        const originalX = this.inventoryOriginalPosition
-            ? this.inventoryOriginalPosition.x
-            : width * 0.8;
-        const originalY = this.inventoryOriginalPosition
-            ? this.inventoryOriginalPosition.y
-            : height * 0.8;
-        this.inventoryUI.setPosition(originalX - 230, originalY);
+        const inventoryController = this.inventoryUI.getComponent("InventoryUIController") as any;
+        if (inventoryController) {
+            inventoryController.followMainCamera = false;
+        }
+
         this.inventoryUI.setScale(0.8, 0.8);
+        this.updatePanelPosition();
+    }
 
-        if (this.root.parent) {
-            const canvasPoint = canvas
-                ? canvas.convertToWorldSpaceAR(cc.v2(width * 0.24, 0))
-                : cc.v2(width * 0.74, height * 0.5);
-            this.root.setPosition(this.root.parent.convertToNodeSpaceAR(canvasPoint));
+
+    private updatePanelPosition(): void {
+        if (!this.root || !cc.isValid(this.root) || !this.root.parent || !this.inventoryUI || !cc.isValid(this.inventoryUI) || !this.inventoryUI.parent) {
+            return;
+        }
+
+        const cameraWorldPos = this.getCameraWorldPosition();
+        if (!cameraWorldPos) {
+            return;
+        }
+
+        const inventoryTargetCenter = cc.v2(
+            cameraWorldPos.x - 200, 
+            cameraWorldPos.y + this.craftingPanelOffsetY
+        );
+
+        const craftingTargetCenter = cc.v2(
+            cameraWorldPos.x + 250, 
+            cameraWorldPos.y + this.craftingPanelOffsetY
+        );
+
+        this.inventoryUI.setPosition(this.inventoryUI.parent.convertToNodeSpaceAR(inventoryTargetCenter));
+        this.root.setPosition(this.root.parent.convertToNodeSpaceAR(craftingTargetCenter));
+
+        this.ensureUIRenderOrder();
+    }
+
+    private alignNodeContentCenterToWorld(node: cc.Node, targetCenterWorldPos: cc.Vec2): void {
+        if (!node || !cc.isValid(node) || !node.parent) {
+            return;
+        }
+
+        const contentBounds = this.getVisibleContentWorldBounds(node);
+        if (!contentBounds) {
+            return;
+        }
+
+        const contentCenterX = (contentBounds.xMin + contentBounds.xMax) * 0.5;
+        const contentCenterY = (contentBounds.yMin + contentBounds.yMax) * 0.5;
+
+        const deltaX = targetCenterWorldPos.x - contentCenterX;
+        const deltaY = targetCenterWorldPos.y - contentCenterY;
+
+        const nodeWorldPos = node.parent.convertToWorldSpaceAR(cc.v2(node.x, node.y));
+        const correctedWorldPos = cc.v2(nodeWorldPos.x + deltaX, nodeWorldPos.y + deltaY);
+
+        node.setPosition(node.parent.convertToNodeSpaceAR(correctedWorldPos));
+    }
+
+    private getCameraWorldPosition(): cc.Vec2 | null {
+        if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
+            this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+        }
+
+        if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
+            return null;
+        }
+
+        if (!this.mainCamera) {
+            this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
+        }
+
+        if (this.mainCameraNode.parent) {
+            return this.mainCameraNode.parent.convertToWorldSpaceAR(cc.v2(this.mainCameraNode.x, this.mainCameraNode.y));
+        }
+
+        return cc.v2(this.mainCameraNode.x, this.mainCameraNode.y);
+    }
+
+    private getCameraVisibleWorldBounds(): { minX: number; maxX: number; minY: number; maxY: number; } | null {
+        const cameraWorldPos = this.getCameraWorldPosition();
+        if (!cameraWorldPos) {
+            return null;
+        }
+
+        const viewWidth = this.canvasNode && this.canvasNode.width > 0 ? this.canvasNode.width : cc.winSize.width;
+        const viewHeight = this.canvasNode && this.canvasNode.height > 0 ? this.canvasNode.height : cc.winSize.height;
+        const zoomRatio = this.mainCamera && (this.mainCamera as any).zoomRatio ? (this.mainCamera as any).zoomRatio : 1;
+
+        const halfWidth = viewWidth * 0.5 / zoomRatio;
+        const halfHeight = viewHeight * 0.5 / zoomRatio;
+
+        return {
+            minX: cameraWorldPos.x - halfWidth,
+            maxX: cameraWorldPos.x + halfWidth,
+            minY: cameraWorldPos.y - halfHeight,
+            maxY: cameraWorldPos.y + halfHeight
+        };
+    }
+
+    private clampNodeToCameraView(node: cc.Node): void {
+        const cameraBounds = this.getCameraVisibleWorldBounds();
+        const contentBounds = this.getVisibleContentWorldBounds(node);
+
+        if (!cameraBounds || !contentBounds || !node || !cc.isValid(node) || !node.parent) {
+            return;
+        }
+
+        const minX = cameraBounds.minX + this.screenPadding;
+        const maxX = cameraBounds.maxX - this.screenPadding;
+        const minY = cameraBounds.minY + this.screenPadding;
+        const maxY = cameraBounds.maxY - this.screenPadding;
+
+        let offsetX = 0;
+        let offsetY = 0;
+
+        const contentWidth = contentBounds.xMax - contentBounds.xMin;
+        const contentHeight = contentBounds.yMax - contentBounds.yMin;
+        const viewWidth = maxX - minX;
+        const viewHeight = maxY - minY;
+
+        if (contentWidth > viewWidth) {
+            offsetX = ((minX + maxX) * 0.5) - ((contentBounds.xMin + contentBounds.xMax) * 0.5);
         } else {
-            this.root.setPosition(width * 0.74, height * 0.5);
+            if (contentBounds.xMin < minX) {
+                offsetX = minX - contentBounds.xMin;
+            }
+            if (contentBounds.xMax > maxX) {
+                offsetX = maxX - contentBounds.xMax;
+            }
+        }
+
+        if (contentHeight > viewHeight) {
+            offsetY = ((minY + maxY) * 0.5) - ((contentBounds.yMin + contentBounds.yMax) * 0.5);
+        } else {
+            if (contentBounds.yMin < minY) {
+                offsetY = minY - contentBounds.yMin;
+            }
+            if (contentBounds.yMax > maxY) {
+                offsetY = maxY - contentBounds.yMax;
+            }
+        }
+
+        if (offsetX === 0 && offsetY === 0) {
+            return;
+        }
+
+        const nodeWorldPos = node.parent.convertToWorldSpaceAR(cc.v2(node.x, node.y));
+        const correctedWorldPos = cc.v2(nodeWorldPos.x + offsetX, nodeWorldPos.y + offsetY);
+        node.setPosition(node.parent.convertToNodeSpaceAR(correctedWorldPos));
+    }
+
+    private getVisibleContentWorldBounds(rootNode: cc.Node): { xMin: number; xMax: number; yMin: number; yMax: number; } | null {
+        const result = {
+            hasValue: false,
+            xMin: 0,
+            xMax: 0,
+            yMin: 0,
+            yMax: 0
+        };
+
+        this.collectVisibleBounds(rootNode, result);
+
+        if (!result.hasValue) {
+            return null;
+        }
+
+        return {
+            xMin: result.xMin,
+            xMax: result.xMax,
+            yMin: result.yMin,
+            yMax: result.yMax
+        };
+    }
+
+    private collectVisibleBounds(node: cc.Node, result: any): void {
+        if (!node || !cc.isValid(node) || !node.activeInHierarchy) {
+            return;
+        }
+        if (node.name === "DescriptionTooltip" || 
+            node.name === "ActionMenu" || 
+            node.name === "SelectionFrame" || 
+            node.name === "CraftingDragVisual") {
+            return;
+        }
+        const hasVisualComponent = node.getComponent(cc.RenderComponent);
+        if (hasVisualComponent) {
+            const rect = node.getBoundingBoxToWorld();
+            if (rect && rect.width > 1 && rect.height > 1) {
+                const xMin = rect.x;
+                const xMax = rect.x + rect.width;
+                const yMin = rect.y;
+                const yMax = rect.y + rect.height;
+
+                if (!result.hasValue) {
+                    result.hasValue = true;
+                    result.xMin = xMin;
+                    result.xMax = xMax;
+                    result.yMin = yMin;
+                    result.yMax = yMax;
+                } else {
+                    result.xMin = Math.min(result.xMin, xMin);
+                    result.xMax = Math.max(result.xMax, xMax);
+                    result.yMin = Math.min(result.yMin, yMin);
+                    result.yMax = Math.max(result.yMax, yMax);
+                }
+            }
+        }
+
+        for (let i = 0; i < node.children.length; i++) {
+            this.collectVisibleBounds(node.children[i], result);
         }
     }
 
@@ -368,7 +623,7 @@ export default class CraftingUIController extends cc.Component {
                 }
                 event.stopPropagation();
                 const item = InventoryManager.instance.getItemsSnapshot()[index];
-                this.selectedItemId = item ? item.id : null;
+                this.selectedItemId = item ? item.id : null!;
                 this.setStatus(item ? `Selected ${item.name}.` : "Selection cleared.");
                 this.refreshSelection();
             }, this);
@@ -492,7 +747,7 @@ export default class CraftingUIController extends cc.Component {
         this.resolveSceneNodes();
         return this.inventoryGrid && this.inventoryGrid.children.length > 0
             ? this.inventoryGrid.children[0]
-            : null;
+            : null!;
     }
 
     private createStyledSlot(
@@ -537,7 +792,7 @@ export default class CraftingUIController extends cc.Component {
             countLabel = labelNode.addComponent(cc.Label);
         }
 
-        icon.spriteFrame = null;
+        icon.spriteFrame = null!;
         icon.node.active = false;
         countLabel.string = "";
         return { node, icon, countLabel };
@@ -610,7 +865,7 @@ export default class CraftingUIController extends cc.Component {
         this.dragEventNode.off(cc.Node.EventType.TOUCH_MOVE, this.onPointerMove, this);
         this.dragEventNode.off(cc.Node.EventType.TOUCH_END, this.onPointerEnd, this);
         this.dragEventNode.off(cc.Node.EventType.TOUCH_CANCEL, this.onPointerCancel, this);
-        this.dragEventNode = null;
+        this.dragEventNode = null!;
     }
 
     private beginDrag(
@@ -789,8 +1044,8 @@ export default class CraftingUIController extends cc.Component {
         if (this.highlightedNode && cc.isValid(this.highlightedNode) && this.highlightedColor) {
             this.highlightedNode.color = this.highlightedColor;
         }
-        this.highlightedNode = null;
-        this.highlightedColor = null;
+        this.highlightedNode = null!;
+        this.highlightedColor = null!;
     }
 
     private finishDrag(): void {
@@ -801,7 +1056,7 @@ export default class CraftingUIController extends cc.Component {
             this.dragVisual.node.active = false;
         }
         this.clearDropHighlight();
-        this.dragState = null;
+        this.dragState = null!;
     }
 
     private cancelDrag(): void {
@@ -889,7 +1144,7 @@ export default class CraftingUIController extends cc.Component {
         }
         if (!itemId) {
             view.countLabel.string = "";
-            view.icon.spriteFrame = null;
+            view.icon.spriteFrame = null!;
             view.icon.node.active = false;
             return;
         }
@@ -998,7 +1253,7 @@ export default class CraftingUIController extends cc.Component {
         for (const sprite of root.getComponentsInChildren(cc.Sprite)) {
             const frame = sprite.spriteFrame;
             if (frame && (!cc.isValid(frame) || !frame.getTexture())) {
-                sprite.spriteFrame = null;
+                sprite.spriteFrame = null!;
                 sprite.enabled = false;
             }
         }

@@ -1,3 +1,4 @@
+import CameraFollow from "../Camera/CameraFollow";
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter";
 import { GameEvent, EntityType } from "../Core/Constants";
@@ -8,16 +9,10 @@ import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDia
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
-import UIManager from "../UI/UIManager";
-import AudioManager, { SfxType } from "../Core/AudioManager";
-import EffectsManager, { EffectType } from "../Core/EffectsManager";
-import InputManager from "../Input/InputManager";
-import { InputAction, InputPayload } from "../Input/InputAction";
-import { InputContext } from "../Input/InputContext";
+import VehicleInteractable from "../Vehicle/VehicleInteractable";
 
 const { ccclass, property } = cc._decorator;
 
-// Crafting and inventory visibility are coordinated through their actual node state.
 @ccclass
 export default class PlayerController extends BaseEntity {
 
@@ -28,16 +23,37 @@ export default class PlayerController extends BaseEntity {
     jumpForce: number = 500;
 
     @property(cc.Float)
-    oceanMoveSpeed: number = 90;
+    fastFallSpeed: number = 520;
 
     @property(cc.Float)
-    oceanVerticalSpeed: number = 120;
+    oceanMoveSpeed: number = 160;
 
     @property(cc.Float)
-    oceanGravityScale: number = 0.15;
+    oceanVerticalSpeed: number = 220;
+
+    @property(cc.Float)
+    oceanSinkSpeed: number = 50;
+
+    @property(cc.Float)
+    oceanGravityScale: number = 0.18;
+
+    @property(cc.Float)
+    oceanControl: number = 8;
+
+    @property(cc.Float)
+    oceanDrag: number = 0.985;
+
+    @property(cc.Float)
+    oceanBoostSpeed: number = 520;
+
+    @property(cc.Float)
+    oceanBoostCooldown: number = 0.35;
 
     @property(cc.Node)
     inventoryUI: cc.Node = null!;
+
+    @property(CraftingUIController)
+    craftingUI: CraftingUIController = null!;
 
     @property(cc.Float)
     attackDamage: number = 20;
@@ -51,12 +67,6 @@ export default class PlayerController extends BaseEntity {
     @property(MerchantShopUIController)
     merchantShopUI: MerchantShopUIController = null!;
 
-    @property(CraftingUIController)
-    craftingUI: CraftingUIController = null;
-
-    @property(UIManager)
-    uiManager: UIManager = null;
-
     @property({ type: cc.Float, range: [0, 1, 0.05], slide: true })
     knockbackResistance: number = 0;
 
@@ -64,7 +74,7 @@ export default class PlayerController extends BaseEntity {
     knockbackLockTime: number = 0.12;
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
-    private keyStates: { [action: string]: boolean } = {};
+    private keyStates: { [key: number]: boolean } = {};
 
     private anim: cc.Animation = null!;
     private currentAnimName: string = "";
@@ -77,36 +87,47 @@ export default class PlayerController extends BaseEntity {
     private canvasNode: cc.Node = null!;
     private currentMerchant: MerchantNPC = null!;
     private promptMerchant: MerchantNPC = null!;
+    private promptVehicle: VehicleInteractable = null!;
     private currentDialogueOptions: DialogueOption[] = [];
     private knockbackTimer: number = 0;
     private gameOverTransitionPending: boolean = false;
-    private inputLockedByGamePause: boolean = false;
+    private externalControlLocks: { [reason: string]: boolean } = {};
 
     private isInOcean: boolean = false;
     private originalGravityScale: number = 1;
-    private inputManager: InputManager = null;
+    private oceanBoostTimer: number = 0;
+
+    private browserMouseDownHandler: any = null!;
+    private browserMouseWheelHandler: any = null!;
+    private useBrowserMouseInput: boolean = false;
 
     onLoad() {
         super.onLoad();
         this.type = EntityType.PLAYER;
+        this.applyRuntimeMovementTuning();
+        this.setupCameraFollow();
 
         const physicsManager = cc.director.getPhysicsManager();
         physicsManager.enabled = true;
-        physicsManager.debugDrawFlags = 1;
+        physicsManager.debugDrawFlags = 0;
 
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
-        cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
-        EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
-        EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
-        this.inputManager = InputManager.getOrCreate(this.node);
-        if (this.inputManager) {
-            this.inputManager.pushContext(InputContext.Gameplay, this.handleGameplayInput, this);
-        }
 
         this.canvasNode = cc.find("Canvas") || null!;
+        this.setupMouseAttackInput();
+        this.setupMouseWheelInput();
 
         this.bodyNode = this.node.getChildByName("Sprite_Body") || null!;
+
+        this.node.zIndex = 100;
+
+        if (this.bodyNode) {
+            this.bodyNode.zIndex = 101;
+        }
+        
         if (this.bodyNode) {
             this.anim = this.bodyNode.getComponent(cc.Animation) || null!;
             if (this.anim) {
@@ -119,11 +140,6 @@ export default class PlayerController extends BaseEntity {
 
         if (this.rb) {
             this.originalGravityScale = (this.rb as any).gravityScale || 1;
-        }
-
-        if (!this.uiManager) {
-            const uiRoot = cc.find("Canvas/UI Root");
-            this.uiManager = uiRoot ? uiRoot.getComponent(UIManager) : null;
         }
 
         if (!this.attackHitbox) {
@@ -140,164 +156,192 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    private handleGameplayInput(payload: InputPayload): boolean {
-        if (this.inputLockedByGamePause) {
-            return this.isPlayerAction(payload.action);
+    private setupMouseAttackInput() {
+        const gameCanvas = (cc.game as any).canvas;
+
+        if (gameCanvas && gameCanvas.addEventListener) {
+            this.browserMouseDownHandler = (event: any) => {
+                this.handleMouseAttack(event.button);
+            };
+
+            gameCanvas.addEventListener("mousedown", this.browserMouseDownHandler, false);
+            this.useBrowserMouseInput = true;
+            return;
         }
 
-        switch (payload.action) {
-            case InputAction.MoveLeft:
-            case InputAction.MoveRight:
-            case InputAction.MoveUp:
-            case InputAction.MoveDown:
-            case InputAction.NavigateUp:
-            case InputAction.NavigateDown:
-            case InputAction.Jump:
-                this.setMoveInput(payload.action, payload.isDown);
-                return true;
-            case InputAction.Attack:
-                if (payload.isDown) this.attack();
-                return true;
-            case InputAction.Interact:
-                if (payload.isDown) this.interact();
-                return true;
-            case InputAction.Inventory:
-                if (payload.isDown) this.toggleInventory();
-                return true;
-            case InputAction.Crafting:
-                if (payload.isDown) this.toggleCrafting();
-                return true;
-            case InputAction.DebugAddCoconut:
-                if (payload.isDown) this.debugAddCoconut();
-                return true;
-            case InputAction.DebugAddCraftItems:
-                if (payload.isDown) this.debugAddCraftItems();
-                return true;
-            default:
-                return false;
+        if (this.canvasNode) {
+            this.canvasNode.on(cc.Node.EventType.MOUSE_DOWN, this.onNodeMouseDown, this);
+            this.useBrowserMouseInput = false;
         }
     }
 
-    private handleInventoryInput(payload: InputPayload): boolean {
-        if (!payload.isDown) {
-            return this.isPlayerAction(payload.action);
+    private setupMouseWheelInput() {
+        const gameCanvas = (cc.game as any).canvas;
+
+        if (gameCanvas && gameCanvas.addEventListener) {
+            this.browserMouseWheelHandler = (event: any) => {
+                const fakeWheelEvent = {
+                    getScrollY: () => -event.deltaY
+                } as cc.Event.EventMouse;
+
+                this.onMouseWheel(fakeWheelEvent);
+
+                if (event.preventDefault) {
+                    event.preventDefault();
+                }
+            };
+
+            gameCanvas.addEventListener("wheel", this.browserMouseWheelHandler, false);
+            return;
         }
 
-        if (payload.action === InputAction.Inventory || payload.action === InputAction.Cancel) {
-            this.setInventoryOpen(false);
-            return true;
+        if (this.canvasNode) {
+            this.canvasNode.on(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
         }
-
-        return this.isPlayerAction(payload.action) || payload.action === InputAction.Attack;
     }
 
-    private handleDialogueInput(payload: InputPayload): boolean {
-        if (!payload.isDown) {
-            return true;
+    private onNodeMouseDown(event: cc.Event.EventMouse) {
+        this.handleMouseAttack(event.getButton());
+    }
+
+    private handleMouseAttack(button: number) {
+        if (!this.canUseGameplayAction()) return;
+
+        if (button === cc.Event.EventMouse.BUTTON_LEFT || button === 0) {
+            this.attack();
+        }
+    }
+
+    onKeyDown(event: cc.Event.EventKeyboard) {
+        this.applyMoveKey(event.keyCode, true);
+    }
+
+    onKeyUp(event: cc.Event.EventKeyboard) {
+        this.applyMoveKey(event.keyCode, false);
+    }
+
+    private applyMoveKey(keyCode: number, isDown: boolean) {
+        const wasDown = !!this.keyStates[keyCode];
+        if (wasDown === isDown) return;
+
+        this.keyStates[keyCode] = isDown;
+
+        if (this.isExternalControlLocked()) {
+            this.blockPlayerControlForUI();
+            return;
         }
 
-        switch (payload.action) {
-            case InputAction.Cancel:
-                this.closeMerchantFlow();
-                return true;
-            case InputAction.MoveUp:
-            case InputAction.NavigateUp:
-                this.dialogueUI.selectPrev();
-                return true;
-            case InputAction.MoveDown:
-            case InputAction.NavigateDown:
+        if (this.isCraftingUIOpen()) {
+            if (isDown && keyCode === cc.macro.KEY.c) {
+                this.toggleCrafting();
+            }
+
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
+            if (isDown && keyCode === cc.macro.KEY.b) {
+                this.toggleInventory();
+            }
+
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        if (isDown && this.handleMerchantShopKey(keyCode)) {
+            return;
+        }
+
+        if (this.isMerchantUIOpen() && keyCode !== cc.macro.KEY.f) {
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        const amount = isDown ? 1 : -1;
+
+        switch (keyCode) {
+            case cc.macro.KEY.a:
+                this.moveDir.x -= amount;
+                break;
+
+            case cc.macro.KEY.d:
+                this.moveDir.x += amount;
+                break;
+
+            case cc.macro.KEY.s:
+            case cc.macro.KEY.down:
+                if (isDown && !this.isInOcean) {
+                    this.tryFastFall();
+                }
+                break;
+
+            case cc.macro.KEY.space:
+                if (isDown) {
+                    if (this.isInOcean) {
+                        this.boostInOcean();
+                    } else {
+                        this.jump();
+                    }
+                }
+                break;
+
+            case cc.macro.KEY.b:
+                if (isDown) {
+                    this.toggleInventory();
+                }
+                break;
+
+            case cc.macro.KEY.c:
+                if (isDown) {
+                    this.toggleCrafting();
+                }
+                break;
+
+            case cc.macro.KEY.f:
+                if (isDown) {
+                    this.tryInteractWithMerchant();
+                }
+                break;
+
+            case cc.macro.KEY.t:
+                if (isDown) {
+                    InventoryManager.instance.addItem("coconut", 10);
+                }
+                break;
+        }
+    }
+
+    private onMouseWheel(event: cc.Event.EventMouse) {
+        const scrollY = event.getScrollY();
+        if (scrollY === 0) {
+            return;
+        }
+
+        if (this.dialogueUI && this.dialogueUI.isOptionsVisible()) {
+            if (scrollY < 0) {
                 this.dialogueUI.selectNext();
-                return true;
-            case InputAction.Confirm:
-            case InputAction.Interact:
-                this.confirmDialogueOption();
-                return true;
-            default:
-                return true;
-        }
-    }
-
-    private handleMerchantShopInput(payload: InputPayload): boolean {
-        if (!payload.isDown) {
-            return true;
-        }
-
-        if (payload.action === InputAction.Cancel) {
-            this.closeMerchantFlow();
-            return true;
-        }
-
-        if (this.merchantShopUI && this.merchantShopUI.handleInput(payload.action)) {
-            return true;
-        }
-
-        return true;
-    }
-
-    public setMoveInput(action: InputAction, isDown: boolean): void {
-        const moveAction = this.toMoveAction(action);
-        if (!moveAction) {
+            } else {
+                this.dialogueUI.selectPrev();
+            }
             return;
         }
 
-        const wasDown = !!this.keyStates[moveAction];
-        if (wasDown === isDown) {
-            return;
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            if (scrollY < 0) {
+                this.merchantShopUI.selectNextItem();
+            } else {
+                this.merchantShopUI.selectPrevItem();
+            }
         }
-
-        this.keyStates[moveAction] = isDown;
-        if (moveAction === InputAction.Jump && isDown) {
-            this.jump();
-        }
-        this.refreshMoveDirection();
-    }
-
-    private toMoveAction(action: InputAction): InputAction {
-        switch (action) {
-            case InputAction.MoveLeft:
-            case InputAction.MoveRight:
-            case InputAction.MoveUp:
-            case InputAction.MoveDown:
-            case InputAction.Jump:
-                return action;
-            case InputAction.NavigateUp:
-                return InputAction.MoveUp;
-            case InputAction.NavigateDown:
-                return InputAction.MoveDown;
-            default:
-                return null;
-        }
-    }
-
-    private isPlayerAction(action: InputAction): boolean {
-        return !!this.toMoveAction(action)
-            || action === InputAction.Attack
-            || action === InputAction.Interact
-            || action === InputAction.Inventory
-            || action === InputAction.Crafting
-            || action === InputAction.DebugAddCoconut
-            || action === InputAction.DebugAddCraftItems;
-    }
-
-    public interact(): void {
-        this.tryInteractWithMerchant();
-    }
-
-    public debugAddCoconut(): void {
-        InventoryManager.instance.addItem("coconut", 10);
-    }
-
-    public debugAddCraftItems(): void {
-        InventoryManager.instance.transact([], [
-            { itemId: "coconut", count: 10 },
-            { itemId: "ore", count: 10 },
-            { itemId: "apple", count: 10 }
-        ]);
-        cc.log("[CraftingDebug] Added coconut, ore and apple x10.");
     }
 
     private tryInteractWithMerchant() {
-        if (this.isDead) {
+        if (this.isDead || this.isCraftingUIOpen()) {
+            return;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
             return;
         }
 
@@ -312,73 +356,120 @@ export default class PlayerController extends BaseEntity {
         }
 
         const merchant = this.promptMerchant || this.findNearestMerchant();
-        if (!merchant || !merchant.canInteract(this.node)) {
-            cc.log("[PlayerController] No merchant in interaction range.");
+        if (merchant && merchant.canInteract(this.node)) {
+            this.currentMerchant = merchant;
+            merchant.beginInteraction(this.node);
+            this.showMerchantOptions();
             return;
         }
 
-        this.currentMerchant = merchant;
-        merchant.beginInteraction(this.node);
-        this.showMerchantOptions();
+        const vehicle = this.promptVehicle || this.findNearestVehicle();
+        if (vehicle && vehicle.canInteract(this.node)) {
+            const controller = vehicle.getVehicleController();
+            if (controller && typeof controller.tryMount === "function" && controller.tryMount(this.node)) {
+                if (this.dialogueUI) {
+                    this.dialogueUI.hidePrompt();
+                }
+                this.promptVehicle = null!;
+                return;
+            }
+        }
+
+        cc.log("[PlayerController] No merchant or vehicle in interaction range.");
     }
 
-    public toggleInventory() {
+    private toggleInventory() {
         if (!this.inventoryUI) return;
+        if (this.isCraftingUIOpen()) return;
 
-        if (this.isCraftingUIOpen()) {
-            if (!this.craftingUI.close()) {
-                return;
-            }
-            this.setInventoryOpen(true);
-            if (this.rb) {
-                this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
-            }
-            return;
-        }
+        const nextActive = !this.inventoryUI.active;
+        this.inventoryUI.active = nextActive;
 
-        const shouldOpen = !this.inventoryUI.active;
-        if (shouldOpen) {
-            if (this.isMerchantUIOpen()) {
-                return;
-            }
-        }
-
-        this.setInventoryOpen(shouldOpen);
-        if (this.inventoryUI.active && this.dialogueUI && !this.isMerchantUIOpen()) {
+        if (nextActive && this.dialogueUI && !this.isMerchantUIOpen()) {
             this.dialogueUI.hide();
             this.promptMerchant = null!;
         }
 
-        if (this.inventoryUI.active && this.rb) {
-            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+        if (nextActive && this.rb) {
+            this.blockPlayerControlForUI();
         }
     }
 
-    private setInventoryOpen(open: boolean): void {
-        if (!this.inventoryUI) {
+    private toggleCrafting() {
+        if (!this.craftingUI) return;
+        if (this.isMerchantUIOpen()) return;
+
+        if (this.inventoryUI && this.inventoryUI.active) {
+            this.inventoryUI.active = false;
+        }
+
+        if (this.isCraftingUIOpen()) {
+            this.closeCrafting();
             return;
         }
 
-        this.inventoryUI.active = open;
-        this.clearMovementInput();
-        if (this.inputManager) {
-            if (open) {
-                this.inputManager.pushContext(InputContext.Inventory, this.handleInventoryInput, this);
-            } else {
-                this.inputManager.popContext(InputContext.Inventory, this);
-            }
+        if (this.dialogueUI) {
+            this.dialogueUI.hide();
+        }
+
+        this.promptMerchant = null!;
+        this.currentMerchant = null!;
+
+        const anyCraftingUI = this.craftingUI as any;
+        if (typeof anyCraftingUI.open === "function") {
+            anyCraftingUI.open();
+        } else if (this.craftingUI.node) {
+            this.craftingUI.node.active = true;
+        }
+
+        this.blockPlayerControlForUI();
+    }
+
+    private closeCrafting() {
+        if (!this.craftingUI) return;
+
+        const anyCraftingUI = this.craftingUI as any;
+        if (typeof anyCraftingUI.close === "function") {
+            anyCraftingUI.close();
+        } else if (this.craftingUI.node) {
+            this.craftingUI.node.active = false;
         }
     }
 
-    public jump() {
-        if (this.isDead || this.isHurting || this.isAttacking || this.isCraftingUIOpen() || !this.rb) return;
+    private isCraftingUIOpen(): boolean {
+        if (!this.craftingUI || !cc.isValid(this.craftingUI.node)) {
+            return false;
+        }
+
+        const anyCraftingUI = this.craftingUI as any;
+
+        if (typeof anyCraftingUI.isOpen === "function") {
+            return anyCraftingUI.isOpen();
+        }
+
+        if (anyCraftingUI.root && cc.isValid(anyCraftingUI.root)) {
+            return !!anyCraftingUI.root.active;
+        }
+
+        return !!this.craftingUI.node.activeInHierarchy;
+    }
+
+    private onCraftingUIOpened() {
+        this.blockPlayerControlForUI();
+    }
+
+    private onCraftingUIClosed() {
+        // 保留空函式，避免之後需要事件時重找
+    }
+
+    private jump() {
+        if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
 
         if (this.isInOcean) {
-            this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.oceanVerticalSpeed);
             return;
         }
 
-        if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+        if (this.isGrounded()) {
             this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, this.jumpForce);
         }
     }
@@ -390,6 +481,37 @@ export default class PlayerController extends BaseEntity {
 
         this.applyKnockback(attackerNode, hitInfo);
         this.takeDamage(amount);
+    }
+
+    public canUseGameplayAction(): boolean {
+        if (this.isDead || this.isExternalControlLocked() || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
+            return false;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public setExternalControlLocked(locked: boolean, reason: string = "external"): void {
+        this.externalControlLocks[reason] = locked;
+        if (!locked) {
+            delete this.externalControlLocks[reason];
+            return;
+        }
+
+        this.blockPlayerControlForUI();
+        if (this.dialogueUI) {
+            this.dialogueUI.hidePrompt();
+        }
+        this.promptMerchant = null!;
+        this.promptVehicle = null!;
+    }
+
+    public isExternalControlLocked(): boolean {
+        return Object.keys(this.externalControlLocks).some(key => this.externalControlLocks[key]);
     }
 
     private findNearestMerchant(): MerchantNPC {
@@ -404,8 +526,8 @@ export default class PlayerController extends BaseEntity {
         let nearest: MerchantNPC = null!;
         let nearestDistance = Number.MAX_VALUE;
         const playerWorldPos = this.node.parent
-            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
-            : this.node.position;
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
 
         for (const merchant of merchants) {
             if (!merchant || !cc.isValid(merchant.node)) {
@@ -413,8 +535,8 @@ export default class PlayerController extends BaseEntity {
             }
 
             const merchantWorldPos = merchant.node.parent
-                ? merchant.node.parent.convertToWorldSpaceAR(merchant.node.position)
-                : merchant.node.position;
+                ? merchant.node.parent.convertToWorldSpaceAR(cc.v2(merchant.node.x, merchant.node.y))
+                : cc.v2(merchant.node.x, merchant.node.y);
 
             const distance = merchantWorldPos.sub(playerWorldPos).mag();
 
@@ -443,43 +565,119 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    update(dt: number) {
-        if (this.inputLockedByGamePause) return;
+    private findNearestVehicle(): VehicleInteractable {
+        const root = this.canvasNode || cc.find("Canvas");
+        if (!root) {
+            return null!;
+        }
 
+        const vehicles: VehicleInteractable[] = [];
+        this.collectVehicles(root, vehicles);
+
+        let nearest: VehicleInteractable = null!;
+        let nearestDistance = Number.MAX_VALUE;
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
+
+        for (const vehicle of vehicles) {
+            if (!vehicle || !cc.isValid(vehicle.node)) {
+                continue;
+            }
+
+            const vehicleWorldPos = vehicle.node.parent
+                ? vehicle.node.parent.convertToWorldSpaceAR(cc.v2(vehicle.node.x, vehicle.node.y))
+                : cc.v2(vehicle.node.x, vehicle.node.y);
+
+            const distance = vehicleWorldPos.sub(playerWorldPos).mag();
+            if (distance < nearestDistance) {
+                nearest = vehicle;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    private collectVehicles(root: cc.Node, result: VehicleInteractable[]) {
+        if (!root) {
+            return;
+        }
+
+        const vehicle = root.getComponent(VehicleInteractable);
+        if (vehicle) {
+            result.push(vehicle);
+        }
+
+        const children = (root as any).children || [];
+        for (const child of children) {
+            this.collectVehicles(child, result);
+        }
+    }
+
+    update(dt: number) {
         if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
             this.closeMerchantFlow();
         }
 
         this.updateMerchantPrompt();
         this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
+        this.oceanBoostTimer = Math.max(0, this.oceanBoostTimer - dt);
 
-        if (this.inventoryUI && this.inventoryUI.active) return;
-        if (this.isCraftingUIOpen()) return;
-        if (this.isMerchantUIOpen()) return;
+        if (this.isExternalControlLocked()) {
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        if (this.isCraftingUIOpen()) {
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
+            this.blockPlayerControlForUI();
+            return;
+        }
+
+        if (this.isMerchantUIOpen()) {
+            this.blockPlayerControlForUI();
+            return;
+        }
 
         if (this.isDead || this.isHurting || this.isAttacking || !this.rb) return;
         if (this.knockbackTimer > 0) return;
 
         if (this.isInOcean) {
-            this.updateOceanMovement();
+            this.updateOceanMovement(dt);
             return;
         }
 
         const isMovingX = this.moveDir.x !== 0;
-
         const targetSpeedX = this.moveDir.x * this.moveSpeed * 0.8;
-        this.rb.linearVelocity = cc.v2(targetSpeedX, this.rb.linearVelocity.y);
+
+        let targetSpeedY = this.rb.linearVelocity.y;
+
+        if (this.isFastFallPressed() && !this.isGrounded()) {
+            targetSpeedY = -this.fastFallSpeed;
+        } 
+        else if (this.isGrounded() && isMovingX) {
+            if (targetSpeedY < -0.5 && targetSpeedY > -300) {
+                targetSpeedY = -150; 
+            }
+        }
+
+        this.rb.linearVelocity = cc.v2(targetSpeedX, targetSpeedY);
 
         if (isMovingX) {
             if (this.bodyNode) {
                 this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
             }
 
-            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1 || this.isGrounded()) {
                 this.playAnimation("PlayerRun");
             }
         } else {
-            if (Math.abs(this.rb.linearVelocity.y) <= 0.1) {
+            if (Math.abs(this.rb.linearVelocity.y) <= 0.1 || this.isGrounded()) {
                 this.playAnimation("PlayerIdle");
             }
         }
@@ -491,12 +689,14 @@ export default class PlayerController extends BaseEntity {
         }
 
         this.isInOcean = true;
-        EffectsManager.play(EffectType.WATER, this.getWorldPosition());
 
         if (this.rb) {
             this.originalGravityScale = (this.rb as any).gravityScale || 1;
             (this.rb as any).gravityScale = this.oceanGravityScale;
-            this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x * 0.5, this.rb.linearVelocity.y * 0.3);
+            this.rb.linearVelocity = cc.v2(
+                this.rb.linearVelocity.x * 0.6,
+                this.rb.linearVelocity.y * 0.4
+            );
         }
     }
 
@@ -509,10 +709,14 @@ export default class PlayerController extends BaseEntity {
 
         if (this.rb) {
             (this.rb as any).gravityScale = this.originalGravityScale;
+            this.rb.linearVelocity = cc.v2(
+                this.rb.linearVelocity.x * 0.95,
+                this.rb.linearVelocity.y * 0.95
+            );
         }
     }
 
-    private updateOceanMovement() {
+    private updateOceanMovement(dt: number) {
         if (!this.rb) {
             return;
         }
@@ -520,8 +724,23 @@ export default class PlayerController extends BaseEntity {
         const horizontalInput = this.moveDir.x;
         const verticalInput = this.getOceanVerticalInput();
 
-        const velocityX = horizontalInput * this.oceanMoveSpeed;
-        const velocityY = verticalInput * this.oceanVerticalSpeed;
+        const targetVelocityX = horizontalInput * this.oceanMoveSpeed;
+        let targetVelocityY = -this.oceanSinkSpeed;
+
+        if (verticalInput > 0) {
+            targetVelocityY = verticalInput * this.oceanVerticalSpeed;
+        } else if (verticalInput < 0) {
+            targetVelocityY = verticalInput * this.oceanVerticalSpeed;
+        }
+
+        const controlRatio = Math.min(1, dt * this.oceanControl);
+
+        let velocityX = this.rb.linearVelocity.x + (targetVelocityX - this.rb.linearVelocity.x) * controlRatio;
+        let velocityY = this.rb.linearVelocity.y + (targetVelocityY - this.rb.linearVelocity.y) * controlRatio;
+
+        const dragRatio = Math.pow(this.oceanDrag, dt * 60);
+        velocityX *= dragRatio;
+        velocityY *= dragRatio;
 
         this.rb.linearVelocity = cc.v2(velocityX, velocityY);
 
@@ -536,17 +755,42 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
+    private boostInOcean() {
+        if (!this.rb || !this.isInOcean || this.oceanBoostTimer > 0) {
+            return;
+        }
+
+        let directionX = this.moveDir.x;
+        let directionY = this.getOceanVerticalInput();
+
+        if (directionX === 0 && directionY === 0) {
+            directionY = 1;
+        }
+
+        const length = Math.sqrt(directionX * directionX + directionY * directionY);
+        if (length <= 0) {
+            return;
+        }
+
+        directionX /= length;
+        directionY /= length;
+
+        this.rb.linearVelocity = cc.v2(
+            this.rb.linearVelocity.x + directionX * this.oceanBoostSpeed,
+            this.rb.linearVelocity.y + directionY * this.oceanBoostSpeed
+        );
+
+        this.oceanBoostTimer = this.oceanBoostCooldown;
+    }
+
     private getOceanVerticalInput(): number {
         let input = 0;
 
-        if (
-            this.keyStates[InputAction.MoveUp]
-            || this.keyStates[InputAction.Jump]
-        ) {
+        if (this.keyStates[cc.macro.KEY.w] || this.keyStates[cc.macro.KEY.up]) {
             input += 1;
         }
 
-        if (this.keyStates[InputAction.MoveDown]) {
+        if (this.keyStates[cc.macro.KEY.s] || this.keyStates[cc.macro.KEY.down]) {
             input -= 1;
         }
 
@@ -561,6 +805,116 @@ export default class PlayerController extends BaseEntity {
         return input;
     }
 
+    private setupCameraFollow() {
+        const cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
+
+        if (!cameraNode) {
+            cc.warn("[PlayerController] Main Camera not found.");
+            return;
+        }
+
+        let cameraFollow = cameraNode.getComponent(CameraFollow);
+
+        if (!cameraFollow) {
+            cameraFollow = cameraNode.addComponent(CameraFollow);
+        }
+
+        cameraFollow.target = this.node;
+        cameraFollow.targetPath = "";
+        cameraFollow.followX = true;
+        cameraFollow.followY = true;
+        cameraFollow.smoothFollow = true;
+        cameraFollow.smoothSpeed = 6;
+        cameraFollow.targetOffsetX = 0;
+        cameraFollow.targetOffsetY = 160;
+
+        // 先給一組比舊版大的安全範圍
+        // 後面如果有更完整地圖資訊再精調
+        cameraFollow.setBounds(-2000, 4000, -1200, 400);
+    }
+
+    private applyRuntimeMovementTuning() {
+        this.oceanMoveSpeed = 180;
+        this.oceanVerticalSpeed = 260;
+        this.oceanSinkSpeed = 35;
+        this.oceanGravityScale = 0.18;
+        this.oceanControl = 12;
+        this.oceanDrag = 0.99;
+        this.oceanBoostSpeed = 620;
+        this.oceanBoostCooldown = 0.28;
+        this.fastFallSpeed = 520;
+    }
+
+    private isFastFallPressed(): boolean {
+        return !!(
+            this.keyStates[cc.macro.KEY.s] ||
+            this.keyStates[cc.macro.KEY.down]
+        );
+    }
+
+    private isGrounded(): boolean {
+        if (!this.rb) {
+            return false;
+        }
+
+        // 1. 靜止平地判定 (保留以節省效能)
+        if (Math.abs(this.rb.linearVelocity.y) <= 0.05) {
+            return true;
+        }
+
+        // 2. 終極三叉戟射線判定 (無視 Anchor，完美貼合斜坡)
+        const physicsManager = cc.director.getPhysicsManager();
+        
+        // 取得角色在世界座標中的實際外框大小，不管 Anchor 設在哪裡都絕對精準
+        const bbox = this.node.getBoundingBoxToWorld();
+
+        // 射線起點：角色腳底板往上 5 像素 (避免剛好貼地穿透)
+        const startY = bbox.yMin + 5;
+        // 射線終點：往下探測 20 像素 (足以應付各種斜坡落差)
+        const endY = bbox.yMin - 20;
+
+        // 從左腳、胯下、右腳打出三條探測線，只要有一條踩到地就算數
+        const rayXs = [bbox.xMin + 5, bbox.xMin + (bbox.width / 2), bbox.xMax - 5];
+
+        for (let x of rayXs) {
+            const startPos = cc.v2(x, startY);
+            const endPos = cc.v2(x, endY);
+            const results = physicsManager.rayCast(startPos, endPos, cc.RayCastType.All);
+
+            for (let i = 0; i < results.length; i++) {
+                const hitCollider = results[i].collider;
+                const hitNode = hitCollider.node;
+
+                // 排除自己、武器以及感應區 (Sensor)
+                if (hitNode !== this.node && !hitNode.isChildOf(this.node) && !hitCollider.sensor) {
+                    // 放寬向上速度限制！
+                    // 走上斜坡時 Y 速度可能破百，只要不是被炸飛或大跳中 (速度 > 300)，就當作乖乖踩在地上
+                    if (this.rb.linearVelocity.y < 300) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private tryFastFall() {
+        if (!this.rb) {
+            return;
+        }
+
+        if (this.isInOcean) {
+            return;
+        }
+
+        if (this.isGrounded()) {
+            return;
+        }
+
+        this.rb.linearVelocity = cc.v2(this.rb.linearVelocity.x, -this.fastFallSpeed);
+    }
+
     private playAnimation(animName: string) {
         if (!this.anim) return;
         if (this.currentAnimName === animName) return;
@@ -569,23 +923,15 @@ export default class PlayerController extends BaseEntity {
         this.currentAnimName = animName;
     }
 
-    public attack() {
-        if (
-            this.inputLockedByGamePause
-            || this.isAttacking
-            || this.isHurting
-            || this.isMerchantUIOpen()
-            || this.isCraftingUIOpen()
-            || (this.inventoryUI && this.inventoryUI.active)
-        ) return;
+    private attack() {
+        if (this.isAttacking || this.isHurting || this.isDead) return;
 
         this.isAttacking = true;
-        AudioManager.play(SfxType.ATTACK);
         this.playAnimation("PlayerAttack");
 
         if (this.attackHitbox) {
             const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
-            this.attackHitbox.activate(facingRight, this.attackDamage, this.node);
+            (this.attackHitbox as any).activate(facingRight, this.attackDamage, this.node, 0);
         }
     }
 
@@ -601,12 +947,12 @@ export default class PlayerController extends BaseEntity {
         }
 
         const selfWorldPos = this.node.parent
-            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
-            : this.node.position;
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
 
         const attackerWorldPos = attackerNode.parent
-            ? attackerNode.parent.convertToWorldSpaceAR(attackerNode.position)
-            : attackerNode.position;
+            ? attackerNode.parent.convertToWorldSpaceAR(cc.v2(attackerNode.x, attackerNode.y))
+            : cc.v2(attackerNode.x, attackerNode.y);
 
         const direction = selfWorldPos.x >= attackerWorldPos.x ? 1 : -1;
         const scale = 1 - Math.max(0, Math.min(1, this.knockbackResistance));
@@ -622,8 +968,11 @@ export default class PlayerController extends BaseEntity {
 
         this.isHurting = true;
         this.isAttacking = false;
-        AudioManager.play(SfxType.HIT);
-        EffectsManager.play(EffectType.HIT, this.getWorldPosition());
+
+        if (this.attackHitbox) {
+            this.attackHitbox.deactivate();
+        }
+
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
         this.playAnimation("PlayerHurt");
     }
@@ -634,8 +983,13 @@ export default class PlayerController extends BaseEntity {
         this.isDead = true;
         this.isHurting = false;
         this.isAttacking = false;
-        this.closeMerchantFlow();
+
+        if (this.attackHitbox) {
+            this.attackHitbox.deactivate();
+        }
+
         this.closeCrafting();
+        this.closeMerchantFlow();
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, 0, this.maxHp);
         this.playAnimation("PlayerDie");
     }
@@ -644,6 +998,10 @@ export default class PlayerController extends BaseEntity {
         if (state.name === "PlayerAttack") {
             this.isAttacking = false;
             this.currentAnimName = "";
+
+            if (this.attackHitbox) {
+                this.attackHitbox.deactivate();
+            }
         } else if (state.name === "PlayerHurt") {
             this.isHurting = false;
             this.currentAnimName = "";
@@ -665,23 +1023,30 @@ export default class PlayerController extends BaseEntity {
         cc.director.loadScene("GameOver");
     };
 
-    private getWorldPosition(): cc.Vec2 {
-        return this.node.parent
-            ? this.node.parent.convertToWorldSpaceAR(this.node.position)
-            : this.node.position;
-    }
-
     onDestroy() {
-        this.closeCrafting();
-
         this.unscheduleAllCallbacks();
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
-        cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
-        EventCenter.off(GameEvent.GAME_PAUSED, this.onGamePaused, this);
-        EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
-        if (this.inputManager) {
-            this.inputManager.clearOwner(this);
+
+        const gameCanvas = (cc.game as any).canvas;
+
+        if (this.useBrowserMouseInput && this.browserMouseDownHandler) {
+            if (gameCanvas && gameCanvas.removeEventListener) {
+                gameCanvas.removeEventListener("mousedown", this.browserMouseDownHandler, false);
+            }
+        }
+
+        if (this.browserMouseWheelHandler) {
+            if (gameCanvas && gameCanvas.removeEventListener) {
+                gameCanvas.removeEventListener("wheel", this.browserMouseWheelHandler, false);
+            }
+        }
+
+        if (this.canvasNode && cc.isValid(this.canvasNode)) {
+            this.canvasNode.off(cc.Node.EventType.MOUSE_DOWN, this.onNodeMouseDown, this);
+            this.canvasNode.off(cc.Node.EventType.MOUSE_WHEEL, this.onMouseWheel, this);
         }
 
         if (this.anim && cc.isValid(this.anim)) {
@@ -692,24 +1057,16 @@ export default class PlayerController extends BaseEntity {
         this.merchantShopUI = null!;
         this.currentMerchant = null!;
         this.promptMerchant = null!;
+        this.promptVehicle = null!;
         this.currentDialogueOptions = [];
-        this.craftingUI = null;
-        this.uiManager = null;
-        this.inputManager = null;
     }
 
     private updateMerchantPrompt() {
-        if (
-            !this.dialogueUI
-            || this.isDead
-            || this.isMerchantUIOpen()
-            || this.isCraftingUIOpen()
-            || (this.inventoryUI && this.inventoryUI.active)
-        ) {
-            if (this.dialogueUI) {
-                this.dialogueUI.hidePrompt();
-            }
-            this.promptMerchant = null;
+        if (!this.dialogueUI || this.isDead || this.isExternalControlLocked() || this.isMerchantUIOpen() || this.isCraftingUIOpen()) {
+            return;
+        }
+
+        if (this.inventoryUI && this.inventoryUI.active) {
             return;
         }
 
@@ -720,11 +1077,20 @@ export default class PlayerController extends BaseEntity {
         const merchant = this.findNearestMerchant();
         if (merchant && merchant.canInteract(this.node)) {
             this.promptMerchant = merchant;
+            this.promptVehicle = null!;
             this.dialogueUI.showPrompt("Press F to Talk", merchant.node);
             return;
         }
 
         this.promptMerchant = null!;
+        const vehicle = this.findNearestVehicle();
+        if (vehicle && vehicle.canInteract(this.node)) {
+            this.promptVehicle = vehicle;
+            this.dialogueUI.showPrompt(vehicle.promptText || "Press F to Ride", vehicle.node);
+            return;
+        }
+
+        this.promptVehicle = null!;
         this.dialogueUI.hidePrompt();
     }
 
@@ -756,20 +1122,9 @@ export default class PlayerController extends BaseEntity {
             if (this.dialogueUI) {
                 this.dialogueUI.hide();
             }
-            if (this.inputManager) {
-                this.inputManager.popContext(InputContext.Dialogue, this);
-            }
 
             if (this.merchantShopUI) {
                 this.merchantShopUI.open(this.currentMerchant);
-                this.clearMovementInput();
-                if (this.inputManager) {
-                    this.inputManager.pushContext(
-                        InputContext.MerchantShop,
-                        this.handleMerchantShopInput,
-                        this
-                    );
-                }
             }
 
             return;
@@ -784,11 +1139,6 @@ export default class PlayerController extends BaseEntity {
     }
 
     private closeMerchantFlow() {
-        if (this.inputManager) {
-            this.inputManager.popContext(InputContext.MerchantShop, this);
-            this.inputManager.popContext(InputContext.Dialogue, this);
-        }
-
         if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
             this.merchantShopUI.close();
         }
@@ -804,7 +1154,38 @@ export default class PlayerController extends BaseEntity {
         this.currentMerchant = null!;
         this.promptMerchant = null!;
         this.currentDialogueOptions = [];
+    }
+
+    private blockPlayerControlForUI(): void {
         this.clearMovementInput();
+
+        if (this.rb) {
+            if (this.isInOcean) {
+                const currentY = this.rb.linearVelocity.y;
+                const sinkY = -Math.abs(this.oceanSinkSpeed);
+                this.rb.linearVelocity = cc.v2(0, Math.min(currentY, sinkY));
+            } else {
+                this.rb.linearVelocity = cc.v2(0, Math.min(0, this.rb.linearVelocity.y));
+            }
+        }
+
+        if (!this.isDead && !this.isHurting && !this.isAttacking) {
+            if (this.isInOcean || this.isGrounded()) {
+                this.playAnimation("PlayerIdle");
+            }
+        }
+    }
+
+    private clearMovementInput(): void {
+        this.moveDir = cc.v2(0, 0);
+
+        this.keyStates[cc.macro.KEY.a] = false;
+        this.keyStates[cc.macro.KEY.d] = false;
+        this.keyStates[cc.macro.KEY.w] = false;
+        this.keyStates[cc.macro.KEY.up] = false;
+        this.keyStates[cc.macro.KEY.s] = false;
+        this.keyStates[cc.macro.KEY.down] = false;
+        this.keyStates[cc.macro.KEY.space] = false;
     }
 
     private isMerchantUIOpen(): boolean {
@@ -814,82 +1195,35 @@ export default class PlayerController extends BaseEntity {
         );
     }
 
-    public toggleCrafting(): void {
-        if (!this.craftingUI) {
-            const host = cc.find("Canvas/UI Root/CraftingUIHost");
-            this.craftingUI = host ? host.getComponent(CraftingUIController) : null;
-        }
-        if (!this.craftingUI) {
-            cc.warn("[PlayerController] CraftingUIController was not found.");
-            return;
+    private handleMerchantShopKey(keyCode: number): boolean {
+        if (!this.merchantShopUI || !this.merchantShopUI.isOpen()) {
+            return false;
         }
 
-        if (this.craftingUI.isOpen()) {
-            this.closeCrafting();
-            return;
+        switch (keyCode) {
+            case cc.macro.KEY.up:
+                this.merchantShopUI.selectPrevItem();
+                return true;
+
+            case cc.macro.KEY.down:
+                this.merchantShopUI.selectNextItem();
+                return true;
+
+            case cc.macro.KEY.left:
+                this.merchantShopUI.decreaseAmount();
+                return true;
+
+            case cc.macro.KEY.right:
+                this.merchantShopUI.increaseAmount();
+                return true;
+
+            case cc.macro.KEY.enter:
+                this.merchantShopUI.buySelected();
+                return true;
+
+            default:
+                return false;
         }
-
-        if (this.isDead || this.isMerchantUIOpen()) {
-            return;
-        }
-        if (!this.craftingUI.open()) {
-            return;
-        }
-
-        this.clearMovementInput();
-    }
-
-    private closeCrafting(): void {
-        if (this.craftingUI && this.craftingUI.isOpen()) {
-            if (!this.craftingUI.close()) {
-                return;
-            }
-        }
-        this.clearMovementInput();
-    }
-
-    private isCraftingUIOpen(): boolean {
-        return !!this.craftingUI && this.craftingUI.isOpen();
-    }
-
-    private refreshMoveDirection(): void {
-        const left = this.keyStates[InputAction.MoveLeft] ? 1 : 0;
-        const right = this.keyStates[InputAction.MoveRight] ? 1 : 0;
-        this.moveDir.x = this.isCraftingUIOpen() ? 0 : right - left;
-    }
-
-    private onCraftingUIClosed(): void {
-        this.clearMovementInput();
-    }
-
-    private onCraftingUIOpened(): void {
-        this.clearMovementInput();
-    }
-
-    private onGamePaused(): void {
-        this.inputLockedByGamePause = true;
-        this.clearMovementInput();
-    }
-
-    private onGameResumed(): void {
-        this.inputLockedByGamePause = false;
-        this.clearMovementInput();
-    }
-
-    private clearMovementInput(): void {
-        this.keyStates = {};
-        this.moveDir.x = 0;
-        if (this.rb) {
-            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
-        }
-    }
-
-    private onDialogueOptionConfirmed(index: number): void {
-        if (!this.dialogueUI || !this.dialogueUI.isOptionsVisible()) {
-            return;
-        }
-        this.dialogueUI.selectOption(index);
-        this.confirmDialogueOption();
     }
 
     private showDialogueContent(content: DialogueContent, anchorNode: cc.Node) {
@@ -904,9 +1238,5 @@ export default class PlayerController extends BaseEntity {
             this.currentDialogueOptions.map(option => option.label),
             anchorNode
         );
-        this.clearMovementInput();
-        if (this.inputManager) {
-            this.inputManager.pushContext(InputContext.Dialogue, this.handleDialogueInput, this);
-        }
     }
 }
