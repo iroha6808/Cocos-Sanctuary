@@ -419,6 +419,8 @@
     "minZoomRatio": 0.1,
     "maxZoomRatio": 1.8,
     "zoomStep": 0.1,
+    "overviewPadding": 220,
+    "overviewMinZoomRatio": 0.08,
     "_id": "68lnp8QThC7qeo/b5SUGnz"
   },
   {
@@ -17892,6 +17894,7 @@
     "cameraRig": {
       "__id__": 8
     },
+    "autoMapGenerator": null,
     "menuSceneName": "MenuScene",
     "gameSceneName": "Game",
     "gameOverSceneName": "GameOver",
@@ -17902,6 +17905,7 @@
     "autoLoadRequestedSave": true,
     "enableAutomaticMonsterSpawning": true,
     "monsterSpawnDebugLog": true,
+    "physicsTagDebugLog": false,
     "_id": "c2ricBxJFBF7r4DwekDvzp"
   },
   {
@@ -20220,7 +20224,18 @@
     },
     "seed": "sanctuary-jump-map-1",
     "autoGenerateOnStart": true,
+    "manualTriggerOnly": true,
     "clearGeneratedOnStart": true,
+    "generationStepInterval": 0.1,
+    "cancelCurrentGenerationBeforeRestart": false,
+    "frameCameraDuringTimedGeneration": true,
+    "cameraFrameDuration": 0.6,
+    "startAfterCameraDelay": 0.2,
+    "returnAfterGenerationDelay": 0.7,
+    "cameraReturnDuration": 0.6,
+    "shakeCameraOnSpawn": true,
+    "spawnShakeDuration": 0.08,
+    "spawnShakeAmplitude": 20,
     "minX": -5000,
     "maxX": 0,
     "minY": -2000,
