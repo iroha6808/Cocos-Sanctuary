@@ -405,6 +405,7 @@ export default class GameManager extends cc.Component {
             hp,
             maxHp,
             inventory: InventoryManager.instance.getSaveSnapshot(),
+            mapState: SaveService.getCurrentMapGenerationState(),
             updatedAt: Date.now()
         };
     }
