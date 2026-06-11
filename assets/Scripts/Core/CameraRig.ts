@@ -17,10 +17,10 @@ export default class CameraRig extends cc.Component {
     public maxFollowSpeed: number = 54;
 
     @property(cc.Float)
-    public distanceExponentScale: number = 2500;
+    public distanceSpeedK: number = 0.18;
 
     @property(cc.Float)
-    public maxDistance: number = 120;
+    public distanceResponseScale: number = 300;
 
     @property(cc.Float)
     public lookAheadScale: number = 0.14;
@@ -202,10 +202,15 @@ export default class CameraRig extends cc.Component {
             return 0;
         }
 
-        const curveDistance = this.maxDistance > 0 ? Math.min(distance, this.maxDistance) : distance;
-        const safeScale = Math.max(1, this.distanceExponentScale);
-        const distanceFactor = 1 - Math.exp(-curveDistance / safeScale);
-        const followSpeed = this.minFollowSpeed + (this.maxFollowSpeed - this.minFollowSpeed) * distanceFactor;
+        const safeResponseScale = Math.max(1, this.distanceResponseScale);
+        const distanceResponse = 1 - Math.exp(-distance / safeResponseScale);
+        const minSpeed = Math.max(0, Math.min(this.minFollowSpeed, this.maxFollowSpeed));
+        const maxSpeed = Math.max(minSpeed, this.maxFollowSpeed);
+        const followSpeed = this.clamp(
+            distance * Math.max(0, this.distanceSpeedK) * distanceResponse,
+            minSpeed,
+            maxSpeed
+        );
         const alpha = 1 - Math.exp(-followSpeed * dt);
         return Math.min(1, Math.max(0, alpha));
     }

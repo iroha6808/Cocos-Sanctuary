@@ -264,7 +264,7 @@ Canvas
   - 監聽 `COMBAT_HIT_CONFIRMED`，用 pooled runtime Label 顯示上飄傷害數字。
   - GameManager 會 runtime 補一個；也可手動掛到 UI Root 並指定 `numberRoot`。
 - `CameraRig.ts`
-  - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
+  - Main Camera runtime 依 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))` 取得 follow speed，再用 `1 - exp(-followSpeed * dt)` 算追趕比例；支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
 - `CameraFollow.ts`
   - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`

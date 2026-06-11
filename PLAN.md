@@ -241,7 +241,7 @@
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
 - [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player
 - [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
-- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceExponentScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
+- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
 - [ ] Player 或 Player 子節點掛 `PlayerGun.ts`；`projectilePrefab` 拖玩家子彈 prefab，`muzzleNode` 可拖槍口節點，`projectileParent` 建議拖 Bullet_Layer。
