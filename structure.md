@@ -704,3 +704,38 @@ Score / save / leaderboard
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
 6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
 7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。
+# 怪物自動生成系統（2026-06-11）
+
+## Runtime 架構
+
+```text
+Canvas
+├─ Core Controllers
+│  ├─ GameManager
+│  ├─ MonsterSpawner（GameManager 啟動時自動補上）
+│  └─ MonsterSpawnPositionResolver（GameManager 啟動時自動補上）
+└─ NPC／World Root
+   └─ Runtime Monsters（MonsterSpawner 自動建立）
+```
+
+## 相關檔案
+
+- `assets/Scripts/Data/MonsterPool.ts`
+  - 怪物池 entry、條件過濾與權重抽選。
+- `assets/Scripts/NPC/MonsterSpawnPositionResolver.ts`
+  - 玩家周邊地面 raycast、鏡頭排除、空間與怪物間距檢查。
+- `assets/Scripts/NPC/MonsterSpawner.ts`
+  - 生成冷卻、全域／種類上限、spawn budget、AI target 與過遠回收。
+- `assets/Scripts/NPC/SpawnedMonster.ts`
+  - 追蹤系統生成怪物，在死亡或銷毀後釋放生成名額。
+- `assets/Scripts/NPC/EnemyRespawner.ts`
+  - 保留作為固定區域、巢穴或事件型生成器，不納入全域生成數量。
+
+## 預設怪物池
+
+- Slime：weight 50、種類上限 4、cost 1。
+- Boar：weight 30、種類上限 3、cost 1。
+- Skeleton Mage：weight 20、種類上限 2、cost 2。
+
+`GameManager.enableAutomaticMonsterSpawning` 可關閉整套自動生成。若手動在
+`Core Controllers` 掛上 `MonsterSpawner`，則可用 Inspector 自訂完整怪物池與參數。
