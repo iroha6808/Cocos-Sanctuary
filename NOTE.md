@@ -143,6 +143,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 | `Esc` | 依最上層 context：關商店 / 關合成 / 關背包 / Pause Resume。 | `InputAction.Cancel`、`GameManager.handleGameplayInput()`、`handlePausedInput()` |
 | `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
 | `+` / `-` | 調整 Main Camera zoom；`+` 放大、`-` 拉遠，Pause 中也可用。 | `InputAction.CameraZoomIn/Out`、`GameManager.adjustCameraZoom()`、`CameraRig.adjustBaseZoom()` |
+| `G` | 觸發自動地圖逐塊生成；生成期間鏡頭拉到整個生成範圍，結束後回到玩家。 | `InputAction.GenerateMap`、`GameManager.beginAutoMapGeneration()`、`AutoMapGenerator.beginTimedGeneration()` |
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
 | `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
 | `Up` / `Down`、`W` / `S`、滑鼠滾輪 | Gameplay 水中上下；UI context 中改成對話 / 商店上下選擇。 | `InputManager.onMouseWheel()`、`PlayerController` context handlers |
@@ -167,7 +168,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `ThemeManager.ts`：主題 / 色調切換雛形，可註冊 `tintTargets`、可選 `tintOverlay`，並提供 `applyTheme(themeName, duration)`；若開 `autoApplyOceanTheme`，會跟水域狀態切 default / ocean tint。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
 - `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`；新增 `Vehicle` context，載具中優先吃 A/D/W/S/Space/F。
-- `CameraRig.ts`：手動掛到 Main Camera，跟隨速度使用 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))`，再用 `minFollowSpeed/maxFollowSpeed` 夾住手感；搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。
+- `CameraRig.ts`：手動掛到 Main Camera，跟隨速度使用 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))`，再用 `minFollowSpeed/maxFollowSpeed` 夾住手感；搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。另提供 `frameWorldRect()` / `returnToTarget()`，供自動地圖生成時暫時拉遠看完整生成範圍。
 - `CameraFollow.ts`：舊版簡單 smooth follow，已不再由 PlayerController runtime 補掛；正式展示以 `CameraRig.ts` 為主。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
 - `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、`clientId`、`sessionId`、scene、position、HP、Score、EXP、背包摘要 / 統計與 online / paused 狀態寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
@@ -289,9 +290,11 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 
 ### Map / Scene
 
-- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5 後自動生成跳躍平台。
+- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5；目前預設不開場生成，按 `G` 才開始逐塊生成。
 - AutoMapGenerator 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
 - 生成策略：先拼出 `FlatRun / RampUp / RampDown / Hill / Valley` 平台組合，再把整組放進地圖；pattern 內部接近連通，pattern 之間保留跳躍距離。
+- `beginTimedGeneration()` 會預先算出 placements，然後每 `generationStepInterval = 0.07` 秒 spawn 一塊地形並 emit `MAP_GENERATION_PROGRESS(current, total)`；生成中重按 `G` 預設不重入。
+- 逐塊生成時會呼叫 `CameraRig.frameWorldRect()` 看完整生成範圍；完成後 `CameraRig.returnToTarget()` 回到玩家，期間玩家仍可移動。
 - AutoMapGenerator 每次生成後會把 `seed`、範圍、pattern 數、斜坡數、rock 數與主要參數寫入 `SaveService.currentMap` 並 emit `MAP_GENERATION_UPDATED`；存檔只保存這份 map state，不保存 runtime 生成出的所有節點。
 - 讀檔觸發 `SAVE_LOADED` 時，AutoMapGenerator 會套用 `saveData.mapState` 並重新生成，確保同一個存檔回到同一張自動地圖。
 - `minPatternCount/maxPatternCount` 控制平台組數，`slopePatternChance` 控制斜坡組比例，`minSlopePatternCount` 保證至少幾組含 Rockleft / Rockright；`scatterCount` 只補少量散點。
@@ -546,6 +549,20 @@ Auto map save/load
 ```
 
 ```text
+Auto map timed generation
+  -> G key
+  -> InputAction.GenerateMap
+  -> GameManager.beginAutoMapGeneration()
+  -> AutoMapGenerator.beginTimedGeneration()
+  -> CameraRig.frameWorldRect(generation range)
+  -> spawn one AutoRock_* every generationStepInterval
+  -> EventCenter.emit(MAP_GENERATION_PROGRESS, current, total)
+  -> SaveService.setCurrentMapGenerationState()
+  -> EventCenter.emit(MAP_GENERATION_UPDATED, state)
+  -> CameraRig.returnToTarget()
+```
+
+```text
 Portal / enemy pathing
   -> NPC_AI.update()
   -> NPCPathAgent.getSteeringDirection()
@@ -557,8 +574,8 @@ Portal / enemy pathing
 
 ## Cocos Inspector 設定
 
-- `GameManager.ts`：接 `playerNode`、`cameraRig`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`pausePanel` 是 Esc 暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
-- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍。
+- `GameManager.ts`：接 `playerNode`、`cameraRig`、`autoMapGenerator`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 上的 AutoMapGenerator。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
+- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。
 - `CameraFollow.ts`：legacy 備用腳本，預設 `useXLimit/useYLimit` 關閉；目前不建議掛在 Main Camera，避免和 `CameraRig.ts` 同時控制相機。
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。

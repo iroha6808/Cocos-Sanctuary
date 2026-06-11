@@ -17,6 +17,7 @@ export enum InputAction {
     ToggleMute = "ToggleMute",
     CameraZoomIn = "CameraZoomIn",
     CameraZoomOut = "CameraZoomOut",
+    GenerateMap = "GenerateMap",
     DebugAddCoconut = "DebugAddCoconut",
     DebugAddCraftItems = "DebugAddCraftItems"
 }
