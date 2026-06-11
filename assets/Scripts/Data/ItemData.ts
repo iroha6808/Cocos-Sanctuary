@@ -318,7 +318,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         rottenTime: 1415
     },
     potion: {
-        id: "redpotion",
+        id: "potion",
         name: "Potion",
         description: "A simple healing potion.",
         iconPath: "potions/redpotion.png",

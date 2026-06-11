@@ -170,14 +170,14 @@ export default class MerchantNPC extends cc.Component {
 
         if (!InventoryManager.instance.transact(
             [{ itemId: "coconut", count: cost }],
-            [{ itemId: itemDefinition.id, count: amount }]
+            [{ itemId: stockItem.itemId, count: amount }]
         )) {
             this.log("buy failed: inventory transaction was rejected.");
             return false;
         }
 
         stockItem.stock -= amount;
-        EventCenter.emit(GameEvent.MERCHANT_PURCHASED, itemDefinition.id, amount, cost);
+        EventCenter.emit(GameEvent.MERCHANT_PURCHASED, stockItem.itemId, amount, cost);
         AudioManager.play(SfxType.BUY);
         this.log(`bought ${itemDefinition.name} x${amount}, cost=${cost}, stockLeft=${stockItem.stock}`);
         return true;

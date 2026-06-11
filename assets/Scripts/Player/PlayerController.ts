@@ -75,6 +75,7 @@ export default class PlayerController extends BaseEntity {
 
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
+    private merchantShopKeyStates: { [key: number]: boolean } = {};
 
     private anim: cc.Animation = null!;
     private currentAnimName: string = "";
@@ -115,6 +116,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
         this.setupMouseAttackInput();
@@ -213,10 +215,27 @@ export default class PlayerController extends BaseEntity {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            if (this.merchantShopKeyStates[event.keyCode]) {
+                return;
+            }
+
+            this.merchantShopKeyStates[event.keyCode] = true;
+            this.handleMerchantShopKey(event.keyCode);
+            this.blockPlayerControlForUI();
+            return;
+        }
+
         this.applyMoveKey(event.keyCode, true);
     }
 
     onKeyUp(event: cc.Event.EventKeyboard) {
+        if (this.merchantShopKeyStates[event.keyCode]) {
+            delete this.merchantShopKeyStates[event.keyCode];
+            this.keyStates[event.keyCode] = false;
+            return;
+        }
+
         this.applyMoveKey(event.keyCode, false);
     }
 
@@ -1029,6 +1048,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         const gameCanvas = (cc.game as any).canvas;
 
@@ -1201,24 +1221,33 @@ export default class PlayerController extends BaseEntity {
         }
 
         switch (keyCode) {
+            case cc.macro.KEY.w:
             case cc.macro.KEY.up:
                 this.merchantShopUI.selectPrevItem();
                 return true;
 
+            case cc.macro.KEY.s:
             case cc.macro.KEY.down:
                 this.merchantShopUI.selectNextItem();
                 return true;
 
+            case cc.macro.KEY.a:
             case cc.macro.KEY.left:
                 this.merchantShopUI.decreaseAmount();
                 return true;
 
+            case cc.macro.KEY.d:
             case cc.macro.KEY.right:
                 this.merchantShopUI.increaseAmount();
                 return true;
 
+            case cc.macro.KEY.f:
             case cc.macro.KEY.enter:
                 this.merchantShopUI.buySelected();
+                return true;
+
+            case cc.macro.KEY.escape:
+                this.closeMerchantFlow();
                 return true;
 
             default:
