@@ -286,6 +286,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `FoodBase.eat()` 會先找 `PlayerStats`，沒有時改用 `PlayerController.heal()`，並發送 HP 更新與 heal feedback。
 - 水果 / 堅果腳本已大量補齊：apple、avacado、blueberries、cherry、coconut、durian、grapes、greenapple、kiwi、mulberry、orange、peach、pear、pineapple、plum、redberries、strawberry、watermelonslice、acorn、cashew、chestnut、coffeebean、guazi、peanuts、pistachio。
 - `coconut.ts`：目前是 `FoodBase` 子類，`itemName = "coconut"`，同時作為商人交易測試貨幣。
+- 采集點的enable contact要打鉤
 
 ### Map / Scene
 
