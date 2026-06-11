@@ -112,6 +112,7 @@ assets/
             acorn.ts
             cashew.ts ... pistachio.ts
     Map/
+      AutoMapGenerator.ts
       NewScript - 001.ts
       BouncePad.ts
       OceanArea.ts
@@ -232,6 +233,8 @@ Canvas
     SkeletonMage
   coconuts
   platform
+    auto generate
+      AutoRock_* runtime nodes
     Rockleft / Rockright / Rockplatform3 / 4 / 5 copies
 ```
 
@@ -409,6 +412,10 @@ Canvas
 
 ## Map / Scene
 
+- `Map/AutoMapGenerator.ts`
+  - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
+  - 預設範圍 local `x = -5000 ~ 0`、`y = -2000 ~ 0`；只清 `AutoRock_` prefix 節點。
+  - 使用 seeded random、AABB separation、平台頂面 / 斜坡地面線 offset，避免地形互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -565,6 +572,8 @@ Canvas
   - `Blue Potion` / `Red Potion` / `Yellow Potion` prefab 建議掛對應 potion script，確認 item id 與 `ItemData` 一致。
 - Rocksets
   - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
+  - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`；平台不用全連通，但用 `minSeparation` 避免卡在一起。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels

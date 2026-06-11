@@ -69,6 +69,7 @@
 - [x] 車 / 船互動腳本、水域 BGM crossfade、ThemeManager 雛形
 - [x] Blue / Red / Yellow Potion scripts / prefab / resources 圖
 - [x] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab
+- [x] AutoMapGenerator 腳本：在 `Canvas/platform/auto generate` 生成跳躍平台
 - [ ] 正式 Game Over 結算 UI
 - [ ] 地圖資料化 / TileRenderer
 
@@ -110,7 +111,7 @@
 | 遊戲渲染 | 客製化渲染效果 Shader 0-4%；2.5D 0-2% | 暫未做 |
 | 遊戲特效 | 打擊感 0-3%；特殊遊戲運鏡 0-4% | 橡皮筋鏡頭、`HitFeelManager` 已補 hit stop / flash / shake |
 | 物理系統 | 客製化物理系統，例如外太空無重力場景 0-4% | `OceanArea` 水中物理可展示 |
-| 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | 傳送法師 Mini Boss / Boss Arena 已補腳本；MapManager 尚未補 |
+| 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | 傳送法師 Mini Boss / Boss Arena 已補腳本；AutoMapGenerator 已補腳本 |
 | 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把玩家狀態寫進 localStorage 假後端，待 UI / 真同步 |
 | 其他 | 同學可以自由發揮 | 打擊感、橡皮筋鏡頭可當展示亮點 |
 | Notice | 最高可拿 20% | 優先保住打擊感 / 運鏡 / AI / 水中物理 |
@@ -182,9 +183,9 @@
 
 | 狀態 | 摘要 |
 | --- | --- |
-| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、商人 idle / talk 動畫素材、NPC 近遠程攻擊、資源掉落、水域、smallore、potions、Rocksets、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number、車 / 船、BGM crossfade 腳本 |
-| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商人動畫 / 商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 車船 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
-| 未完成 | Firebase 真後端替換、正式 UI 美術、MapManager / TileRenderer、素材清理、多人角色顯示 UI |
+| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、商人 idle / talk 動畫素材、NPC 近遠程攻擊、資源掉落、水域、smallore、potions、Rocksets、AutoMapGenerator、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number、車 / 船、BGM crossfade 腳本 |
+| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、AutoMapGenerator prefab 欄位、商人動畫 / 商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 車船 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
+| 未完成 | Firebase 真後端替換、正式 UI 美術、TileRenderer、素材清理、多人角色顯示 UI |
 
 ## 分工
 
@@ -205,7 +206,7 @@
 | NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、Boss、距離刷怪、商人交易、TravelingMerchant sprite / idle / talk clips、drop table | SkeletonMage / Boss / Respawner 實測、商人動畫播放實測、PathNode 手動連線 |
 | Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、potions、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
 | UI | HP / EXP / Score HUD、Inventory、Dialogue、Merchant Shop、Crafting、Menu / GameOver 腳本 API；多數 panel 已可跟 Main Camera / clamp | 手動接 Menu / Pause / GameOver panels，實測 OceanArea UI |
-| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | MapManager、TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
+| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、AutoMapGenerator、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
 | Vehicle | `VehicleInteractable`、`VehicleController`、`CarController`、`BoatController` | 車 / 船 prefab 視覺、seat / exitOffset / collider 手動調整 |
 
 ## 手動設定
@@ -225,6 +226,8 @@
 - [ ] DropOre prefab 掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key
 - [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
 - [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
+- [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
+- [ ] AutoMapGenerator 預設範圍 `x -5000~0`、`y -2000~0`；`seed` 固定可重現，`minSeparation` / `rowCount` / `verticalJitter` 可調平台密度。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`

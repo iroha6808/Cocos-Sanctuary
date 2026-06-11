@@ -114,6 +114,8 @@ Canvas
 │   └── SkeletonMage
 ├── coconuts
 └── platform
+    ├── auto generate
+    │   └── AutoRock_* runtime nodes
     └── Rockleft / Rockright / Rockplatform3 / 4 / 5 copies
 ```
 
@@ -285,6 +287,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 
 ### Map / Scene
 
+- `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5 後自動生成跳躍平台。
+- AutoMapGenerator 預設生成範圍是 local `x = -5000 ~ 0`、`y = -2000 ~ 0`，只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
+- Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。
 - `OceanArea.ts`：掛在水域 sensor collider 上；目前用 collider bounds 每幀判斷玩家是否在水域內，進入時呼叫 `enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
 - `OceanArea.ts`：進出水域時會 emit `PLAYER_WATER_STATE_CHANGED(isInWater, oceanNode)`，給 `AudioManager` crossfade BGM 與 `ThemeManager` 可選色調切換使用。
 - `OceanLayerOrder.ts`：固定 OceanArea 子節點 zIndex / active / opacity，避免水域視覺層被蓋掉。
