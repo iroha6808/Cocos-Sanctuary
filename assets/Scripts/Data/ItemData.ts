@@ -419,6 +419,12 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         description: "A rare crystal that refracts light into stunning oceanic hues.",
         iconPath: "smallore/tealprism.png",
     },
+    torch: {
+        id: "torch",
+        name: "torch",
+        description: "A torch for lighting.",
+        iconPath: "combined/torch.png",
+    },
     voidnugget: {
         id: "voidnugget",
         name: "Void Nugget",
@@ -437,12 +443,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     wood: {
         id: "wood",
         name: "Wood",
-        description: "Basic building material."
+        description: "Basic building material.",
+        iconPath: "combined/wood.png"
     },
     wood_plank: {
         id: "wood_plank",
         name: "Wood Plank",
-        description: "Processed wood used for building."
+        description: "Processed wood used for building.",
+        iconPath: "combined/wood_plank.png"
     },
     yellowpotion: {
         id: "yellowpotion",
@@ -470,13 +478,14 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     fire_essence: {
         id: "fire_essence",
         name: "Fire Essence",
-        description: "A concentrated source of heat."
+        description: "A concentrated source of heat.",
+        iconPath: "combined/fire_essence.png"
     },
     burning_coconut: {
         id: "burning_coconut",
         name: "Burning Coconut",
         description: "A coconut infused with fire essence.",
-        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits2/coconut.png"
+        iconPath: "combined/burning_coconut.png",
     },
     // ==========================================
     // 2. 新增合成道具：料理類 (48 - 62)
@@ -540,7 +549,6 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     // 5. 新增合成道具：武器與彈藥類 (84 - 94)
     // ==========================================
     copper_sword: { id: "copper_sword", name: "Copper Shortsword", description: "Better than your bare fists, but not by much.", iconPath: "combined/copper_sword.png", attack: 6 },
-    iron_sword: { id: "iron_sword", name: "Iron Broadsword", description: "A reliable weapon forged with the backbone of classic smithing.", iconPath: "combined/iron_sword.png", attack: 14 },
     silver_sword: { id: "silver_sword", name: "Holy Silver Blade", description: "Deals 50% bonus radiant damage to undead and shadow monsters.", iconPath: "combined/silver_sword.png", attack: 22, critChance: 5 },
     golden_rapier: { id: "golden_rapier", name: "Royal Citrine Rapier", description: "A swift thrusting sword that boosts critical strike rates.", iconPath: "combined/golden_rapier.png", attack: 26, critChance: 12 },
     ruby_flameblade: { id: "ruby_flameblade", name: "Ruby Volcano Flameblade", description: "Sears enemies with a volcanic burn, dealing damage over time.", iconPath: "combined/ruby_flameblade.png", attack: 38 },

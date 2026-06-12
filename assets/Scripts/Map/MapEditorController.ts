@@ -86,13 +86,13 @@ export default class MapEditorController extends cc.Component {
     deleteRadius: number = 120;
 
     @property(cc.Integer)
-    previewOpacity: number = 120;
+    previewOpacity: number = 255;
 
     @property(cc.Boolean)
-    alignPlacementCenterToCursor: boolean = true;
+    alignPlacementCenterToCursor: boolean = false;
 
     @property(cc.Boolean)
-    showPlacementDebug: boolean = true;
+    showPlacementDebug: boolean = false;
 
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
@@ -582,9 +582,6 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
-        if (!this.placedDuringCurrentClick && this.tool !== MapEditorTool.BoxGenerate) {
-            this.placeAt(rootLocal);
-        }
         this.placedDuringCurrentClick = false;
     }
 
@@ -654,7 +651,9 @@ export default class MapEditorController extends cc.Component {
         }
         const started = generator.beginTimedGenerationInRect(rect, {
             clearExisting: true,
+            frameCamera: true,
             useRealtimeTimer: true,
+            fitSmallRect: true,
             onPlacementSpawned: (state: MapEditorPlacementState) => {
                 this.upsertPlacement(state);
                 this.commitEditorChangesToScene();
@@ -1211,19 +1210,26 @@ export default class MapEditorController extends cc.Component {
             this.previewNode = cc.instantiate(entry.prefab);
             this.previewNode.name = `EditorPreview_${entry.key}`;
             this.previewNode.setScale(scale, scale);
-            parent.addChild(this.previewNode);
+            if (entry.kind === "terrain") {
+                this.previewNode.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
+                parent.addChild(this.previewNode);
+                this.previewNode.setSiblingIndex(parent.childrenCount - 1);
+            } else {
+                parent.addChild(this.previewNode);
+            }
             this.disablePreviewPhysics(this.previewNode);
-            this.setPreviewOpacity(this.previewNode, this.previewOpacity);
             this.previewKey = key;
         }
 
         this.previewNode.angle = this.rotation;
-        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry);
         if (entry.kind === "terrain") {
-            this.drawTerrainPlacementDebug(rootLocal, this.previewNode);
+            this.previewNode.active = true;
+            this.previewNode.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
         } else {
-            this.clearPlacementDebug();
+            this.setPreviewNodePosition(this.previewNode, parent, rootLocal, entry);
+            this.setPreviewVisualState(this.previewNode, Math.max(220, this.previewOpacity || 255));
         }
+        this.clearPlacementDebug();
     }
 
     private destroyPlacementPreview(): void {
@@ -1335,7 +1341,34 @@ export default class MapEditorController extends cc.Component {
 
         node.opacity = Math.max(0, Math.min(255, opacity));
         for (let i = 0; i < node.childrenCount; i++) {
-            this.setPreviewOpacity(node.children[i], opacity);
+            node.children[i].opacity = 255;
+        }
+    }
+
+    private setPreviewNodePosition(
+        node: cc.Node,
+        parent: cc.Node,
+        rootLocal: cc.Vec2,
+        entry: EditorPrefabEntry
+    ): void {
+        if (entry.kind === "terrain") {
+            this.setTerrainNodePosition(node, parent, rootLocal, entry.key);
+            return;
+        }
+
+        this.setNodePositionFromRootLocal(node, parent, rootLocal);
+    }
+
+    private setPreviewVisualState(node: cc.Node, opacity: number): void {
+        if (!node) {
+            return;
+        }
+
+        node.active = true;
+        node.zIndex = 9998;
+        node.opacity = Math.max(0, Math.min(255, opacity));
+        for (let i = 0; i < node.childrenCount; i++) {
+            this.setPreviewVisualState(node.children[i], 255);
         }
     }
 

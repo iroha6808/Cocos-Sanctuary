@@ -89,6 +89,8 @@ export default class CameraRig extends cc.Component {
     private inverseZoomScaledBaseScales: cc.Vec2[] = [];
     private screenFixedZoomScaledBaseScales: cc.Vec2[] = [];
     private screenFixedZoomScaledBasePositions: cc.Vec2[] = [];
+    private realtimeOverviewTimer: any = null;
+    private lastRealtimeOverviewMs: number = 0;
 
     public static getOrCreate(cameraNode?: cc.Node): CameraRig {
         if (CameraRig.instance && cc.isValid(CameraRig.instance.node)) {
@@ -167,6 +169,7 @@ export default class CameraRig extends cc.Component {
         this.shakeDuration = Math.max(this.shakeDuration, duration);
         this.shakeTime = Math.max(this.shakeTime, duration);
         this.shakeAmplitude = Math.max(this.shakeAmplitude, amplitude);
+        this.startRealtimeOverviewTickIfNeeded();
     }
 
     public addImpulse(direction: cc.Vec2, strength: number): void {
@@ -241,6 +244,7 @@ export default class CameraRig extends cc.Component {
         if (CameraRig.instance === this) {
             CameraRig.instance = null;
         }
+        this.stopRealtimeOverviewTick();
     }
 
     private resolveTarget(): cc.Node {
@@ -332,11 +336,13 @@ export default class CameraRig extends cc.Component {
         this.overviewTime = 0;
         this.shakeTime = 0;
         this.impulse = cc.v2(0, 0);
+        this.startRealtimeOverviewTickIfNeeded();
     }
 
     private updateOverview(dt: number): void {
         if (!this.camera) {
             this.overviewActive = false;
+            this.stopRealtimeOverviewTick();
             return;
         }
 
@@ -357,18 +363,51 @@ export default class CameraRig extends cc.Component {
             this.lastTargetPosition = this.target && cc.isValid(this.target)
                 ? this.getTargetWorldPosition()
                 : null;
+            this.stopRealtimeOverviewTick();
+        } else if (rawT >= 1 && this.shakeTime <= 0) {
+            this.stopRealtimeOverviewTick();
         }
     }
 
     private onGamePaused(): void {
         this.paused = true;
+        this.startRealtimeOverviewTickIfNeeded();
     }
 
     private onGameResumed(): void {
         this.paused = false;
+        this.stopRealtimeOverviewTick();
         this.lastTargetPosition = this.target && cc.isValid(this.target)
             ? this.getTargetWorldPosition()
             : null;
+    }
+
+    private startRealtimeOverviewTickIfNeeded(): void {
+        if (!this.paused || !this.overviewActive || this.realtimeOverviewTimer !== null) {
+            return;
+        }
+
+        this.lastRealtimeOverviewMs = Date.now();
+        this.realtimeOverviewTimer = setInterval(() => {
+            if (!this.paused || !this.overviewActive) {
+                this.stopRealtimeOverviewTick();
+                return;
+            }
+
+            const now = Date.now();
+            const dt = Math.min(0.05, Math.max(0, (now - this.lastRealtimeOverviewMs) / 1000));
+            this.lastRealtimeOverviewMs = now;
+            this.updateOverview(dt);
+        }, 16);
+    }
+
+    private stopRealtimeOverviewTick(): void {
+        if (this.realtimeOverviewTimer === null) {
+            return;
+        }
+
+        clearInterval(this.realtimeOverviewTimer);
+        this.realtimeOverviewTimer = null;
     }
 
     private getTargetWorldPosition(): cc.Vec2 {

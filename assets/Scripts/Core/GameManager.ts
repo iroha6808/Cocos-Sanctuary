@@ -175,7 +175,7 @@ export default class GameManager extends cc.Component {
     }
 
     async start() {
-        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:145");
+        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:175");
         this.initializeBoundaryMapRange();
         await this.loadCurrentUserSave();
     }
@@ -185,16 +185,21 @@ export default class GameManager extends cc.Component {
     }
 
     async onGameOver() {
-        console.log("玩家死亡，結算分數... - GameManager.ts:150");
+        console.log("玩家死亡，結算分數... - GameManager.ts:185");
         this.resumeGame(false);
+
+        if (AudioManager.instance && AudioManager.instance.gameOverBgm) {
+            AudioManager.instance.playManualBgm(AudioManager.instance.gameOverBgm);
+        }
         const user = firebase.auth().currentUser;
         if (user) {
             const displayName = user.email ? user.email.split('@')[0] : "Player";
-            await this.saveCurrentGame();
+            await this.saveCurrentGame(); 
             await SaveService2.submitScoreToCloud(user.uid, displayName, this.score);
             const top10 = await SaveService2.getTopLeaderboard();
             EventCenter.emit(GameEvent.LEADERBOARD_UPDATED, top10);
         }
+        cc.director.loadScene(this.gameOverSceneName);
     }
 
     public togglePause(): void {
@@ -713,8 +718,14 @@ export default class GameManager extends cc.Component {
     private createSaveData(uid: string): Partial<SaveData> {
         const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
+        
+        let saveHp = 100;
+        let saveMaxHp = 100;
+
         if (playerEntity) {
             cc.log(`[DEBUG] 發現玩家元件，當前 HP=${playerEntity.currentHp}, MAX=${playerEntity.maxHp}`);
+            saveMaxHp = playerEntity.maxHp;
+            saveHp = playerEntity.currentHp > 0 ? playerEntity.currentHp : saveMaxHp; 
         } else {
             cc.error("[DEBUG] ❌ 找不到 PlayerController 元件！");
         }
@@ -723,8 +734,8 @@ export default class GameManager extends cc.Component {
             uid: uid,
             score: this.score,
             exp: this.exp,
-            hp: playerEntity ? playerEntity.currentHp : 100,
-            maxHp: playerEntity ? playerEntity.maxHp : 100,
+            hp: saveHp,
+            maxHp: saveMaxHp,
             inventory: InventoryManager.instance.getSaveSnapshot(),
             updatedAt: Date.now()
         };
@@ -737,10 +748,22 @@ export default class GameManager extends cc.Component {
             cc.error("❌ 找不到 PlayerController！");
             return;
         }
-        playerEntity.maxHp = saveData.maxHp;
-        playerEntity.currentHp = saveData.hp;
+
+        playerEntity.maxHp = saveData.maxHp || 100;
+        let loadHp = saveData.hp;
+        if (loadHp <= 0) {
+            cc.log(`[DEBUG] 發現舊版 0 血存檔，強制洗白恢復滿血！`);
+            loadHp = playerEntity.maxHp; 
+        }
+
+        playerEntity.currentHp = loadHp;
+        
         cc.log(`[DEBUG] 強制寫入 HP: ${playerEntity.currentHp} / ${playerEntity.maxHp}`);
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, playerEntity.currentHp, playerEntity.maxHp);
+        
+        if (loadHp !== saveData.hp) {
+             this.saveCurrentGame();
+        }
     }
 
     private getPlayerNode(): cc.Node {
@@ -776,11 +799,5 @@ export default class GameManager extends cc.Component {
         }
         this.fadeOverlay.active = alpha > 0;
         this.fadeOverlay.opacity = alpha;
-    }
-
-    public async handlePlayerDeath() {
-        console.log("[DEBUG] 偵測到玩家死亡，準備存檔並返回主選單 - GameManager.ts:556");
-        await SaveService2.instance.saveToCloud(this.createSaveData());
-        cc.director.loadScene('MenuScene');
     }
 }

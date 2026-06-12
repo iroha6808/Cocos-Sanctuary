@@ -47,6 +47,7 @@ export interface TimedGenerationOptions {
     frameCamera?: boolean;
     publishState?: boolean;
     useRealtimeTimer?: boolean;
+    fitSmallRect?: boolean;
     onPlacementSpawned?: (state: any) => void;
     onComplete?: () => void;
 }
@@ -58,6 +59,21 @@ interface PatternPlacement {
     bounds: PlacementBounds;
     hasSlope: boolean;
     endGroundY: number;
+}
+
+interface GeneratorTuningSnapshot {
+    rowCount: number;
+    minSeparation: number;
+    edgePadding: number;
+    patternGapMinX: number;
+    patternGapMaxX: number;
+    patternVerticalJitter: number;
+    verticalJitter: number;
+    minPatternCount: number;
+    maxPatternCount: number;
+    minSlopePatternCount: number;
+    slopePatternChance: number;
+    scatterCount: number;
 }
 
 @ccclass
@@ -223,6 +239,9 @@ export default class AutoMapGenerator extends cc.Component {
     private timedGenerationOptions: TimedGenerationOptions = null;
     private generatedRockSerial: number = 0;
     private generatedResourceSerial: number = 0;
+    private realtimeStartTimer: any = null;
+    private realtimeStepTimer: any = null;
+    private realtimeReturnTimer: any = null;
 
     start(): void {
         if (!this.manualTriggerOnly && this.autoGenerateOnStart) {
@@ -314,10 +333,19 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         const previousBounds = this.getCurrentBounds();
-        this.applyBounds(normalizedRect);
-        this.resetRandom();
-        const placements = this.createPlacements(specs);
-        this.applyBounds(previousBounds);
+        const previousTuning = this.captureTuning();
+        let placements: RockPlacement[] = [];
+        try {
+            this.applyBounds(normalizedRect);
+            if (options.fitSmallRect) {
+                this.applySmallRectTuning(normalizedRect);
+            }
+            this.resetRandom();
+            placements = this.createPlacements(specs);
+        } finally {
+            this.restoreTuning(previousTuning);
+            this.applyBounds(previousBounds);
+        }
         this.timedRoot = root;
         this.timedPlacements = placements;
         this.timedSpawnIndex = 0;
@@ -326,6 +354,7 @@ export default class AutoMapGenerator extends cc.Component {
         this.waitingToReturnCamera = false;
         this.timedGenerationRect = normalizedRect;
         this.timedGenerationOptions = options || {};
+        cc.log(`[AutoMapGenerator] Timed generation prepared: total=${placements.length}, realtime=${!!options.useRealtimeTimer}`);
 
         if (this.showDebugBounds) {
             this.drawDebugBounds(root, placements);
@@ -335,10 +364,7 @@ export default class AutoMapGenerator extends cc.Component {
             this.finishTimedGeneration();
             return true;
         }
-        this.scheduleOnce(
-            this.startTimedPlacementSpawning,
-            Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay)
-        );
+        this.scheduleTimedStart(this.getTimedStartDelaySeconds());
         return true;
     }
 
@@ -838,10 +864,17 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         this.waitingToStartTimedGeneration = false;
-        this.schedule(
-            this.spawnNextTimedPlacement,
-            Math.max(0.01, this.generationStepInterval)
-        );
+        if (this.shouldUseRealtimeTimer()) {
+            this.clearRealtimeStartTimer();
+            this.clearRealtimeStepTimer();
+            this.runRealtimeGenerationStep();
+            return;
+        } else {
+            this.schedule(
+                this.spawnNextTimedPlacement,
+                Math.max(0.01, this.generationStepInterval)
+            );
+        }
         this.spawnNextTimedPlacement();
     }
 
@@ -852,6 +885,8 @@ export default class AutoMapGenerator extends cc.Component {
 
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
+        this.clearRealtimeStartTimer();
+        this.clearRealtimeStepTimer();
         const placements = this.timedPlacements.slice();
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
@@ -863,12 +898,13 @@ export default class AutoMapGenerator extends cc.Component {
         if (options.publishState !== false) {
             this.publishMapGenerationState(placements, this.timedGenerationRect || this.getCurrentBounds());
         }
+        EventCenter.emit(GameEvent.MAP_GENERATION_PROGRESS, placements.length, placements.length);
         if (options.onComplete) {
             options.onComplete();
         }
         this.timedGenerationRect = null;
         this.timedGenerationOptions = null;
-        this.scheduleOnce(this.returnCameraToTargetAfterDelay, Math.max(0, this.returnAfterGenerationDelay));
+        this.scheduleTimedReturn(Math.max(0, this.returnAfterGenerationDelay), options);
     }
 
     private stopTimedGeneration(returnCamera: boolean): void {
@@ -876,9 +912,11 @@ export default class AutoMapGenerator extends cc.Component {
             return;
         }
 
+        const shouldReturnCamera = returnCamera && this.shouldFrameCameraForTimedGeneration();
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
         this.unschedule(this.returnCameraToTargetAfterDelay);
+        this.clearRealtimeTimers();
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
         this.waitingToReturnCamera = false;
@@ -887,8 +925,109 @@ export default class AutoMapGenerator extends cc.Component {
         this.timedSpawnIndex = 0;
         this.timedGenerationRect = null;
         this.timedGenerationOptions = null;
-        if (returnCamera) {
+        if (shouldReturnCamera) {
             this.returnCameraToTarget();
+        }
+    }
+
+    private scheduleTimedStart(delaySeconds: number): void {
+        this.clearRealtimeStartTimer();
+        if (this.shouldUseRealtimeTimer()) {
+            this.realtimeStartTimer = this.setRealtimeTimeout(() => {
+                this.realtimeStartTimer = null;
+                this.startTimedPlacementSpawning();
+            }, delaySeconds * 1000);
+            return;
+        }
+
+        this.scheduleOnce(this.startTimedPlacementSpawning, delaySeconds);
+    }
+
+    private scheduleTimedReturn(delaySeconds: number, options: TimedGenerationOptions): void {
+        this.clearRealtimeReturnTimer();
+        if ((options && options.frameCamera === false) || !this.frameCameraDuringTimedGeneration) {
+            this.waitingToReturnCamera = false;
+            return;
+        }
+
+        if (options && options.useRealtimeTimer) {
+            this.realtimeReturnTimer = this.setRealtimeTimeout(() => {
+                this.realtimeReturnTimer = null;
+                this.returnCameraToTargetAfterDelay();
+            }, delaySeconds * 1000);
+            return;
+        }
+
+        this.scheduleOnce(this.returnCameraToTargetAfterDelay, delaySeconds);
+    }
+
+    private shouldUseRealtimeTimer(): boolean {
+        return !!(this.timedGenerationOptions && this.timedGenerationOptions.useRealtimeTimer);
+    }
+
+    private clearRealtimeTimers(): void {
+        this.clearRealtimeStartTimer();
+        this.clearRealtimeStepTimer();
+        this.clearRealtimeReturnTimer();
+    }
+
+    private clearRealtimeStartTimer(): void {
+        if (this.realtimeStartTimer !== null) {
+            this.clearRealtimeTimeout(this.realtimeStartTimer);
+            this.realtimeStartTimer = null;
+        }
+    }
+
+    private clearRealtimeStepTimer(): void {
+        if (this.realtimeStepTimer !== null) {
+            this.clearRealtimeTimeout(this.realtimeStepTimer);
+            this.realtimeStepTimer = null;
+        }
+    }
+
+    private runRealtimeGenerationStep(): void {
+        if (!this.isTimedGenerationRunning) {
+            this.clearRealtimeStepTimer();
+            return;
+        }
+
+        try {
+            this.spawnNextTimedPlacement();
+        } catch (error) {
+            cc.error("[AutoMapGenerator] Timed generation step failed.", error);
+            this.stopTimedGeneration(true);
+            return;
+        }
+
+        if (this.isTimedGenerationRunning && this.shouldUseRealtimeTimer()) {
+            this.clearRealtimeStepTimer();
+            this.realtimeStepTimer = this.setRealtimeTimeout(() => {
+                this.realtimeStepTimer = null;
+                this.runRealtimeGenerationStep();
+            }, Math.max(0.01, this.generationStepInterval) * 1000);
+        }
+    }
+
+    private clearRealtimeReturnTimer(): void {
+        if (this.realtimeReturnTimer !== null) {
+            this.clearRealtimeTimeout(this.realtimeReturnTimer);
+            this.realtimeReturnTimer = null;
+        }
+    }
+
+    private setRealtimeTimeout(callback: () => void, delayMs: number): any {
+        const globalWindow = typeof window !== "undefined" ? window as any : null;
+        return globalWindow && globalWindow.setTimeout
+            ? globalWindow.setTimeout(callback, delayMs)
+            : setTimeout(callback, delayMs);
+    }
+
+    private clearRealtimeTimeout(timerId: any): void {
+        const globalWindow = typeof window !== "undefined" ? window as any : null;
+        if (globalWindow && globalWindow.clearTimeout) {
+            globalWindow.clearTimeout(timerId);
+        } else {
+            clearTimeout(timerId);
         }
     }
 
@@ -904,8 +1043,7 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     private frameCameraForGeneration(): void {
-        const options = this.timedGenerationOptions || {};
-        if (options.frameCamera === false || !this.frameCameraDuringTimedGeneration) {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
             return;
         }
 
@@ -919,8 +1057,7 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     private returnCameraToTarget(): void {
-        const options = this.timedGenerationOptions || {};
-        if (options.frameCamera === false || !this.frameCameraDuringTimedGeneration) {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
             return;
         }
 
@@ -928,6 +1065,18 @@ export default class AutoMapGenerator extends cc.Component {
         if (rig && cc.isValid(rig.node)) {
             rig.returnToTarget(this.cameraReturnDuration);
         }
+    }
+
+    private getTimedStartDelaySeconds(): number {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
+            return 0;
+        }
+        return Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay);
+    }
+
+    private shouldFrameCameraForTimedGeneration(): boolean {
+        const options = this.timedGenerationOptions || {};
+        return options.frameCamera !== false && this.frameCameraDuringTimedGeneration;
     }
 
     private getGenerationWorldRect(bounds: MapGenerationRect): { minX: number; minY: number; maxX: number; maxY: number } {
@@ -1117,6 +1266,64 @@ export default class AutoMapGenerator extends cc.Component {
         const minY = Math.min(rect.minY, rect.maxY);
         const maxY = Math.max(rect.minY, rect.maxY);
         return { minX, minY, maxX, maxY };
+    }
+
+    private captureTuning(): GeneratorTuningSnapshot {
+        return {
+            rowCount: this.rowCount,
+            minSeparation: this.minSeparation,
+            edgePadding: this.edgePadding,
+            patternGapMinX: this.patternGapMinX,
+            patternGapMaxX: this.patternGapMaxX,
+            patternVerticalJitter: this.patternVerticalJitter,
+            verticalJitter: this.verticalJitter,
+            minPatternCount: this.minPatternCount,
+            maxPatternCount: this.maxPatternCount,
+            minSlopePatternCount: this.minSlopePatternCount,
+            slopePatternChance: this.slopePatternChance,
+            scatterCount: this.scatterCount
+        };
+    }
+
+    private restoreTuning(snapshot: GeneratorTuningSnapshot): void {
+        if (!snapshot) {
+            return;
+        }
+        this.rowCount = snapshot.rowCount;
+        this.minSeparation = snapshot.minSeparation;
+        this.edgePadding = snapshot.edgePadding;
+        this.patternGapMinX = snapshot.patternGapMinX;
+        this.patternGapMaxX = snapshot.patternGapMaxX;
+        this.patternVerticalJitter = snapshot.patternVerticalJitter;
+        this.verticalJitter = snapshot.verticalJitter;
+        this.minPatternCount = snapshot.minPatternCount;
+        this.maxPatternCount = snapshot.maxPatternCount;
+        this.minSlopePatternCount = snapshot.minSlopePatternCount;
+        this.slopePatternChance = snapshot.slopePatternChance;
+        this.scatterCount = snapshot.scatterCount;
+    }
+
+    private applySmallRectTuning(rect: MapGenerationRect): void {
+        const width = Math.abs(rect.maxX - rect.minX);
+        const height = Math.abs(rect.maxY - rect.minY);
+        const compactPatternCount = this.clamp(Math.floor(width / 1500) + 1, 1, 4);
+
+        this.edgePadding = Math.min(this.edgePadding, Math.max(12, width * 0.04));
+        this.minSeparation = Math.min(this.minSeparation, Math.max(16, width * 0.025));
+        this.patternGapMinX = Math.min(this.patternGapMinX, 80);
+        this.patternGapMaxX = Math.min(this.patternGapMaxX, 180);
+        this.patternVerticalJitter = Math.min(this.patternVerticalJitter, Math.max(20, height * 0.08));
+        this.verticalJitter = Math.min(this.verticalJitter, Math.max(20, height * 0.06));
+        this.rowCount = Math.max(1, Math.min(this.rowCount, Math.floor(height / 700) + 1));
+        this.minPatternCount = Math.max(1, Math.min(this.minPatternCount, compactPatternCount));
+        this.maxPatternCount = Math.max(this.minPatternCount, Math.min(this.maxPatternCount, compactPatternCount + 1));
+        this.minSlopePatternCount = width >= 2400 && height >= 900
+            ? Math.min(this.minSlopePatternCount, this.maxPatternCount)
+            : 0;
+        this.slopePatternChance = width >= 2400 && height >= 900
+            ? this.slopePatternChance
+            : Math.min(this.slopePatternChance, 0.15);
+        this.scatterCount = Math.min(this.scatterCount, Math.max(1, Math.floor(width / 1200)));
     }
 
     private getNodePositionInRoot(node: cc.Node, root: cc.Node): cc.Vec2 {
