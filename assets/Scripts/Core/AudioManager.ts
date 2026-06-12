@@ -25,6 +25,15 @@ export default class AudioManager extends cc.Component {
     public sceneBgm: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
+    public menuBgm: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    public gameOverBgm: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    public sceneBgm: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
     public waterBgm: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
@@ -65,9 +74,12 @@ export default class AudioManager extends cc.Component {
     private sceneBgmAudioId: number = -1;
     private isPlayerInWater: boolean = false;
     private waterAmbientTimer: number = 0;
+    private bgmAudioIds: { [track: string]: number } = {};
 
     onLoad(): void {
         AudioManager.instance = this;
+        this.bgmAudioIds = {};
+        cc.director.on(cc.Director.EVENT_AFTER_SCENE_LAUNCH, this.onSceneLaunched, this);
         EventCenter.on(GameEvent.PLAYER_WATER_STATE_CHANGED, this.onWaterStateChanged, this);
     }
 
@@ -210,6 +222,13 @@ export default class AudioManager extends cc.Component {
             cc.audioEngine.stop(this.sceneBgmAudioId);
             this.sceneBgmAudioId = -1;
         }
+        
+        if (this.bgmAudioIds && this.bgmAudioIds['manual'] !== undefined) {
+            cc.audioEngine.stop(this.bgmAudioIds['manual']);
+            delete this.bgmAudioIds['manual'];
+        }
+
+        cc.audioEngine.stopMusic();
     }
 
     private getClip(type: SfxType): cc.AudioClip {
@@ -230,4 +249,33 @@ export default class AudioManager extends cc.Component {
                 return null!;
         }
     }
+    public playManualBgm(clip: cc.AudioClip): void {
+        cc.log("🎵 嘗試播放音樂: ", clip ? clip.name : "null");
+        
+        if (!this.bgmAudioIds) {
+            this.bgmAudioIds = {};
+        }
+
+        this.stopAllBgmChannels();
+        
+        if (clip) {
+            const id = cc.audioEngine.play(clip, true, this.musicVolume);
+            cc.log("🎵 播放器 ID:", id); 
+            this.bgmAudioIds['manual'] = id; // 現在這裡保證不會再報錯
+        }
+    }
+    private onSceneLaunched(): void {
+        const sceneName = cc.director.getScene().name;
+        cc.log("🎵 場景切換到: ", sceneName);
+        this.stopAllBgmChannels();
+        if (sceneName === "Menu") {
+            if (this.menuBgm) this.playManualBgm(this.menuBgm);
+        } else if (sceneName === "Game") {
+            cc.log("🎵 進入遊戲，等待狀態機控制音樂");
+        } else if (sceneName === "GameOver") {
+            if (this.gameOverBgm) this.playManualBgm(this.gameOverBgm);
+        }
+    }
 }
+
+   
