@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Boar",
+    "_name": "aaaaaaa",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -663,8 +663,8 @@
     "neutralAggroDuration": 8,
     "neutralCalmMoveMode": 2,
     "neutralAggroMoveMode": 1,
-    "attackAnimLockTime": 1.5,
-    "damagedAnimLockTime": 0.67,
+    "attackAnimLockTime": 0.35,
+    "damagedAnimLockTime": 0.2,
     "jumpForce": 250,
     "jumpCooldown": 0.8,
     "stuckCheckTime": 0.25,

@@ -30,9 +30,6 @@ export default class Rope extends cc.Component {
     @property({ tooltip: '底端偏移（從節點中心往下，px）' })
     bottomOffset: number = 0;
 
-    @property({ tooltip: '進入攀爬時是否吸附到中心 X。藤蔓勾選，樹幹取消。' })
-    snapToCenterOnEnter: boolean = true;
-
     // 目前在範圍內的玩家（sensor overlap）
     private playerInRange: cc.Node | null = null;
 

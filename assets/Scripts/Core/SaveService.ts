@@ -17,7 +17,6 @@ export interface SaveData {
     maxHp: number;
     inventory: ItemAmount[];
     mapState?: MapGenerationState;
-    mapEditorState?: MapEditorState;
     updatedAt: number;
 }
 
@@ -84,26 +83,6 @@ export interface MapGenerationState {
     updatedAt: number;
 }
 
-export interface MapEditorPlacementState {
-    id: string;
-    kind: "terrain" | "resource";
-    prefabKey: string;
-    x: number;
-    y: number;
-    rotation: number;
-    scaleX: number;
-    scaleY: number;
-    source: "manual" | "box-generate";
-    updatedAt: number;
-}
-
-export interface MapEditorState {
-    mapId: string;
-    editorVersion: string;
-    placements: MapEditorPlacementState[];
-    updatedAt: number;
-}
-
 export interface AuthResult {
     ok: boolean;
     message: string;
@@ -144,7 +123,6 @@ export interface BackendSnapshot {
     leaderboard: LeaderboardEntry[];
     realtimePlayers: RealtimePlayerState[];
     currentMap: MapGenerationState;
-    currentMapEditor: MapEditorState;
     lastRun: LastRunData;
     storageKeys: string[];
 }
@@ -155,12 +133,10 @@ export default class SaveService {
     private static readonly SAVE_PREFIX = "cocos_sanctuary.save.";
     private static readonly LEADERBOARD_KEY = "cocos_sanctuary.leaderboard";
     private static readonly LOAD_NEXT_KEY = "cocos_sanctuary.load_next_game";
-    private static readonly MAP_EDITOR_NEXT_KEY = "cocos_sanctuary.map_editor_next_game";
     private static readonly LAST_RUN_KEY = "cocos_sanctuary.last_run";
     private static readonly REALTIME_PLAYERS_KEY = "cocos_sanctuary.realtime.players";
     private static readonly CLIENT_ID_KEY = "cocos_sanctuary.client_id";
     private static readonly CURRENT_MAP_KEY = "cocos_sanctuary.map_generation.current";
-    private static readonly CURRENT_MAP_EDITOR_KEY = "cocos_sanctuary.map_editor.current";
     private static readonly SESSION_ID = `session_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
 
     public static register(username: string, password: string): AuthResult {
@@ -216,7 +192,6 @@ export default class SaveService {
         }
         cc.sys.localStorage.removeItem(this.CURRENT_USER_KEY);
         cc.sys.localStorage.removeItem(this.LOAD_NEXT_KEY);
-        cc.sys.localStorage.removeItem(this.MAP_EDITOR_NEXT_KEY);
     }
 
     public static getCurrentUsername(): string {
@@ -241,7 +216,6 @@ export default class SaveService {
             maxHp: Math.max(1, Math.floor(data.maxHp || 1)),
             inventory: this.normalizeInventory(data.inventory || []),
             mapState: this.normalizeMapGenerationState(data.mapState || this.getCurrentMapGenerationState()),
-            mapEditorState: this.normalizeMapEditorState(data.mapEditorState || this.getCurrentMapEditorState()),
             updatedAt: data.updatedAt || Date.now()
         };
         this.writeJson(this.SAVE_PREFIX + username, safeData);
@@ -268,20 +242,10 @@ export default class SaveService {
         return true;
     }
 
-    public static requestMapEditorOnNextGame(): void {
-        cc.sys.localStorage.setItem(this.MAP_EDITOR_NEXT_KEY, "1");
-    }
-
     public static consumeLoadOnNextGame(): boolean {
         const shouldLoad = cc.sys.localStorage.getItem(this.LOAD_NEXT_KEY) === "1";
         cc.sys.localStorage.removeItem(this.LOAD_NEXT_KEY);
         return shouldLoad;
-    }
-
-    public static consumeMapEditorOnNextGame(): boolean {
-        const shouldOpen = cc.sys.localStorage.getItem(this.MAP_EDITOR_NEXT_KEY) === "1";
-        cc.sys.localStorage.removeItem(this.MAP_EDITOR_NEXT_KEY);
-        return shouldOpen;
     }
 
     public static submitScore(username: string, score: number): LeaderboardEntry[] {
@@ -414,18 +378,6 @@ export default class SaveService {
         return this.normalizeMapGenerationState(this.readJson<MapGenerationState>(this.CURRENT_MAP_KEY, null));
     }
 
-    public static setCurrentMapEditorState(data: MapEditorState): MapEditorState {
-        const safeState = this.normalizeMapEditorState(data);
-        if (safeState) {
-            this.writeJson(this.CURRENT_MAP_EDITOR_KEY, safeState);
-        }
-        return safeState;
-    }
-
-    public static getCurrentMapEditorState(): MapEditorState {
-        return this.normalizeMapEditorState(this.readJson<MapEditorState>(this.CURRENT_MAP_EDITOR_KEY, null));
-    }
-
     public static getUserSummaries(): UserSummary[] {
         const users = this.getUsers();
         return Object.keys(users)
@@ -497,7 +449,6 @@ export default class SaveService {
             leaderboard: this.getLeaderboard(),
             realtimePlayers: this.getRealtimePlayers(),
             currentMap: this.getCurrentMapGenerationState(),
-            currentMapEditor: this.getCurrentMapEditorState(),
             lastRun: this.getLastRun(),
             storageKeys: this.getStorageKeys()
         };
@@ -547,7 +498,6 @@ export default class SaveService {
             maxHp: Math.max(1, Math.floor(data.maxHp || 1)),
             inventory: this.normalizeInventory(data.inventory || []),
             mapState: this.normalizeMapGenerationState(data.mapState),
-            mapEditorState: this.normalizeMapEditorState(data.mapEditorState),
             updatedAt: data.updatedAt || 0
         };
     }
@@ -633,39 +583,6 @@ export default class SaveService {
                 minSlopePatternCount: Math.max(0, Math.floor(settings.minSlopePatternCount || 0)),
                 slopePatternChance: Math.max(0, Math.min(1, settings.slopePatternChance || 0))
             },
-            updatedAt: data.updatedAt || Date.now()
-        };
-    }
-
-    private static normalizeMapEditorState(data: MapEditorState): MapEditorState {
-        if (!data) {
-            return null;
-        }
-        const placements = (data.placements || [])
-            .filter(placement => !!placement && !!placement.prefabKey && !!placement.kind)
-            .map(placement => this.normalizeMapEditorPlacement(placement))
-            .filter(placement => !!placement);
-        return {
-            mapId: data.mapId || "game-map-editor",
-            editorVersion: data.editorVersion || "1",
-            placements,
-            updatedAt: data.updatedAt || Date.now()
-        };
-    }
-
-    private static normalizeMapEditorPlacement(data: MapEditorPlacementState): MapEditorPlacementState {
-        const kind = data.kind === "resource" ? "resource" : "terrain";
-        const source = data.source === "box-generate" ? "box-generate" : "manual";
-        return {
-            id: data.id || `editor_${Date.now()}_${Math.floor(Math.random() * 100000)}`,
-            kind,
-            prefabKey: data.prefabKey || "",
-            x: isFinite(data.x) ? data.x : 0,
-            y: isFinite(data.y) ? data.y : 0,
-            rotation: isFinite(data.rotation) ? data.rotation : 0,
-            scaleX: isFinite(data.scaleX) ? data.scaleX : 1,
-            scaleY: isFinite(data.scaleY) ? data.scaleY : 1,
-            source,
             updatedAt: data.updatedAt || Date.now()
         };
     }
