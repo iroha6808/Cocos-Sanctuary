@@ -40,7 +40,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         iconPath: "Equipment/leather_armor.png",
         defBoost: 5,
         equipmentSlot: EquipmentSlot.ARMOR
-    }
+    },
     acorn: {
         id: "acorn",
         name: "Acorn",
@@ -437,11 +437,13 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     wood: {
         id: "wood",
         name: "Wood",
+        iconPath: "combined/wood.png",
         description: "Basic building material."
     },
     wood_plank: {
         id: "wood_plank",
         name: "Wood Plank",
+        iconPath: "combined/wood_plank.png",
         description: "Processed wood used for building."
     },
     yellowpotion: {
@@ -540,7 +542,6 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     // 5. 新增合成道具：武器與彈藥類 (84 - 94)
     // ==========================================
     copper_sword: { id: "copper_sword", name: "Copper Shortsword", description: "Better than your bare fists, but not by much.", iconPath: "combined/copper_sword.png", attack: 6 },
-    iron_sword: { id: "iron_sword", name: "Iron Broadsword", description: "A reliable weapon forged with the backbone of classic smithing.", iconPath: "combined/iron_sword.png", attack: 14 },
     silver_sword: { id: "silver_sword", name: "Holy Silver Blade", description: "Deals 50% bonus radiant damage to undead and shadow monsters.", iconPath: "combined/silver_sword.png", attack: 22, critChance: 5 },
     golden_rapier: { id: "golden_rapier", name: "Royal Citrine Rapier", description: "A swift thrusting sword that boosts critical strike rates.", iconPath: "combined/golden_rapier.png", attack: 26, critChance: 12 },
     ruby_flameblade: { id: "ruby_flameblade", name: "Ruby Volcano Flameblade", description: "Sears enemies with a volcanic burn, dealing damage over time.", iconPath: "combined/ruby_flameblade.png", attack: 38 },
