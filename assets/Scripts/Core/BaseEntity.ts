@@ -14,7 +14,9 @@ export default class BaseEntity extends cc.Component {
     public currentHp: number = 100;
 
     onLoad() {
-        this.currentHp = this.maxHp;
+        if (this.currentHp === this.maxHp) {
+            this.currentHp = this.maxHp;
+        }
     }
 
     public takeDamage(amount: number) {

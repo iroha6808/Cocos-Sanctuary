@@ -101,11 +101,6 @@ export default class MapEditorController extends cc.Component {
     private previewNode: cc.Node = null;
     private previewKey: string = "";
     private lastMouseRootLocal: cc.Vec2 = null;
-    private browserMouseDownHandler: any = null;
-    private browserMouseMoveHandler: any = null;
-    private browserMouseUpHandler: any = null;
-    private preventContextMenuHandler: any = null;
-    private placedDuringCurrentClick: boolean = false;
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -115,8 +110,7 @@ export default class MapEditorController extends cc.Component {
     }
 
     start(): void {
-        // Map editor is currently scene-authoritative: do not rebuild from the
-        // fake backend on scene start, or it may overwrite freshly edited terrain.
+        this.rebuildFromState(SaveService.getCurrentMapEditorState());
         this.refreshStatus();
     }
 
@@ -154,11 +148,9 @@ export default class MapEditorController extends cc.Component {
         this.setPlayerLocked(false);
         this.destroyPlacementPreview();
         this.clearSelection();
-        this.commitEditorChangesToScene();
         this.refreshStatus();
         cc.log("[MapEditor] Exit editor mode.");
         EventCenter.emit(GameEvent.MAP_EDITOR_MODE_CHANGED, false);
-        this.scheduleOnce(this.refreshEditedPhysics, 0);
     }
 
     public toggleEditorMode(): void {
@@ -241,12 +233,6 @@ export default class MapEditorController extends cc.Component {
     }
 
     private bindMouseEvents(): void {
-        const gameCanvas = (cc.game as any).canvas;
-        if (gameCanvas && gameCanvas.addEventListener) {
-            this.bindBrowserMouseEvents(gameCanvas);
-            return;
-        }
-
         if (!this.canvasNode) {
             return;
         }
@@ -256,22 +242,6 @@ export default class MapEditorController extends cc.Component {
     }
 
     private unbindMouseEvents(): void {
-        const gameCanvas = (cc.game as any).canvas;
-        if (gameCanvas && gameCanvas.removeEventListener) {
-            if (this.browserMouseDownHandler) {
-                gameCanvas.removeEventListener("mousedown", this.browserMouseDownHandler, false);
-            }
-            if (this.browserMouseMoveHandler) {
-                gameCanvas.removeEventListener("mousemove", this.browserMouseMoveHandler, false);
-            }
-            if (this.browserMouseUpHandler) {
-                gameCanvas.removeEventListener("mouseup", this.browserMouseUpHandler, false);
-            }
-            if (this.preventContextMenuHandler) {
-                gameCanvas.removeEventListener("contextmenu", this.preventContextMenuHandler, false);
-            }
-        }
-
         if (!this.canvasNode || !cc.isValid(this.canvasNode)) {
             return;
         }
@@ -280,78 +250,22 @@ export default class MapEditorController extends cc.Component {
         this.canvasNode.off(cc.Node.EventType.MOUSE_UP, this.onMouseUp, this);
     }
 
-    private bindBrowserMouseEvents(gameCanvas: any): void {
-        this.browserMouseDownHandler = (event: any) => {
-            if (!this.isEditing) {
-                return;
-            }
-            const input = this.getBrowserMouseInput(event);
-            this.handleEditorMouseDown(event.button, input.rootLocal, input.world);
-            this.preventBrowserMouseDefault(event);
-        };
-        this.browserMouseMoveHandler = (event: any) => {
-            if (!this.isEditing) {
-                return;
-            }
-            const input = this.getBrowserMouseInput(event);
-            this.handleEditorMouseMove(input.rootLocal);
-            this.preventBrowserMouseDefault(event);
-        };
-        this.browserMouseUpHandler = (event: any) => {
-            if (!this.isEditing) {
-                return;
-            }
-            const input = this.getBrowserMouseInput(event);
-            this.handleEditorMouseUp(event.button, input.rootLocal);
-            this.preventBrowserMouseDefault(event);
-        };
-        this.preventContextMenuHandler = (event: any) => {
-            if (this.isEditing) {
-                this.preventBrowserMouseDefault(event);
-            }
-        };
-
-        gameCanvas.addEventListener("mousedown", this.browserMouseDownHandler, false);
-        gameCanvas.addEventListener("mousemove", this.browserMouseMoveHandler, false);
-        gameCanvas.addEventListener("mouseup", this.browserMouseUpHandler, false);
-        gameCanvas.addEventListener("contextmenu", this.preventContextMenuHandler, false);
-    }
-
     private onMouseDown(event: cc.Event.EventMouse): void {
         if (!this.isEditing) {
             return;
         }
         const rootLocal = this.getMouseRootLocal(event);
-        this.handleEditorMouseDown(event.getButton(), rootLocal, this.getMouseWorld(event));
-    }
-
-    private onMouseMove(event: cc.Event.EventMouse): void {
-        if (!this.isEditing) {
-            return;
-        }
-        this.handleEditorMouseMove(this.getMouseRootLocal(event));
-    }
-
-    private onMouseUp(event: cc.Event.EventMouse): void {
-        if (!this.isEditing) {
-            return;
-        }
-        this.handleEditorMouseUp(event.getButton(), this.getMouseRootLocal(event));
-    }
-
-    private handleEditorMouseDown(button: number, rootLocal: cc.Vec2, world: cc.Vec2): void {
         if (!rootLocal) {
             return;
         }
         this.lastMouseRootLocal = rootLocal.clone();
-        this.placedDuringCurrentClick = false;
 
-        if (button === cc.Event.EventMouse.BUTTON_RIGHT) {
-            this.deleteAtWorld(world);
+        if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
+            this.deleteAt(event);
             return;
         }
 
-        if (button !== cc.Event.EventMouse.BUTTON_LEFT) {
+        if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }
 
@@ -363,10 +277,14 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
-        this.placedDuringCurrentClick = this.placeAt(rootLocal);
+        this.placeAt(rootLocal);
     }
 
-    private handleEditorMouseMove(rootLocal: cc.Vec2): void {
+    private onMouseMove(event: cc.Event.EventMouse): void {
+        if (!this.isEditing) {
+            return;
+        }
+        const rootLocal = this.getMouseRootLocal(event);
         if (!rootLocal) {
             return;
         }
@@ -384,37 +302,26 @@ export default class MapEditorController extends cc.Component {
         this.updatePlacementPreview(rootLocal);
     }
 
-    private handleEditorMouseUp(button: number, rootLocal: cc.Vec2): void {
-        if (button !== cc.Event.EventMouse.BUTTON_LEFT || !rootLocal) {
-            this.placedDuringCurrentClick = false;
+    private onMouseUp(event: cc.Event.EventMouse): void {
+        if (!this.isEditing || !this.selectionStart || event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }
-
-        if (this.selectionStart) {
-            this.selectionCurrent = rootLocal;
-            this.generateInSelection();
-            this.clearSelection();
-            this.placedDuringCurrentClick = false;
-            return;
-        }
-
-        if (!this.placedDuringCurrentClick && this.tool !== MapEditorTool.BoxGenerate) {
-            this.placeAt(rootLocal);
-        }
-        this.placedDuringCurrentClick = false;
+        this.selectionCurrent = this.getMouseRootLocal(event);
+        this.generateInSelection();
+        this.clearSelection();
     }
 
-    private placeAt(rootLocal: cc.Vec2): boolean {
+    private placeAt(rootLocal: cc.Vec2): void {
         const entry = this.getCurrentEntry();
         if (!entry || !entry.prefab) {
             cc.warn("[MapEditor] No prefab assigned for current tool.");
-            return false;
+            return;
         }
 
         const parent = entry.kind === "resource" ? this.getResourceRoot() : this.getTerrainRoot();
         if (!parent) {
             cc.warn("[MapEditor] Missing terrainRoot/resourceRoot.");
-            return false;
+            return;
         }
 
         const node = cc.instantiate(entry.prefab);
@@ -423,16 +330,15 @@ export default class MapEditorController extends cc.Component {
         node.setScale(scale, scale);
         node.angle = this.rotation;
         parent.addChild(node);
-        this.setPlacementNodePosition(node, parent, rootLocal, entry.kind);
-        this.finalizePlacedNode(node, entry.kind);
+        this.setEditorNodePosition(node, parent, rootLocal);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
-        this.commitEditorChangesToScene();
-        return true;
+        this.persistState();
     }
 
-    private deleteAtWorld(world: cc.Vec2): void {
+    private deleteAt(event: cc.Event.EventMouse): void {
         const root = this.getTerrainRoot();
+        const world = this.getMouseWorld(event);
         if (!root || !world) {
             return;
         }
@@ -444,7 +350,7 @@ export default class MapEditorController extends cc.Component {
 
         this.removePlacement(target.name);
         target.destroy();
-        this.commitEditorChangesToScene();
+        this.persistState();
     }
 
     private generateInSelection(): void {
@@ -462,20 +368,11 @@ export default class MapEditorController extends cc.Component {
             cc.warn("[MapEditor] AutoMapGenerator is missing.");
             return;
         }
-        const started = generator.beginTimedGenerationInRect(rect, {
-            clearExisting: true,
-            useRealtimeTimer: true,
-            onPlacementSpawned: (state: MapEditorPlacementState) => {
-                this.upsertPlacement(state);
-                this.commitEditorChangesToScene();
-            },
-            onComplete: () => {
-                this.commitEditorChangesToScene();
-            }
-        });
-        if (!started) {
-            this.commitEditorChangesToScene();
+        const states = generator.generateInRect(rect, { clearExisting: true });
+        for (let i = 0; i < states.length; i++) {
+            this.upsertPlacement(states[i]);
         }
+        this.persistState();
     }
 
     private setTool(tool: MapEditorTool): void {
@@ -561,86 +458,8 @@ export default class MapEditorController extends cc.Component {
         this.refreshStatus();
     }
 
-    private commitEditorChangesToScene(): void {
-        this.persistState(true);
-        this.setGeneratedNodesVisible(this.getTerrainRoot());
-        const resourceRoot = this.getResourceRoot();
-        if (resourceRoot !== this.getTerrainRoot()) {
-            this.setGeneratedNodesVisible(resourceRoot);
-        }
-    }
-
-    private setGeneratedNodesVisible(root: cc.Node): void {
-        if (!root) {
-            return;
-        }
-
-        for (let i = 0; i < root.childrenCount; i++) {
-            const child = root.children[i];
-            if (this.isEditorOwnedNode(child) || this.isAutoGeneratedNode(child)) {
-                child.active = true;
-            }
-        }
-    }
-
-    private refreshEditedPhysics(): void {
-        this.applyPhysicsColliders(this.getTerrainRoot());
-        const resourceRoot = this.getResourceRoot();
-        if (resourceRoot !== this.getTerrainRoot()) {
-            this.applyPhysicsColliders(resourceRoot);
-        }
-
-        const physicsManager = cc.director.getPhysicsManager() as any;
-        if (physicsManager && typeof physicsManager.syncPosition === "function") {
-            physicsManager.syncPosition();
-        }
-    }
-
-    private applyPhysicsColliders(root: cc.Node): void {
-        if (!root) {
-            return;
-        }
-
-        for (let i = 0; i < root.childrenCount; i++) {
-            const child = root.children[i];
-            if (this.isEditorOwnedNode(child) || this.isAutoGeneratedNode(child)) {
-                this.applyNodePhysicsColliders(child);
-            }
-        }
-    }
-
-    private applyNodePhysicsColliders(node: cc.Node): void {
-        const colliders = node.getComponents(cc.PhysicsCollider);
-        for (let i = 0; i < colliders.length; i++) {
-            const collider = colliders[i] as any;
-            if (collider && collider.enabled && typeof collider.apply === "function") {
-                collider.apply();
-            }
-        }
-
-        for (let i = 0; i < node.childrenCount; i++) {
-            this.applyNodePhysicsColliders(node.children[i]);
-        }
-    }
-
-    private finalizePlacedNode(node: cc.Node, kind: "terrain" | "resource"): void {
-        if (!node || kind !== "terrain") {
-            return;
-        }
-
-        // Manual terrain should become live terrain immediately, like AutoMapGenerator output.
-        this.applyNodePhysicsColliders(node);
-        this.syncPhysicsPosition();
-    }
-
-    private syncPhysicsPosition(): void {
-        this.syncPhysicsPosition();
-    }
-
-    private onSaveLoaded(_saveData: SaveData): void {
-        // Intentionally ignore backend/editor save data for now. Manual terrain
-        // edits should stay in the live scene until the editor save flow is stable.
-        this.refreshStatus();
+    private onSaveLoaded(saveData: SaveData): void {
+        this.rebuildFromState(saveData ? saveData.mapEditorState : null);
     }
 
     private getTerrainEntries(): EditorPrefabEntry[] {
@@ -698,27 +517,15 @@ export default class MapEditorController extends cc.Component {
         if (this.terrainRoot && cc.isValid(this.terrainRoot)) {
             return this.terrainRoot;
         }
-        if (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)) {
-            const generatorRoot = this.autoMapGenerator.targetRoot;
-            if (generatorRoot && cc.isValid(generatorRoot)) {
-                return generatorRoot;
-            }
-            return this.autoMapGenerator.node;
-        }
-        return this.node;
+        return this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)
+            ? this.autoMapGenerator.node
+            : this.node;
     }
 
     private getResourceRoot(): cc.Node {
-        if (this.resourceRoot && cc.isValid(this.resourceRoot)) {
-            return this.resourceRoot;
-        }
-        if (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)) {
-            const generatorResourceRoot = this.autoMapGenerator.resourceRoot;
-            if (generatorResourceRoot && cc.isValid(generatorResourceRoot)) {
-                return generatorResourceRoot;
-            }
-        }
-        return this.getTerrainRoot();
+        return this.resourceRoot && cc.isValid(this.resourceRoot)
+            ? this.resourceRoot
+            : this.getTerrainRoot();
     }
 
     private getAutoMapGenerator(): AutoMapGenerator {
@@ -745,24 +552,7 @@ export default class MapEditorController extends cc.Component {
     }
 
     private getMouseWorld(event: cc.Event.EventMouse): cc.Vec2 {
-        return this.getWorldFromScreenLocation(this.getMouseScreenLocation(event));
-    }
-
-    private getBrowserMouseInput(event: any): { rootLocal: cc.Vec2, world: cc.Vec2 } {
-        if (!event || typeof event.clientX !== "number" || typeof event.clientY !== "number") {
-            return { rootLocal: null, world: null };
-        }
-
-        const screenLocation = this.getScreenLocationFromClient(event.clientX, event.clientY);
-        const world = this.getWorldFromScreenLocation(screenLocation);
-        const root = this.getTerrainRoot();
-        return {
-            rootLocal: root && world ? root.convertToNodeSpaceAR(world) : null,
-            world
-        };
-    }
-
-    private getWorldFromScreenLocation(screenLocation: cc.Vec2): cc.Vec2 {
+        const screenLocation = this.getMouseScreenLocation(event);
         const camera = this.getCamera();
         if (camera) {
             return this.screenToWorld(camera, screenLocation);
@@ -774,19 +564,15 @@ export default class MapEditorController extends cc.Component {
         const anyEvent = event as any;
         const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
         if (nativeEvent && typeof nativeEvent.clientX === "number" && typeof nativeEvent.clientY === "number") {
-            return this.getScreenLocationFromClient(nativeEvent.clientX, nativeEvent.clientY);
+            const canvas = (cc.game as any).canvas;
+            const rect = canvas && canvas.getBoundingClientRect
+                ? canvas.getBoundingClientRect()
+                : { left: 0, top: 0 };
+            const location = cc.v2();
+            cc.view.convertToLocationInView(nativeEvent.clientX, nativeEvent.clientY, rect, location);
+            return location;
         }
         return event.getLocation();
-    }
-
-    private getScreenLocationFromClient(clientX: number, clientY: number): cc.Vec2 {
-        const canvas = (cc.game as any).canvas;
-        const rect = canvas && canvas.getBoundingClientRect
-            ? canvas.getBoundingClientRect()
-            : { left: 0, top: 0 };
-        const location = cc.v2();
-        cc.view.convertToLocationInView(clientX, clientY, rect, location);
-        return location;
     }
 
     private screenToWorld(camera: cc.Camera, screenLocation: cc.Vec2): cc.Vec2 {
@@ -800,18 +586,6 @@ export default class MapEditorController extends cc.Component {
             cameraWorld.x + (screenLocation.x - visibleSize.width * 0.5) / zoom,
             cameraWorld.y + (screenLocation.y - visibleSize.height * 0.5) / zoom
         );
-    }
-
-    private preventBrowserMouseDefault(event: any): void {
-        if (!event) {
-            return;
-        }
-        if (typeof event.preventDefault === "function") {
-            event.preventDefault();
-        }
-        if (typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private getCamera(): cc.Camera {
@@ -852,15 +626,6 @@ export default class MapEditorController extends cc.Component {
             node.x - (visualCenterX - node.x),
             node.y - (visualCenterY - node.y)
         );
-    }
-
-    private setPlacementNodePosition(
-        node: cc.Node,
-        parent: cc.Node,
-        rootLocal: cc.Vec2,
-        _kind: "terrain" | "resource"
-    ): void {
-        this.setEditorNodePosition(node, parent, rootLocal);
     }
 
     private createPlacementState(
@@ -970,13 +735,6 @@ export default class MapEditorController extends cc.Component {
         );
     }
 
-    private isAutoGeneratedNode(node: cc.Node): boolean {
-        return !!node && (
-            node.name.indexOf("AutoRock_") === 0
-            || node.name.indexOf("AutoResource_") === 0
-        );
-    }
-
     private createRect(a: cc.Vec2, b: cc.Vec2): MapGenerationRect {
         return {
             minX: Math.min(a.x, b.x),
@@ -1013,7 +771,7 @@ export default class MapEditorController extends cc.Component {
         }
 
         this.previewNode.angle = this.rotation;
-        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry.kind);
+        this.setEditorNodePosition(this.previewNode, parent, rootLocal);
     }
 
     private destroyPlacementPreview(): void {

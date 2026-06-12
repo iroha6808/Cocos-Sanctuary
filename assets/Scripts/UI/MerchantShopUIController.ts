@@ -1,8 +1,6 @@
 import { getItemDefinition, ItemDefinition } from "../Data/ItemData";
 import { MerchantStockItem } from "../Data/MerchantPool";
 import { InputAction } from "../Input/InputAction";
-import InputManager from "../Input/InputManager";
-import { InputContext } from "../Input/InputContext";
 import MerchantNPC from "../NPC/MerchantNPC";
 import { InventoryManager } from "../Player/InventoryManager";
 import ItemIconLoader from "./ItemIconLoader";
@@ -79,7 +77,6 @@ export default class MerchantShopUIController extends cc.Component {
     private generatedPanel: cc.Node = null!;
     private uiBuilt: boolean = false;
     private closeRequested: boolean = false;
-    private displayRootBaseScale: cc.Vec2 = null!;
 
     private itemScrollView: cc.ScrollView = null!;
     private itemContent: cc.Node = null!;
@@ -97,7 +94,6 @@ export default class MerchantShopUIController extends cc.Component {
     private readonly textColor = cc.color(236, 239, 224, 255);
     private readonly mutedTextColor = cc.color(175, 184, 190, 255);
     private readonly accentColor = cc.color(232, 151, 77, 255);
-    private inputManager: InputManager = null!;
 
     onLoad(): void {
         // Old scene data serialized these colors as bright green/gray.
@@ -106,7 +102,6 @@ export default class MerchantShopUIController extends cc.Component {
         this.cannotBuyColor = cc.color(91, 94, 98, 255);
         this.setupReferences();
         this.ensureUIBuilt();
-        this.inputManager = InputManager.getOrCreate(this.node);
         this.close();
     }
 
@@ -123,14 +118,10 @@ export default class MerchantShopUIController extends cc.Component {
         if (this.followMainCamera) {
             this.updatePanelPosition();
         }
-        this.applyPanelZoomScale();
     }
 
     onDestroy(): void {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
-        if (this.inputManager) {
-            this.inputManager.clearOwner(this);
-        }
         this.clearItemRows();
         this.merchant = null!;
     }
@@ -156,12 +147,7 @@ export default class MerchantShopUIController extends cc.Component {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
 
-        if (this.inputManager) {
-            this.inputManager.pushContext(InputContext.MerchantShop, this.handleInput, this);
-        }
-
         this.updatePanelPosition();
-        this.applyPanelZoomScale();
         this.refresh();
     }
 
@@ -170,10 +156,6 @@ export default class MerchantShopUIController extends cc.Component {
         this.selectedIndex = 0;
         this.buyAmount = 1;
         this.closeRequested = false;
-
-        if (this.inputManager) {
-            this.inputManager.popContext(InputContext.MerchantShop, this);
-        }
 
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         const panel = this.getDisplayRoot();
@@ -894,33 +876,6 @@ export default class MerchantShopUIController extends cc.Component {
         const target = cc.v2(cameraWorldPos.x, cameraWorldPos.y + this.runtimePanelOffsetY);
         panel.setPosition(panel.parent.convertToNodeSpaceAR(target));
         panel.zIndex = this.uiZIndex;
-    }
-
-    private applyPanelZoomScale(): void {
-        const panel = this.getDisplayRoot();
-        if (!panel || !cc.isValid(panel)) {
-            return;
-        }
-        if (!this.displayRootBaseScale || !cc.isValid(panel)) {
-            this.displayRootBaseScale = cc.v2(panel.scaleX || 1, panel.scaleY || 1);
-        }
-
-        const zoom = this.getCameraZoomRatio();
-        const scaleFactor = 1 / zoom;
-        panel.scaleX = this.displayRootBaseScale.x * scaleFactor;
-        panel.scaleY = this.displayRootBaseScale.y * scaleFactor;
-    }
-
-    private getCameraZoomRatio(): number {
-        if (!this.mainCamera || !cc.isValid(this.mainCamera.node)) {
-            if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
-                this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
-            }
-            this.mainCamera = this.mainCameraNode
-                ? this.mainCameraNode.getComponent(cc.Camera) || null!
-                : null!;
-        }
-        return this.mainCamera ? Math.max(0.01, this.mainCamera.zoomRatio || 1) : 1;
     }
 
     private getCameraWorldPosition(): cc.Vec2 | null {
