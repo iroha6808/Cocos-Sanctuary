@@ -17,10 +17,10 @@ export default class CameraRig extends cc.Component {
     public maxFollowSpeed: number = 54;
 
     @property(cc.Float)
-    public distanceSpeedK: number = 0.18;
+    public distanceSpeedK: number = 0.2;
 
     @property(cc.Float)
-    public distanceResponseScale: number = 300;
+    public distanceResponseScale: number = 12000;
 
     @property(cc.Float)
     public lookAheadScale: number = 0.14;
@@ -29,7 +29,7 @@ export default class CameraRig extends cc.Component {
     public lookAheadMax: number = 70;
 
     @property(cc.Float)
-    public minZoomRatio: number = 0.55;
+    public minZoomRatio: number = 0.1;
 
     @property(cc.Float)
     public maxZoomRatio: number = 1.8;

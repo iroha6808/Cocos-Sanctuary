@@ -71,7 +71,7 @@ export default class GameManager extends cc.Component {
     enableAutomaticMonsterSpawning: boolean = true;
 
     @property(cc.Boolean)
-    monsterSpawnDebugLog: boolean = false;
+    monsterSpawnDebugLog: boolean = true;
 
     @property(cc.Boolean)
     physicsTagDebugLog: boolean = false;

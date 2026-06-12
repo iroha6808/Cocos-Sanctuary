@@ -33,19 +33,19 @@ export default class CombatHitbox extends cc.Component {
     public activeTime: number = 0.12;
 
     @property(cc.Float)
-    public offsetX: number = 46;
+    public offsetX: number = 15;
 
     @property(cc.Float)
     public offsetY: number = 0;
 
     @property(cc.Float)
-    public knockbackX: number = 240;
+    public knockbackX: number = 160;
 
     @property(cc.Float)
-    public knockbackY: number = 120;
+    public knockbackY: number = 80;
 
     @property(cc.Boolean)
-    public debugLog: boolean = false;
+    public debugLog: boolean = true;
 
     @property({ type: cc.Enum(CombatFaction) })
     public ownerFaction: CombatFaction = CombatFaction.NONE;

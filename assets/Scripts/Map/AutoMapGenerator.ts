@@ -88,10 +88,10 @@ export default class AutoMapGenerator extends cc.Component {
     fruitOrePrefab: cc.Prefab = null;
 
     @property
-    seed: string = "sanctuary-jump-map-1";
+    seed: string = "fuck";
 
     @property(cc.Boolean)
-    autoGenerateOnStart: boolean = false;
+    autoGenerateOnStart: boolean = true;
 
     @property(cc.Boolean)
     manualTriggerOnly: boolean = true;
@@ -115,10 +115,10 @@ export default class AutoMapGenerator extends cc.Component {
     startAfterCameraDelay: number = 0.2;
 
     @property(cc.Float)
-    returnAfterGenerationDelay: number = 1.0;
+    returnAfterGenerationDelay: number = 0.7;
 
     @property(cc.Float)
-    cameraReturnDuration: number = 1.6;
+    cameraReturnDuration: number = 0.6;
 
     @property(cc.Boolean)
     shakeCameraOnSpawn: boolean = true;
@@ -127,7 +127,7 @@ export default class AutoMapGenerator extends cc.Component {
     spawnShakeDuration: number = 0.08;
 
     @property(cc.Float)
-    spawnShakeAmplitude: number = 6;
+    spawnShakeAmplitude: number = 20;
 
     @property
     minX: number = -5000;
@@ -136,7 +136,7 @@ export default class AutoMapGenerator extends cc.Component {
     maxX: number = 0;
 
     @property
-    minY: number = -2000;
+    minY: number = -3000;
 
     @property
     maxY: number = 0;
@@ -193,7 +193,7 @@ export default class AutoMapGenerator extends cc.Component {
     spawnResourcesOnFlatPlatforms: boolean = true;
 
     @property(cc.Float)
-    resourceSpawnChance: number = 0.55;
+    resourceSpawnChance: number = 0.8;
 
     @property(cc.Float)
     resourceEdgePadding: number = 130;

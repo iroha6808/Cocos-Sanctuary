@@ -42,7 +42,7 @@ export default class DialogueUIController extends cc.Component {
     public normalColor: cc.Color = cc.Color.WHITE;
 
     @property(cc.Vec2)
-    public followOffset: cc.Vec2 = cc.v2(0, 80);
+    public followOffset: cc.Vec2 = cc.v2(0, 40);
 
     @property(cc.Boolean)
     public clampToCameraView: boolean = true;

@@ -28,16 +28,16 @@ export default class PlayerController extends BaseEntity {
     fastFallSpeed: number = 520;
 
     @property(cc.Float)
-    oceanMoveSpeed: number = 160;
+    oceanMoveSpeed: number = 90;
 
     @property(cc.Float)
-    oceanVerticalSpeed: number = 220;
+    oceanVerticalSpeed: number = 120;
 
     @property(cc.Float)
     oceanSinkSpeed: number = 50;
 
     @property(cc.Float)
-    oceanGravityScale: number = 0.18;
+    oceanGravityScale: number = 0.15;
 
     @property(cc.Float)
     oceanControl: number = 8;
@@ -849,14 +849,14 @@ export default class PlayerController extends BaseEntity {
     }
 
     private applyRuntimeMovementTuning() {
-        this.oceanMoveSpeed = 180;
-        this.oceanVerticalSpeed = 260;
-        this.oceanSinkSpeed = 35;
-        this.oceanGravityScale = 0.18;
-        this.oceanControl = 12;
-        this.oceanDrag = 0.99;
-        this.oceanBoostSpeed = 620;
-        this.oceanBoostCooldown = 0.28;
+        this.oceanMoveSpeed = 90;
+        this.oceanVerticalSpeed = 120;
+        this.oceanSinkSpeed = 50;
+        this.oceanGravityScale = 0.15;
+        this.oceanControl = 8;
+        this.oceanDrag = 0.985;
+        this.oceanBoostSpeed = 520;
+        this.oceanBoostCooldown = 0.35;
         this.fastFallSpeed = 520;
     }
 

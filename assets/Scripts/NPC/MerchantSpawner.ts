@@ -15,19 +15,19 @@ export default class MerchantSpawner extends cc.Component {
     public spawnParent: cc.Node = null;
 
     @property(cc.Float)
-    public minSpawnDistance: number = 300;
+    public minSpawnDistance: number = 50;
 
     @property(cc.Float)
-    public maxSpawnDistance: number = 700;
+    public maxSpawnDistance: number = 300;
 
     @property(cc.Float)
-    public spawnInterval: number = 120;
+    public spawnInterval: number = 20;
 
     @property(cc.Boolean)
-    public spawnOnStart: boolean = true;
+    public spawnOnStart: boolean = false;
 
     @property(cc.Boolean)
-    public debugLog: boolean = false;
+    public debugLog: boolean = true;
 
     private currentMerchant: cc.Node = null;
 
