@@ -12,8 +12,11 @@ export default class OceanArea extends cc.Component {
     @property(cc.Node)
     public playerNode: cc.Node = null!;
 
-    private playerInside: boolean = false;
+    private playerInsideThisArea: boolean = false;
     private oceanCollider: cc.PhysicsBoxCollider = null!;
+
+    private static activeAreaCount: number = 0;
+    private static playerInOcean: boolean = false;
 
     onLoad() {
         const body = this.getComponent(cc.RigidBody);
@@ -36,6 +39,14 @@ export default class OceanArea extends cc.Component {
         }
     }
 
+    onDestroy() {
+        if (this.playerInsideThisArea) {
+            this.playerInsideThisArea = false;
+            OceanArea.activeAreaCount = Math.max(0, OceanArea.activeAreaCount - 1);
+            this.refreshGlobalWaterState();
+        }
+    }
+
     update() {
         if (!this.player || !this.playerNode || !cc.isValid(this.playerNode)) {
             this.findPlayer();
@@ -48,18 +59,38 @@ export default class OceanArea extends cc.Component {
 
         const isInsideNow = this.isPlayerInsideOcean();
 
-        if (isInsideNow && !this.playerInside) {
-            this.playerInside = true;
-            this.player.enterOceanArea();
-            EventCenter.emit(GameEvent.PLAYER_WATER_STATE_CHANGED, true, this.node);
-            cc.log("[OceanArea] Player entered ocean area by bounds");
+        if (isInsideNow && !this.playerInsideThisArea) {
+            this.playerInsideThisArea = true;
+            OceanArea.activeAreaCount++;
+            this.refreshGlobalWaterState();
         }
 
-        if (!isInsideNow && this.playerInside) {
-            this.playerInside = false;
+        if (!isInsideNow && this.playerInsideThisArea) {
+            this.playerInsideThisArea = false;
+            OceanArea.activeAreaCount = Math.max(0, OceanArea.activeAreaCount - 1);
+            this.refreshGlobalWaterState();
+        }
+    }
+
+    private refreshGlobalWaterState() {
+        if (!this.player || !cc.isValid(this.player.node)) {
+            return;
+        }
+
+        const shouldBeInOcean = OceanArea.activeAreaCount > 0;
+
+        if (shouldBeInOcean && !OceanArea.playerInOcean) {
+            OceanArea.playerInOcean = true;
+            this.player.enterOceanArea();
+            EventCenter.emit(GameEvent.PLAYER_WATER_STATE_CHANGED, true, this.node);
+            cc.log("[OceanArea] Player entered ocean area");
+        }
+
+        if (!shouldBeInOcean && OceanArea.playerInOcean) {
+            OceanArea.playerInOcean = false;
             this.player.exitOceanArea();
             EventCenter.emit(GameEvent.PLAYER_WATER_STATE_CHANGED, false, this.node);
-            cc.log("[OceanArea] Player exited ocean area by bounds");
+            cc.log("[OceanArea] Player exited ocean area");
         }
     }
 
