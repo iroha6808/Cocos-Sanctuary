@@ -12,6 +12,7 @@ import VehicleInteractable from "../Vehicle/VehicleInteractable";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
 import Rope from '../Entity/Resources/Rope';
+import AudioManager, { SfxType } from "../Core/AudioManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -1067,11 +1068,14 @@ export default class PlayerController extends BaseEntity {
         }
 
         EventCenter.emit(GameEvent.PLAYER_DIED);
-        if (window.GameManager && typeof (window.GameManager as any).handlePlayerDeath === "function") {
-             (window.GameManager as any).handlePlayerDeath();
-        } else {
-             cc.director.loadScene("GameOver");
+
+        const gameManager = (window as any).GameManager;
+        if (gameManager && typeof gameManager.handlePlayerDeath === "function") {
+            gameManager.handlePlayerDeath();
+            return;
         }
+
+        cc.director.loadScene("GameOver");
     };
 
     onDestroy() {
@@ -1477,18 +1481,39 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    public heal(amount: number) {
-        if (this.isDead) return;
-        if (this.currentHp >= this.maxHp) {
-            cc.log(`[PlayerController] HP 已滿 (${this.currentHp}/${this.maxHp})，無法再補血。`);
-            return;
+    public heal(amount: number): number {
+        if (this.isDead) {
+            return 0;
         }
+
+        if (amount <= 0) {
+            return 0;
+        }
+
+        if (this.currentHp >= this.maxHp) {
+            cc.log(`[PlayerController] HP is already full (${this.currentHp}/${this.maxHp}), heal skipped.`);
+            return 0;
+        }
+
+        const beforeHp = this.currentHp;
+
         this.currentHp += amount;
         if (this.currentHp > this.maxHp) {
             this.currentHp = this.maxHp;
         }
-        cc.log(`[PlayerController] 補血 +${amount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
+
+        const healedAmount = this.currentHp - beforeHp;
+
+        if (healedAmount <= 0) {
+            return 0;
+        }
+
+        cc.log(`[PlayerController] Heal +${healedAmount}, HP: ${this.currentHp}/${this.maxHp}`);
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
+
+        AudioManager.play(SfxType.HEAL);
+
+        return healedAmount;
     }
 
     public addAttackBuff(amount: number, duration: number = 60) {
