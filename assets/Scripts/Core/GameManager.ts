@@ -14,6 +14,7 @@ import PhysicsTagValidator from "./PhysicsTagValidator";
 import AutoMapGenerator, { MapGenerationRect } from "../Map/AutoMapGenerator";
 import SaveService2, { SaveData } from "./SaveService2";
 import MapEditorController from "../Map/MapEditorController";
+import EquipmentManager from "./EquipmentManager";
 
 declare const firebase: any;
 
@@ -175,7 +176,7 @@ export default class GameManager extends cc.Component {
     }
 
     async start() {
-        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:175");
+        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:179");
         this.initializeBoundaryMapRange();
         await this.loadCurrentUserSave();
     }
@@ -185,7 +186,7 @@ export default class GameManager extends cc.Component {
     }
 
     async onGameOver() {
-        console.log("玩家死亡，結算分數... - GameManager.ts:185");
+        console.log("玩家死亡，結算分數... - GameManager.ts:189");
         this.resumeGame(false);
 
         if (AudioManager.instance && AudioManager.instance.gameOverBgm) {
@@ -280,20 +281,22 @@ export default class GameManager extends cc.Component {
         if (!user) return false;
         this.isLoadingSave = true;
         const saveData = await SaveService2.loadFromCloud(user.uid);
-        
+
         if (saveData) {
             cc.log(`[DEBUG] 從雲端拿到的存檔資料 -> HP: ${saveData.hp}, EXP: ${saveData.exp}`);
             this.score = saveData.score || 0;
             this.exp = saveData.exp || 0;
             InventoryManager.instance.setItemsFromSave(saveData.inventory || []);
+            if (EquipmentManager.Instance) {
+                EquipmentManager.Instance.setEquipmentFromSave(saveData.equipment || null);
+            }
             this.restorePlayerHp(saveData);
-
             this.emitScoreState();
             EventCenter.emit(GameEvent.SAVE_LOADED, saveData);
-            cc.log(`[GameManager] ✅ 讀檔完成：EXP=${this.exp}, HP=${saveData.hp}`);
+            cc.log(`[GameManager] ✅ 讀檔完成並成功同步裝備數值！`);
         }
 
-        this.isLoadingSave = false; // 解鎖
+        this.isLoadingSave = false; 
         return true;
     }
 
@@ -718,16 +721,13 @@ export default class GameManager extends cc.Component {
     private createSaveData(uid: string): Partial<SaveData> {
         const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
-        
+
         let saveHp = 100;
         let saveMaxHp = 100;
 
         if (playerEntity) {
-            cc.log(`[DEBUG] 發現玩家元件，當前 HP=${playerEntity.currentHp}, MAX=${playerEntity.maxHp}`);
             saveMaxHp = playerEntity.maxHp;
             saveHp = playerEntity.currentHp > 0 ? playerEntity.currentHp : saveMaxHp; 
-        } else {
-            cc.error("[DEBUG] ❌ 找不到 PlayerController 元件！");
         }
 
         return {
@@ -737,6 +737,7 @@ export default class GameManager extends cc.Component {
             hp: saveHp,
             maxHp: saveMaxHp,
             inventory: InventoryManager.instance.getSaveSnapshot(),
+            equipment: EquipmentManager.Instance.getSaveSnapshot(),
             updatedAt: Date.now()
         };
     }
