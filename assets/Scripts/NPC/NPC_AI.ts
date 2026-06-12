@@ -27,6 +27,11 @@ export enum NPCMoveMode {
     WANDER = 2
 }
 
+export enum NPCMovementEnvironment {
+    LAND = 0,
+    WATER = 1
+}
+
 export enum NeutralCombatState {
     CALM = 0,
     AGGRO = 1,
@@ -39,9 +44,15 @@ enum NPCFacing {
     BACK = "back"
 }
 
+interface OceanAreaLike extends cc.Component {
+    containsWorldPoint(point: cc.Vec2): boolean;
+    getWorldBounds(): cc.Rect;
+}
+
 cc.Enum(NPCAttackType);
 cc.Enum(ProjectileAimMode);
 cc.Enum(NPCMoveMode);
+cc.Enum(NPCMovementEnvironment);
 cc.Enum(NeutralCombatState);
 
 @ccclass("NPCDropEntry")
@@ -99,8 +110,23 @@ export default class NPC_AI extends BaseEntity {
     @property({ type: cc.Enum(NPCMoveMode) })
     public moveMode: NPCMoveMode = NPCMoveMode.CHASE_TARGET;
 
+    @property({ type: cc.Enum(NPCMovementEnvironment) })
+    public movementEnvironment: NPCMovementEnvironment = NPCMovementEnvironment.LAND;
+
     @property(cc.Float)
     public wanderMoveSpeed: number = 40;
+
+    @property(cc.Float)
+    public waterGravityScale: number = 0;
+
+    @property(cc.Float)
+    public waterVerticalSpeedScale: number = 0.8;
+
+    @property(cc.Float)
+    public waterBoundaryMargin: number = 24;
+
+    @property(cc.Float)
+    public waterReturnSpeed: number = 90;
 
     @property(cc.Float)
     public minWanderMoveTime: number = 1.5;
@@ -225,6 +251,8 @@ export default class NPC_AI extends BaseEntity {
     private lastX: number = 0;
     private wanderTimer: number = 0;
     private wanderDirection: number = 0;
+    private waterWanderDirection: cc.Vec2 = cc.v2(0, 0);
+    private lastWaterPosition: cc.Vec2 = null;
     private bodyNode: cc.Node = null;
     private anim: cc.Animation = null;
     private rb: cc.RigidBody = null;
@@ -240,6 +268,7 @@ export default class NPC_AI extends BaseEntity {
     private baseBodyScaleX: number = 1;
     private lastProjectileFlightTime: number = 0;
     private pathAgent: NPCPathAgent = null;
+    private oceanAreas: OceanAreaLike[] = [];
 
     onLoad() {
         super.onLoad();
@@ -253,13 +282,16 @@ export default class NPC_AI extends BaseEntity {
         }
 
         this.rb = this.getComponent(cc.RigidBody);
+        this.applyMovementEnvironmentPhysics();
         PhysicsContactFilter.ensureForNode(
             this.node,
             PhysicsTag.NPC_BODY,
             this.debugLog
         );
         this.pathAgent = this.getComponent(NPCPathAgent);
+        this.refreshOceanAreas();
         this.lastX = this.node.x;
+        this.lastWaterPosition = cc.v2(this.node.x, this.node.y);
 
         if (!this.attackHitbox) {
             const hitboxNode = this.node.getChildByName("AttackHitbox");
@@ -326,6 +358,7 @@ export default class NPC_AI extends BaseEntity {
     public stopMovement() {
         this.stopHorizontalMove();
         this.wanderDirection = 0;
+        this.waterWanderDirection = cc.v2(0, 0);
         this.wanderTimer = 0;
         this.playStateAnimation("idle");
     }
@@ -704,6 +737,14 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
+        if (
+            this.movementEnvironment === NPCMovementEnvironment.WATER
+            && !this.isPointInsideAnyOcean(this.getNodeWorldPosition())
+        ) {
+            this.returnToNearestOcean(dt);
+            return;
+        }
+
         const distance = this.getTargetDistance();
         if (
             distance > this.detectRadius
@@ -718,7 +759,19 @@ export default class NPC_AI extends BaseEntity {
         }
 
         const targetWorldPosition = this.getTargetWorldPosition();
-        const pathDirection = this.pathAgent
+        if (
+            this.movementEnvironment === NPCMovementEnvironment.WATER
+            && !this.isPointInsideAnyOcean(targetWorldPosition)
+        ) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        const pathDirection = (
+            this.movementEnvironment === NPCMovementEnvironment.LAND
+            && this.pathAgent
+        )
             ? this.pathAgent.getSteeringDirection(targetWorldPosition, dt)
             : null;
         const direction = pathDirection || this.getTargetPositionInParent().sub(this.node.position);
@@ -772,6 +825,7 @@ export default class NPC_AI extends BaseEntity {
         this.isTrading = false;
         this.isMovementPaused = false;
         this.wanderDirection = 0;
+        this.waterWanderDirection = cc.v2(0, 0);
         this.wanderTimer = 0;
         this.hasWarnedNoTarget = false;
         this.updateHpBar();
@@ -818,7 +872,26 @@ export default class NPC_AI extends BaseEntity {
     }
 
     private moveTowardTarget(direction: cc.Vec2 | cc.Vec3, dt: number) {
-        if (!direction || Math.abs(direction.x) <= 0.01) {
+        if (!direction) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        if (this.movementEnvironment === NPCMovementEnvironment.WATER) {
+            const waterDirection = cc.v2(direction.x, direction.y);
+            if (waterDirection.magSqr() <= 0.0001) {
+                this.stopHorizontalMove();
+                this.playStateAnimation("idle");
+                return;
+            }
+
+            this.applyWaterVelocity(waterDirection, this.moveSpeed, dt);
+            this.playStateAnimation("move");
+            return;
+        }
+
+        if (Math.abs(direction.x) <= 0.01) {
             this.stopHorizontalMove();
             this.playStateAnimation("idle");
             return;
@@ -837,6 +910,11 @@ export default class NPC_AI extends BaseEntity {
     }
 
     protected updateWander(dt: number) {
+        if (this.movementEnvironment === NPCMovementEnvironment.WATER) {
+            this.updateWaterWander(dt);
+            return;
+        }
+
         this.wanderTimer -= dt;
 
         if (this.wanderTimer <= 0) {
@@ -875,6 +953,202 @@ export default class NPC_AI extends BaseEntity {
 
         this.wanderDirection = Math.random() < 0.5 ? -1 : 1;
         this.wanderTimer = this.randomRange(this.minWanderMoveTime, this.maxWanderMoveTime);
+    }
+
+    private updateWaterWander(dt: number): void {
+        const selfWorldPosition = this.getNodeWorldPosition();
+        if (!this.isPointInsideAnyOcean(selfWorldPosition)) {
+            this.returnToNearestOcean(dt);
+            return;
+        }
+
+        this.wanderTimer -= dt;
+        if (this.wanderTimer <= 0) {
+            this.chooseNextWaterWanderState();
+        }
+
+        if (this.waterWanderDirection.magSqr() <= 0.0001) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        this.applyWaterVelocity(this.waterWanderDirection, this.wanderMoveSpeed, dt);
+        this.playStateAnimation("move");
+    }
+
+    private chooseNextWaterWanderState(): void {
+        if (Math.random() < 0.35) {
+            this.waterWanderDirection = cc.v2(0, 0);
+            this.wanderTimer = this.randomRange(this.minWanderIdleTime, this.maxWanderIdleTime);
+            return;
+        }
+
+        const angle = Math.random() * Math.PI * 2;
+        this.waterWanderDirection = cc.v2(
+            Math.cos(angle),
+            Math.sin(angle)
+        ).normalize();
+        this.wanderTimer = this.randomRange(this.minWanderMoveTime, this.maxWanderMoveTime);
+    }
+
+    private applyWaterVelocity(direction: cc.Vec2, speed: number, dt: number): void {
+        const adjustedDirection = cc.v2(
+            direction.x,
+            direction.y * Math.max(0, this.waterVerticalSpeedScale)
+        );
+        if (adjustedDirection.magSqr() <= 0.0001) {
+            this.stopHorizontalMove();
+            return;
+        }
+
+        const safeDirection = this.keepWaterDirectionInsideBounds(adjustedDirection.normalize());
+        const velocity = safeDirection.mul(Math.max(0, speed));
+        if (this.rb) {
+            this.rb.linearVelocity = velocity;
+        } else {
+            this.node.x += velocity.x * dt;
+            this.node.y += velocity.y * dt;
+        }
+
+        this.setFacingByDirection(safeDirection);
+        this.tryChangeWaterDirectionWhenStuck(dt);
+    }
+
+    private keepWaterDirectionInsideBounds(direction: cc.Vec2): cc.Vec2 {
+        const area = this.findOceanAreaForPoint(this.getNodeWorldPosition());
+        if (!area) {
+            return direction;
+        }
+
+        const bounds = area.getWorldBounds();
+        const margin = this.getSafeWaterBoundaryMargin(bounds);
+        const position = this.getNodeWorldPosition();
+        const corrected = direction.clone();
+
+        if (position.x <= bounds.xMin + margin && corrected.x < 0) {
+            corrected.x = Math.abs(corrected.x);
+        } else if (position.x >= bounds.xMax - margin && corrected.x > 0) {
+            corrected.x = -Math.abs(corrected.x);
+        }
+
+        if (position.y <= bounds.yMin + margin && corrected.y < 0) {
+            corrected.y = Math.abs(corrected.y);
+        } else if (position.y >= bounds.yMax - margin && corrected.y > 0) {
+            corrected.y = -Math.abs(corrected.y);
+        }
+
+        return corrected.magSqr() > 0.0001 ? corrected.normalize() : cc.v2(0, 0);
+    }
+
+    private returnToNearestOcean(dt: number): void {
+        const area = this.findNearestOceanArea(this.getNodeWorldPosition());
+        if (!area) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        const bounds = area.getWorldBounds();
+        const margin = this.getSafeWaterBoundaryMargin(bounds);
+        const targetWorldPosition = cc.v2(
+            Math.max(bounds.xMin + margin, Math.min(bounds.xMax - margin, this.getNodeWorldPosition().x)),
+            Math.max(bounds.yMin + margin, Math.min(bounds.yMax - margin, this.getNodeWorldPosition().y))
+        );
+        const direction = targetWorldPosition.sub(this.getNodeWorldPosition());
+        if (direction.magSqr() <= 1) {
+            this.stopHorizontalMove();
+            return;
+        }
+
+        this.applyWaterVelocity(direction, this.waterReturnSpeed, dt);
+        this.playStateAnimation("move");
+    }
+
+    private getSafeWaterBoundaryMargin(bounds: cc.Rect): number {
+        const maxMargin = Math.max(0, Math.min(bounds.width, bounds.height) * 0.45);
+        return Math.max(0, Math.min(maxMargin, this.waterBoundaryMargin));
+    }
+
+    private findOceanAreaForPoint(point: cc.Vec2): OceanAreaLike {
+        const areas = this.getOceanAreas();
+        for (const area of areas) {
+            if (area.containsWorldPoint(point)) {
+                return area;
+            }
+        }
+        return null;
+    }
+
+    private findNearestOceanArea(point: cc.Vec2): OceanAreaLike {
+        let nearest: OceanAreaLike = null;
+        let nearestDistance = Number.MAX_VALUE;
+        for (const area of this.getOceanAreas()) {
+            const bounds = area.getWorldBounds();
+            const closest = cc.v2(
+                Math.max(bounds.xMin, Math.min(bounds.xMax, point.x)),
+                Math.max(bounds.yMin, Math.min(bounds.yMax, point.y))
+            );
+            const distance = closest.sub(point).magSqr();
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = area;
+            }
+        }
+        return nearest;
+    }
+
+    private isPointInsideAnyOcean(point: cc.Vec2): boolean {
+        return this.getOceanAreas().some(area => area.containsWorldPoint(point));
+    }
+
+    private getOceanAreas(): OceanAreaLike[] {
+        this.oceanAreas = this.oceanAreas.filter(area => (
+            !!area
+            && !!area.node
+            && cc.isValid(area.node)
+        ));
+        if (this.oceanAreas.length <= 0) {
+            this.refreshOceanAreas();
+        }
+        return this.oceanAreas;
+    }
+
+    private refreshOceanAreas(): void {
+        const canvas = cc.find("Canvas");
+        if (!canvas) {
+            this.oceanAreas = [];
+            return;
+        }
+
+        this.oceanAreas = (canvas.getComponentsInChildren("OceanArea") as any[])
+            .filter(area => (
+                !!area
+                && typeof area.containsWorldPoint === "function"
+                && typeof area.getWorldBounds === "function"
+            )) as OceanAreaLike[];
+    }
+
+    private tryChangeWaterDirectionWhenStuck(dt: number): void {
+        const currentPosition = cc.v2(this.node.x, this.node.y);
+        if (!this.lastWaterPosition) {
+            this.lastWaterPosition = currentPosition;
+            return;
+        }
+
+        const movedDistance = currentPosition.sub(this.lastWaterPosition).mag();
+        this.stuckTimer = movedDistance < this.minMoveDeltaX
+            ? this.stuckTimer + dt
+            : 0;
+        this.lastWaterPosition = currentPosition;
+
+        if (this.stuckTimer >= this.stuckCheckTime) {
+            this.stuckTimer = 0;
+            this.chooseNextWaterWanderState();
+            if (this.debugLog) {
+                cc.log("[NPC_AI] water direction changed: obstacle/stuck detected");
+            }
+        }
     }
 
     private randomRange(min: number, max: number) {
@@ -1117,7 +1391,9 @@ export default class NPC_AI extends BaseEntity {
 
     private stopHorizontalMove() {
         if (this.rb) {
-            this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+            this.rb.linearVelocity = this.movementEnvironment === NPCMovementEnvironment.WATER
+                ? cc.v2(0, 0)
+                : cc.v2(0, this.rb.linearVelocity.y);
         }
     }
 
@@ -1143,7 +1419,20 @@ export default class NPC_AI extends BaseEntity {
 
     private getTargetDistance() {
         const delta = this.getTargetWorldPosition().sub(this.getNodeWorldPosition());
-        return Math.abs(delta.x);
+        return this.movementEnvironment === NPCMovementEnvironment.WATER
+            ? delta.mag()
+            : Math.abs(delta.x);
+    }
+
+    private applyMovementEnvironmentPhysics(): void {
+        if (!this.rb || this.movementEnvironment !== NPCMovementEnvironment.WATER) {
+            return;
+        }
+
+        this.rb.type = cc.RigidBodyType.Dynamic;
+        this.rb.fixedRotation = true;
+        (this.rb as any).gravityScale = Math.max(0, this.waterGravityScale);
+        this.rb.linearVelocity = cc.v2(0, 0);
     }
 
     private getNodeWorldPosition() {

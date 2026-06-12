@@ -4,6 +4,8 @@ export enum InputContext {
     Crafting = "Crafting",
     Dialogue = "Dialogue",
     MerchantShop = "MerchantShop",
+    MapEditor = "MapEditor",
     Vehicle = "Vehicle",
+    MapEditor = "MapEditor",
     Paused = "Paused"
 }

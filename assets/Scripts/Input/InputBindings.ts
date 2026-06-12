@@ -65,12 +65,15 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.e:
         case KEY_E:
             return InputAction.ToggleMapEditor;
+        case cc.macro.KEY.num1:
         case KEY_1:
         case KEY_NUMPAD_1:
             return InputAction.EditorTerrainTool;
+        case cc.macro.KEY.num2:
         case KEY_2:
         case KEY_NUMPAD_2:
             return InputAction.EditorResourceTool;
+        case cc.macro.KEY.num3:
         case KEY_3:
         case KEY_NUMPAD_3:
             return InputAction.EditorBoxGenerateTool;
@@ -105,16 +108,39 @@ export function getActionForKeyboardEvent(event: cc.Event.EventKeyboard): InputA
 
     const key = getKeyboardString(event, "key");
     switch (key) {
+        case "escape":
+        case "esc":
+            return InputAction.Cancel;
+        case "e":
+            return InputAction.ToggleMapEditor;
         case "1":
             return InputAction.EditorTerrainTool;
         case "2":
             return InputAction.EditorResourceTool;
         case "3":
             return InputAction.EditorBoxGenerateTool;
+        case "q":
+            return InputAction.EditorPreviousPrefab;
+        case "r":
+            return InputAction.EditorNextPrefab;
+        case "[":
+            return InputAction.EditorRotateLeft;
+        case "]":
+            return InputAction.EditorRotateRight;
+        case "+":
+        case "=":
+            return InputAction.CameraZoomIn;
+        case "-":
+        case "_":
+            return InputAction.CameraZoomOut;
     }
 
     const code = getKeyboardString(event, "code");
     switch (code) {
+        case "escape":
+            return InputAction.Cancel;
+        case "keye":
+            return InputAction.ToggleMapEditor;
         case "digit1":
         case "numpad1":
             return InputAction.EditorTerrainTool;
@@ -124,6 +150,20 @@ export function getActionForKeyboardEvent(event: cc.Event.EventKeyboard): InputA
         case "digit3":
         case "numpad3":
             return InputAction.EditorBoxGenerateTool;
+        case "keyq":
+            return InputAction.EditorPreviousPrefab;
+        case "keyr":
+            return InputAction.EditorNextPrefab;
+        case "bracketleft":
+            return InputAction.EditorRotateLeft;
+        case "bracketright":
+            return InputAction.EditorRotateRight;
+        case "equal":
+        case "numpadadd":
+            return InputAction.CameraZoomIn;
+        case "minus":
+        case "numpadsubtract":
+            return InputAction.CameraZoomOut;
     }
 
     return null!;
@@ -149,9 +189,15 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.Confirm:
         case InputAction.Cancel:
         case InputAction.ToggleMute:
-        case InputAction.CameraZoomIn:
-        case InputAction.CameraZoomOut:
         case InputAction.GenerateMap:
+        case InputAction.ToggleMapEditor:
+        case InputAction.EditorTerrainTool:
+        case InputAction.EditorResourceTool:
+        case InputAction.EditorBoxGenerateTool:
+        case InputAction.EditorPreviousPrefab:
+        case InputAction.EditorNextPrefab:
+        case InputAction.EditorRotateLeft:
+        case InputAction.EditorRotateRight:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:
             return true;

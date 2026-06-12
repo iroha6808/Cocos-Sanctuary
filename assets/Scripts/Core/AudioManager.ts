@@ -19,31 +19,31 @@ export enum BgmTrack {
 
 @ccclass
 export default class AudioManager extends cc.Component {
-    public static instance: AudioManager = null;
+    public static instance: AudioManager = null!;
 
     @property(cc.AudioClip)
-    public sceneBgm: cc.AudioClip = null;
+    public sceneBgm: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public waterBgm: cc.AudioClip = null;
+    public waterBgm: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public attackSfx: cc.AudioClip = null;
+    public attackSfx: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public hitSfx: cc.AudioClip = null;
+    public hitSfx: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public collectSfx: cc.AudioClip = null;
+    public collectSfx: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public buySfx: cc.AudioClip = null;
+    public buySfx: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public healSfx: cc.AudioClip = null;
+    public healSfx: cc.AudioClip = null!;
 
     @property(cc.AudioClip)
-    public skillSfx: cc.AudioClip = null;
+    public skillSfx: cc.AudioClip = null!;
 
     @property({ type: cc.Float, range: [0, 1, 0.05], slide: true })
     public musicVolume: number = 0.5;
@@ -57,32 +57,37 @@ export default class AudioManager extends cc.Component {
     @property({ type: cc.Float, range: [0, 3, 0.05], slide: true })
     public bgmFadeDuration: number = 0.8;
 
+    @property({ type: cc.Float, range: [0, 10, 0.5], slide: true })
+    public waterRepeatDelay: number = 2.0;
+
     private muted: boolean = false;
     private currentBgmTrack: BgmTrack = BgmTrack.LAND;
-    private bgmAudioIds: { [track: string]: number } = {};
-    private bgmFadeTimer: number = 0;
-    private bgmFadeDurationInternal: number = 0;
-    private bgmFadeFromTrack: BgmTrack = BgmTrack.LAND;
-    private bgmFadeToTrack: BgmTrack = BgmTrack.LAND;
-    private bgmFadeFromVolume: number = 0;
+    private sceneBgmAudioId: number = -1;
+    private isPlayerInWater: boolean = false;
+    private waterAmbientTimer: number = 0;
 
     onLoad(): void {
         AudioManager.instance = this;
         EventCenter.on(GameEvent.PLAYER_WATER_STATE_CHANGED, this.onWaterStateChanged, this);
     }
 
-    onDestroy(): void {
-        if (AudioManager.instance === this) {
-            AudioManager.instance = null;
-        }
-        EventCenter.off(GameEvent.PLAYER_WATER_STATE_CHANGED, this.onWaterStateChanged, this);
-        this.stopAllBgmChannels();
-    }
-
     start(): void {
         if (this.playBgmOnStart) {
             this.playBgm();
         }
+    }
+
+    update(dt: number): void {
+        this.updateWaterAmbient(dt);
+    }
+
+    onDestroy(): void {
+        if (AudioManager.instance === this) {
+            AudioManager.instance = null!;
+        }
+
+        EventCenter.off(GameEvent.PLAYER_WATER_STATE_CHANGED, this.onWaterStateChanged, this);
+        this.stopAllBgmChannels();
     }
 
     public static play(type: SfxType): void {
@@ -96,42 +101,19 @@ export default class AudioManager extends cc.Component {
     }
 
     public playBgm(track: BgmTrack = BgmTrack.LAND): void {
-        this.crossFadeToBgm(track, 0);
+        this.currentBgmTrack = BgmTrack.LAND;
+        this.ensureSceneBgm();
     }
 
     public crossFadeToBgm(track: BgmTrack, duration: number = this.bgmFadeDuration): void {
-        const targetTrack = this.getAvailableTrack(track);
-        this.currentBgmTrack = targetTrack;
+        this.currentBgmTrack = BgmTrack.LAND;
+        this.ensureSceneBgm();
 
-        if (this.muted) {
-            return;
+        if (track === BgmTrack.WATER) {
+            this.isPlayerInWater = true;
+        } else {
+            this.isPlayerInWater = false;
         }
-
-        const targetId = this.ensureBgmChannel(targetTrack, targetTrack === this.bgmFadeToTrack ? undefined : 0);
-        if (targetId < 0) {
-            return;
-        }
-
-        if (duration <= 0) {
-            this.unschedule(this.updateBgmFade);
-            this.setBgmVolume(targetTrack, this.musicVolume);
-            this.stopOtherBgmChannels(targetTrack);
-            return;
-        }
-
-        if (this.bgmFadeToTrack === targetTrack && this.bgmFadeTimer < this.bgmFadeDurationInternal) {
-            return;
-        }
-
-        const fromTrack = this.getCurrentPlayingTrack(targetTrack);
-        this.bgmFadeFromTrack = fromTrack;
-        this.bgmFadeToTrack = targetTrack;
-        this.bgmFadeTimer = 0;
-        this.bgmFadeDurationInternal = duration;
-        this.bgmFadeFromVolume = fromTrack ? this.getBgmVolume(fromTrack) : 0;
-        this.setBgmVolume(targetTrack, 0);
-        this.unschedule(this.updateBgmFade);
-        this.schedule(this.updateBgmFade, 0);
     }
 
     public playSfx(type: SfxType): void {
@@ -140,149 +122,94 @@ export default class AudioManager extends cc.Component {
         }
 
         const clip = this.getClip(type);
-        if (clip) {
-            cc.audioEngine.playEffect(clip, false);
-            cc.audioEngine.setEffectsVolume(this.sfxVolume);
+        if (!clip) {
+            return;
         }
+
+        cc.audioEngine.setEffectsVolume(this.sfxVolume);
+        cc.audioEngine.playEffect(clip, false);
     }
 
     public toggleMute(): boolean {
         this.muted = !this.muted;
+
         if (this.muted) {
-            cc.audioEngine.pauseMusic();
             this.pauseBgmChannels();
             cc.audioEngine.pauseAllEffects();
         } else {
-            cc.audioEngine.resumeMusic();
             this.resumeBgmChannels();
             cc.audioEngine.resumeAllEffects();
-            this.playBgm(this.currentBgmTrack);
+            this.ensureSceneBgm();
         }
+
         return this.muted;
     }
 
     private onWaterStateChanged(isInWater: boolean): void {
-        this.crossFadeToBgm(isInWater ? BgmTrack.WATER : BgmTrack.LAND, this.bgmFadeDuration);
+        this.isPlayerInWater = isInWater;
     }
 
-    private updateBgmFade = (dt: number): void => {
-        if (this.bgmFadeDurationInternal <= 0) {
+    private ensureSceneBgm(): void {
+        if (this.muted || !this.sceneBgm) {
             return;
         }
 
-        this.bgmFadeTimer += dt;
-        const ratio = Math.min(1, this.bgmFadeTimer / this.bgmFadeDurationInternal);
-        const eased = ratio * ratio * (3 - 2 * ratio);
-
-        if (this.bgmFadeFromTrack) {
-            this.setBgmVolume(this.bgmFadeFromTrack, this.bgmFadeFromVolume * (1 - eased));
+        if (this.sceneBgmAudioId >= 0) {
+            cc.audioEngine.setVolume(this.sceneBgmAudioId, this.musicVolume);
+            return;
         }
-        this.setBgmVolume(this.bgmFadeToTrack, this.musicVolume * eased);
 
-        if (ratio >= 1) {
-            this.unschedule(this.updateBgmFade);
-            this.setBgmVolume(this.bgmFadeToTrack, this.musicVolume);
-            this.stopOtherBgmChannels(this.bgmFadeToTrack);
-        }
-    };
-
-    private getAvailableTrack(track: BgmTrack): BgmTrack {
-        if (track === BgmTrack.WATER && this.waterBgm) {
-            return BgmTrack.WATER;
-        }
-        return BgmTrack.LAND;
+        this.sceneBgmAudioId = cc.audioEngine.play(this.sceneBgm, true, this.musicVolume);
     }
 
-    private getClipForTrack(track: BgmTrack): cc.AudioClip {
-        if (track === BgmTrack.WATER) {
-            return this.waterBgm || this.sceneBgm;
+    private updateWaterAmbient(dt: number): void {
+        if (this.waterAmbientTimer > 0) {
+            this.waterAmbientTimer -= dt;
         }
-        return this.sceneBgm;
+
+        if (this.muted || !this.isPlayerInWater || !this.waterBgm) {
+            return;
+        }
+
+        if (this.waterAmbientTimer > 0) {
+            return;
+        }
+
+        const audioId = cc.audioEngine.play(this.waterBgm, false, this.musicVolume);
+        if (audioId >= 0) {
+            cc.audioEngine.setVolume(audioId, this.musicVolume);
+        }
+
+        const duration = this.getClipDuration(this.waterBgm);
+        this.waterAmbientTimer = duration + this.waterRepeatDelay;
     }
 
-    private ensureBgmChannel(track: BgmTrack, volume: number = this.musicVolume): number {
-        const existingId = this.bgmAudioIds[track];
-        if (existingId !== undefined && existingId >= 0) {
-            return existingId;
+    private getClipDuration(clip: cc.AudioClip): number {
+        const rawDuration = (clip as any).duration;
+        if (typeof rawDuration === "number" && rawDuration > 0) {
+            return rawDuration;
         }
 
-        const clip = this.getClipForTrack(track);
-        if (!clip) {
-            return -1;
-        }
-
-        cc.audioEngine.stopMusic();
-        const audioId = cc.audioEngine.play(clip, true, volume);
-        this.bgmAudioIds[track] = audioId;
-        return audioId;
-    }
-
-    private getCurrentPlayingTrack(fallback: BgmTrack): BgmTrack {
-        const tracks = [BgmTrack.LAND, BgmTrack.WATER];
-        for (const track of tracks) {
-            const id = this.bgmAudioIds[track];
-            if (id !== undefined && id >= 0 && track !== fallback) {
-                return track;
-            }
-        }
-        return null;
-    }
-
-    private setBgmVolume(track: BgmTrack, volume: number): void {
-        const id = this.bgmAudioIds[track];
-        if (id !== undefined && id >= 0) {
-            cc.audioEngine.setVolume(id, Math.max(0, Math.min(1, volume)));
-        }
-    }
-
-    private getBgmVolume(track: BgmTrack): number {
-        const id = this.bgmAudioIds[track];
-        if (id !== undefined && id >= 0 && (cc.audioEngine as any).getVolume) {
-            return (cc.audioEngine as any).getVolume(id);
-        }
-        return this.musicVolume;
-    }
-
-    private stopOtherBgmChannels(activeTrack: BgmTrack): void {
-        const tracks = [BgmTrack.LAND, BgmTrack.WATER];
-        for (const track of tracks) {
-            if (track === activeTrack) {
-                continue;
-            }
-            const id = this.bgmAudioIds[track];
-            if (id !== undefined && id >= 0) {
-                cc.audioEngine.stop(id);
-                delete this.bgmAudioIds[track];
-            }
-        }
+        return 5;
     }
 
     private pauseBgmChannels(): void {
-        Object.keys(this.bgmAudioIds).forEach(track => {
-            const id = this.bgmAudioIds[track];
-            if (id !== undefined && id >= 0) {
-                cc.audioEngine.pause(id);
-            }
-        });
+        if (this.sceneBgmAudioId >= 0) {
+            cc.audioEngine.pause(this.sceneBgmAudioId);
+        }
     }
 
     private resumeBgmChannels(): void {
-        Object.keys(this.bgmAudioIds).forEach(track => {
-            const id = this.bgmAudioIds[track];
-            if (id !== undefined && id >= 0) {
-                cc.audioEngine.resume(id);
-            }
-        });
+        if (this.sceneBgmAudioId >= 0) {
+            cc.audioEngine.resume(this.sceneBgmAudioId);
+        }
     }
 
     private stopAllBgmChannels(): void {
-        Object.keys(this.bgmAudioIds).forEach(track => {
-            const id = this.bgmAudioIds[track];
-            if (id !== undefined && id >= 0) {
-                cc.audioEngine.stop(id);
-            }
-        });
-        this.bgmAudioIds = {};
+        if (this.sceneBgmAudioId >= 0) {
+            cc.audioEngine.stop(this.sceneBgmAudioId);
+            this.sceneBgmAudioId = -1;
+        }
     }
 
     private getClip(type: SfxType): cc.AudioClip {
@@ -300,7 +227,7 @@ export default class AudioManager extends cc.Component {
             case SfxType.SKILL:
                 return this.skillSfx;
             default:
-                return null;
+                return null!;
         }
     }
 }

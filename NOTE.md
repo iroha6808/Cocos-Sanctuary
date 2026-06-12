@@ -144,8 +144,9 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 | `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
 | `+` / `-` | 調整 Main Camera zoom；`+` 放大、`-` 拉遠，Pause 中也可用。 | `InputAction.CameraZoomIn/Out`、`GameManager.adjustCameraZoom()`、`CameraRig.adjustBaseZoom()` |
 | `G` | 觸發自動地圖逐塊生成；生成期間鏡頭拉到整個生成範圍，結束後回到玩家。 | `InputAction.GenerateMap`、`GameManager.beginAutoMapGeneration()`、`AutoMapGenerator.beginTimedGeneration()` |
-| `E` | 進 / 出 Game 內 Map Editor；Editor mode 會鎖住玩家控制。 | `InputAction.ToggleMapEditor`、`GameManager.enterMapEditorMode()`、`MapEditorController.enterEditorMode()` |
-| Map Editor `1/2/3` | 切地形 / 資源 / 框選生成工具。 | `MapEditorController.handleEditorInput()` |
+| `E` | 進 / 出 Game 內 Map Editor；Editor mode 會像暫停一樣鎖住玩家控制。 | `InputAction.ToggleMapEditor`、`GameManager.toggleMapEditorMode()`、`MapEditorController.enterEditorMode()` |
+| Map Editor `Esc` | 離開 Map Editor 並把 editor-owned 節點留在 live scene。 | `InputAction.Cancel`、`MapEditorController.handleEditorInput()` |
+| Map Editor `1/2/3` | 切地形 / 資源 / 框選生成工具；同時支援 Cocos `num1/num2/num3`、瀏覽器 `Digit1/2/3`、numpad。 | `InputBindings.getActionForKey()`、`MapEditorController.handleEditorInput()` |
 | Map Editor 左鍵 / 右鍵 | 左鍵放置或拖框；右鍵刪 `Editor*` 節點。 | `MapEditorController.onMouseDown()` / `generateInSelection()` |
 | Map Editor `Q/R`、`[` / `]` | 切換 prefab、旋轉放置角度。 | `MapEditorController.selectPrefab()` / `adjustRotation()` |
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
@@ -306,7 +307,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `beginTimedGeneration()` 會預先算出 placements，呼叫 `CameraRig.frameWorldRect()` 用 `cameraFrameDuration = 1.6` 秒看完整生成範圍，等 `startAfterCameraDelay = 0.5` 秒後，每 `generationStepInterval = 0.25` 秒 spawn 一塊地形、觸發小幅 camera shake，並 emit `MAP_GENERATION_PROGRESS(current, total)`；生成中重按 `G` 預設不重入。
 - 逐塊生成完成後會先等 `returnAfterGenerationDelay = 1.0` 秒，再呼叫 `CameraRig.returnToTarget()` 回到玩家；期間玩家仍可移動。
 - AutoMapGenerator 每次生成後會把 `seed`、範圍、pattern 數、斜坡數、rock 數與主要參數寫入 `SaveService.currentMap` 並 emit `MAP_GENERATION_UPDATED`；存檔只保存這份 map state，不保存 runtime 生成出的所有節點。
-- Map Editor 每次放置 / 刪除 / 框選生成後會更新 `SaveService.currentMapEditor` 並 emit `MAP_EDITOR_STATE_CHANGED`；讀檔時 `SAVE_LOADED` 會重建 `mapEditorState.placements`。
+- Map Editor 每次放置 / 刪除 / 框選生成後會更新 live scene、`SaveService.currentMapEditor` 並 emit `MAP_EDITOR_STATE_CHANGED`；目前 `SAVE_LOADED` 先不重建 placements，避免舊假後端資料蓋掉正在編輯的地圖。
 - 讀檔觸發 `SAVE_LOADED` 時，AutoMapGenerator 只套用 `saveData.mapState` 的 seed / range / settings 並更新 current map；不會立刻生成，等玩家按 `G` 後才用同一組參數生成。
 - `minPatternCount/maxPatternCount` 控制平台組數，`slopePatternChance` 控制斜坡組比例，`minSlopePatternCount` 保證至少幾組含 Rockleft / Rockright；`scatterCount` 只補少量散點。
 - Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。

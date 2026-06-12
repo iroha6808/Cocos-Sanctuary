@@ -17,7 +17,7 @@
 - [Git 流程](#git-流程)
 
 ## 下一步優先順序
-目前自動生成範圍改成按按鍵後才開始生成，鏡頭先慢慢拉至整個生成範圍，等 0.5 秒後每 0.25 秒顯示(或生成)一塊新地形，生成完再等 1 秒回到玩家
+edit3 卡住(可能因為被暫停)，edit1取消預覽框線然後正確顯示預覽地形
 1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
 2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
 3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
@@ -211,29 +211,29 @@
 
 ## 手動設定
 
-- [ ] Player prefab 接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`
-- [ ] Player 的 `Sprite_Body` 掛 `cc.Animation`
-- [ ] Player 的 `AttackHitbox` 掛 `CombatHitbox` + PhysicsCollider
-- [ ] NPC prefab 接 `targetPlayer`、`hpBar`、`attackHitbox`
-- [ ] SkeletonMage 接 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`
-- [ ] BurningCoconutProjectile prefab 要有 `CombatProjectile`、RigidBody、PhysicsCollider、視覺 / 火焰動畫
-- [ ] TravelingMerchant 同節點掛 `NPC_AI` + `MerchantNPC`
-- [ ] TravelingMerchant prefab 已有新 sprite 與 `cc.Animation`，確認 default clip / clips 包含 idle / talk，並實測對話時切 talk 或至少顯示新商人圖。
-- [ ] MerchantSpawner 接 `merchantPrefab`、`playerNode`、`spawnParent`
+- [ x] Player prefab 接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`
+- [ x] Player 的 `Sprite_Body` 掛 `cc.Animation`
+- [ x] Player 的 `AttackHitbox` 掛 `CombatHitbox` + PhysicsCollider
+- [ x] NPC prefab 接 `targetPlayer`、`hpBar`、`attackHitbox`
+- [ x] SkeletonMage 接 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`
+- [ x] BurningCoconutProjectile prefab 要有 `CombatProjectile`、RigidBody、PhysicsCollider、視覺 / 火焰動畫
+- [ x] TravelingMerchant 同節點掛 `NPC_AI` + `MerchantNPC`
+- [ x] TravelingMerchant prefab 已有新 sprite 與 `cc.Animation`，確認 default clip / clips 包含 idle / talk，並實測對話時切 talk 或至少顯示新商人圖。
+- [ x] MerchantSpawner 接 `merchantPrefab`、`playerNode`、`spawnParent`
 - [ ] OceanArea 節點掛 `PhysicsBoxCollider` sensor + `OceanArea.ts`
 - [ ] OceanArea root 可掛 `OceanLayerOrder.ts`；若要清掉舊 GeneratedContent 可掛 `OceanPrefabBuilder.ts`
-- [ ] Resource prefab 接 `dropPrefab`
-- [ ] DropOre prefab 掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key
-- [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
-- [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
-- [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
-- [ ] AutoMapGenerator 的 `manualTriggerOnly` 預設開啟；開場 / 讀檔只套 seed 與參數不生成，Gameplay 按 `G` 後鏡頭用 `cameraFrameDuration = 1.6` 秒拉遠，等 `startAfterCameraDelay = 0.5` 秒，再在 `x -5000~0`、`y -2000~0` 每 `generationStepInterval = 0.25` 秒逐塊生成並小幅震動，完成後等 `returnAfterGenerationDelay = 1.0` 秒再回玩家。
-- [ ] AutoMapGenerator 使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例；存檔保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
-- [ ] AutoMapGenerator 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；資源只生成在平坦平台頂面，fruitore prefab 尚未建立時可先留空。
-- [ ] Map Editor 入口：Menu 新增按鈕綁 `MenuScene.startMapEditor()`；進 Game 後會切 `InputContext.MapEditor` 並鎖住 Player 控制。
-- [ ] MapEditorController 可掛 `Canvas/platform/auto generate` 或由 GameManager runtime 補；拖 `terrainRoot`、`resourceRoot`、`cameraRig`、`playerNode`、可選 `editorStatusLabel` / `selectionGraphics`，prefab 欄位沒拖時會 fallback AutoMapGenerator。
-- [ ] Map Editor 操作：`E` 進出、`1/2/3` 地形 / 資源 / 框選生成、左鍵放置或拖框、右鍵刪 editor-owned 節點、`Q/R` 換 prefab、`[` / `]` 旋轉；框選生成只清框內 `Auto*` / `Editor*` 節點。
-- [ ] Map Editor 存檔：`SaveData.mapEditorState` 保存實際 placements，讀檔後重建 `EditorRock_*` / `EditorResource_*`；一般 AutoMap 的 seed / 範圍仍由 `mapState` 保存。
+- [ x] Resource prefab 接 `dropPrefab`
+- [ x] DropOre prefab 掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key
+- [ x] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
+- [ x] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
+- [ x] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
+- [ x] AutoMapGenerator 的 `manualTriggerOnly` 預設開啟；開場 / 讀檔只套 seed 與參數不生成，Gameplay 按 `G` 後鏡頭用 `cameraFrameDuration = 1.6` 秒拉遠，等 `startAfterCameraDelay = 0.5` 秒，再在 `x -5000~0`、`y -2000~0` 每 `generationStepInterval = 0.25` 秒逐塊生成並小幅震動，完成後等 `returnAfterGenerationDelay = 1.0` 秒再回玩家。
+- [ x] AutoMapGenerator 使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例；存檔保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
+- [ x] AutoMapGenerator 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；資源只生成在平坦平台頂面，fruitore prefab 尚未建立時可先留空。
+- [ x] Map Editor 入口：Menu 新增按鈕綁 `MenuScene.startMapEditor()`；進 Game 後會切 `InputContext.MapEditor` 並鎖住 Player 控制。
+- [ x] MapEditorController 可掛 `Canvas/platform/auto generate` 或由 GameManager runtime 補；拖 `terrainRoot`、`resourceRoot`、`cameraRig`、`playerNode`、可選 `editorStatusLabel` / `selectionGraphics`，prefab 欄位沒拖時會 fallback AutoMapGenerator。
+- [ x] Map Editor 操作：`E` / `Esc` 進出、`1/2/3` 地形 / 資源 / 框選生成、左鍵放置或拖框、右鍵刪 editor-owned 節點、`Q/R` 換 prefab、`[` / `]` 旋轉；支援 Cocos `num1/num2/num3` 與瀏覽器 key/code fallback，框選生成只清框內 `Auto*` / `Editor*` 節點。
+- [ x] Map Editor 暫存：放置 / 刪除 / 框選生成後會更新 live scene 與 `SaveService.currentMapEditor`；目前讀檔先不重建 editor placements，避免假後端舊資料蓋掉場景。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
@@ -245,9 +245,9 @@
 - [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、可選 `waterBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`；`bgmFadeDuration` 控制進出水域淡入淡出。
 - [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
-- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator；Background 可拖 `zoomScaledNodes` / `inverseZoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
-- [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
-- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep` / `overviewPadding` / `overviewMinZoomRatio`，或 `AutoMapGenerator.spawnShakeDuration/spawnShakeAmplitude`、`HitFeelManager` 的 hitStop / shake / zoom 數值
+- [ x] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator；Background 可拖 `zoomScaledNodes` / `inverseZoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
+- [ x] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
+- [ x] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep` / `overviewPadding` / `overviewMinZoomRatio`，或 `AutoMapGenerator.spawnShakeDuration/spawnShakeAmplitude`、`HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
 - [ ] Player 或 Player 子節點掛 `PlayerGun.ts`；`projectilePrefab` 拖玩家子彈 prefab，`muzzleNode` 可拖槍口節點，`projectileParent` 建議拖 Bullet_Layer。
@@ -273,7 +273,7 @@
 
 ### Cocos Inspector 設定
 
-- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，AutoMapGenerator 拖到 `autoMapGenerator`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
+- [ x] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，AutoMapGenerator 拖到 `autoMapGenerator`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
 - [ ] 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp`、`moveSpeed`、`jumpForce`、`attackDamage`。
 - [ ] `PlayerController.ts` 需要接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`、`craftingUI`。
 - [ ] 玩家節點建議有 `RigidBody`、`Sprite_Body`、`AttackHitbox` 子節點。
