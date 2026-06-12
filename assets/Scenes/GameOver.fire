@@ -85,18 +85,21 @@
       },
       {
         "__id__": 13
+      },
+      {
+        "__id__": 30
       }
     ],
     "_active": true,
     "_components": [
       {
-        "__id__": 30
-      },
-      {
-        "__id__": 31
-      },
-      {
         "__id__": 32
+      },
+      {
+        "__id__": 33
+      },
+      {
+        "__id__": 34
       }
     ],
     "_prefab": null,
@@ -1450,6 +1453,96 @@
     "_componentId": "91a08c98xpFao2DvWKC1RJp",
     "handler": "onMenuClicked",
     "customEventData": ""
+  },
+  {
+    "__type__": "cc.Node",
+    "_name": "AudioMgr",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 2
+    },
+    "_children": [],
+    "_active": true,
+    "_components": [
+      {
+        "__id__": 31
+      }
+    ],
+    "_prefab": null,
+    "_opacity": 255,
+    "_color": {
+      "__type__": "cc.Color",
+      "r": 255,
+      "g": 255,
+      "b": 255,
+      "a": 255
+    },
+    "_contentSize": {
+      "__type__": "cc.Size",
+      "width": 0,
+      "height": 0
+    },
+    "_anchorPoint": {
+      "__type__": "cc.Vec2",
+      "x": 0.5,
+      "y": 0.5
+    },
+    "_trs": {
+      "__type__": "TypedArray",
+      "ctor": "Float64Array",
+      "array": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "_eulerAngles": {
+      "__type__": "cc.Vec3",
+      "x": 0,
+      "y": 0,
+      "z": 0
+    },
+    "_skewX": 0,
+    "_skewY": 0,
+    "_is3DNode": false,
+    "_groupIndex": 0,
+    "groupIndex": 0,
+    "_id": "bfD2dQj+VNe4DBQunXztp/"
+  },
+  {
+    "__type__": "2d453G78ldN3783btZxyYGV",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 30
+    },
+    "_enabled": true,
+    "menuBgm": {
+      "__uuid__": "b203e4e4-2b63-4c03-ba09-48c102ef86b1"
+    },
+    "gameOverBgm": {
+      "__uuid__": "440418d4-2781-4adf-810a-f9def689e13a"
+    },
+    "sceneBgm": null,
+    "waterBgm": null,
+    "attackSfx": null,
+    "hitSfx": null,
+    "collectSfx": null,
+    "buySfx": null,
+    "healSfx": null,
+    "skillSfx": null,
+    "musicVolume": 0.5,
+    "sfxVolume": 0.8,
+    "playBgmOnStart": true,
+    "bgmFadeDuration": 0.8,
+    "_id": "7dtmp0HYdHha3QfyjiEu/U"
   },
   {
     "__type__": "cc.Canvas",
