@@ -551,4 +551,10 @@ export default class GameManager extends cc.Component {
         this.fadeOverlay.active = alpha > 0;
         this.fadeOverlay.opacity = alpha;
     }
+
+    public async handlePlayerDeath() {
+        console.log("[DEBUG] 偵測到玩家死亡，準備存檔並返回主選單 - GameManager.ts:556");
+        await SaveService2.instance.saveToCloud(this.createSaveData());
+        cc.director.loadScene('MenuScene');
+    }
 }
