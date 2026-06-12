@@ -1067,7 +1067,11 @@ export default class PlayerController extends BaseEntity {
         }
 
         EventCenter.emit(GameEvent.PLAYER_DIED);
-        cc.director.loadScene("GameOver");
+        if (window.GameManager && typeof (window.GameManager as any).handlePlayerDeath === "function") {
+             (window.GameManager as any).handlePlayerDeath();
+        } else {
+             cc.director.loadScene("GameOver");
+        }
     };
 
     onDestroy() {

@@ -108,6 +108,9 @@ export default class InputManager extends cc.Component {
         if (owner === undefined || owner === null) {
             return;
         }
+        if (!this.contextStack) {
+            return;
+        }
         this.contextStack = this.contextStack.filter(entry => entry.owner !== owner);
     }
 
