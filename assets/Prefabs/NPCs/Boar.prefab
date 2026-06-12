@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Boar",
+    "_name": "aaaaaaa",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -647,7 +647,7 @@
       "__id__": 11
     },
     "detectRadius": 100,
-    "attackRange": 20,
+    "attackRange": 40,
     "attackDamage": 10,
     "attackCooldown": 1,
     "moveSpeed": 80,
@@ -660,6 +660,9 @@
     "interactDistance": 90,
     "attackType": 1,
     "chaseTarget": true,
+    "neutralAggroDuration": 8,
+    "neutralCalmMoveMode": 2,
+    "neutralAggroMoveMode": 1,
     "attackAnimLockTime": 0.35,
     "damagedAnimLockTime": 0.2,
     "jumpForce": 250,
