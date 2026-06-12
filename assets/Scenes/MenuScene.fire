@@ -1964,7 +1964,7 @@
     },
     "component": "",
     "_componentId": "82d89OPkn5PaIh0ugQYcuYm",
-    "handler": "startMapEditor",
+    "handler": "goToGameScene",
     "customEventData": ""
   },
   {
