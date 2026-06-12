@@ -15,8 +15,16 @@ import Rope from '../Entity/Resources/Rope';
 
 const { ccclass, property } = cc._decorator;
 
+export interface BuffInfo {
+    type: string;
+    amount: number;
+    timer: number;
+}
+
 @ccclass
 export default class PlayerController extends BaseEntity {
+
+    private activeBuffs: BuffInfo[] = [];
 
     @property(cc.Float)
     moveSpeed: number = 200;
@@ -25,19 +33,22 @@ export default class PlayerController extends BaseEntity {
     jumpForce: number = 500;
 
     @property(cc.Float)
+    defense: number = 0;
+
+    @property(cc.Float)
     fastFallSpeed: number = 520;
 
     @property(cc.Float)
-    oceanMoveSpeed: number = 90;
+    oceanMoveSpeed: number = 160;
 
     @property(cc.Float)
-    oceanVerticalSpeed: number = 120;
+    oceanVerticalSpeed: number = 220;
 
     @property(cc.Float)
     oceanSinkSpeed: number = 50;
 
     @property(cc.Float)
-    oceanGravityScale: number = 0.15;
+    oceanGravityScale: number = 0.18;
 
     @property(cc.Float)
     oceanControl: number = 8;
@@ -652,6 +663,26 @@ export default class PlayerController extends BaseEntity {
     }
 
     update(dt: number) {
+        if (this.activeBuffs.length > 0) {
+            for (let i = this.activeBuffs.length - 1; i >= 0; i--) {
+                this.activeBuffs[i].timer -= dt;
+                if (this.activeBuffs[i].timer <= 0) {
+                    if (this.activeBuffs[i].type === 'attack') {
+                        this.attackDamage -= this.activeBuffs[i].amount;
+                        cc.log(`[PlayerController] Buff 結束！扣回攻擊力 ${this.activeBuffs[i].amount}`);
+                    }
+                    else if (this.activeBuffs[i].type === 'defense') {
+                        this.defense -= this.activeBuffs[i].amount;
+                        cc.log(`[PlayerController] Buff 結束！扣回防禦力 ${this.activeBuffs[i].amount}`);
+                    }
+                    
+                    this.activeBuffs.splice(i, 1);
+                }
+            }
+            EventCenter.emit(GameEvent.BUFF_UPDATED, this.activeBuffs);
+        } else {
+            EventCenter.emit(GameEvent.BUFF_UPDATED, []);
+        }
         if (this.currentMerchant && !cc.isValid(this.currentMerchant.node)) {
             this.closeMerchantFlow();
         }
@@ -724,6 +755,7 @@ export default class PlayerController extends BaseEntity {
                 this.playAnimation("PlayerIdle");
             }
         }
+        
     }
 
     public enterOceanArea() {
@@ -849,14 +881,14 @@ export default class PlayerController extends BaseEntity {
     }
 
     private applyRuntimeMovementTuning() {
-        this.oceanMoveSpeed = 90;
-        this.oceanVerticalSpeed = 120;
-        this.oceanSinkSpeed = 50;
-        this.oceanGravityScale = 0.15;
-        this.oceanControl = 8;
-        this.oceanDrag = 0.985;
-        this.oceanBoostSpeed = 520;
-        this.oceanBoostCooldown = 0.35;
+        this.oceanMoveSpeed = 180;
+        this.oceanVerticalSpeed = 260;
+        this.oceanSinkSpeed = 35;
+        this.oceanGravityScale = 0.18;
+        this.oceanControl = 12;
+        this.oceanDrag = 0.99;
+        this.oceanBoostSpeed = 620;
+        this.oceanBoostCooldown = 0.28;
         this.fastFallSpeed = 520;
     }
 
@@ -1368,7 +1400,6 @@ export default class PlayerController extends BaseEntity {
         cc.log('[PlayerController] 離開爬行狀態');
     }
     
-    // 爬行 update（在 update() 最前面呼叫）
     private updateClimb(dt: number) {
         if (!this.currentRope || !this.rb) return;
     
@@ -1454,5 +1485,25 @@ export default class PlayerController extends BaseEntity {
         }
         cc.log(`[PlayerController] 補血 +${amount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
+    }
+
+    public addAttackBuff(amount: number, duration: number = 60) {
+        if (this.isDead) return;
+        this.attackDamage += amount;
+        this.activeBuffs.push({ type: 'attack', amount: amount, timer: duration });
+        cc.log(`[PlayerController] 獲得 Buff: 攻擊力 +${amount}，持續 ${duration} 秒`);
+    }
+
+    public addDefenseBuff(amount: number, duration: number = 60) {
+        if (this.isDead) return;
+        this.defense += amount;
+        this.activeBuffs.push({ type: 'defense', amount: amount, timer: duration });
+        cc.log(`[PlayerController] 獲得 Buff: 防禦力 +${amount}，持續 ${duration} 秒`);
+    }
+
+    public takeDamage(damage: number) {
+        if (this.isDead) return;
+        cc.log(`🛡️ [玩家受傷] 經過護甲抵擋後，實際扣除血量: ${damage}`);
+        super.takeDamage(damage);
     }
 }

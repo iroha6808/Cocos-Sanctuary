@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "18c1b98a-d87e-4f74-add0-7126621a37ed",
+=======
+  "uuid": "c302c202-c128-475b-8b56-b04e60156812",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "lucky_jade_amulet": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "df052f61-3d8e-49c0-90f8-d1317c04df71",
       "importer": "sprite-frame",
       "rawTextureUuid": "18c1b98a-d87e-4f74-add0-7126621a37ed",
+=======
+      "uuid": "6a217487-aab4-48fe-b9c7-7328c78d4db6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "c302c202-c128-475b-8b56-b04e60156812",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

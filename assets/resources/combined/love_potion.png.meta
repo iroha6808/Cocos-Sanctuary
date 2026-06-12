@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "59a04b1e-3ad2-4475-8da2-de4a458da420",
+=======
+  "uuid": "59e20faf-2fd3-420e-9ca2-99e7c1960e07",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "love_potion": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "9feee5b8-98f1-4d58-950f-913c0d54c547",
       "importer": "sprite-frame",
       "rawTextureUuid": "59a04b1e-3ad2-4475-8da2-de4a458da420",
+=======
+      "uuid": "8c69af26-b281-47f8-8734-eb2bdcc3d89e",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "59e20faf-2fd3-420e-9ca2-99e7c1960e07",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

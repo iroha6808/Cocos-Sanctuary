@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "81e003af-c593-4855-944c-36d2411ca32d",
+=======
+  "uuid": "d38390f8-f766-4159-8541-dd2fba3a6ec4",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "cherry_pie": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "1589fdf9-4929-48ec-977f-62da13f56095",
       "importer": "sprite-frame",
       "rawTextureUuid": "81e003af-c593-4855-944c-36d2411ca32d",
+=======
+      "uuid": "4302852e-cc76-49ed-943a-cd6e8d9d3ac3",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "d38390f8-f766-4159-8541-dd2fba3a6ec4",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

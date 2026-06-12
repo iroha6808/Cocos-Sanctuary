@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "6a15cd19-3f79-466b-8bf6-83e65182e768",
+=======
+  "uuid": "a6884ac8-a91a-499d-b704-da4f234a73e6",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "starmetal_helmet": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "45afb108-4611-43b4-ba5c-d5656e386ec5",
       "importer": "sprite-frame",
       "rawTextureUuid": "6a15cd19-3f79-466b-8bf6-83e65182e768",
+=======
+      "uuid": "4d7a9338-4be5-4e40-9423-1dca17b74a47",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "a6884ac8-a91a-499d-b704-da4f234a73e6",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

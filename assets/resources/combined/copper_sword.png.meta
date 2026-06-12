@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "08b4c8c0-0cff-49c2-8494-54a2d9224df3",
+=======
+  "uuid": "cd3aa43b-9508-4c1c-b692-fcfbf28a89db",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "copper_sword": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "86de3297-dc16-4e78-a9ab-8a638e8f29d3",
       "importer": "sprite-frame",
       "rawTextureUuid": "08b4c8c0-0cff-49c2-8494-54a2d9224df3",
+=======
+      "uuid": "ac7bda84-366f-4476-82f8-bb37709ecb63",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "cd3aa43b-9508-4c1c-b692-fcfbf28a89db",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

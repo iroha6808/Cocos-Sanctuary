@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "bfb38b39-c367-46db-8241-52d8a50ff75b",
+=======
+  "uuid": "6c12adc8-06ff-4531-b30f-aba9ad2acf1d",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "ice_ring": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "864c62c3-9f99-4c34-a698-012c1cf3df2a",
       "importer": "sprite-frame",
       "rawTextureUuid": "bfb38b39-c367-46db-8241-52d8a50ff75b",
+=======
+      "uuid": "7bdb184e-e3f6-462a-a93c-a44604a29a39",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "6c12adc8-06ff-4531-b30f-aba9ad2acf1d",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

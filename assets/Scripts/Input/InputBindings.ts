@@ -93,6 +93,53 @@ export function getActionForKey(keyCode: number): InputAction {
     }
 }
 
+export function getActionForKeyboardEvent(event: cc.Event.EventKeyboard): InputAction {
+    if (!event) {
+        return null!;
+    }
+
+    const action = getActionForKey(event.keyCode);
+    if (action) {
+        return action;
+    }
+
+    const key = getKeyboardString(event, "key");
+    switch (key) {
+        case "1":
+            return InputAction.EditorTerrainTool;
+        case "2":
+            return InputAction.EditorResourceTool;
+        case "3":
+            return InputAction.EditorBoxGenerateTool;
+    }
+
+    const code = getKeyboardString(event, "code");
+    switch (code) {
+        case "digit1":
+        case "numpad1":
+            return InputAction.EditorTerrainTool;
+        case "digit2":
+        case "numpad2":
+            return InputAction.EditorResourceTool;
+        case "digit3":
+        case "numpad3":
+            return InputAction.EditorBoxGenerateTool;
+    }
+
+    return null!;
+}
+
+function getKeyboardString(event: cc.Event.EventKeyboard, field: string): string {
+    const anyEvent = event as any;
+    const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
+    const value = anyEvent && typeof anyEvent[field] === "string"
+        ? anyEvent[field]
+        : nativeEvent && typeof nativeEvent[field] === "string"
+            ? nativeEvent[field]
+            : "";
+    return value.toLowerCase();
+}
+
 export function isOneShotAction(action: InputAction): boolean {
     switch (action) {
         case InputAction.Attack:
@@ -105,14 +152,6 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.CameraZoomIn:
         case InputAction.CameraZoomOut:
         case InputAction.GenerateMap:
-        case InputAction.ToggleMapEditor:
-        case InputAction.EditorTerrainTool:
-        case InputAction.EditorResourceTool:
-        case InputAction.EditorBoxGenerateTool:
-        case InputAction.EditorPreviousPrefab:
-        case InputAction.EditorNextPrefab:
-        case InputAction.EditorRotateLeft:
-        case InputAction.EditorRotateRight:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:
             return true;

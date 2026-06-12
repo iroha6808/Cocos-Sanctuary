@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "3c7da2b6-55a6-409d-ad5d-d4aa787753ae",
+=======
+  "uuid": "3ceaf3f7-08a9-4f33-b277-9ea6cd732713",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "cosmic_anvil": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "79190ed3-f38c-4d15-8e79-468515e2e380",
       "importer": "sprite-frame",
       "rawTextureUuid": "3c7da2b6-55a6-409d-ad5d-d4aa787753ae",
+=======
+      "uuid": "5875e8fe-b44f-4086-85d0-4eba1d31d9f6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3ceaf3f7-08a9-4f33-b277-9ea6cd732713",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

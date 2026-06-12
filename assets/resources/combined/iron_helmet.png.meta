@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "9e6bc6d0-1b40-4e29-ac2b-fc7b798d4292",
+=======
+  "uuid": "f3d9ee3d-6e0a-4be6-afde-60c00d5b9efb",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "iron_helmet": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "e7a7cb61-2eca-42eb-9277-9e6e41b0f75a",
       "importer": "sprite-frame",
       "rawTextureUuid": "9e6bc6d0-1b40-4e29-ac2b-fc7b798d4292",
+=======
+      "uuid": "fe1624fa-8e7d-4c2a-ac45-80ab331ff211",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "f3d9ee3d-6e0a-4be6-afde-60c00d5b9efb",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "5e57d113-f1d2-4656-8192-396c530d5b63",
+=======
+  "uuid": "2a8df300-91aa-42ea-8ea2-e903a306fe7c",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "gravitational_orb": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "48699261-0938-41b8-85b5-ea67c60ecf60",
       "importer": "sprite-frame",
       "rawTextureUuid": "5e57d113-f1d2-4656-8192-396c530d5b63",
+=======
+      "uuid": "e5ea5ae0-2b06-441b-a17e-278d8b62f0df",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "2a8df300-91aa-42ea-8ea2-e903a306fe7c",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

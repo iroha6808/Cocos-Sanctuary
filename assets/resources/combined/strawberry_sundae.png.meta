@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "046af7fc-435d-4c92-b4fc-9f0b95da8ab0",
+=======
+  "uuid": "cebe3e77-ef5a-48f1-b28f-65f2a813fee2",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "strawberry_sundae": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "111dd33a-5c8b-4d8e-9f5f-6197f2ce7727",
       "importer": "sprite-frame",
       "rawTextureUuid": "046af7fc-435d-4c92-b4fc-9f0b95da8ab0",
+=======
+      "uuid": "00e82224-d95b-448a-9447-da168eeef2a7",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "cebe3e77-ef5a-48f1-b28f-65f2a813fee2",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

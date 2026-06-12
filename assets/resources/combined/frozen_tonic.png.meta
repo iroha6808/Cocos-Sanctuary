@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "0f9ee3eb-4b4d-4f14-8729-71e81fd9094c",
+=======
+  "uuid": "3136aea2-d6b3-4889-8322-0452f246af65",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "frozen_tonic": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "8f62df92-07d5-4518-86be-fe39b93a8fce",
       "importer": "sprite-frame",
       "rawTextureUuid": "0f9ee3eb-4b4d-4f14-8729-71e81fd9094c",
+=======
+      "uuid": "ed613954-e7db-41cc-bbc3-a337222926d5",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3136aea2-d6b3-4889-8322-0452f246af65",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

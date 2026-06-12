@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "018aa990-6dac-4514-b038-b22f7631e2bd",
+=======
+  "uuid": "e343c4d6-94fd-4b3c-86ea-6983c47b529b",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "amethyst_lamp": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "bf42eaec-1a17-4614-86bc-d4aecdf3ce01",
       "importer": "sprite-frame",
       "rawTextureUuid": "018aa990-6dac-4514-b038-b22f7631e2bd",
+=======
+      "uuid": "1c99a9e2-8c14-4541-9f0f-eebfa2b8bc32",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "e343c4d6-94fd-4b3c-86ea-6983c47b529b",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

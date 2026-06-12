@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "19910b1b-1ba2-4f50-88f5-22972ac7e7e8",
+=======
+  "uuid": "ea0e7226-ae19-4af1-89b0-6e049ab3736a",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "frost_spear": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "3deba9e2-8c5f-49e5-8894-6fda4e0a9712",
       "importer": "sprite-frame",
       "rawTextureUuid": "19910b1b-1ba2-4f50-88f5-22972ac7e7e8",
+=======
+      "uuid": "4f12ed06-0f67-47fb-b7af-d1219b048d20",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "ea0e7226-ae19-4af1-89b0-6e049ab3736a",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

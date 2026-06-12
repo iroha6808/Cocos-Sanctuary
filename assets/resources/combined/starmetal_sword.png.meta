@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "07946504-4db9-4985-96fc-15d14729e0af",
+=======
+  "uuid": "2233a4ac-bd2a-43f8-a8e2-bf0ce1088a44",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "starmetal_sword": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "82b58f73-eb93-4705-afa4-1586fea2c843",
       "importer": "sprite-frame",
       "rawTextureUuid": "07946504-4db9-4985-96fc-15d14729e0af",
+=======
+      "uuid": "d0094474-a7c6-45f8-8c86-30691c09a0af",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "2233a4ac-bd2a-43f8-a8e2-bf0ce1088a44",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

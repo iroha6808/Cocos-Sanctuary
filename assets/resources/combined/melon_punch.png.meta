@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "b74f5857-1e44-4eab-af68-ff4276e59937",
+=======
+  "uuid": "3f5ba1e6-6b39-4422-bc8e-01451336fea8",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "melon_punch": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "be73de55-f75c-46fe-9d1d-89e703d09b96",
       "importer": "sprite-frame",
       "rawTextureUuid": "b74f5857-1e44-4eab-af68-ff4276e59937",
+=======
+      "uuid": "6e212ce7-2e05-4fe1-9aa4-8c12c82cef88",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3f5ba1e6-6b39-4422-bc8e-01451336fea8",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

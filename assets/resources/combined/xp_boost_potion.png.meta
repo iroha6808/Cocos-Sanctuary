@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "52b6aa2c-2871-4c18-89b4-0d005cb5fff4",
+=======
+  "uuid": "fe3b70e0-ce48-48d7-92f7-e56057cb45d5",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "xp_boost_potion": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "51a7a152-006d-4237-abaf-0ed30c4269c9",
       "importer": "sprite-frame",
       "rawTextureUuid": "52b6aa2c-2871-4c18-89b4-0d005cb5fff4",
+=======
+      "uuid": "6f8274f6-94a0-4a9c-a2c4-c19d59ebb29d",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "fe3b70e0-ce48-48d7-92f7-e56057cb45d5",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

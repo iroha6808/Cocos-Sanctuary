@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "5876e7c5-b336-491e-ac68-114fe7b4d48b",
+=======
+  "uuid": "6cbca26a-6584-49d8-95a9-b2aa59492a57",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "sweet_berry_jam": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "f312460b-8ab2-4bc4-a568-68466ce5494f",
       "importer": "sprite-frame",
       "rawTextureUuid": "5876e7c5-b336-491e-ac68-114fe7b4d48b",
+=======
+      "uuid": "73183cd5-f465-4c6d-85ae-bdb947cffdef",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "6cbca26a-6584-49d8-95a9-b2aa59492a57",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

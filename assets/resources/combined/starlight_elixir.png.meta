@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "26257f5c-268f-4e5f-a840-32e253e5e66c",
+=======
+  "uuid": "75ed9ca5-3fa9-41d9-a9d5-c38bcc92ac70",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "starlight_elixir": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "e9995484-a5d4-4cd0-b70c-c3aaf32726a3",
       "importer": "sprite-frame",
       "rawTextureUuid": "26257f5c-268f-4e5f-a840-32e253e5e66c",
+=======
+      "uuid": "6350cebb-ac54-4589-9153-54d6ecae82ad",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "75ed9ca5-3fa9-41d9-a9d5-c38bcc92ac70",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

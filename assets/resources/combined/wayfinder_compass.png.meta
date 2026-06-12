@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "a4650d0e-36e7-44e1-b7db-dcdad8f6079c",
+=======
+  "uuid": "39415e0e-53e3-4670-8292-f9528d965efe",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "wayfinder_compass": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "e4b237d3-db78-4e37-8d80-35ffc4bd7b0d",
       "importer": "sprite-frame",
       "rawTextureUuid": "a4650d0e-36e7-44e1-b7db-dcdad8f6079c",
+=======
+      "uuid": "6800d99b-ef76-45e9-9b61-b1a63f759c9c",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "39415e0e-53e3-4670-8292-f9528d965efe",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

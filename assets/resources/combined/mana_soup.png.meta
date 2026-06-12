@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "58846fed-a052-4941-aba6-9f55641d132a",
+=======
+  "uuid": "3430e2d5-9344-4de0-9e58-628ac8ecd0e3",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "mana_soup": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "78f8542f-608a-4176-b8f8-a6f5011242d7",
       "importer": "sprite-frame",
       "rawTextureUuid": "58846fed-a052-4941-aba6-9f55641d132a",
+=======
+      "uuid": "26fa2238-08d3-4122-b4d7-759ebd8e5fe6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "3430e2d5-9344-4de0-9e58-628ac8ecd0e3",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "039cfde0-ed2c-47c5-ae6e-1a588324030d",
+=======
+  "uuid": "6c093d45-71c4-414c-8b87-8400439dd74c",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "citrus_tea": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "1f1ac68d-bbcf-4d06-a3d7-430fb82ef2f3",
       "importer": "sprite-frame",
       "rawTextureUuid": "039cfde0-ed2c-47c5-ae6e-1a588324030d",
+=======
+      "uuid": "e14d2658-6a76-4105-938f-af6bbc278c2a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "6c093d45-71c4-414c-8b87-8400439dd74c",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

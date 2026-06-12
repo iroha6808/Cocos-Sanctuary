@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "bcfab5d8-7f2a-4ef4-95e9-3db4fde18e22",
+=======
+  "uuid": "bb5a02df-6330-4f2a-afc4-57b9fd4ddaaf",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "premium_fruit_platter": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "89049309-f70e-4269-a640-71f0766dd203",
       "importer": "sprite-frame",
       "rawTextureUuid": "bcfab5d8-7f2a-4ef4-95e9-3db4fde18e22",
+=======
+      "uuid": "1916d55c-4601-4161-8d4c-85b69165341a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "bb5a02df-6330-4f2a-afc4-57b9fd4ddaaf",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

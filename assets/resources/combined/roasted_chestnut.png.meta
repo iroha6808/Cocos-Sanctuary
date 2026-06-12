@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "84d7e6bb-572d-453d-b2c1-e5e71c75f84a",
+=======
+  "uuid": "dcd5e8d6-f657-4bca-95e8-b66f0521307b",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "roasted_chestnut": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "57d45909-886e-4ea8-b310-484c110bdd39",
       "importer": "sprite-frame",
       "rawTextureUuid": "84d7e6bb-572d-453d-b2c1-e5e71c75f84a",
+=======
+      "uuid": "ef32ef8e-64fb-4aae-967c-b722adb339d1",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "dcd5e8d6-f657-4bca-95e8-b66f0521307b",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

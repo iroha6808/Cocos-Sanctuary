@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "8f75c7f7-2476-4b2b-aebd-cb42c8a6e0a8",
+=======
+  "uuid": "d920bff8-8e84-4237-b71a-172903c077dd",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "salted_guazi": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "e6cf4d9c-89e5-47de-a60f-4d4c6238919a",
       "importer": "sprite-frame",
       "rawTextureUuid": "8f75c7f7-2476-4b2b-aebd-cb42c8a6e0a8",
+=======
+      "uuid": "e98eb512-db19-4a78-a7d2-1a8cd8080fa2",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "d920bff8-8e84-4237-b71a-172903c077dd",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

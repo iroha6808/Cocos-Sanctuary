@@ -5,6 +5,7 @@ import CameraRig from "../Core/CameraRig";
 import InputManager from "../Input/InputManager";
 import { InputAction, InputPayload } from "../Input/InputAction";
 import { InputContext } from "../Input/InputContext";
+import { getActionForKeyboardEvent } from "../Input/InputBindings";
 import AutoMapGenerator, { MapGenerationRect } from "./AutoMapGenerator";
 import PlayerController from "../Player/PlayerController";
 
@@ -21,13 +22,6 @@ interface EditorPrefabEntry {
     kind: "terrain" | "resource";
     prefab: cc.Prefab;
 }
-
-const KEY_1 = 49;
-const KEY_2 = 50;
-const KEY_3 = 51;
-const KEY_NUMPAD_1 = 97;
-const KEY_NUMPAD_2 = 98;
-const KEY_NUMPAD_3 = 99;
 
 @ccclass
 export default class MapEditorController extends cc.Component {
@@ -88,6 +82,9 @@ export default class MapEditorController extends cc.Component {
     @property(cc.Float)
     deleteRadius: number = 120;
 
+    @property(cc.Integer)
+    previewOpacity: number = 120;
+
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
     private isEditing: boolean = false;
@@ -98,6 +95,9 @@ export default class MapEditorController extends cc.Component {
     private placements: MapEditorPlacementState[] = [];
     private selectionStart: cc.Vec2 = null;
     private selectionCurrent: cc.Vec2 = null;
+    private previewNode: cc.Node = null;
+    private previewKey: string = "";
+    private lastMouseRootLocal: cc.Vec2 = null;
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -129,6 +129,7 @@ export default class MapEditorController extends cc.Component {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
         this.setPlayerLocked(true);
         this.refreshStatus();
+        cc.log("[MapEditor] Enter editor mode.");
         EventCenter.emit(GameEvent.MAP_EDITOR_MODE_CHANGED, true);
     }
 
@@ -142,8 +143,10 @@ export default class MapEditorController extends cc.Component {
         }
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
         this.setPlayerLocked(false);
+        this.destroyPlacementPreview();
         this.clearSelection();
         this.refreshStatus();
+        cc.log("[MapEditor] Exit editor mode.");
         EventCenter.emit(GameEvent.MAP_EDITOR_MODE_CHANGED, false);
     }
 
@@ -203,19 +206,16 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
-        switch (event.keyCode) {
-            case KEY_1:
-            case KEY_NUMPAD_1:
+        switch (getActionForKeyboardEvent(event)) {
+            case InputAction.EditorTerrainTool:
                 this.setTool(MapEditorTool.Terrain);
                 this.stopEditorKeyEvent(event);
                 return;
-            case KEY_2:
-            case KEY_NUMPAD_2:
+            case InputAction.EditorResourceTool:
                 this.setTool(MapEditorTool.Resource);
                 this.stopEditorKeyEvent(event);
                 return;
-            case KEY_3:
-            case KEY_NUMPAD_3:
+            case InputAction.EditorBoxGenerateTool:
                 this.setTool(MapEditorTool.BoxGenerate);
                 this.stopEditorKeyEvent(event);
                 return;
@@ -255,6 +255,7 @@ export default class MapEditorController extends cc.Component {
         if (!rootLocal) {
             return;
         }
+        this.lastMouseRootLocal = rootLocal.clone();
 
         if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.deleteAt(event);
@@ -266,6 +267,7 @@ export default class MapEditorController extends cc.Component {
         }
 
         if (this.tool === MapEditorTool.BoxGenerate) {
+            this.destroyPlacementPreview();
             this.selectionStart = rootLocal;
             this.selectionCurrent = rootLocal.clone();
             this.drawSelection();
@@ -276,11 +278,25 @@ export default class MapEditorController extends cc.Component {
     }
 
     private onMouseMove(event: cc.Event.EventMouse): void {
-        if (!this.isEditing || !this.selectionStart) {
+        if (!this.isEditing) {
             return;
         }
-        this.selectionCurrent = this.getMouseRootLocal(event);
-        this.drawSelection();
+        const rootLocal = this.getMouseRootLocal(event);
+        if (!rootLocal) {
+            return;
+        }
+        this.lastMouseRootLocal = rootLocal.clone();
+
+        if (this.tool === MapEditorTool.BoxGenerate) {
+            this.destroyPlacementPreview();
+            if (this.selectionStart) {
+                this.selectionCurrent = rootLocal;
+                this.drawSelection();
+            }
+            return;
+        }
+
+        this.updatePlacementPreview(rootLocal);
     }
 
     private onMouseUp(event: cc.Event.EventMouse): void {
@@ -358,7 +374,17 @@ export default class MapEditorController extends cc.Component {
 
     private setTool(tool: MapEditorTool): void {
         this.tool = tool;
+        if (this.tool === MapEditorTool.BoxGenerate) {
+            this.destroyPlacementPreview();
+        } else {
+            this.clearSelection();
+            this.previewKey = "";
+            if (this.lastMouseRootLocal) {
+                this.updatePlacementPreview(this.lastMouseRootLocal);
+            }
+        }
         this.refreshStatus();
+        cc.log(`[MapEditor] Tool: ${tool} / ${this.getCurrentEntryKey()}`);
         EventCenter.emit(GameEvent.MAP_EDITOR_SELECTION_CHANGED, tool, this.getCurrentEntryKey());
     }
 
@@ -368,12 +394,19 @@ export default class MapEditorController extends cc.Component {
         } else {
             this.terrainIndex = this.wrapIndex(this.terrainIndex + direction, this.getTerrainEntries().length);
         }
+        this.previewKey = "";
+        if (this.isEditing && this.tool !== MapEditorTool.BoxGenerate && this.lastMouseRootLocal) {
+            this.updatePlacementPreview(this.lastMouseRootLocal);
+        }
         this.refreshStatus();
         EventCenter.emit(GameEvent.MAP_EDITOR_SELECTION_CHANGED, this.tool, this.getCurrentEntryKey());
     }
 
     private adjustRotation(direction: number): void {
         this.rotation += this.rotationStep * direction;
+        if (this.previewNode && cc.isValid(this.previewNode)) {
+            this.previewNode.angle = this.rotation;
+        }
         this.refreshStatus();
     }
 
@@ -660,16 +693,88 @@ export default class MapEditorController extends cc.Component {
         };
     }
 
+    private updatePlacementPreview(rootLocal: cc.Vec2): void {
+        const entry = this.getCurrentEntry();
+        if (!entry || !entry.prefab) {
+            this.destroyPlacementPreview();
+            return;
+        }
+
+        const parent = entry.kind === "resource" ? this.getResourceRoot() : this.getTerrainRoot();
+        if (!parent) {
+            this.destroyPlacementPreview();
+            return;
+        }
+
+        const scale = entry.kind === "resource" ? this.resourceScale : this.terrainScale;
+        const key = `${entry.kind}:${entry.key}:${scale}`;
+        if (!this.previewNode || !cc.isValid(this.previewNode) || this.previewKey !== key || this.previewNode.parent !== parent) {
+            this.destroyPlacementPreview();
+            this.previewNode = cc.instantiate(entry.prefab);
+            this.previewNode.name = `EditorPreview_${entry.key}`;
+            this.previewNode.setScale(scale, scale);
+            parent.addChild(this.previewNode);
+            this.disablePreviewPhysics(this.previewNode);
+            this.setPreviewOpacity(this.previewNode, this.previewOpacity);
+            this.previewKey = key;
+        }
+
+        this.previewNode.angle = this.rotation;
+        this.setNodePositionFromRootLocal(this.previewNode, parent, rootLocal);
+    }
+
+    private destroyPlacementPreview(): void {
+        if (this.previewNode && cc.isValid(this.previewNode)) {
+            this.previewNode.destroy();
+        }
+        this.previewNode = null;
+        this.previewKey = "";
+    }
+
+    private disablePreviewPhysics(node: cc.Node): void {
+        if (!node) {
+            return;
+        }
+
+        const body = node.getComponent(cc.RigidBody);
+        if (body) {
+            body.enabled = false;
+        }
+
+        const colliders = node.getComponents(cc.PhysicsCollider);
+        for (let i = 0; i < colliders.length; i++) {
+            colliders[i].enabled = false;
+        }
+
+        for (let i = 0; i < node.childrenCount; i++) {
+            this.disablePreviewPhysics(node.children[i]);
+        }
+    }
+
+    private setPreviewOpacity(node: cc.Node, opacity: number): void {
+        if (!node) {
+            return;
+        }
+
+        node.opacity = Math.max(0, Math.min(255, opacity));
+        for (let i = 0; i < node.childrenCount; i++) {
+            this.setPreviewOpacity(node.children[i], opacity);
+        }
+    }
+
     private drawSelection(): void {
-        if (!this.selectionGraphics || !this.selectionStart || !this.selectionCurrent) {
+        const graphics = this.getSelectionGraphics();
+        if (!graphics || !this.selectionStart || !this.selectionCurrent) {
             return;
         }
         const rect = this.createRect(this.selectionStart, this.selectionCurrent);
-        this.selectionGraphics.clear();
-        this.selectionGraphics.lineWidth = 4;
-        this.selectionGraphics.strokeColor = cc.Color.YELLOW;
-        this.selectionGraphics.rect(rect.minX, rect.minY, rect.maxX - rect.minX, rect.maxY - rect.minY);
-        this.selectionGraphics.stroke();
+        graphics.clear();
+        graphics.lineWidth = 4;
+        graphics.strokeColor = cc.Color.YELLOW;
+        graphics.fillColor = new cc.Color(255, 220, 40, 32);
+        graphics.rect(rect.minX, rect.minY, rect.maxX - rect.minX, rect.maxY - rect.minY);
+        graphics.fill();
+        graphics.stroke();
     }
 
     private clearSelection(): void {
@@ -678,6 +783,22 @@ export default class MapEditorController extends cc.Component {
         if (this.selectionGraphics) {
             this.selectionGraphics.clear();
         }
+    }
+
+    private getSelectionGraphics(): cc.Graphics {
+        if (this.selectionGraphics && cc.isValid(this.selectionGraphics.node)) {
+            return this.selectionGraphics;
+        }
+
+        const root = this.getTerrainRoot() || this.node;
+        if (!root) {
+            return null;
+        }
+
+        const node = new cc.Node("EditorSelectionPreview");
+        root.addChild(node);
+        this.selectionGraphics = node.addComponent(cc.Graphics);
+        return this.selectionGraphics;
     }
 
     private refreshStatus(): void {

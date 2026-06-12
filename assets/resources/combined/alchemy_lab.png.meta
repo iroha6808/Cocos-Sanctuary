@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "7a422640-d953-4281-aa29-2e75d66ac796",
+=======
+  "uuid": "1fb52218-4e1d-4ea9-b723-5087d4bd8c77",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "alchemy_lab": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "ea67c1f3-ddb4-4d12-bb64-9f594f1ced76",
       "importer": "sprite-frame",
       "rawTextureUuid": "7a422640-d953-4281-aa29-2e75d66ac796",
+=======
+      "uuid": "cf6e572f-1deb-472e-986a-f30d327e45f6",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "1fb52218-4e1d-4ea9-b723-5087d4bd8c77",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

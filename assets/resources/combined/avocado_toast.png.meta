@@ -1,6 +1,10 @@
 {
   "ver": "2.3.7",
+<<<<<<< HEAD
   "uuid": "bfd24b7a-eba4-42e3-95f0-2ca6076b75a2",
+=======
+  "uuid": "897da592-e17a-48bb-8f41-c508ce35b7a0",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +18,15 @@
   "subMetas": {
     "avocado_toast": {
       "ver": "1.0.6",
+<<<<<<< HEAD
       "uuid": "ef2f99fd-108f-4d12-baf0-04fc7b945d01",
       "importer": "sprite-frame",
       "rawTextureUuid": "bfd24b7a-eba4-42e3-95f0-2ca6076b75a2",
+=======
+      "uuid": "d14abff8-7126-4fbc-8e46-d0c6dcee9ca3",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "897da592-e17a-48bb-8f41-c508ce35b7a0",
+>>>>>>> c5b81a9602e85c3c366ce4b8a6a06dbf0bc81699
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
