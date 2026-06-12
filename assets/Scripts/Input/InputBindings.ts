@@ -65,12 +65,15 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.e:
         case KEY_E:
             return InputAction.ToggleMapEditor;
+        case cc.macro.KEY.num1:
         case KEY_1:
         case KEY_NUMPAD_1:
             return InputAction.EditorTerrainTool;
+        case cc.macro.KEY.num2:
         case KEY_2:
         case KEY_NUMPAD_2:
             return InputAction.EditorResourceTool;
+        case cc.macro.KEY.num3:
         case KEY_3:
         case KEY_NUMPAD_3:
             return InputAction.EditorBoxGenerateTool;

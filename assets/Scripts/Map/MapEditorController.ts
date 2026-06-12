@@ -92,7 +92,7 @@ export default class MapEditorController extends cc.Component {
     alignPlacementCenterToCursor: boolean = true;
 
     @property(cc.Boolean)
-    showPlacementDebug: boolean = false;
+    showPlacementDebug: boolean = true;
 
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
@@ -110,10 +110,11 @@ export default class MapEditorController extends cc.Component {
     private browserMouseDownHandler: any = null;
     private browserMouseMoveHandler: any = null;
     private browserMouseUpHandler: any = null;
-    private browserKeyDownHandler: any = null;
     private preventContextMenuHandler: any = null;
     private placedDuringCurrentClick: boolean = false;
     private runtimePlacementDebugNode: cc.Node = null;
+    private lastEditorToggleTime: number = 0;
+    private lastEditorActionTimes: { [action: string]: number } = {};
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -145,7 +146,6 @@ export default class MapEditorController extends cc.Component {
             this.inputManager.pushContext(InputContext.MapEditor, this.handleEditorInput, this);
         }
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
-        this.bindEditorKeyboardFallback();
         this.setPlayerLocked(true);
         this.refreshStatus();
         cc.log("[MapEditor] Enter editor mode.");
@@ -161,7 +161,6 @@ export default class MapEditorController extends cc.Component {
             this.inputManager.popContext(InputContext.MapEditor, this);
         }
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
-        this.unbindEditorKeyboardFallback();
         this.setPlayerLocked(false);
         this.destroyPlacementPreview();
         this.clearPlacementDebug();
@@ -174,6 +173,12 @@ export default class MapEditorController extends cc.Component {
     }
 
     public toggleEditorMode(): void {
+        const now = Date.now();
+        if (now - this.lastEditorToggleTime < 160) {
+            return;
+        }
+        this.lastEditorToggleTime = now;
+
         if (this.isEditing) {
             this.exitEditorMode();
         } else {
@@ -181,6 +186,8 @@ export default class MapEditorController extends cc.Component {
         }
     }
 
+<<<<<<< Updated upstream
+=======
     public isEditorModeActive(): boolean {
         return this.isEditing;
     }
@@ -190,7 +197,13 @@ export default class MapEditorController extends cc.Component {
             return false;
         }
 
-        switch (this.getEditorActionFromEvent(event)) {
+        const action = this.getEditorActionFromEvent(event);
+        if (this.shouldIgnoreRepeatedEditorAction(action)) {
+            this.stopEditorKeyEvent(event);
+            return true;
+        }
+
+        switch (action) {
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
@@ -237,7 +250,13 @@ export default class MapEditorController extends cc.Component {
             return false;
         }
 
-        switch (this.getEditorActionFromRaw(key, code, keyCode)) {
+        const action = this.getEditorActionFromRaw(key, code, keyCode);
+        if (this.shouldIgnoreRepeatedEditorAction(action)) {
+            this.stopRawEditorKeyEvent(event);
+            return true;
+        }
+
+        switch (action) {
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
@@ -279,15 +298,24 @@ export default class MapEditorController extends cc.Component {
         }
     }
 
+>>>>>>> Stashed changes
     private handleEditorInput(payload: InputPayload): boolean {
         if (!payload.isDown) {
             return true;
         }
 
-        const action = payload.originalEvent
+<<<<<<< Updated upstream
+        switch (payload.action) {
+=======
+        const action = payload.action || (payload.originalEvent
             ? this.getEditorActionFromEvent(payload.originalEvent)
-            : payload.action;
+            : null);
+        if (this.shouldIgnoreRepeatedEditorAction(action)) {
+            return true;
+        }
+
         switch (action) {
+>>>>>>> Stashed changes
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
@@ -326,67 +354,26 @@ export default class MapEditorController extends cc.Component {
     }
 
     private onEditorKeyDownFallback(event: cc.Event.EventKeyboard): void {
-        this.handleEditorKeyboardEvent(event);
-    }
-
-    private getEditorActionFromEvent(event: cc.Event.EventKeyboard): InputAction {
-        const keyCode = event ? event.keyCode : 0;
-        return this.getEditorActionFromRaw(
-            this.getKeyboardString(event, "key"),
-            this.getKeyboardString(event, "code"),
-            keyCode
-        ) || getActionForKeyboardEvent(event);
-    }
-
-    private getEditorActionFromRaw(key: string, code: string, keyCode: number): InputAction {
-        key = (key || "").toLowerCase();
-        code = (code || "").toLowerCase();
-
-        switch (key) {
-            case "escape":
-            case "esc":
-                return InputAction.Cancel;
-            case "e":
-                return InputAction.ToggleMapEditor;
-            case "1":
-                return InputAction.EditorTerrainTool;
-            case "2":
-                return InputAction.EditorResourceTool;
-            case "3":
-                return InputAction.EditorBoxGenerateTool;
-            case "q":
-                return InputAction.EditorPreviousPrefab;
-            case "r":
-                return InputAction.EditorNextPrefab;
-            case "[":
-                return InputAction.EditorRotateLeft;
-            case "]":
-                return InputAction.EditorRotateRight;
+        if (!this.isEditing) {
+            return;
         }
 
-        switch (code) {
-            case "escape":
-                return InputAction.Cancel;
-            case "keye":
-                return InputAction.ToggleMapEditor;
-            case "digit1":
-            case "numpad1":
-                return InputAction.EditorTerrainTool;
-            case "digit2":
-            case "numpad2":
-                return InputAction.EditorResourceTool;
-            case "digit3":
-            case "numpad3":
-                return InputAction.EditorBoxGenerateTool;
-            case "keyq":
-                return InputAction.EditorPreviousPrefab;
-            case "keyr":
-                return InputAction.EditorNextPrefab;
-            case "bracketleft":
-                return InputAction.EditorRotateLeft;
-            case "bracketright":
-                return InputAction.EditorRotateRight;
+        switch (getActionForKeyboardEvent(event)) {
+            case InputAction.EditorTerrainTool:
+                this.setTool(MapEditorTool.Terrain);
+                this.stopEditorKeyEvent(event);
+                return;
+            case InputAction.EditorResourceTool:
+                this.setTool(MapEditorTool.Resource);
+                this.stopEditorKeyEvent(event);
+                return;
+            case InputAction.EditorBoxGenerateTool:
+                this.setTool(MapEditorTool.BoxGenerate);
+                this.stopEditorKeyEvent(event);
+                return;
         }
+<<<<<<< Updated upstream
+=======
 
         if (keyCode === 27) {
             return InputAction.Cancel;
@@ -394,13 +381,13 @@ export default class MapEditorController extends cc.Component {
         if (keyCode === 69) {
             return InputAction.ToggleMapEditor;
         }
-        if (keyCode === 49 || keyCode === 97) {
+        if (keyCode === cc.macro.KEY.num1 || keyCode === 49 || keyCode === 97) {
             return InputAction.EditorTerrainTool;
         }
-        if (keyCode === 50 || keyCode === 98) {
+        if (keyCode === cc.macro.KEY.num2 || keyCode === 50 || keyCode === 98) {
             return InputAction.EditorResourceTool;
         }
-        if (keyCode === 51 || keyCode === 99) {
+        if (keyCode === cc.macro.KEY.num3 || keyCode === 51 || keyCode === 99) {
             return InputAction.EditorBoxGenerateTool;
         }
         if (keyCode === 81) {
@@ -428,6 +415,26 @@ export default class MapEditorController extends cc.Component {
                 ? nativeEvent[field]
                 : "";
         return value.toLowerCase();
+>>>>>>> Stashed changes
+    }
+
+    private shouldIgnoreRepeatedEditorAction(action: InputAction): boolean {
+        if (!action) {
+            return false;
+        }
+
+        if (action === InputAction.CameraZoomIn || action === InputAction.CameraZoomOut) {
+            return false;
+        }
+
+        const now = Date.now();
+        const lastTime = this.lastEditorActionTimes[action] || 0;
+        if (now - lastTime < 80) {
+            return true;
+        }
+
+        this.lastEditorActionTimes[action] = now;
+        return false;
     }
 
     private stopEditorKeyEvent(event: cc.Event.EventKeyboard): void {
@@ -435,48 +442,6 @@ export default class MapEditorController extends cc.Component {
         if (maybeEvent && typeof maybeEvent.stopPropagation === "function") {
             maybeEvent.stopPropagation();
         }
-    }
-
-    private stopRawEditorKeyEvent(event: any): void {
-        if (!event) {
-            return;
-        }
-        if (typeof event.preventDefault === "function") {
-            event.preventDefault();
-        }
-        if (typeof event.stopImmediatePropagation === "function") {
-            event.stopImmediatePropagation();
-        } else if (typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
-    }
-
-    private bindEditorKeyboardFallback(): void {
-        const globalWindow = typeof window !== "undefined" ? window as any : null;
-        if (!globalWindow || this.browserKeyDownHandler) {
-            return;
-        }
-
-        this.browserKeyDownHandler = (event: any) => {
-            this.handleRawEditorKeyboardEvent(
-                typeof event.key === "string" ? event.key : "",
-                typeof event.code === "string" ? event.code : "",
-                typeof event.keyCode === "number" ? event.keyCode : 0,
-                event
-            );
-        };
-        globalWindow.addEventListener("keydown", this.browserKeyDownHandler, true);
-    }
-
-    private unbindEditorKeyboardFallback(): void {
-        const globalWindow = typeof window !== "undefined" ? window as any : null;
-        if (!globalWindow || !this.browserKeyDownHandler) {
-            this.browserKeyDownHandler = null;
-            return;
-        }
-
-        globalWindow.removeEventListener("keydown", this.browserKeyDownHandler, true);
-        this.browserKeyDownHandler = null;
     }
 
     private bindMouseEvents(): void {
@@ -880,7 +845,10 @@ export default class MapEditorController extends cc.Component {
     }
 
     private syncPhysicsPosition(): void {
-        this.syncPhysicsPosition();
+        const physicsManager = cc.director.getPhysicsManager() as any;
+        if (physicsManager && typeof physicsManager.syncPosition === "function") {
+            physicsManager.syncPosition();
+        }
     }
 
     private onSaveLoaded(_saveData: SaveData): void {
@@ -1264,19 +1232,18 @@ export default class MapEditorController extends cc.Component {
             this.previewNode.name = `EditorPreview_${entry.key}`;
             this.previewNode.setScale(scale, scale);
             parent.addChild(this.previewNode);
-            this.previewNode.active = true;
-            this.previewNode.zIndex = 9998;
             this.disablePreviewPhysics(this.previewNode);
             this.setPreviewOpacity(this.previewNode, this.previewOpacity);
             this.previewKey = key;
         }
 
         this.previewNode.angle = this.rotation;
-        this.previewNode.active = true;
-        this.previewNode.zIndex = 9998;
-        this.setPreviewOpacity(this.previewNode, this.previewOpacity);
         this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry);
-        this.clearPlacementDebug();
+        if (entry.kind === "terrain") {
+            this.drawTerrainPlacementDebug(rootLocal, this.previewNode);
+        } else {
+            this.clearPlacementDebug();
+        }
     }
 
     private destroyPlacementPreview(): void {
