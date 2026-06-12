@@ -5,7 +5,6 @@ import AudioManager, { SfxType } from "../Core/AudioManager";
 
 const {ccclass, property} = cc._decorator;
 
-// 告訴 TypeScript 我們已經透過插件載入了 firebase
 declare const firebase: any;
 
 @ccclass
@@ -57,6 +56,13 @@ export default class MenuScene extends cc.Component {
         this.showMain();
         this.refreshAuthState();
         this.refreshLeaderboard();
+        this.scheduleOnce(() => {
+        if (AudioManager.instance && AudioManager.instance.menuBgm) {
+                AudioManager.instance.playManualBgm(AudioManager.instance.menuBgm);
+            } else {
+                cc.log("AudioManager 尚未準備好或音樂檔缺失");
+            }
+        }, 0.1);
     }
 
     private initFirebase() {

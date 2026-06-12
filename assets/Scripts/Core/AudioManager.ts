@@ -22,6 +22,12 @@ export default class AudioManager extends cc.Component {
     public static instance: AudioManager = null;
 
     @property(cc.AudioClip)
+    public menuBgm: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
+    public gameOverBgm: cc.AudioClip = null;
+
+    @property(cc.AudioClip)
     public sceneBgm: cc.AudioClip = null;
 
     @property(cc.AudioClip)
@@ -303,4 +309,14 @@ export default class AudioManager extends cc.Component {
                 return null;
         }
     }
+
+    public playManualBgm(clip: cc.AudioClip): void {
+        cc.log("🎵 嘗試播放音樂: ", clip ? clip.name : "null");
+        this.stopAllBgmChannels();
+        if (clip) {
+            const id = cc.audioEngine.play(clip, true, this.musicVolume);
+            cc.log("🎵 播放器 ID:", id); 
+            this.bgmAudioIds['manual'] = id;
+        }
+}
 }
