@@ -13,6 +13,17 @@ interface InputContextEntry {
 }
 
 const ONE_SHOT_DEBOUNCE_MS = 160;
+const INPUT_EVENT_HANDLED_FLAG = "__cocosSanctuaryInputHandled";
+
+export function isInputEventHandled(event: any): boolean {
+    return !!event && !!event[INPUT_EVENT_HANDLED_FLAG];
+}
+
+export function markInputEventHandled(event: any): void {
+    if (event) {
+        event[INPUT_EVENT_HANDLED_FLAG] = true;
+    }
+}
 
 @ccclass
 export default class InputManager extends cc.Component {
@@ -20,6 +31,7 @@ export default class InputManager extends cc.Component {
 
     private contextStack: InputContextEntry[] = [];
     private lastActionTimes: { [action: string]: number } = {};
+    private pressedKeyboardActions: { [action: string]: boolean } = {};
     private canvasNode: cc.Node = null;
 
     public static getOrCreate(hostNode?: cc.Node): InputManager {
@@ -32,7 +44,10 @@ export default class InputManager extends cc.Component {
             return existingManager;
         }
 
-        const targetNode = hostNode || cc.find("Canvas") || cc.director.getScene();
+        const scene = cc.director.getScene();
+        const targetNode = hostNode && hostNode !== scene
+            ? hostNode
+            : cc.find("Canvas");
         if (!targetNode) {
             return null;
         }
@@ -45,12 +60,12 @@ export default class InputManager extends cc.Component {
     }
 
     private static findInCurrentScene(): InputManager {
-        const scene = cc.director.getScene();
-        if (!scene) {
+        const canvas = cc.find("Canvas");
+        if (!canvas) {
             return null;
         }
 
-        const managers = scene.getComponentsInChildren(InputManager);
+        const managers = canvas.getComponentsInChildren(InputManager);
         for (const manager of managers) {
             if (manager && cc.isValid(manager.node)) {
                 return manager;
@@ -76,6 +91,7 @@ export default class InputManager extends cc.Component {
         }
         this.contextStack = [];
         this.lastActionTimes = {};
+        this.pressedKeyboardActions = {};
     }
 
     public pushContext(context: InputContext, handler: InputHandler, owner?: any): void {
@@ -139,16 +155,30 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        if (isOneShotAction(action) && this.isActionCoolingDown(action)) {
+        if (isOneShotAction(action)) {
+            if (this.pressedKeyboardActions[action]) {
+                return;
+            }
+            this.pressedKeyboardActions[action] = true;
+        }
+
+        if (isInputEventHandled(event)) {
             return;
         }
 
-        this.dispatch({
+        const handled = this.dispatch({
             action,
             isDown: true,
             source: InputSource.Keyboard,
             originalEvent: event
         });
+
+        if (handled) {
+            markInputEventHandled(event);
+            if (event && typeof event.stopPropagation === "function") {
+                event.stopPropagation();
+            }
+        }
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
@@ -157,12 +187,24 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        this.dispatch({
+        if (isOneShotAction(action)) {
+            delete this.pressedKeyboardActions[action];
+        }
+
+        if (isInputEventHandled(event)) {
+            return;
+        }
+
+        const handled = this.dispatch({
             action,
             isDown: false,
             source: InputSource.Keyboard,
             originalEvent: event
         });
+
+        if (handled) {
+            markInputEventHandled(event);
+        }
     }
 
     private onMouseDown(event: cc.Event.EventMouse): void {

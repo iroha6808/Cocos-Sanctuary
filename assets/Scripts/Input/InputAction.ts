@@ -18,6 +18,14 @@ export enum InputAction {
     CameraZoomIn = "CameraZoomIn",
     CameraZoomOut = "CameraZoomOut",
     GenerateMap = "GenerateMap",
+    ToggleMapEditor = "ToggleMapEditor",
+    EditorTerrainTool = "EditorTerrainTool",
+    EditorResourceTool = "EditorResourceTool",
+    EditorBoxGenerateTool = "EditorBoxGenerateTool",
+    EditorPreviousPrefab = "EditorPreviousPrefab",
+    EditorNextPrefab = "EditorNextPrefab",
+    EditorRotateLeft = "EditorRotateLeft",
+    EditorRotateRight = "EditorRotateRight",
     DebugAddCoconut = "DebugAddCoconut",
     DebugAddCraftItems = "DebugAddCraftItems"
 }

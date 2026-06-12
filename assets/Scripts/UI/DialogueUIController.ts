@@ -1,3 +1,7 @@
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
+
 const { ccclass, property } = cc._decorator;
 
 export enum DialogueUIState {
@@ -56,6 +60,7 @@ export default class DialogueUIController extends cc.Component {
     private anchorTarget: cc.Node = null!;
     private mainCamera: cc.Camera = null!;
     private isDestroying: boolean = false;
+    private inputManager: InputManager = null!;
 
     onLoad() {
         if (!this.floatingRoot) {
@@ -74,6 +79,7 @@ export default class DialogueUIController extends cc.Component {
             this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
         }
 
+        this.inputManager = InputManager.getOrCreate(this.node);
         this.bindOptionInput();
         this.hide();
     }
@@ -94,6 +100,7 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public showPrompt(text: string, anchorTarget?: cc.Node): void {
+        this.releaseInputContext();
         this.state = DialogueUIState.Prompt;
 
         if (anchorTarget) {
@@ -149,6 +156,9 @@ export default class DialogueUIController extends cc.Component {
 
         this.refreshOptions();
         this.updateFloatingPosition();
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Dialogue, this.handleDialogueInput, this);
+        }
     }
 
     public selectNext(): void {
@@ -191,6 +201,7 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public hide(): void {
+        this.releaseInputContext();
         this.clearState();
 
         if (this.isDestroying || !this.node || !cc.isValid(this.node)) {
@@ -209,11 +220,15 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public clearForOwnerDestroy(): void {
+        this.releaseInputContext();
         this.clearState();
     }
 
     onDestroy() {
         this.isDestroying = true;
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
         this.clearState();
         this.optionLabels = [];
         this.floatingRoot = null!;
@@ -297,6 +312,40 @@ export default class DialogueUIController extends cc.Component {
                     this.confirmOption(index);
                 }
             }, this);
+        }
+    }
+
+    private handleDialogueInput(payload: InputPayload): boolean {
+        if (!this.isOptionsVisible()) {
+            return false;
+        }
+        if (!payload.isDown) {
+            return true;
+        }
+
+        switch (payload.action) {
+            case InputAction.MoveUp:
+            case InputAction.NavigateUp:
+                this.selectPrev();
+                break;
+            case InputAction.MoveDown:
+            case InputAction.NavigateDown:
+                this.selectNext();
+                break;
+            case InputAction.Interact:
+            case InputAction.Confirm:
+                this.confirmOption(this.selectedIndex);
+                break;
+            case InputAction.Cancel:
+                cc.systemEvent.emit("DIALOGUE_CLOSE_REQUESTED");
+                break;
+        }
+        return true;
+    }
+
+    private releaseInputContext(): void {
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.Dialogue, this);
         }
     }
 

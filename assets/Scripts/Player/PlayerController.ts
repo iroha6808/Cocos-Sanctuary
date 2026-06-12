@@ -8,10 +8,12 @@ import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDia
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
+import InventoryUIController from "../UI/InventoryUIController";
 import VehicleInteractable from "../Vehicle/VehicleInteractable";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
 import Rope from '../Entity/Resources/Rope';
+import { isInputEventHandled, markInputEventHandled } from "../Input/InputManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -135,6 +137,9 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("CRAFTING_OPEN_REQUESTED", this.onCraftingOpenRequested, this);
+        cc.systemEvent.on("DIALOGUE_CLOSE_REQUESTED", this.onDialogueCloseRequested, this);
+        cc.systemEvent.on("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
         cc.systemEvent.on("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
@@ -235,15 +240,21 @@ export default class PlayerController extends BaseEntity {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
-        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
-            if (this.merchantShopKeyStates[event.keyCode]) {
-                return;
-            }
+        if (isInputEventHandled(event)) {
+            return;
+        }
 
-            this.merchantShopKeyStates[event.keyCode] = true;
-            this.handleMerchantShopKey(event.keyCode);
+        if (this.hasFocusedUI()) {
             this.blockPlayerControlForUI();
             return;
+        }
+
+        if (
+            event.keyCode === cc.macro.KEY.b
+            || event.keyCode === cc.macro.KEY.c
+            || event.keyCode === cc.macro.KEY.f
+        ) {
+            markInputEventHandled(event);
         }
 
         this.applyMoveKey(event.keyCode, true);
@@ -266,33 +277,6 @@ export default class PlayerController extends BaseEntity {
         this.keyStates[keyCode] = isDown;
 
         if (this.isExternalControlLocked()) {
-            this.blockPlayerControlForUI();
-            return;
-        }
-
-        if (this.isCraftingUIOpen()) {
-            if (isDown && keyCode === cc.macro.KEY.c) {
-                this.toggleCrafting();
-            }
-
-            this.blockPlayerControlForUI();
-            return;
-        }
-
-        if (this.inventoryUI && this.inventoryUI.active) {
-            if (isDown && keyCode === cc.macro.KEY.b) {
-                this.toggleInventory();
-            }
-
-            this.blockPlayerControlForUI();
-            return;
-        }
-
-        if (isDown && this.handleMerchantShopKey(keyCode)) {
-            return;
-        }
-
-        if (this.isMerchantUIOpen() && keyCode !== cc.macro.KEY.f) {
             this.blockPlayerControlForUI();
             return;
         }
@@ -429,15 +413,20 @@ export default class PlayerController extends BaseEntity {
         if (!this.inventoryUI) return;
         if (this.isCraftingUIOpen()) return;
 
-        const nextActive = !this.inventoryUI.active;
-        this.inventoryUI.active = nextActive;
+        const inventoryController = this.getInventoryUIController();
+        if (!inventoryController) {
+            this.inventoryUI.active = !this.inventoryUI.active;
+            return;
+        }
 
-        if (nextActive && this.dialogueUI && !this.isMerchantUIOpen()) {
+        const opening = !inventoryController.isOpen();
+        if (opening && this.dialogueUI && !this.isMerchantUIOpen()) {
             this.dialogueUI.hide();
             this.promptMerchant = null!;
         }
 
-        if (nextActive && this.rb) {
+        inventoryController.toggle();
+        if (opening && this.rb) {
             this.blockPlayerControlForUI();
         }
     }
@@ -446,7 +435,10 @@ export default class PlayerController extends BaseEntity {
         if (!this.craftingUI) return;
         if (this.isMerchantUIOpen()) return;
 
-        if (this.inventoryUI && this.inventoryUI.active) {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
+            inventoryController.close();
+        } else if (this.inventoryUI && this.inventoryUI.active) {
             this.inventoryUI.active = false;
         }
 
@@ -507,6 +499,12 @@ export default class PlayerController extends BaseEntity {
 
     private onCraftingUIClosed() {
         // 保留空函式，避免之後需要事件時重找
+    }
+
+    private onCraftingOpenRequested(): void {
+        if (!this.isCraftingUIOpen() && !this.isMerchantUIOpen()) {
+            this.toggleCrafting();
+        }
     }
 
     private jump() {
@@ -1076,6 +1074,9 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("CRAFTING_OPEN_REQUESTED", this.onCraftingOpenRequested, this);
+        cc.systemEvent.off("DIALOGUE_CLOSE_REQUESTED", this.onDialogueCloseRequested, this);
+        cc.systemEvent.off("DIALOGUE_OPTION_CONFIRMED", this.onDialogueOptionConfirmed, this);
         cc.systemEvent.off("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         const gameCanvas = (cc.game as any).canvas;
@@ -1204,6 +1205,17 @@ export default class PlayerController extends BaseEntity {
         this.currentDialogueOptions = [];
     }
 
+    private onDialogueCloseRequested(): void {
+        this.closeMerchantFlow();
+    }
+
+    private onDialogueOptionConfirmed(index: number): void {
+        if (this.dialogueUI && index >= 0) {
+            this.dialogueUI.selectOption(index);
+        }
+        this.confirmDialogueOption();
+    }
+
     private blockPlayerControlForUI(): void {
         this.clearMovementInput();
 
@@ -1241,6 +1253,24 @@ export default class PlayerController extends BaseEntity {
             (this.dialogueUI && this.dialogueUI.isOptionsVisible()) ||
             (this.merchantShopUI && this.merchantShopUI.isOpen())
         );
+    }
+
+    private hasFocusedUI(): boolean {
+        if (this.isCraftingUIOpen() || this.isMerchantUIOpen()) {
+            return true;
+        }
+
+        const inventoryController = this.getInventoryUIController();
+        return inventoryController
+            ? inventoryController.isOpen()
+            : !!(this.inventoryUI && this.inventoryUI.activeInHierarchy);
+    }
+
+    private getInventoryUIController(): InventoryUIController | null {
+        if (!this.inventoryUI || !cc.isValid(this.inventoryUI)) {
+            return null;
+        }
+        return this.inventoryUI.getComponent(InventoryUIController) || null;
     }
 
     private handleMerchantShopKey(keyCode: number): boolean {
