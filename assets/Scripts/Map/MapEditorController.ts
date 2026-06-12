@@ -92,7 +92,7 @@ export default class MapEditorController extends cc.Component {
     alignPlacementCenterToCursor: boolean = true;
 
     @property(cc.Boolean)
-    showPlacementDebug: boolean = true;
+    showPlacementDebug: boolean = false;
 
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
@@ -582,9 +582,6 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
-        if (!this.placedDuringCurrentClick && this.tool !== MapEditorTool.BoxGenerate) {
-            this.placeAt(rootLocal);
-        }
         this.placedDuringCurrentClick = false;
     }
 
@@ -654,6 +651,7 @@ export default class MapEditorController extends cc.Component {
         }
         const started = generator.beginTimedGenerationInRect(rect, {
             clearExisting: true,
+            frameCamera: true,
             useRealtimeTimer: true,
             onPlacementSpawned: (state: MapEditorPlacementState) => {
                 this.upsertPlacement(state);
@@ -1212,18 +1210,19 @@ export default class MapEditorController extends cc.Component {
             this.previewNode.name = `EditorPreview_${entry.key}`;
             this.previewNode.setScale(scale, scale);
             parent.addChild(this.previewNode);
+            this.previewNode.active = true;
+            this.previewNode.zIndex = 9998;
             this.disablePreviewPhysics(this.previewNode);
             this.setPreviewOpacity(this.previewNode, this.previewOpacity);
             this.previewKey = key;
         }
 
         this.previewNode.angle = this.rotation;
+        this.previewNode.active = true;
+        this.previewNode.zIndex = 9998;
+        this.setPreviewOpacity(this.previewNode, this.previewOpacity);
         this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry);
-        if (entry.kind === "terrain") {
-            this.drawTerrainPlacementDebug(rootLocal, this.previewNode);
-        } else {
-            this.clearPlacementDebug();
-        }
+        this.clearPlacementDebug();
     }
 
     private destroyPlacementPreview(): void {
@@ -1335,7 +1334,7 @@ export default class MapEditorController extends cc.Component {
 
         node.opacity = Math.max(0, Math.min(255, opacity));
         for (let i = 0; i < node.childrenCount; i++) {
-            this.setPreviewOpacity(node.children[i], opacity);
+            node.children[i].opacity = 255;
         }
     }
 
