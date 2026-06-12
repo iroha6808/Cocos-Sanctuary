@@ -41,7 +41,7 @@ export default class EquipmentManager {
         let totalAtk = 0;
         for (const key in this.equipment) {
             const item = this.equipment[key];
-            if (item && typeof item.attackBoost === 'number') {
+            if (item&& item.attackBoost !== undefined) {
                 totalAtk += item.attackBoost;
             }
         }
@@ -52,10 +52,30 @@ export default class EquipmentManager {
         let totalDef = 0;
         for (const key in this.equipment) {
             const item = this.equipment[key];
-            if (item && typeof item.defBoost === 'number') {
+            if (item && item.defBoost !== undefined) {
+                cc.log(`[Debug 裝備防禦] 槽位: ${key}, 物品名稱: ${item.name}`);
+                cc.log(`[Debug 裝備防禦] 完整 item 物件內容:`, item);
+                cc.log(`[Debug 裝備防禦] item.defBoost 的型態: ${typeof item.defBoost}, 數值: ${item.defBoost}`);
                 totalDef += item.defBoost;
             }
         }
         return totalDef;
+    }
+
+    public getSaveSnapshot(): any {
+        return this.equipment;
+    }
+
+    public setEquipmentFromSave(savedEquipment: any) {
+        if (savedEquipment) {
+            this.equipment = savedEquipment;
+        } else {
+            this.equipment = {
+                [EquipmentSlot.WEAPON]: null,
+                [EquipmentSlot.ARMOR]: null,
+                [EquipmentSlot.ACCESSORY]: null
+            };
+        }
+        EventCenter.emit(GameEvent.EQUIPMENT_UPDATED);
     }
 }

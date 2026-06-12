@@ -316,18 +316,26 @@ export default class CombatProjectile extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
-        const targetDefense = (target as any).defense || 0;
-        const finalDamage = Math.max(1, this.damage - targetDefense);
+        let initialDamage = this.damage;
+        let finalDamage = initialDamage;
 
         const hitInfo: CombatHitInfo = {
             attackerNode: this.ownerNode,
             hitboxNode: this.node,
-            damage: finalDamage,
+            damage: initialDamage,
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY
         };
 
-        this.log(`hit ${target.node.name}, 原本攻擊=${this.damage}, 防禦=${targetDefense}, 最終=${finalDamage}`);
+        const receiver = target as any;
+        if (typeof receiver.receiveAttack === "function") {
+            finalDamage = receiver.receiveAttack(initialDamage, this.ownerNode, hitInfo);
+        } else {
+            finalDamage = target.takeDamage(initialDamage);
+        }
+
+        this.log(`hit ${target.node.name}, 原本攻擊=${initialDamage}, 最終傷害=${finalDamage}`);
+        
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
         EffectsManager.play(EffectType.FIRE, hitWorldPosition);
@@ -341,13 +349,6 @@ export default class CombatProjectile extends cc.Component {
             knockbackY: this.knockbackY,
             sourceType: "projectile"
         });
-        const receiver = target as any;
-        if (typeof receiver.receiveAttack === "function") {
-            receiver.receiveAttack(finalDamage, this.ownerNode, hitInfo);
-            return;
-        }
-
-        target.takeDamage(finalDamage);
     }
 
     private finishByLifetime = () => {
