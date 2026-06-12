@@ -7,6 +7,14 @@ const KEY_MINUS = 189;
 const KEY_NUMPAD_PLUS = 107;
 const KEY_NUMPAD_MINUS = 109;
 const KEY_G = 71;
+const KEY_E = 69;
+const KEY_Q = 81;
+const KEY_R = 82;
+const KEY_1 = 49;
+const KEY_2 = 50;
+const KEY_3 = 51;
+const KEY_LEFT_BRACKET = 219;
+const KEY_RIGHT_BRACKET = 221;
 
 export function getActionForKey(keyCode: number): InputAction {
     switch (keyCode) {
@@ -51,6 +59,25 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.g:
         case KEY_G:
             return InputAction.GenerateMap;
+        case cc.macro.KEY.e:
+        case KEY_E:
+            return InputAction.ToggleMapEditor;
+        case KEY_1:
+            return InputAction.EditorTerrainTool;
+        case KEY_2:
+            return InputAction.EditorResourceTool;
+        case KEY_3:
+            return InputAction.EditorBoxGenerateTool;
+        case cc.macro.KEY.q:
+        case KEY_Q:
+            return InputAction.EditorPreviousPrefab;
+        case cc.macro.KEY.r:
+        case KEY_R:
+            return InputAction.EditorNextPrefab;
+        case KEY_LEFT_BRACKET:
+            return InputAction.EditorRotateLeft;
+        case KEY_RIGHT_BRACKET:
+            return InputAction.EditorRotateRight;
         case cc.macro.KEY.t:
             return InputAction.DebugAddCoconut;
         case cc.macro.KEY.y:
@@ -72,6 +99,14 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.CameraZoomIn:
         case InputAction.CameraZoomOut:
         case InputAction.GenerateMap:
+        case InputAction.ToggleMapEditor:
+        case InputAction.EditorTerrainTool:
+        case InputAction.EditorResourceTool:
+        case InputAction.EditorBoxGenerateTool:
+        case InputAction.EditorPreviousPrefab:
+        case InputAction.EditorNextPrefab:
+        case InputAction.EditorRotateLeft:
+        case InputAction.EditorRotateRight:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:
             return true;

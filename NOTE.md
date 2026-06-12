@@ -144,6 +144,10 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 | `M` | 切換靜音 / 取消靜音。 | `InputAction.ToggleMute`、`AudioManager.toggleMute()` |
 | `+` / `-` | 調整 Main Camera zoom；`+` 放大、`-` 拉遠，Pause 中也可用。 | `InputAction.CameraZoomIn/Out`、`GameManager.adjustCameraZoom()`、`CameraRig.adjustBaseZoom()` |
 | `G` | 觸發自動地圖逐塊生成；生成期間鏡頭拉到整個生成範圍，結束後回到玩家。 | `InputAction.GenerateMap`、`GameManager.beginAutoMapGeneration()`、`AutoMapGenerator.beginTimedGeneration()` |
+| `E` | 進 / 出 Game 內 Map Editor；Editor mode 會鎖住玩家控制。 | `InputAction.ToggleMapEditor`、`GameManager.enterMapEditorMode()`、`MapEditorController.enterEditorMode()` |
+| Map Editor `1/2/3` | 切地形 / 資源 / 框選生成工具。 | `MapEditorController.handleEditorInput()` |
+| Map Editor 左鍵 / 右鍵 | 左鍵放置或拖框；右鍵刪 `Editor*` 節點。 | `MapEditorController.onMouseDown()` / `generateInSelection()` |
+| Map Editor `Q/R`、`[` / `]` | 切換 prefab、旋轉放置角度。 | `MapEditorController.selectPrefab()` / `adjustRotation()` |
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
 | `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
 | `Up` / `Down`、`W` / `S`、滑鼠滾輪 | Gameplay 水中上下；UI context 中改成對話 / 商店上下選擇。 | `InputManager.onMouseWheel()`、`PlayerController` context handlers |
@@ -163,7 +167,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `BaseEntity.ts`：提供 `type`、`maxHp`、`currentHp`、clamp 後的 `takeDamage()`、`heal()`、`onDamaged()`、`die()` 基底。
 - `SaveService.ts`：localStorage 假 Firebase 後端，支援 register / login / logout / saveGame / loadGame / submitScore / getLeaderboard；使用者資料會記錄 `createdAt`、`lastLoginAt`、`lastLogoutAt`、`loginCount`。
 - `SaveService.ts`：fake multiplayer realtime snapshot，支援 `upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`；每筆 realtime player 會帶 `clientId`、`sessionId`、`displayName`、position、HP、Score、EXP、背包格數 / 總數與 `status`。
-- `SaveService.ts`：`getBackendSnapshot()` 可一次取出 current user、client/session、user summaries、save summaries、leaderboard、realtime players、current map、last run 與目前專案 localStorage keys，方便之後接 debug UI 或替換 Firebase。
+- `SaveService.ts`：`getBackendSnapshot()` 可一次取出 current user、client/session、user summaries、save summaries、leaderboard、realtime players、current map、current map editor、last run 與目前專案 localStorage keys，方便之後接 debug UI 或替換 Firebase。
 - `AudioManager.ts`：支援 land / water BGM 雙 channel crossfade；監聽 `PLAYER_WATER_STATE_CHANGED`，水中淡到 `waterBgm`，未拖 `waterBgm` 時維持 `sceneBgm`。SFX 仍有 attack / hit / collect / buy / heal / skill 六種。
 - `ThemeManager.ts`：主題 / 色調切換雛形，可註冊 `tintTargets`、可選 `tintOverlay`，並提供 `applyTheme(themeName, duration)`；若開 `autoApplyOceanTheme`，會跟水域狀態切 default / ocean tint。
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
@@ -176,6 +180,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、`clientId`、`sessionId`、scene、position、HP、Score、EXP、背包摘要 / 統計與 online / paused 狀態寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
 - `DamageNumberManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，顯示上飄傷害數字並播放 damage spark；GameManager 會 runtime 補一個。
 - `GameManager.ts`：Singleton、啟用物理、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算與排行榜提交；Pause 會同時停 scheduler 與 physics，並顯示 `pausePanel`。Retry / 回主畫面可透過 `fadeOverlay` 做 0.25 秒黑幕淡出，場景切換時會清掉 static instance，避免第二輪按鍵失效。
+- `GameManager.ts`：Menu 透過 `SaveService.requestMapEditorOnNextGame()` 進 Game 後，會取得或 runtime 補 `MapEditorController` 並進入 editor mode；一般 `saveCurrentGame()` 會把 `mapEditorState` 一起存進 `SaveData`。
 - 原則：能在 Inspector 掛節點就不要寫死 `cc.find()` 路徑；目前 `GameManager.cameraRig`、`GameManager.playerNode`、`CameraRig.target` 都採手動綁定，避免改場景層級後壞掉。
 
 ### Player
@@ -294,12 +299,14 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 ### Map / Scene
 
 - `AutoMapGenerator.ts`：掛在 `Canvas/platform/auto generate`，用 Inspector 拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5；`manualTriggerOnly` 預設開啟，所以開場 / 讀檔只套參數不生成，按 `G` 才開始逐塊生成。
+- `MapEditorController.ts`：Game 內地圖編輯器，建議掛 `Canvas/platform/auto generate`；支援左鍵放地形 / 資源、右鍵刪 editor-owned 節點、拖框呼叫 `AutoMapGenerator.generateInRect()`。節點命名 `EditorRock_*` / `EditorResource_*`，存檔保存實際 placements。
 - AutoMapGenerator 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清除 `AutoRock_` 開頭的 runtime 節點，不碰手動擺的 rock。
 - 生成策略：先拼出 `FlatRun / RampUp / RampDown / Hill / Valley` 平台組合，再把整組放進地圖；pattern 內部接近連通，pattern 之間保留跳躍距離。
 - 平坦平台上可生成資源：`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab` 三個 Inspector 欄位有拖才會被抽到；只生成在 `slope === none` 的平台頂面，節點命名 `AutoResource_*`。
 - `beginTimedGeneration()` 會預先算出 placements，呼叫 `CameraRig.frameWorldRect()` 用 `cameraFrameDuration = 1.6` 秒看完整生成範圍，等 `startAfterCameraDelay = 0.5` 秒後，每 `generationStepInterval = 0.25` 秒 spawn 一塊地形、觸發小幅 camera shake，並 emit `MAP_GENERATION_PROGRESS(current, total)`；生成中重按 `G` 預設不重入。
 - 逐塊生成完成後會先等 `returnAfterGenerationDelay = 1.0` 秒，再呼叫 `CameraRig.returnToTarget()` 回到玩家；期間玩家仍可移動。
 - AutoMapGenerator 每次生成後會把 `seed`、範圍、pattern 數、斜坡數、rock 數與主要參數寫入 `SaveService.currentMap` 並 emit `MAP_GENERATION_UPDATED`；存檔只保存這份 map state，不保存 runtime 生成出的所有節點。
+- Map Editor 每次放置 / 刪除 / 框選生成後會更新 `SaveService.currentMapEditor` 並 emit `MAP_EDITOR_STATE_CHANGED`；讀檔時 `SAVE_LOADED` 會重建 `mapEditorState.placements`。
 - 讀檔觸發 `SAVE_LOADED` 時，AutoMapGenerator 只套用 `saveData.mapState` 的 seed / range / settings 並更新 current map；不會立刻生成，等玩家按 `G` 後才用同一組參數生成。
 - `minPatternCount/maxPatternCount` 控制平台組數，`slopePatternChance` 控制斜坡組比例，`minSlopePatternCount` 保證至少幾組含 Rockleft / Rockright；`scatterCount` 只補少量散點。
 - Rock offset：Rockplatform3/4/5 用頂面當地面，左接點 local `x = -384`；Rockleft 是左下到右上，Rockright 是左上到右下，斜坡用 bounding box 避免互相卡住。
@@ -311,7 +318,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `BouncePad.ts`：sensor 觸發後依節點 local up 或 local right 反彈 Player / NPC；預設 local up，所以旋轉節點就能改方向。
 - `PathNode.ts`：手動 waypoint，可用 `neighbors` 連線；若節點旁有 portal，可拖 `Portal` 當 link。
 - `PathGraph.ts`：收集子節點 `PathNode`，用簡單 A* 找 waypoint path，portal pair 會視為鄰接節點。
-- `MenuScene.ts`：選單場景用腳本，支援開始遊戲、讀取存檔進遊戲、註冊、登入、登出、設定面板、排行榜、靜音與 fade。
+- `MenuScene.ts`：選單場景用腳本，支援開始遊戲、進入 Map Editor、讀取存檔進遊戲、註冊、登入、登出、設定面板、排行榜、靜音與 fade。
 
 ### Vehicle
 
@@ -583,11 +590,12 @@ Portal / enemy pathing
 ## Cocos Inspector 設定
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`autoMapGenerator`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 上的 AutoMapGenerator。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
+- `MapEditorController.ts`：可手動掛在 `Canvas/platform/auto generate`；拖 `terrainRoot`、`resourceRoot`、`cameraRig`、`autoMapGenerator`、`playerNode`，可選拖 `editorStatusLabel` 與 `selectionGraphics`。rock / resource prefab 可不重拖，會 fallback 使用同節點 AutoMapGenerator 的欄位。
 - `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。overview 期間也會套用 `addShake()`，所以地圖逐塊生成可看到震動。Background 可拖 `zoomScaledNodes` 或 `inverseZoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
 - `CameraFollow.ts`：legacy 備用腳本，預設 `useXLimit/useYLimit` 關閉；目前不建議掛在 Main Camera，避免和 `CameraRig.ts` 同時控制相機。
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
-- `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay。
+- `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay；新增 Map Editor 按鈕時 click handler 綁 `startMapEditor()`。
 - `GameOverScene.ts`：接 title / username / score / exp / status labels、fadeOverlay；按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`。
 - `AudioManager.ts`：接 `sceneBgm`、可選 `waterBgm` 與 attack / hit / collect / buy / heal / skill 六個 SFX clip；`bgmFadeDuration` 控制水域 BGM 淡入淡出。
 - `ThemeManager.ts`：可選掛在 Game 或 UI Root；接 `tintOverlay` / `tintTargets`，`autoApplyOceanTheme` 勾起來後會跟 OceanArea 切 ocean tint。

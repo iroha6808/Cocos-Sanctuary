@@ -113,6 +113,7 @@ assets/
             cashew.ts ... pistachio.ts
     Map/
       AutoMapGenerator.ts
+      MapEditorController.ts
       NewScript - 001.ts
       BouncePad.ts
       OceanArea.ts
@@ -429,6 +430,10 @@ Canvas
   - 生成後呼叫 `SaveService.setCurrentMapGenerationState()` 並 emit `MAP_GENERATION_UPDATED`。
   - 讀到 `SAVE_LOADED` 且存檔有 `mapState` 時，只套用 seed / range / settings；玩家按 `G` 後才重生同一張地圖。
   - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
+- `Map/MapEditorController.ts`
+  - Game 內 Map Editor；Menu 的 `startMapEditor()` 會讓 GameManager 進 Game 後開啟 editor mode。
+  - 支援地形 / 資源放置、右鍵刪 editor-owned 節點、框選呼叫 `AutoMapGenerator.generateInRect()`。
+  - placements 存到 `SaveData.mapEditorState`，讀檔後重建 `EditorRock_*` / `EditorResource_*`。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -589,6 +594,7 @@ Canvas
   - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
   - `manualTriggerOnly` 預設開啟；GameManager 可拖 `autoMapGenerator`，Gameplay 按 `G` 逐塊生成，`generationStepInterval` 預設 0.25，`cameraFrameDuration/cameraReturnDuration` 預設 1.6。
   - 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；fruitore prefab 未建立時留空即可。
+  - MapEditorController 可掛同節點；`terrainRoot` 指 `Canvas/platform/auto generate`，`resourceRoot` 可同 root 或資源容器，`editorStatusLabel` / `selectionGraphics` 可選。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - Background 若要跟 zoom 變大變小，拖到 Main Camera 的 `CameraRig.zoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
@@ -598,7 +604,7 @@ Canvas
 - Flow / final grading
   - `GameManager.pausePanel`：Esc 暫停時顯示的 UI 容器，可放 Resume / Retry / Main Menu / Save 按鈕。
   - `GameManager.fadeOverlay`：全螢幕黑色 UI 節點，供 Retry / Main Menu 切場景前淡出；未綁時會直接切場景。
-  - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels
+  - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels；Map Editor 按鈕綁 `startMapEditor()`
   - `GameOverScene` title / username / score / exp / status labels、retry / menu / submit buttons
   - `AudioManager` land / water BGM + six SFX clips
   - `EffectsManager.effectRoot` + `particleSpriteFrame`

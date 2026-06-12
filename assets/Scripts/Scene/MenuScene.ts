@@ -57,6 +57,12 @@ export default class MenuScene extends cc.Component {
         this.loadSceneWithFade(this.gameScene);
     }
 
+    public startMapEditor(): void {
+        SaveService.requestMapEditorOnNextGame();
+        this.setStatus("Opening map editor...");
+        this.goToGameScene();
+    }
+
     public loadSavedGame(): void {
         if (!SaveService.requestLoadOnNextGame()) {
             this.setStatus("No save found. Login and save in game first.");

@@ -230,6 +230,10 @@
 - [ ] AutoMapGenerator 的 `manualTriggerOnly` 預設開啟；開場 / 讀檔只套 seed 與參數不生成，Gameplay 按 `G` 後鏡頭用 `cameraFrameDuration = 1.6` 秒拉遠，等 `startAfterCameraDelay = 0.5` 秒，再在 `x -5000~0`、`y -2000~0` 每 `generationStepInterval = 0.25` 秒逐塊生成並小幅震動，完成後等 `returnAfterGenerationDelay = 1.0` 秒再回玩家。
 - [ ] AutoMapGenerator 使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例；存檔保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
 - [ ] AutoMapGenerator 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；資源只生成在平坦平台頂面，fruitore prefab 尚未建立時可先留空。
+- [ ] Map Editor 入口：Menu 新增按鈕綁 `MenuScene.startMapEditor()`；進 Game 後會切 `InputContext.MapEditor` 並鎖住 Player 控制。
+- [ ] MapEditorController 可掛 `Canvas/platform/auto generate` 或由 GameManager runtime 補；拖 `terrainRoot`、`resourceRoot`、`cameraRig`、`playerNode`、可選 `editorStatusLabel` / `selectionGraphics`，prefab 欄位沒拖時會 fallback AutoMapGenerator。
+- [ ] Map Editor 操作：`E` 進出、`1/2/3` 地形 / 資源 / 框選生成、左鍵放置或拖框、右鍵刪 editor-owned 節點、`Q/R` 換 prefab、`[` / `]` 旋轉；框選生成只清框內 `Auto*` / `Editor*` 節點。
+- [ ] Map Editor 存檔：`SaveData.mapEditorState` 保存實際 placements，讀檔後重建 `EditorRock_*` / `EditorResource_*`；一般 AutoMap 的 seed / 範圍仍由 `mapState` 保存。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
@@ -263,7 +267,7 @@
 - [ ] 車節點掛 `VehicleInteractable.ts` + `CarController.ts` + `RigidBody` / collider；`promptText` 可設 `Press F to Drive`，`seatNode` 拖座位點，調 `exitOffsetX/Y`。
 - [ ] 船節點掛 `VehicleInteractable.ts` + `BoatController.ts` + `RigidBody` / collider；`promptText` 可設 `Press F to Board`，船建議放在 OceanArea 附近，調 `horizontalSpeed` / `verticalSpeed` / `boostAcceleration`。
 - [ ] MenuScene 接 `mainPanel`、`loginPanel`、`settingsPanel`、`leaderboardPanel`、`fadeOverlay`、username / password EditBox、status / current user / leaderboard Labels
-- [ ] Menu 按鈕綁 `goToGameScene()`、`loadSavedGame()`、`register()`、`login()`、`logout()`、`showMain()`、`showLogin()`、`showSettings()`、`showLeaderboard()`、`toggleMute()`
+- [ ] Menu 按鈕綁 `goToGameScene()`、`startMapEditor()`、`loadSavedGame()`、`register()`、`login()`、`logout()`、`showMain()`、`showLogin()`、`showSettings()`、`showLeaderboard()`、`toggleMute()`
 - [ ] GameOver 場景掛 `GameOverScene.ts`，接 title / username / score / exp / status Labels 與 fadeOverlay
 - [ ] GameOver 按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`
 
