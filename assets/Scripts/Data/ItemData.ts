@@ -419,6 +419,12 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         description: "A rare crystal that refracts light into stunning oceanic hues.",
         iconPath: "smallore/tealprism.png",
     },
+    torch: {
+        id: "torch",
+        name: "torch",
+        description: "A torch for lighting.",
+        iconPath: "combined/torch.png",
+    },
     voidnugget: {
         id: "voidnugget",
         name: "Void Nugget",
