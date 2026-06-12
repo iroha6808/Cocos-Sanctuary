@@ -6,8 +6,14 @@ import InputManager from "../Input/InputManager";
 import { InputAction, InputPayload } from "../Input/InputAction";
 import { InputContext } from "../Input/InputContext";
 import InventoryUIController from "./InventoryUIController";
+import CraftingRecipeListController from "./CraftingRecipeListController";
 
 const { ccclass, property } = cc._decorator;
+
+export enum CraftingViewMode {
+    CRAFTING = 0,
+    RECIPE_LIST = 1
+}
 
 // Reuses the scene's existing InventoryUI and its slot visuals.
 interface CraftSlotView {
@@ -58,6 +64,7 @@ export default class CraftingUIController extends cc.Component {
     public craftingPanelOffsetY: number = 0;
 
     private opened: boolean = false;
+    private viewMode: CraftingViewMode = CraftingViewMode.CRAFTING;
     private selectedItemId: string = null!;
     private craftingSlots: CraftSlotView[] = [];
     private resultSlot: CraftSlotView = null!;
@@ -86,9 +93,11 @@ export default class CraftingUIController extends cc.Component {
     private inputManager: InputManager = null!;
     private resultHovered: boolean = false;
     private resultItemId: string = null!;
+    private recipeListController: CraftingRecipeListController = null!;
 
     private readonly enabledColor = cc.color(55, 150, 105);
     private readonly disabledColor = cc.color(95, 95, 95);
+    private readonly recipeListBuildVersion = "2026-06-13-v2";
 
     onLoad() {
         this.setupReferences();
@@ -97,13 +106,14 @@ export default class CraftingUIController extends cc.Component {
         if (this.buildUIAtRuntime) {
             this.buildCraftingPanel();
         }
+        this.ensureRecipeListController();
 
         this.inputManager = InputManager.getOrCreate(this.node);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("CRAFTING_SESSION_CHANGED", this.refresh, this);
         this.setVisible(false);
         cc.log(
-            `[CraftingUI] loaded root=${!!this.root}, inventory=${!!this.inventoryUI}, slots=${this.craftingSlots.length}`
+            `[CraftingUI] loaded build=${this.recipeListBuildVersion}, root=${!!this.root}, inventory=${!!this.inventoryUI}, slots=${this.craftingSlots.length}`
         );
     }
 
@@ -114,6 +124,9 @@ export default class CraftingUIController extends cc.Component {
         }
 
         this.updatePanelPosition();
+        if (this.recipeListController && this.recipeListController.isOpen()) {
+            this.recipeListController.updatePositions();
+        }
     }
 
     public open(): boolean {
@@ -139,6 +152,11 @@ export default class CraftingUIController extends cc.Component {
         this.suspendInventoryWidgets();
 
         this.opened = true;
+        this.viewMode = CraftingViewMode.CRAFTING;
+        this.ensureRecipeListController();
+        if (this.recipeListController) {
+            this.recipeListController.close();
+        }
         this.sanitizeRenderComponents(this.inventoryUI);
         this.sanitizeRenderComponents(this.root);
         this.inventoryUI.active = true;
@@ -164,6 +182,9 @@ export default class CraftingUIController extends cc.Component {
             return true;
         }
 
+        if (this.viewMode === CraftingViewMode.RECIPE_LIST) {
+            this.closeRecipeList();
+        }
         this.cancelDrag();
         this.hideResultTooltip();
         if (!CraftingSession.shared.returnAllToInventory()) {
@@ -181,6 +202,7 @@ export default class CraftingUIController extends cc.Component {
         }
 
         this.selectedItemId = null!;
+        this.viewMode = CraftingViewMode.CRAFTING;
         this.opened = false;
         this.setVisible(false);
         this.unbindGlobalDragEvents();
@@ -203,9 +225,71 @@ export default class CraftingUIController extends cc.Component {
         return this.opened;
     }
 
+    public getViewMode(): CraftingViewMode {
+        return this.viewMode;
+    }
+
+    public isRecipeListOpen(): boolean {
+        return this.opened && this.viewMode === CraftingViewMode.RECIPE_LIST;
+    }
+
+    public openRecipeList(): boolean {
+        if (!this.opened || this.viewMode === CraftingViewMode.RECIPE_LIST) {
+            return false;
+        }
+
+        this.cancelDrag();
+        this.hideResultTooltip();
+        this.viewMode = CraftingViewMode.RECIPE_LIST;
+        this.ensureRecipeListController();
+        if (!this.recipeListController || !this.recipeListController.open()) {
+            this.viewMode = CraftingViewMode.CRAFTING;
+            return false;
+        }
+        cc.log(
+            `[CraftingUI] view=recipe-list recipe=${this.recipeListController.getSelectedRecipeId() || "none"}`
+        );
+        cc.systemEvent.emit("CRAFTING_RECIPE_LIST_OPENED");
+        return true;
+    }
+
+    public closeRecipeList(): boolean {
+        if (!this.opened || this.viewMode !== CraftingViewMode.RECIPE_LIST) {
+            return false;
+        }
+
+        this.viewMode = CraftingViewMode.CRAFTING;
+        if (this.recipeListController) {
+            this.recipeListController.close();
+        }
+        this.refresh();
+        cc.log("[CraftingUI] view=crafting");
+        cc.systemEvent.emit("CRAFTING_RECIPE_LIST_CLOSED");
+        return true;
+    }
+
     public handleInput(action: InputAction): boolean {
         if (!this.opened) {
             return false;
+        }
+
+        if (this.viewMode === CraftingViewMode.RECIPE_LIST) {
+            if (action === InputAction.RecipeList || action === InputAction.Cancel) {
+                this.closeRecipeList();
+                return true;
+            }
+
+            if (action === InputAction.Crafting) {
+                this.close();
+                return true;
+            }
+
+            return true;
+        }
+
+        if (action === InputAction.RecipeList) {
+            this.openRecipeList();
+            return true;
         }
 
         if (action === InputAction.Cancel || action === InputAction.Crafting) {
@@ -271,6 +355,9 @@ export default class CraftingUIController extends cc.Component {
         if (!CraftingSession.shared.isEmpty()) {
             CraftingSession.shared.returnAllToInventory();
         }
+        if (this.recipeListController) {
+            this.recipeListController.close();
+        }
         this.restoreInventory();
         if (this.dragVisual && this.dragVisual.node && cc.isValid(this.dragVisual.node)) {
             this.dragVisual.node.destroy();
@@ -329,15 +416,16 @@ export default class CraftingUIController extends cc.Component {
 
         const host = this.root.parent;
         const uiRoot = host ? host.parent : null;
+        const maxZIndex = (cc.macro as any).MAX_ZINDEX || 32767;
         if (uiRoot) {
-            uiRoot.zIndex = 100000;
+            uiRoot.zIndex = maxZIndex - 3;
         }
         if (host) {
-            host.zIndex = 1000;
+            host.zIndex = maxZIndex - 2;
         }
-        this.root.zIndex = 1000;
+        this.root.zIndex = maxZIndex - 1;
         if (this.inventoryUI && cc.isValid(this.inventoryUI)) {
-            this.inventoryUI.zIndex = 1000;
+            this.inventoryUI.zIndex = maxZIndex - 1;
         }
     }
 
@@ -691,9 +779,17 @@ export default class CraftingUIController extends cc.Component {
         }
 
         const panel = this.createBox("GeneratedCraftingPanel", this.root, 410, 500, cc.color(25, 32, 40, 245));
-        this.createLabel("Title", panel, "CRAFTING", 24, cc.Color.WHITE).node.setPosition(0, 215);
+        this.createLabel("Title", panel, "CRAFTING", 24, cc.Color.WHITE).node.setPosition(-75, 215);
+        this.createButton(
+            "RecipesButton",
+            panel,
+            "RECIPES",
+            cc.v2(130, 180),
+            () => this.openRecipeList()
+        );
         this.selectedItemLabel = this.createLabel("Selected", panel, "Selected: none", 14, cc.color(210, 220, 230));
-        this.selectedItemLabel.node.setPosition(0, 180);
+        this.selectedItemLabel.node.setContentSize(240, 22);
+        this.selectedItemLabel.node.setPosition(-75, 180);
 
         const slotTemplate = this.getInventorySlotTemplate();
         this.craftingSlots = [];
@@ -788,6 +884,23 @@ export default class CraftingUIController extends cc.Component {
         cc.log(`[CraftingUI] panel built with ${this.craftingSlots.length} crafting slots`);
     }
 
+    private ensureRecipeListController(): void {
+        if (!this.node || !cc.isValid(this.node)) {
+            return;
+        }
+        if (!this.recipeListController || !cc.isValid(this.recipeListController.node)) {
+            this.recipeListController =
+                this.node.getComponent(CraftingRecipeListController)
+                || this.node.addComponent(CraftingRecipeListController);
+        }
+        this.recipeListController.configure(
+            this.root,
+            this.inventoryUI,
+            CraftingSession.shared.getStationType(),
+            () => this.closeRecipeList()
+        );
+    }
+
     private getInventorySlotTemplate(): cc.Node {
         this.resolveSceneNodes();
         return this.inventoryGrid && this.inventoryGrid.children.length > 0
@@ -858,7 +971,7 @@ export default class CraftingUIController extends cc.Component {
         }
         const node = new cc.Node("CraftingDragVisual");
         node.setContentSize(52, 52);
-        node.zIndex = 100000;
+        node.zIndex = ((cc.macro as any).MAX_ZINDEX || 32767) - 1;
         overlayParent.addChild(node);
 
         const iconNode = new cc.Node("Icon");
@@ -1248,6 +1361,7 @@ export default class CraftingUIController extends cc.Component {
     private createLabel(name: string, parent: cc.Node, text: string, size: number, color: cc.Color): cc.Label {
         const node = new cc.Node(name);
         node.color = color;
+        node.zIndex = 10;
         node.setContentSize(360, size + 8);
         parent.addChild(node);
         const label = node.addComponent(cc.Label);

@@ -209,6 +209,10 @@ export default class CraftingSession {
         this.changed();
     }
 
+    public getStationType(): string {
+        return this.stationType;
+    }
+
     private consume(consumption: SlotConsumption[]): void {
         for (const entry of consumption) {
             const slot = this.slots[entry.index];

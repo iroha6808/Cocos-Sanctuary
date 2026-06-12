@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "SeaTurtle",
+    "_name": "Marlin",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -28,16 +28,10 @@
     "_components": [
       {
         "__id__": 13
-      },
-      {
-        "__id__": 15
-      },
-      {
-        "__id__": 16
       }
     ],
     "_prefab": {
-      "__id__": 17
+      "__id__": 15
     },
     "_opacity": 255,
     "_color": {
@@ -116,8 +110,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 72,
-      "height": 72
+      "width": 48,
+      "height": 48
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -169,7 +163,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "8f62d102-1f16-42df-9a3f-a86b9c3e9955"
+      "__uuid__": "3d5d6094-70b3-4066-873e-17d5f5c7af46"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -194,23 +188,23 @@
     },
     "_enabled": true,
     "_defaultClip": {
-      "__uuid__": "b410988b-8d19-4792-ae72-3235bcbdf627"
+      "__uuid__": "0674b183-bd66-42cd-800f-9388cae71afe"
     },
     "_clips": [
       {
-        "__uuid__": "b410988b-8d19-4792-ae72-3235bcbdf627"
+        "__uuid__": "0674b183-bd66-42cd-800f-9388cae71afe"
       },
       {
-        "__uuid__": "73704d84-e35f-4d4c-8e89-f746428b898c"
+        "__uuid__": "a2aa5998-13ba-4ca2-8653-3d798f339f21"
       },
       {
-        "__uuid__": "bf373219-4edb-47e5-87ba-d3f6f55ffbab"
+        "__uuid__": "59ab7ec8-8d14-46aa-95e6-de2bea28b32f"
       },
       {
-        "__uuid__": "403a2cfb-3bf6-40ec-8219-d0069c3669c2"
+        "__uuid__": "adbfa416-4ce7-428a-861b-bdf515e9b6d6"
       },
       {
-        "__uuid__": "9d9ad20c-96d3-4792-848b-dd8c6186b905"
+        "__uuid__": "6daf2dca-11ac-4687-9634-3bf310b7fc5f"
       }
     ],
     "playOnLoad": false,
@@ -224,7 +218,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "67jwtYQ15H9a9a1alzXSbt",
+    "fileId": "4f7DtYiFBCe7a7faBdmmT2",
     "sync": false
   },
   {
@@ -402,7 +396,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "d6VC6oNcJKf74fnAnDdKKg",
+    "fileId": "4fyX6WkH9BSp0VPwiGbTcV",
     "sync": false
   },
   {
@@ -462,7 +456,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "7dCXnTQyJGBaQ9OhsSTlqG",
+    "fileId": "b9kd2hyadEPJkZn6twgqLn",
     "sync": false
   },
   {
@@ -480,13 +474,15 @@
     "targetNodeName": "Player",
     "debugLog": false,
     "showHpBar": true,
-    "hpBar": null,
+    "hpBar": {
+      "__id__": 11
+    },
     "detectRadius": 300,
     "attackRange": 60,
     "attackDamage": 10,
     "attackCooldown": 1,
-    "moveSpeed": 50,
-    "moveMode": 2,
+    "moveSpeed": 80,
+    "moveMode": 1,
     "movementEnvironment": 1,
     "wanderMoveSpeed": 40,
     "waterGravityScale": 0,
@@ -542,57 +538,6 @@
     "minAmount": 1,
     "maxAmount": 1,
     "dropChance": 1
-  },
-  {
-    "__type__": "cc.RigidBody",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "_type": 2,
-    "_allowSleep": true,
-    "_gravityScale": 0,
-    "_linearDamping": 0,
-    "_angularDamping": 0,
-    "_linearVelocity": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_angularVelocity": 0,
-    "_fixedRotation": true,
-    "enabledContactListener": true,
-    "bullet": false,
-    "awakeOnLoad": true,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.PhysicsBoxCollider",
-    "_name": "",
-    "_objFlags": 0,
-    "node": {
-      "__id__": 1
-    },
-    "_enabled": true,
-    "tag": 20,
-    "_density": 1,
-    "_sensor": false,
-    "_friction": 0.2,
-    "_restitution": 0,
-    "body": null,
-    "_offset": {
-      "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
-    },
-    "_size": {
-      "__type__": "cc.Size",
-      "width": 45,
-      "height": 20
-    },
-    "_id": ""
   },
   {
     "__type__": "cc.PrefabInfo",
