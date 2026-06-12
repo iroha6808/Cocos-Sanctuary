@@ -16,11 +16,11 @@ const ONE_SHOT_DEBOUNCE_MS = 160;
 
 @ccclass
 export default class InputManager extends cc.Component {
-    public static instance: InputManager | null = null;
+    public static instance: InputManager = null;
 
     private contextStack: InputContextEntry[] = [];
     private lastActionTimes: { [action: string]: number } = {};
-    private canvasNode: cc.Node | null = null;
+    private canvasNode: cc.Node = null;
 
     public static getOrCreate(hostNode?: cc.Node): InputManager {
         if (InputManager.instance && cc.isValid(InputManager.instance.node)) {
@@ -34,7 +34,7 @@ export default class InputManager extends cc.Component {
 
         const targetNode = hostNode || cc.find("Canvas") || cc.director.getScene();
         if (!targetNode) {
-            return null!;
+            return null;
         }
 
         let manager = targetNode.getComponent(InputManager);
@@ -47,7 +47,7 @@ export default class InputManager extends cc.Component {
     private static findInCurrentScene(): InputManager {
         const scene = cc.director.getScene();
         if (!scene) {
-            return null!;
+            return null;
         }
 
         const managers = scene.getComponentsInChildren(InputManager);
@@ -56,7 +56,7 @@ export default class InputManager extends cc.Component {
                 return manager;
             }
         }
-        return null!;
+        return null;
     }
 
     onLoad(): void {
@@ -143,16 +143,12 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action,
             isDown: true,
             source: InputSource.Keyboard,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
@@ -161,16 +157,12 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action,
             isDown: false,
             source: InputSource.Keyboard,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private onMouseDown(event: cc.Event.EventMouse): void {
@@ -182,16 +174,12 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action: InputAction.Attack,
             isDown: true,
             source: InputSource.Mouse,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private onMouseWheel(event: cc.Event.EventMouse): void {
@@ -200,17 +188,13 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action: wheelY < 0 ? InputAction.NavigateDown : InputAction.NavigateUp,
             isDown: true,
             source: InputSource.Wheel,
             wheelY,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private dispatch(payload: InputPayload): boolean {

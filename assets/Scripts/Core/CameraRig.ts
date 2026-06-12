@@ -29,13 +29,13 @@ export default class CameraRig extends cc.Component {
     public lookAheadMax: number = 70;
 
     @property(cc.Float)
-    public minZoomRatio: number = 0.55;
+    public minZoomRatio: number = 0.01;
 
     @property(cc.Float)
     public maxZoomRatio: number = 1.8;
 
     @property(cc.Float)
-    public zoomStep: number = 0.1;
+    public zoomStep: number = 0.01;
 
     @property(cc.Float)
     public overviewPadding: number = 220;
@@ -53,7 +53,7 @@ export default class CameraRig extends cc.Component {
     public screenFixedZoomScaledNodes: cc.Node[] = [];
 
     @property(cc.Float)
-    public minZoomNodeScale: number = 0.01;
+    public minZoomNodeScale: number = 0.1;
 
     @property(cc.Float)
     public maxZoomNodeScale: number = 5;
@@ -88,7 +88,7 @@ export default class CameraRig extends cc.Component {
     private zoomScaledBaseScales: cc.Vec2[] = [];
     private inverseZoomScaledBaseScales: cc.Vec2[] = [];
     private screenFixedZoomScaledBaseScales: cc.Vec2[] = [];
-    private screenFixedZoomScaledBaseScreenPoints: cc.Vec2[] = [];
+    private screenFixedZoomScaledBasePositions: cc.Vec2[] = [];
 
     public static getOrCreate(cameraNode?: cc.Node): CameraRig {
         if (CameraRig.instance && cc.isValid(CameraRig.instance.node)) {
@@ -389,38 +389,6 @@ export default class CameraRig extends cc.Component {
         }
     }
 
-    private getWorldToScreenPoint(worldPosition: cc.Vec2): cc.Vec2 {
-        const cameraAny = this.camera as any;
-        if (cameraAny && typeof cameraAny.getWorldToScreenPoint === "function") {
-            const point = cameraAny.getWorldToScreenPoint(worldPosition);
-            return cc.v2(point.x, point.y);
-        }
-
-        const cameraWorld = this.getNodeWorldPosition(this.node);
-        const visibleSize = cc.view.getVisibleSize();
-        const zoom = Math.max(0.01, this.camera && this.camera.zoomRatio ? this.camera.zoomRatio : 1);
-        return cc.v2(
-            (worldPosition.x - cameraWorld.x) * zoom + visibleSize.width * 0.5,
-            (worldPosition.y - cameraWorld.y) * zoom + visibleSize.height * 0.5
-        );
-    }
-
-    private getScreenToWorldPoint(screenPoint: cc.Vec2): cc.Vec2 {
-        const cameraAny = this.camera as any;
-        if (cameraAny && typeof cameraAny.getScreenToWorldPoint === "function") {
-            const point = cameraAny.getScreenToWorldPoint(screenPoint);
-            return cc.v2(point.x, point.y);
-        }
-
-        const cameraWorld = this.getNodeWorldPosition(this.node);
-        const visibleSize = cc.view.getVisibleSize();
-        const zoom = Math.max(0.01, this.camera && this.camera.zoomRatio ? this.camera.zoomRatio : 1);
-        return cc.v2(
-            cameraWorld.x + (screenPoint.x - visibleSize.width * 0.5) / zoom,
-            cameraWorld.y + (screenPoint.y - visibleSize.height * 0.5) / zoom
-        );
-    }
-
     private clampVector(value: cc.Vec2, maxLength: number): cc.Vec2 {
         if (!value || maxLength <= 0) {
             return cc.v2(0, 0);
@@ -458,7 +426,7 @@ export default class CameraRig extends cc.Component {
         this.zoomScaledBaseScales = this.captureNodeScales(this.zoomScaledNodes);
         this.inverseZoomScaledBaseScales = this.captureNodeScales(this.inverseZoomScaledNodes);
         this.screenFixedZoomScaledBaseScales = this.captureNodeScales(this.screenFixedZoomScaledNodes);
-        this.screenFixedZoomScaledBaseScreenPoints = this.captureNodeScreenPoints(this.screenFixedZoomScaledNodes);
+        this.screenFixedZoomScaledBasePositions = this.captureNodeLocalPositions(this.screenFixedZoomScaledNodes);
     }
 
     private captureNodeScales(nodes: cc.Node[]): cc.Vec2[] {
@@ -486,7 +454,7 @@ export default class CameraRig extends cc.Component {
         );
         this.applyScaleList(this.zoomScaledNodes, this.zoomScaledBaseScales, directFactor);
         this.applyScaleList(this.inverseZoomScaledNodes, this.inverseZoomScaledBaseScales, inverseFactor);
-        this.applyScreenFixedScaleList(this.screenFixedZoomScaledNodes, this.screenFixedZoomScaledBaseScales, this.screenFixedZoomScaledBaseScreenPoints, directFactor);
+        this.applyScreenFixedScaleList(this.screenFixedZoomScaledNodes, this.screenFixedZoomScaledBaseScales, this.screenFixedZoomScaledBasePositions, directFactor);
     }
 
     private applyScaleList(nodes: cc.Node[], baseScales: cc.Vec2[], factor: number): void {
@@ -503,35 +471,30 @@ export default class CameraRig extends cc.Component {
         }
     }
 
-    private captureNodeScreenPoints(nodes: cc.Node[]): cc.Vec2[] {
-        const screenPoints: cc.Vec2[] = [];
+    private captureNodeLocalPositions(nodes: cc.Node[]): cc.Vec2[] {
+        const positions: cc.Vec2[] = [];
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
-            screenPoints.push(node && cc.isValid(node)
-                ? this.getWorldToScreenPoint(this.getNodeWorldPosition(node))
-                : cc.v2(0, 0));
+            positions.push(node && cc.isValid(node) ? cc.v2(node.x, node.y) : cc.v2(0, 0));
         }
-        return screenPoints;
+        return positions;
     }
 
-    private applyScreenFixedScaleList(nodes: cc.Node[], baseScales: cc.Vec2[], baseScreenPoints: cc.Vec2[], factor: number): void {
+    private applyScreenFixedScaleList(nodes: cc.Node[], baseScales: cc.Vec2[], basePositions: cc.Vec2[], factor: number): void {
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
             if (!node || !cc.isValid(node)) {
                 continue;
             }
-            if (node.getComponent("CameraUIFollower")) {
-                continue;
-            }
             if (!baseScales[i]) {
                 baseScales[i] = cc.v2(node.scaleX, node.scaleY);
             }
-            if (!baseScreenPoints[i]) {
-                baseScreenPoints[i] = this.getWorldToScreenPoint(this.getNodeWorldPosition(node));
+            if (!basePositions[i]) {
+                basePositions[i] = cc.v2(node.x, node.y);
             }
             node.scaleX = baseScales[i].x * factor;
             node.scaleY = baseScales[i].y * factor;
-            this.setNodeWorldPosition(node, this.getScreenToWorldPoint(baseScreenPoints[i]));
+            node.setPosition(basePositions[i]);
         }
     }
 }
