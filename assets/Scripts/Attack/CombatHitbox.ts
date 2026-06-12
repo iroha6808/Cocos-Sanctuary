@@ -172,31 +172,44 @@ export default class CombatHitbox extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
-        // 1. 取得基礎防禦力
-        let targetDefense = (target as any).defense || 0;
-        
-        // 2. 【關鍵修正】如果目標是玩家，把裝備防禦力也加進來！
-        if (target.type === EntityType.PLAYER) {
-            targetDefense += EquipmentManager.Instance.getTotalDefenseBonus();
-        }
-
-        // 3. 計算最終傷害
-        const finalDamage = Math.max(1, this.damage - targetDefense);
+        let initialDamage = this.damage;
+        let finalDamage = initialDamage;
 
         const hitInfo: CombatHitInfo = {
             attackerNode: this.attackerNode,
             hitboxNode: this.node,
-            damage: finalDamage,
+            damage: initialDamage,
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY
         };
 
-        this.log(`Hit ${target.node.name}, 原本攻擊=${this.damage}, 總防禦=${targetDefense}, 最終傷害=${finalDamage}`);
+        const receiver = target as any;
+
+        if (target.type === EntityType.PLAYER) {
+            if (typeof receiver.receiveAttack === "function") {
+                finalDamage = receiver.receiveAttack(initialDamage, this.attackerNode, hitInfo);
+            } else {
+                finalDamage = target.takeDamage(initialDamage);
+            }
+            if (typeof finalDamage !== "number" || isNaN(finalDamage)) {
+                finalDamage = initialDamage;
+            }
+
+        } else {
+            const targetDefense = (target as any).defense || 0;
+            finalDamage = Math.max(1, initialDamage - targetDefense);
+            if (typeof receiver.receiveAttack === "function") {
+                receiver.receiveAttack(finalDamage, this.attackerNode, hitInfo);
+            } else {
+                target.takeDamage(finalDamage);
+            }
+        }
+
+        this.log(`Hit ${target.node.name}, 原本攻擊=${initialDamage}, 最終傷害=${finalDamage}`);
 
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
         EffectsManager.play(EffectType.HIT, hitWorldPosition);
-        
         EventCenter.emit(GameEvent.COMBAT_HIT_CONFIRMED, {
             attackerNode: this.attackerNode,
             targetNode: target.node,
@@ -206,14 +219,6 @@ export default class CombatHitbox extends cc.Component {
             knockbackY: this.knockbackY,
             sourceType: "melee"
         });
-
-        const receiver = target as any;
-        if (receiver.receiveAttack) {
-            receiver.receiveAttack(finalDamage, this.attackerNode, hitInfo);
-            return;
-        }
-
-        target.takeDamage(finalDamage);
     }
 
     private log(message: string) {
