@@ -29,6 +29,11 @@ interface RockPlacement {
     bounds: PlacementBounds;
 }
 
+interface ResourceSpec {
+    key: string;
+    prefab: cc.Prefab;
+}
+
 type PatternType = "FlatRun" | "RampUp" | "RampDown" | "Hill" | "Valley";
 
 interface PatternPlacement {
@@ -58,6 +63,18 @@ export default class AutoMapGenerator extends cc.Component {
 
     @property(cc.Prefab)
     rockPlatform5Prefab: cc.Prefab = null;
+
+    @property(cc.Node)
+    resourceRoot: cc.Node = null;
+
+    @property(cc.Prefab)
+    appleBushPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    oreRockPrefab: cc.Prefab = null;
+
+    @property(cc.Prefab)
+    fruitOrePrefab: cc.Prefab = null;
 
     @property
     seed: string = "sanctuary-jump-map-1";
@@ -161,6 +178,21 @@ export default class AutoMapGenerator extends cc.Component {
     @property(cc.Boolean)
     showDebugBounds: boolean = false;
 
+    @property(cc.Boolean)
+    spawnResourcesOnFlatPlatforms: boolean = true;
+
+    @property(cc.Float)
+    resourceSpawnChance: number = 0.55;
+
+    @property(cc.Float)
+    resourceEdgePadding: number = 130;
+
+    @property(cc.Float)
+    resourceYOffset: number = 24;
+
+    @property(cc.Float)
+    resourceScaleMultiplier: number = 1;
+
     private randomState: number = 1;
     private lastGeneratedPatternCount: number = 0;
     private lastGeneratedSlopePatternCount: number = 0;
@@ -208,6 +240,7 @@ export default class AutoMapGenerator extends cc.Component {
         const placements = this.createPlacements(specs);
         for (let i = 0; i < placements.length; i++) {
             this.spawnRock(root, placements[i], i);
+            this.spawnResourceForPlacement(root, placements[i], i);
         }
         this.publishMapGenerationState(placements);
 
@@ -302,9 +335,19 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     private clearGenerated(root: cc.Node): void {
+        this.clearGeneratedInRoot(root);
+        const resourcesRoot = this.getResourceRoot(root);
+        if (resourcesRoot && resourcesRoot !== root) {
+            this.clearGeneratedInRoot(resourcesRoot);
+        }
+    }
+
+    private clearGeneratedInRoot(root: cc.Node): void {
         for (let i = root.childrenCount - 1; i >= 0; i--) {
             const child = root.children[i];
-            if (child.name.indexOf("AutoRock_") === 0 || child.name === "AutoMapDebugBounds") {
+            if (child.name.indexOf("AutoRock_") === 0
+                || child.name.indexOf("AutoResource_") === 0
+                || child.name === "AutoMapDebugBounds") {
                 child.destroy();
             }
         }
@@ -639,6 +682,33 @@ export default class AutoMapGenerator extends cc.Component {
         root.addChild(node);
     }
 
+    private spawnResourceForPlacement(root: cc.Node, placement: RockPlacement, index: number): void {
+        if (!this.spawnResourcesOnFlatPlatforms || placement.spec.slope !== "none") {
+            return;
+        }
+
+        const resourceSpec = this.pickResourceSpec();
+        const chance = this.clamp(this.resourceSpawnChance, 0, 1);
+        if (!resourceSpec || this.nextRandom() > chance) {
+            return;
+        }
+
+        const safePadding = Math.max(0, Math.min(this.resourceEdgePadding, placement.bounds.width * 0.45));
+        const minX = placement.bounds.x + safePadding;
+        const maxX = placement.bounds.x + placement.bounds.width - safePadding;
+        const x = maxX > minX ? this.randomRange(minX, maxX) : placement.bounds.x + placement.bounds.width * 0.5;
+        const y = placement.bounds.y + placement.bounds.height + this.resourceYOffset;
+        const parent = this.getResourceRoot(root);
+        const node = cc.instantiate(resourceSpec.prefab);
+        node.name = "AutoResource_" + index + "_" + resourceSpec.key;
+        if (this.resourceScaleMultiplier > 0 && this.resourceScaleMultiplier !== 1) {
+            node.scaleX *= this.resourceScaleMultiplier;
+            node.scaleY *= this.resourceScaleMultiplier;
+        }
+        parent.addChild(node);
+        this.setNodePositionFromRootLocal(node, parent, root, cc.v2(x, y));
+    }
+
     private drawDebugBounds(root: cc.Node, placements: RockPlacement[]): void {
         const debugNode = new cc.Node("AutoMapDebugBounds");
         const graphics = debugNode.addComponent(cc.Graphics);
@@ -674,6 +744,7 @@ export default class AutoMapGenerator extends cc.Component {
 
         const index = this.timedSpawnIndex;
         this.spawnRock(this.timedRoot, this.timedPlacements[index], index);
+        this.spawnResourceForPlacement(this.timedRoot, this.timedPlacements[index], index);
         this.shakeCameraForSpawn();
         this.timedSpawnIndex++;
         EventCenter.emit(GameEvent.MAP_GENERATION_PROGRESS, this.timedSpawnIndex, this.timedPlacements.length);
@@ -801,6 +872,37 @@ export default class AutoMapGenerator extends cc.Component {
             }
         }
         return specs[specs.length - 1];
+    }
+
+    private pickResourceSpec(): ResourceSpec {
+        const specs: ResourceSpec[] = [];
+        this.addResourceSpec(specs, "applebush", this.appleBushPrefab);
+        this.addResourceSpec(specs, "orerock", this.oreRockPrefab);
+        this.addResourceSpec(specs, "fruitore", this.fruitOrePrefab);
+        if (specs.length === 0) {
+            return null;
+        }
+        return specs[this.randomInt(0, specs.length - 1)];
+    }
+
+    private addResourceSpec(specs: ResourceSpec[], key: string, prefab: cc.Prefab): void {
+        if (prefab) {
+            specs.push({ key, prefab });
+        }
+    }
+
+    private getResourceRoot(root: cc.Node): cc.Node {
+        return this.resourceRoot && cc.isValid(this.resourceRoot) ? this.resourceRoot : root;
+    }
+
+    private setNodePositionFromRootLocal(node: cc.Node, parent: cc.Node, root: cc.Node, rootLocalPosition: cc.Vec2): void {
+        if (!parent || parent === root) {
+            node.setPosition(rootLocalPosition);
+            return;
+        }
+
+        const worldPosition = root.convertToWorldSpaceAR(rootLocalPosition);
+        node.setPosition(parent.convertToNodeSpaceAR(worldPosition));
     }
 
     private expandBounds(bounds: PlacementBounds, amount: number): PlacementBounds {

@@ -5,6 +5,9 @@ import AudioManager, { SfxType } from "../Core/AudioManager";
 
 const {ccclass, property} = cc._decorator;
 
+// 告訴 TypeScript 我們已經透過插件載入了 firebase
+declare const firebase: any;
+
 @ccclass
 export default class MenuScene extends cc.Component {
 
@@ -27,7 +30,7 @@ export default class MenuScene extends cc.Component {
     fadeOverlay: cc.Node = null;
 
     @property(cc.EditBox)
-    usernameInput: cc.EditBox = null;
+    usernameInput: cc.EditBox = null; 
 
     @property(cc.EditBox)
     passwordInput: cc.EditBox = null;
@@ -44,12 +47,30 @@ export default class MenuScene extends cc.Component {
     onLoad(): void {
         EventCenter.on(GameEvent.LEADERBOARD_UPDATED, this.refreshLeaderboard, this);
         this.setFadeAlpha(0);
+        this.initFirebase();
     }
 
     start(): void {
         this.showMain();
         this.refreshAuthState();
         this.refreshLeaderboard();
+    }
+
+    private initFirebase() {
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq9gGI7AFY8zY82HLUdJLuDzK1HeUs1EM",
+            authDomain: "coconut-sanctuary.firebaseapp.com",
+            projectId: "coconut-sanctuary",
+            storageBucket: "coconut-sanctuary.firebasestorage.app",
+            messagingSenderId: "300648797657",
+            appId: "1:300648797657:web:dce0646506855e761fb5c8",
+            measurementId: "G-70LXBJCEZY"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            cc.log("[Firebase] 椰子聖地連線成功！");
+        }
     }
 
     public goToGameScene(): void {
@@ -62,27 +83,60 @@ export default class MenuScene extends cc.Component {
             this.setStatus("No save found. Login and save in game first.");
             return;
         }
-
         this.setStatus("Loading save...");
         this.goToGameScene();
     }
 
     public register(): void {
-        const result = SaveService.register(this.getUsername(), this.getPassword());
-        this.setStatus(result.message);
-        this.refreshAuthState();
+        const email = this.getUsername();
+        const password = this.getPassword();
+
+        if (!email || !password) {
+            this.setStatus("請輸入帳號密碼");
+            return;
+        }
+
+        this.setStatus("註冊中...");
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+            .then((userCredential: any) => {
+                this.setStatus("註冊成功！");
+                cc.log("註冊成功 UID:", userCredential.user.uid);
+                // 註冊成功後直接載入場景 (帶有你原本的淡出特效！)
+                this.goToGameScene(); 
+            })
+            .catch((error: any) => {
+                this.setStatus(`註冊失敗: ${error.message}`);
+                cc.error("註冊失敗:", error.code, error.message);
+            });
     }
 
     public login(): void {
-        const result = SaveService.login(this.getUsername(), this.getPassword());
-        this.setStatus(result.message);
-        this.refreshAuthState();
+        const email = this.getUsername();
+        const password = this.getPassword();
+
+        if (!email || !password) {
+            this.setStatus("請輸入帳號密碼");
+            return;
+        }
+
+        this.setStatus("登入中...");
+        firebase.auth().signInWithEmailAndPassword(email, password)
+            .then((userCredential: any) => {
+                this.setStatus("登入成功！");
+                cc.log("登入成功 UID:", userCredential.user.uid);
+                this.goToGameScene(); 
+            })
+            .catch((error: any) => {
+                this.setStatus(`登入失敗: ${error.message}`);
+                cc.error("登入失敗:", error.code, error.message);
+            });
     }
 
     public logout(): void {
-        SaveService.logout();
-        this.setStatus("Logged out.");
-        this.refreshAuthState();
+        firebase.auth().signOut().then(() => {
+            this.setStatus("Logged out.");
+            this.refreshAuthState();
+        });
     }
 
     public showMain(): void {
@@ -93,6 +147,7 @@ export default class MenuScene extends cc.Component {
     }
 
     public showLogin(): void {
+        cc.log("👉 成功觸發 showLogin！正在切換面板..."); 
         this.setPanel(this.mainPanel, false);
         this.setPanel(this.loginPanel, true);
         this.setPanel(this.settingsPanel, false);
@@ -124,24 +179,21 @@ export default class MenuScene extends cc.Component {
     }
 
     private refreshAuthState(): void {
-        if (this.currentUserLabel) {
-            const username = SaveService.getCurrentUsername();
-            this.currentUserLabel.string = username ? `User: ${username}` : "User: guest";
-        }
+        // Firebase 抓取當前使用者的狀態
+        firebase.auth().onAuthStateChanged((user: any) => {
+            if (this.currentUserLabel) {
+                this.currentUserLabel.string = user ? `User: ${user.email}` : "User: guest";
+            }
+        });
     }
 
     private refreshLeaderboard(): void {
         const entries = SaveService.getLeaderboard();
         for (let i = 0; i < this.leaderboardLabels.length; i++) {
             const label = this.leaderboardLabels[i];
-            if (!label) {
-                continue;
-            }
-
+            if (!label) continue;
             const entry = entries[i];
-            label.string = entry
-                ? `${i + 1}. ${entry.username} - ${entry.score}`
-                : `${i + 1}. ---`;
+            label.string = entry ? `${i + 1}. ${entry.username} - ${entry.score}` : `${i + 1}. ---`;
         }
     }
 
@@ -180,9 +232,7 @@ export default class MenuScene extends cc.Component {
     }
 
     private setFadeAlpha(alpha: number): void {
-        if (!this.fadeOverlay) {
-            return;
-        }
+        if (!this.fadeOverlay) return;
         this.fadeOverlay.active = alpha > 0;
         this.fadeOverlay.opacity = alpha;
     }

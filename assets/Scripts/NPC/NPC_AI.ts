@@ -6,6 +6,7 @@ import CombatProjectile from "../Attack/CombatProjectile";
 import NPCPathAgent from "./NPCPathAgent";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
+import DropItem from "../Entity/Resources/DropItem";
 
 const { ccclass, property } = cc._decorator;
 
@@ -26,6 +27,12 @@ export enum NPCMoveMode {
     WANDER = 2
 }
 
+export enum NeutralCombatState {
+    CALM = 0,
+    AGGRO = 1,
+    ALERTED_CALM = 2
+}
+
 enum NPCFacing {
     FRONT = "front",
     RIGHT = "right",
@@ -35,15 +42,13 @@ enum NPCFacing {
 cc.Enum(NPCAttackType);
 cc.Enum(ProjectileAimMode);
 cc.Enum(NPCMoveMode);
+cc.Enum(NeutralCombatState);
 
 @ccclass("NPCDropEntry")
 export class NPCDropEntry {
 
     @property(cc.Prefab)
     public prefab: cc.Prefab = null;
-
-    @property
-    public itemName: string = "Item";
 
     @property(cc.Integer)
     public minAmount: number = 1;
@@ -117,6 +122,15 @@ export default class NPC_AI extends BaseEntity {
 
     @property(cc.Boolean)
     public chaseTarget: boolean = true;
+
+    @property(cc.Float)
+    public neutralAggroDuration: number = 8;
+
+    @property({ type: cc.Enum(NPCMoveMode) })
+    public neutralCalmMoveMode: NPCMoveMode = NPCMoveMode.WANDER;
+
+    @property({ type: cc.Enum(NPCMoveMode) })
+    public neutralAggroMoveMode: NPCMoveMode = NPCMoveMode.CHASE_TARGET;
 
     @property(cc.Float)
     public attackAnimLockTime: number = 0.35;
@@ -197,7 +211,10 @@ export default class NPC_AI extends BaseEntity {
     protected isTrading: boolean = false;
     protected isMovementPaused: boolean = false;
 
-    private isEnraged: boolean = false;
+    private neutralCombatState: NeutralCombatState = NeutralCombatState.CALM;
+    private neutralAggroTimer: number = 0;
+    private hasBeenAttacked: boolean = false;
+    private neutralTarget: cc.Node = null;
     private isDead: boolean = false;
     private isAttacking: boolean = false;
     private isHurting: boolean = false;
@@ -258,6 +275,11 @@ export default class NPC_AI extends BaseEntity {
             this.hpBar = hpBarNode ? hpBarNode.getComponent(cc.ProgressBar) : null;
         }
 
+        if (this.type === EntityType.NPC_NEUTRAL) {
+            this.neutralCombatState = NeutralCombatState.CALM;
+            this.moveMode = this.neutralCalmMoveMode;
+        }
+
         this.updateHpBar();
     }
 
@@ -277,6 +299,19 @@ export default class NPC_AI extends BaseEntity {
 
     public setTarget(playerNode: cc.Node) {
         this.targetPlayer = playerNode;
+    }
+
+    public isNeutralAggro(): boolean {
+        return this.type === EntityType.NPC_NEUTRAL
+            && this.neutralCombatState === NeutralCombatState.AGGRO;
+    }
+
+    public getNeutralCombatState(): NeutralCombatState {
+        return this.neutralCombatState;
+    }
+
+    public hasNeutralBeenAttacked(): boolean {
+        return this.hasBeenAttacked;
     }
 
     public pauseMovement() {
@@ -353,54 +388,12 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
-        if (this.moveMode === NPCMoveMode.NONE) {
-            this.stopHorizontalMove();
-            this.playStateAnimation("idle");
+        if (this.type === EntityType.NPC_NEUTRAL) {
+            this.updateNeutralBehavior(dt);
             return;
         }
 
-        if (this.moveMode === NPCMoveMode.WANDER) {
-            this.updateWander(dt);
-            return;
-        }
-
-        if (!this.canAct()) {
-            this.stopHorizontalMove();
-            this.playStateAnimation("idle");
-            return;
-        }
-
-        const distance = this.getTargetDistance();
-        if (distance > this.detectRadius) {
-            this.stopHorizontalMove();
-            this.playStateAnimation("idle");
-            return;
-        }
-
-        const targetWorldPosition = this.getTargetWorldPosition();
-        const pathDirection = this.pathAgent
-            ? this.pathAgent.getSteeringDirection(targetWorldPosition, dt)
-            : null;
-        const direction = pathDirection || this.getTargetPositionInParent().sub(this.node.position);
-        this.updateFacing(direction);
-
-        if (distance <= this.attackRange) {
-            this.stopHorizontalMove();
-            if (this.attackTimer <= 0) {
-                this.attackTarget();
-            } else {
-                this.playStateAnimation("idle");
-            }
-            return;
-        }
-
-        if (this.chaseTarget) {
-            this.moveTowardTarget(direction, dt);
-            return;
-        }
-
-        this.stopHorizontalMove();
-        this.playStateAnimation("idle");
+        this.updateStandardBehavior(dt);
     }
 
     public onMocked(playerNode: cc.Node) {
@@ -408,14 +401,16 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
-        this.isEnraged = true;
-        this.targetPlayer = playerNode;
+        this.enterNeutralAggro(playerNode, true);
         EventCenter.emit(GameEvent.NPC_MOCKED, this.node, playerNode);
     }
 
     public receiveAttack(amount: number, attackerNode: cc.Node = null, hitInfo?: CombatHitInfo) {
         if (attackerNode && cc.isValid(attackerNode)) {
             this.targetPlayer = attackerNode;
+            if (this.type === EntityType.NPC_NEUTRAL && amount > 0) {
+                this.enterNeutralAggro(attackerNode);
+            }
         }
 
         this.applyKnockback(attackerNode, hitInfo);
@@ -443,10 +438,6 @@ export default class NPC_AI extends BaseEntity {
     }
 
     protected onDamaged() {
-        if (this.type === EntityType.NPC_NEUTRAL) {
-            this.isEnraged = true;
-        }
-
         this.cancelPendingRangedAttack("hurt");
         this.isHurting = true;
         this.isAttacking = false;
@@ -534,10 +525,19 @@ export default class NPC_AI extends BaseEntity {
                 continue;
             }
 
+            const amount = this.rollDropAmount(dropEntry.minAmount, dropEntry.maxAmount);
             const dropNode = cc.instantiate(dropEntry.prefab);
-            dropNode.parent = parent;
+            const dropScript = dropNode.getComponent(DropItem);
+            if (!dropScript) {
+                cc.error(`[NPC_AI] ${this.node.name} spawned ${dropNode.name} without DropItem.`);
+                dropNode.destroy();
+                continue;
+            }
+
+            dropScript.itemAmount = amount;
 
             const randomOffsetX = (Math.random() - 0.5) * 24;
+            dropNode.parent = parent;
             dropNode.setPosition(
                 this.node.x + randomOffsetX,
                 this.node.y + this.dropSpawnOffsetY
@@ -548,20 +548,11 @@ export default class NPC_AI extends BaseEntity {
                 this.debugDropLog
             );
 
-            const dropScript = dropNode.getComponent("DropItem") as any;
-            if (dropScript) {
-                dropScript.itemName = dropEntry.itemName;
-                dropScript.itemAmount = this.rollDropAmount(dropEntry.minAmount, dropEntry.maxAmount);
-                if (dropScript.launch) {
-                    dropScript.launch();
-                }
-            } else if (this.debugDropLog) {
-                cc.warn(`[NPC_AI] spawned drop ${dropNode.name}, but it has no DropItem component.`);
-            }
-
             if (this.debugDropLog) {
-                const amount = dropScript ? dropScript.itemAmount : "n/a";
-                cc.log(`[NPC_AI] ${this.node.name} dropped ${dropEntry.itemName} x${amount}`);
+                cc.log(
+                    `[NPC_AI] ${this.node.name} spawned drop prefab=${dropNode.name}, ` +
+                    `amount=${amount}`
+                );
             }
         }
     }
@@ -577,6 +568,20 @@ export default class NPC_AI extends BaseEntity {
         this.actionLockTimer = Math.max(0, this.actionLockTimer - dt);
         this.jumpTimer = Math.max(0, this.jumpTimer - dt);
         this.knockbackTimer = Math.max(0, this.knockbackTimer - dt);
+
+        if (
+            this.type === EntityType.NPC_NEUTRAL
+            && this.neutralCombatState === NeutralCombatState.AGGRO
+        ) {
+            this.neutralAggroTimer = Math.max(0, this.neutralAggroTimer - dt);
+            if (
+                this.neutralAggroTimer <= 0
+                || !this.neutralTarget
+                || !cc.isValid(this.neutralTarget)
+            ) {
+                this.exitNeutralAggro();
+            }
+        }
     }
 
     private applyKnockback(attackerNode: cc.Node, hitInfo?: CombatHitInfo): void {
@@ -628,7 +633,13 @@ export default class NPC_AI extends BaseEntity {
         const animationText = this.currentAnimName
             ? `${this.currentAnimName}:${animationState && animationState.isPlaying ? "playing" : "stopped"}`
             : "none";
-        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, moveMode=${this.moveMode}, distance=${distance}, velocity=${velocity}, animation=${animationText}, attacking=${this.isAttacking}, hurting=${this.isHurting}, talking=${this.isTalking}, trading=${this.isTrading}`);
+        const neutralText = this.type === EntityType.NPC_NEUTRAL
+            ? `, neutralState=${NeutralCombatState[this.neutralCombatState]}, ` +
+                `aggroTimer=${this.neutralAggroTimer.toFixed(1)}, ` +
+                `hasBeenAttacked=${this.hasBeenAttacked}, ` +
+                `hpBarVisible=${!!this.hpBar && this.hpBar.node.active}`
+            : "";
+        cc.log(`[NPC_AI] state target=${targetName}, type=${this.type}, moveMode=${this.moveMode}, distance=${distance}, velocity=${velocity}, animation=${animationText}, attacking=${this.isAttacking}, hurting=${this.isHurting}, talking=${this.isTalking}, trading=${this.isTrading}${neutralText}`);
     }
 
     private canAct() {
@@ -648,11 +659,162 @@ export default class NPC_AI extends BaseEntity {
             return false;
         }
 
-        if (this.type === EntityType.NPC_NEUTRAL && !this.isEnraged) {
-            return false;
+        return true;
+    }
+
+    private updateStandardBehavior(dt: number): void {
+        if (this.moveMode === NPCMoveMode.NONE) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
         }
 
-        return true;
+        if (this.moveMode === NPCMoveMode.WANDER) {
+            this.updateWander(dt);
+            return;
+        }
+
+        this.updateCombatBehavior(dt);
+    }
+
+    private updateNeutralBehavior(dt: number): void {
+        if (this.neutralCombatState === NeutralCombatState.AGGRO) {
+            if (this.neutralAggroMoveMode === NPCMoveMode.NONE) {
+                this.stopHorizontalMove();
+                this.playStateAnimation("idle");
+                return;
+            }
+            this.updateCombatBehavior(dt);
+            return;
+        }
+
+        if (this.neutralCalmMoveMode === NPCMoveMode.WANDER) {
+            this.updateWander(dt);
+            return;
+        }
+
+        this.stopHorizontalMove();
+        this.playStateAnimation("idle");
+    }
+
+    private updateCombatBehavior(dt: number): void {
+        if (!this.canAct()) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        const distance = this.getTargetDistance();
+        if (
+            distance > this.detectRadius
+            && !(
+                this.type === EntityType.NPC_NEUTRAL
+                && this.neutralCombatState === NeutralCombatState.AGGRO
+            )
+        ) {
+            this.stopHorizontalMove();
+            this.playStateAnimation("idle");
+            return;
+        }
+
+        const targetWorldPosition = this.getTargetWorldPosition();
+        const pathDirection = this.pathAgent
+            ? this.pathAgent.getSteeringDirection(targetWorldPosition, dt)
+            : null;
+        const direction = pathDirection || this.getTargetPositionInParent().sub(this.node.position);
+        this.updateFacing(direction);
+
+        if (distance <= this.attackRange) {
+            this.stopHorizontalMove();
+            if (this.attackTimer <= 0) {
+                this.attackTarget();
+            } else {
+                this.playStateAnimation("idle");
+            }
+            return;
+        }
+
+        if (
+            this.chaseTarget
+            && (
+                this.type !== EntityType.NPC_NEUTRAL
+                || this.neutralAggroMoveMode === NPCMoveMode.CHASE_TARGET
+            )
+        ) {
+            this.moveTowardTarget(direction, dt);
+            return;
+        }
+
+        this.stopHorizontalMove();
+        this.playStateAnimation("idle");
+    }
+
+    private enterNeutralAggro(attackerNode: cc.Node, mocked: boolean = false): void {
+        if (
+            this.type !== EntityType.NPC_NEUTRAL
+            || !attackerNode
+            || !cc.isValid(attackerNode)
+            || this.isDead
+        ) {
+            return;
+        }
+
+        const previousState = this.neutralCombatState;
+        if (!mocked) {
+            this.hasBeenAttacked = true;
+        }
+        this.neutralCombatState = NeutralCombatState.AGGRO;
+        this.neutralAggroTimer = Math.max(0.1, this.neutralAggroDuration);
+        this.neutralTarget = attackerNode;
+        this.targetPlayer = attackerNode;
+        this.moveMode = this.neutralAggroMoveMode;
+        this.isTalking = false;
+        this.isTrading = false;
+        this.isMovementPaused = false;
+        this.wanderDirection = 0;
+        this.wanderTimer = 0;
+        this.hasWarnedNoTarget = false;
+        this.updateHpBar();
+
+        if (this.debugLog) {
+            const action = previousState === NeutralCombatState.AGGRO
+                ? "aggro refreshed"
+                : `state ${NeutralCombatState[previousState]} -> AGGRO`;
+            cc.log(
+                `[NPC_AI] ${this.node.name} neutral ${action}, ` +
+                `target=${attackerNode.name}, timer=${this.neutralAggroTimer.toFixed(1)}, ` +
+                `mocked=${mocked}`
+            );
+        }
+    }
+
+    private exitNeutralAggro(): void {
+        if (
+            this.type !== EntityType.NPC_NEUTRAL
+            || this.neutralCombatState !== NeutralCombatState.AGGRO
+            || this.isDead
+        ) {
+            return;
+        }
+
+        this.neutralCombatState = NeutralCombatState.ALERTED_CALM;
+        this.neutralAggroTimer = 0;
+        this.neutralTarget = null;
+        this.moveMode = this.neutralCalmMoveMode;
+        this.cancelPendingRangedAttack("neutral aggro expired");
+        this.isAttacking = false;
+        this.attackTimer = 0;
+        if (this.attackHitbox) {
+            this.attackHitbox.deactivate();
+        }
+        this.stopMovement();
+        this.updateHpBar();
+
+        if (this.debugLog) {
+            cc.log(
+                `[NPC_AI] ${this.node.name} neutral state AGGRO -> ALERTED_CALM`
+            );
+        }
     }
 
     private moveTowardTarget(direction: cc.Vec2 | cc.Vec3, dt: number) {
@@ -1112,8 +1274,21 @@ export default class NPC_AI extends BaseEntity {
             return;
         }
 
-        this.hpBar.node.active = this.showHpBar;
+        this.hpBar.node.active = this.shouldShowHpBar();
         this.hpBar.progress = this.maxHp > 0 ? this.currentHp / this.maxHp : 0;
+    }
+
+    private shouldShowHpBar(): boolean {
+        if (!this.showHpBar || this.isDead) {
+            return false;
+        }
+
+        if (this.type === EntityType.NPC_NEUTRAL) {
+            return this.hasBeenAttacked
+                || this.neutralCombatState === NeutralCombatState.AGGRO;
+        }
+
+        return true;
     }
 
     private hideHpBar() {

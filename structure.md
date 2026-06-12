@@ -113,6 +113,7 @@ assets/
             cashew.ts ... pistachio.ts
     Map/
       AutoMapGenerator.ts
+      MapEditorController.ts
       NewScript - 001.ts
       BouncePad.ts
       OceanArea.ts
@@ -269,6 +270,9 @@ Canvas
 - `CameraRig.ts`
   - Main Camera runtime 依 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))` 取得 follow speed，再用 `1 - exp(-followSpeed * dt)` 算追趕比例；支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
   - `frameWorldRect()` / `returnToTarget()` 可暫時切到 overview framing，用於自動地圖逐塊生成展示；overview 期間仍可疊加 `addShake()`。
+  - `zoomScaledNodes` / `inverseZoomScaledNodes` 給背景層跟 camera zoom 同步縮放或反向補償；`screenFixedZoomScaledNodes` 是備用 HUD 欄位，若節點已掛 `CameraUIFollower` 會自動跳過。
+  - `CameraUIFollower.ts`
+    - 給 `ExpLabel`、`HpBar` 這種固定螢幕位置的 HUD 使用，依 camera zoom 反向補位置；`compensateCameraZoomScale` 預設開啟，會補償相機放大造成的 HUD 視覺放大。
 - `CameraFollow.ts`
   - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
@@ -422,9 +426,14 @@ Canvas
   - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
   - `manualTriggerOnly` 預設開啟；開場 / 讀檔只套參數不生成，Gameplay 按 `G` 後逐塊生成，每 `generationStepInterval` 秒 spawn 一塊。
   - 逐塊生成前透過 `CameraRig.frameWorldRect()` 看完整生成範圍，等 `startAfterCameraDelay` 後開始鋪地形；每塊生成可觸發 `spawnShakeDuration/spawnShakeAmplitude` 小震動，完成後等 `returnAfterGenerationDelay` 再 `returnToTarget()` 回玩家。
+  - `appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab` 可在平坦平台頂面生成 `AutoResource_*`，斜坡不放資源。
   - 生成後呼叫 `SaveService.setCurrentMapGenerationState()` 並 emit `MAP_GENERATION_UPDATED`。
   - 讀到 `SAVE_LOADED` 且存檔有 `mapState` 時，只套用 seed / range / settings；玩家按 `G` 後才重生同一張地圖。
   - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
+- `Map/MapEditorController.ts`
+  - Game 內 Map Editor；Menu 的 `startMapEditor()` 會讓 GameManager 進 Game 後開啟 editor mode。
+  - 支援地形 / 資源放置、右鍵刪 editor-owned 節點、框選呼叫 `AutoMapGenerator.generateInRect()`。
+  - placements 存到 `SaveData.mapEditorState`，讀檔後重建 `EditorRock_*` / `EditorResource_*`。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -584,15 +593,18 @@ Canvas
   - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
   - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
   - `manualTriggerOnly` 預設開啟；GameManager 可拖 `autoMapGenerator`，Gameplay 按 `G` 逐塊生成，`generationStepInterval` 預設 0.25，`cameraFrameDuration/cameraReturnDuration` 預設 1.6。
+  - 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；fruitore prefab 未建立時留空即可。
+  - MapEditorController 可掛同節點；`terrainRoot` 指 `Canvas/platform/auto generate`，`resourceRoot` 可同 root 或資源容器，`editorStatusLabel` / `selectionGraphics` 可選。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
+  - Background 若要跟 zoom 變大變小，拖到 Main Camera 的 `CameraRig.zoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
   - `DialogueUIController` prompt / panel / option labels
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
   - `DialogueUIController` / `InventoryUIController` / `MerchantShopUIController` / `CraftingUIController` 可接 `mainCameraNode`，讓 panel 跟鏡頭並 clamp。
 - Flow / final grading
   - `GameManager.pausePanel`：Esc 暫停時顯示的 UI 容器，可放 Resume / Retry / Main Menu / Save 按鈕。
   - `GameManager.fadeOverlay`：全螢幕黑色 UI 節點，供 Retry / Main Menu 切場景前淡出；未綁時會直接切場景。
-  - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels
+  - `MenuScene` main / login / settings / leaderboard panels、EditBox、status / user / leaderboard labels；Map Editor 按鈕綁 `startMapEditor()`
   - `GameOverScene` title / username / score / exp / status labels、retry / menu / submit buttons
   - `AudioManager` land / water BGM + six SFX clips
   - `EffectsManager.effectRoot` + `particleSpriteFrame`

@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Boar",
+    "_name": "aaaaaaa",
     "_objFlags": 0,
     "_parent": null,
     "_children": [
@@ -37,10 +37,13 @@
       },
       {
         "__id__": 21
+      },
+      {
+        "__id__": 22
       }
     ],
     "_prefab": {
-      "__id__": 22
+      "__id__": 23
     },
     "_opacity": 255,
     "_color": {
@@ -644,7 +647,7 @@
       "__id__": 11
     },
     "detectRadius": 100,
-    "attackRange": 20,
+    "attackRange": 40,
     "attackDamage": 10,
     "attackCooldown": 1,
     "moveSpeed": 80,
@@ -657,6 +660,9 @@
     "interactDistance": 90,
     "attackType": 1,
     "chaseTarget": true,
+    "neutralAggroDuration": 8,
+    "neutralCalmMoveMode": 2,
+    "neutralAggroMoveMode": 1,
     "attackAnimLockTime": 0.35,
     "damagedAnimLockTime": 0.2,
     "jumpForce": 250,
@@ -695,7 +701,6 @@
     "prefab": {
       "__uuid__": "2505aaf7-b97c-4f9e-9373-9b3bb0b94e4e"
     },
-    "itemName": "Item",
     "minAmount": 1,
     "maxAmount": 1,
     "dropChance": 0.5
@@ -732,7 +737,7 @@
     "node": {
       "__id__": 1
     },
-    "_enabled": true,
+    "_enabled": false,
     "tag": 0,
     "_density": 1,
     "_sensor": false,
@@ -749,6 +754,28 @@
       "width": 48,
       "height": 48
     },
+    "_id": ""
+  },
+  {
+    "__type__": "cc.PhysicsCircleCollider",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 1
+    },
+    "_enabled": true,
+    "tag": 20,
+    "_density": 1,
+    "_sensor": false,
+    "_friction": 0,
+    "_restitution": 0,
+    "body": null,
+    "_offset": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_radius": 24,
     "_id": ""
   },
   {

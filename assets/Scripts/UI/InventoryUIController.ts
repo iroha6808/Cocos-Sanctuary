@@ -3,6 +3,7 @@ const { ccclass, property } = cc._decorator;
 import { InventoryManager } from "../Player/InventoryManager";
 import { getItemDefinition } from "../Data/ItemData";
 import ItemIconLoader from "./ItemIconLoader";
+import EquipmentManager from "../Core/EquipmentManager";
 
 @ccclass
 export default class InventoryUIController extends cc.Component {
@@ -180,41 +181,46 @@ export default class InventoryUIController extends cc.Component {
         const item = InventoryManager.instance.getItemsSnapshot()[this.selectedIndex];
         if (!item) return;
 
-        // 1. 取得這項物品的完整屬性資料
         const def = getItemDefinition(item.id);
-        
-        // 2. 判斷它是不是「食物」而且「能補血」
-        // 直接從 ItemDefinition 中讀取 hpRestore
-        const healAmount = def ? (def.hpRestore || 0) : 0;
-        const isFood = healAmount > 0;
-
-        if (isFood) {
-            cc.log(`[InventoryUI] 成功使用！吃掉了 ${def.name}，準備回復 ${healAmount} 點 HP。`);
-
-            const playerNode = cc.find("Canvas/Player");
-            if (playerNode) {
-                const playerStats = playerNode.getComponent("PlayerController") as any; 
-                
-                if (playerStats && playerStats.heal) {
-                    playerStats.heal(healAmount); 
-                    cc.log(`[InventoryUI] 已成功呼叫玩家的 heal() 函式。`);
-                } else {
-                    cc.warn(`[InventoryUI] 找不到玩家的補血函式！請確認 Player 身上有沒有對應的腳本和 heal() 方法。`);
-                }
-            } else {
-                cc.warn(`[InventoryUI] 找不到 Canvas/Player 節點，無法補血！`);
+        if (!def) return; 
+        if (def.equipmentSlot !== undefined) {
+            const currentEquipped = EquipmentManager.Instance.getEquipment(def.equipmentSlot);
+            if (currentEquipped && currentEquipped.id === def.id) {
+                cc.log(`[InventoryUI] 脫下了 ${def.name}`);
+                EquipmentManager.Instance.unequip(def.equipmentSlot);
+            } 
+            else {
+                cc.log(`[InventoryUI] 穿上了 ${def.name}`);
+                EquipmentManager.Instance.equip(def.equipmentSlot, def);
             }
 
-            InventoryManager.instance.removeItem(item.id, 1);
-
         } else {
-            cc.log(`[InventoryUI] 這個物品 (${def ? def.name : item.id}) 不能吃或沒有補血效果！`);
-            
-            // 既然不能吃，我們就不應該扣除它的數量，直接 return 結束動作
-            this.hideActionMenu();
-            return;
-        }
+            const healAmount = def.hpRestore || 0;
+            const staminaAmount = def.staminaRestore || 0;
+            const attackAmount = def.attackBoost || 0; 
+            const defAmount = def.defBoost || 0;
+            const isConsumable = healAmount !== 0 || staminaAmount !== 0 || attackAmount !== 0 || defAmount !== 0;
 
+            if (isConsumable) {
+                cc.log(`[InventoryUI] 成功使用消耗品 ${def.name}`);
+
+                const playerNode = cc.find("Canvas/Player");
+                if (playerNode) {
+                    const playerStats = playerNode.getComponent("PlayerController") as any; 
+                    
+                    if (playerStats) {
+                        if (healAmount !== 0 && playerStats.heal) playerStats.heal(healAmount);
+                        if (staminaAmount !== 0 && playerStats.restoreStamina) playerStats.restoreStamina(staminaAmount);
+                        if (attackAmount !== 0 && playerStats.addAttackBuff) playerStats.addAttackBuff(attackAmount, 60); 
+                        if (defAmount !== 0 && playerStats.addDefenseBuff) playerStats.addDefenseBuff(defAmount, 60);
+                    }
+                }
+                InventoryManager.instance.removeItem(item.id, 1);
+
+            } else {
+                cc.log(`[InventoryUI] 這個物品 (${def.name}) 無法使用或沒有效果！`);
+            }
+        }
         this.hideActionMenu();
         this.hideTooltip();
         this.refreshUI();

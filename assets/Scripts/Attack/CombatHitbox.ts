@@ -28,7 +28,6 @@ export interface CombatHitInfo {
 
 @ccclass
 export default class CombatHitbox extends cc.Component {
-
     @property(cc.Float)
     public activeTime: number = 0.12;
 
@@ -172,24 +171,28 @@ export default class CombatHitbox extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
+        const targetDefense = (target as any).defense || 0;
+        const finalDamage = Math.max(1, this.damage - targetDefense);
+
         const hitInfo: CombatHitInfo = {
             attackerNode: this.attackerNode,
             hitboxNode: this.node,
-            damage: this.damage,
+            damage: finalDamage,
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY
         };
 
-        this.log(`Hit ${target.node.name}, damage=${this.damage}, knockback=(${this.knockbackX}, ${this.knockbackY})`);
+        this.log(`Hit ${target.node.name}, 原本攻擊=${this.damage}, 防禦=${targetDefense}, 最終傷害=${finalDamage}`);
 
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
         EffectsManager.play(EffectType.HIT, hitWorldPosition);
+        
         EventCenter.emit(GameEvent.COMBAT_HIT_CONFIRMED, {
             attackerNode: this.attackerNode,
             targetNode: target.node,
             worldPosition: hitWorldPosition,
-            damage: this.damage,
+            damage: finalDamage,
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY,
             sourceType: "melee"
@@ -197,11 +200,11 @@ export default class CombatHitbox extends cc.Component {
 
         const receiver = target as any;
         if (receiver.receiveAttack) {
-            receiver.receiveAttack(this.damage, this.attackerNode, hitInfo);
+            receiver.receiveAttack(finalDamage, this.attackerNode, hitInfo);
             return;
         }
 
-        target.takeDamage(this.damage);
+        target.takeDamage(finalDamage);
     }
 
     private log(message: string) {

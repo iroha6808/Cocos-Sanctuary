@@ -1,4 +1,4 @@
-import { getActionForKey, isOneShotAction } from "./InputBindings";
+import { getActionForKeyboardEvent, isOneShotAction } from "./InputBindings";
 import { InputAction, InputPayload, InputSource } from "./InputAction";
 import { InputContext } from "./InputContext";
 
@@ -134,7 +134,7 @@ export default class InputManager extends cc.Component {
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
-        const action = getActionForKey(event.keyCode);
+        const action = getActionForKeyboardEvent(event);
         if (!action) {
             return;
         }
@@ -152,7 +152,7 @@ export default class InputManager extends cc.Component {
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
-        const action = getActionForKey(event.keyCode);
+        const action = getActionForKeyboardEvent(event);
         if (!action) {
             return;
         }

@@ -1,4 +1,7 @@
 import MerchantNPC from "./MerchantNPC";
+import LandSpawnPositionResolver, {
+    LandSpawnResult
+} from "./LandSpawnPositionResolver";
 
 const { ccclass, property } = cc._decorator;
 
@@ -14,11 +17,38 @@ export default class MerchantSpawner extends cc.Component {
     @property(cc.Node)
     public spawnParent: cc.Node = null;
 
+    @property(LandSpawnPositionResolver)
+    public positionResolver: LandSpawnPositionResolver = null;
+
     @property(cc.Float)
     public minSpawnDistance: number = 300;
 
     @property(cc.Float)
     public maxSpawnDistance: number = 700;
+
+    @property(cc.Float)
+    public spawnClearanceWidth: number = 64;
+
+    @property(cc.Float)
+    public spawnClearanceHeight: number = 96;
+
+    @property(cc.Float)
+    public spawnHeightOffset: number = 2;
+
+    @property(cc.Integer)
+    public maxPositionAttempts: number = 12;
+
+    @property(cc.Boolean)
+    public avoidCameraView: boolean = false;
+
+    @property(cc.Float)
+    public cameraPadding: number = 80;
+
+    @property(cc.Float)
+    public minimumNpcSpacing: number = 80;
+
+    @property([cc.Integer])
+    public groundGroupIndices: number[] = [0];
 
     @property(cc.Float)
     public spawnInterval: number = 120;
@@ -28,6 +58,9 @@ export default class MerchantSpawner extends cc.Component {
 
     @property(cc.Boolean)
     public debugLog: boolean = false;
+
+    @property(cc.Boolean)
+    public debugDraw: boolean = false;
 
     private currentMerchant: cc.Node = null;
 
@@ -71,12 +104,21 @@ export default class MerchantSpawner extends cc.Component {
             return null;
         }
 
+        const spawnPosition = this.findSpawnPositionNearPlayer();
+        if (!spawnPosition) {
+            this.log("spawn skipped: no valid land position.");
+            return null;
+        }
+
         const merchantNode = cc.instantiate(this.merchantPrefab);
         merchantNode.parent = this.spawnParent;
-        merchantNode.setPosition(this.getRandomSpawnPositionNearPlayer());
-
+        merchantNode.setPosition(spawnPosition.localPosition);
         this.currentMerchant = merchantNode;
-        this.log(`spawned ${merchantNode.name} at (${merchantNode.x.toFixed(1)}, ${merchantNode.y.toFixed(1)})`);
+        this.log(
+            `spawned ${merchantNode.name} on ${spawnPosition.groundNode.name} at ` +
+            `(${spawnPosition.worldPosition.x.toFixed(1)}, ` +
+            `${spawnPosition.worldPosition.y.toFixed(1)})`
+        );
         return merchantNode;
     }
 
@@ -101,17 +143,34 @@ export default class MerchantSpawner extends cc.Component {
     }
 
     public getRandomSpawnPositionNearPlayer(): cc.Vec2 {
+        const result = this.findSpawnPositionNearPlayer();
+        return result ? result.localPosition : null;
+    }
+
+    public findSpawnPositionNearPlayer(): LandSpawnResult {
         this.resolveReferences();
+        if (!this.positionResolver || !this.playerNode || !this.spawnParent) {
+            return null;
+        }
 
-        const parentNode = this.spawnParent || this.node;
-        const playerWorldPos = this.getWorldPosition(this.playerNode || this.node);
-        const minDistance = Math.max(0, Math.min(this.minSpawnDistance, this.maxSpawnDistance));
-        const maxDistance = Math.max(minDistance, Math.max(this.minSpawnDistance, this.maxSpawnDistance));
-        const direction = Math.random() < 0.5 ? -1 : 1;
-        const distance = minDistance + Math.random() * (maxDistance - minDistance);
-        const spawnWorldPos = cc.v2(playerWorldPos.x + direction * distance, playerWorldPos.y);
+        this.positionResolver.spawnHeightOffset = this.spawnHeightOffset;
+        this.positionResolver.maxPositionAttempts = this.maxPositionAttempts;
+        this.positionResolver.groundGroupIndices = (this.groundGroupIndices || []).slice();
+        this.positionResolver.debugLog = this.debugLog;
+        this.positionResolver.debugDraw = this.debugDraw;
 
-        return parentNode.convertToNodeSpaceAR(spawnWorldPos);
+        return this.positionResolver.findLandPosition({
+            playerNode: this.playerNode,
+            spawnParent: this.spawnParent,
+            minDistance: this.minSpawnDistance,
+            maxDistance: this.maxSpawnDistance,
+            clearanceWidth: this.spawnClearanceWidth,
+            clearanceHeight: this.spawnClearanceHeight,
+            occupiedWorldPositions: [],
+            minimumSpacing: this.minimumNpcSpacing,
+            avoidCameraView: this.avoidCameraView,
+            cameraPadding: this.cameraPadding
+        });
     }
 
     private resolveReferences(): void {
@@ -121,6 +180,11 @@ export default class MerchantSpawner extends cc.Component {
 
         if (!this.spawnParent) {
             this.spawnParent = cc.find("Canvas/NPC") || cc.find("Canvas/World Root") || cc.find("Canvas");
+        }
+
+        if (!this.positionResolver) {
+            this.positionResolver = this.getComponent(LandSpawnPositionResolver)
+                || this.addComponent(LandSpawnPositionResolver);
         }
     }
 
@@ -152,16 +216,6 @@ export default class MerchantSpawner extends cc.Component {
         }
 
         return null;
-    }
-
-    private getWorldPosition(node: cc.Node): cc.Vec2 {
-        if (!node) {
-            return cc.v2(0, 0);
-        }
-
-        return node.parent
-            ? node.parent.convertToWorldSpaceAR(node.position)
-            : cc.v2(node.x, node.y);
     }
 
     private log(message: string): void {

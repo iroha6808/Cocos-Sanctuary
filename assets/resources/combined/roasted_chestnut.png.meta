@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "dcd5e8d6-f657-4bca-95e8-b66f0521307b",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 110,
+  "height": 105,
+  "platformSettings": {},
+  "subMetas": {
+    "roasted_chestnut": {
+      "ver": "1.0.6",
+      "uuid": "ef32ef8e-64fb-4aae-967c-b722adb339d1",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "dcd5e8d6-f657-4bca-95e8-b66f0521307b",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 12.5,
+      "offsetY": -2,
+      "trimX": 36,
+      "trimY": 31,
+      "width": 63,
+      "height": 47,
+      "rawWidth": 110,
+      "rawHeight": 105,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
