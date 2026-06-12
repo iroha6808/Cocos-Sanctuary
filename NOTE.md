@@ -320,6 +320,7 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `PathNode.ts`：手動 waypoint，可用 `neighbors` 連線；若節點旁有 portal，可拖 `Portal` 當 link。
 - `PathGraph.ts`：收集子節點 `PathNode`，用簡單 A* 找 waypoint path，portal pair 會視為鄰接節點。
 - `MenuScene.ts`：選單場景用腳本，支援開始遊戲、進入 Map Editor、讀取存檔進遊戲、註冊、登入、登出、設定面板、排行榜、靜音與 fade。
+- `MenuRollingSpawner.ts`：Menu 視覺特效腳本，可掛在 Canvas 或 `MenuEffectsRoot`。從畫面邊界外隨機生成 prefab / spriteFrame，帶速度與旋轉滾過畫面，超出邊界後自動 destroy；會停用生成物上的 RigidBody / PhysicsCollider，避免影響 menu 點擊或物理。
 
 ### Vehicle
 
@@ -597,6 +598,7 @@ Portal / enemy pathing
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。
 - `MenuScene.ts`：接 main / login / settings / leaderboard panels、username / password EditBox、status / current user / leaderboard labels、fadeOverlay；新增 Map Editor 按鈕時 click handler 綁 `startMapEditor()`。
+- `MenuRollingSpawner.ts`：Menu 可新增 `MenuEffectsRoot`，掛本腳本後把 `spawnRoot` 拖該節點或 Canvas；`rollingPrefabs` 可拖椰子 / 礦物 / 道具 prefab，或改用 `rollingSpriteFrames`；`spawnMode=Horizontal` 代表左右邊界互噴，`AnyEdge` 會從四邊出現。
 - `GameOverScene.ts`：接 title / username / score / exp / status labels、fadeOverlay；按鈕綁 `retry()`、`goToMainMenu()`、`submitScore()`。
 - `AudioManager.ts`：接 `sceneBgm`、可選 `waterBgm` 與 attack / hit / collect / buy / heal / skill 六個 SFX clip；`bgmFadeDuration` 控制水域 BGM 淡入淡出。
 - `ThemeManager.ts`：可選掛在 Game 或 UI Root；接 `tintOverlay` / `tintTargets`，`autoApplyOceanTheme` 勾起來後會跟 OceanArea 切 ocean tint。
