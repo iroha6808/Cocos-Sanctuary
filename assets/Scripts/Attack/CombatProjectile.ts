@@ -316,35 +316,38 @@ export default class CombatProjectile extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
+        const targetDefense = (target as any).defense || 0;
+        const finalDamage = Math.max(1, this.damage - targetDefense);
+
         const hitInfo: CombatHitInfo = {
             attackerNode: this.ownerNode,
             hitboxNode: this.node,
-            damage: this.damage,
+            damage: finalDamage,
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY
         };
 
-        this.log(`hit ${target.node.name}, damage=${this.damage}`);
+        this.log(`hit ${target.node.name}, 原本攻擊=${this.damage}, 防禦=${targetDefense}, 最終=${finalDamage}`);
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
         EffectsManager.play(EffectType.FIRE, hitWorldPosition);
+        
         EventCenter.emit(GameEvent.COMBAT_HIT_CONFIRMED, {
             attackerNode: this.ownerNode,
             targetNode: target.node,
             worldPosition: hitWorldPosition,
-            damage: this.damage,
+            damage: finalDamage, 
             knockbackX: this.knockbackX,
             knockbackY: this.knockbackY,
             sourceType: "projectile"
         });
-
         const receiver = target as any;
         if (typeof receiver.receiveAttack === "function") {
-            receiver.receiveAttack(this.damage, this.ownerNode, hitInfo);
+            receiver.receiveAttack(finalDamage, this.ownerNode, hitInfo);
             return;
         }
 
-        target.takeDamage(this.damage);
+        target.takeDamage(finalDamage);
     }
 
     private finishByLifetime = () => {

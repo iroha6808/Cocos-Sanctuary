@@ -3,9 +3,11 @@ export interface ItemDefinition {
     name: string;
     description: string;
     iconPath?: string;
-    hpRestore?: number; // for food items and potions, how much HP they restore
-    staminaRestore?: number; // for food items, how much stamina they restore
-    rottenTime?: number; // for food items, how long until they rot (in seconds)
+    hpRestore?: number;
+    staminaRestore?: number;
+    rottenTime?: number;
+    attackBoost?: number;
+    defBoost?: number;
 }
 
 export const ITEM_DATA: { [id: string]: ItemDefinition } = {
@@ -63,7 +65,8 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         description: "Potion for high stamina restore.",
         iconPath: "potions/bluepotion.png",
         hpRestore: 100,
-        staminaRestore: 800
+        staminaRestore: 10,
+        attackBoost: 5
     },
     calcitecluster: {
         id: "calcitecluster",
@@ -317,13 +320,6 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 5,
         rottenTime: 1415
     },
-    potion: {
-        id: "potion",
-        name: "Potion",
-        description: "A simple healing potion.",
-        iconPath: "potions/redpotion.png",
-        hpRestore: 110
-    },
     radslimechunk: {
         id: "radslimechunk",
         name: "Rad-Slime Chunk",
@@ -351,7 +347,8 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         description: "Potion for high hp restore.",
         iconPath: "potions/redpotion.png",
         hpRestore: 800,
-        staminaRestore: 100
+        staminaRestore: 100,
+        defBoost:5
     },
     rubycrystal: {
         id: "rubycrystal",
