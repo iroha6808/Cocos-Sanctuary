@@ -386,12 +386,6 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         description: "A perfectly formed crystalline cluster that feels warm to the touch.",
         iconPath: "smallore/rubycrystal.png",
     },
-    ruby_flameblade: {
-        id: "ruby_flameblade",
-        name: "ruby_flameblade",
-        description: "A perfectly formed crystalline cluster sword that can burn you out.",
-        iconPath: "combined/ruby_flameblade.png",
-    },
     silverbar: {
         id: "silverbar",
         name: "Silver Bar",
