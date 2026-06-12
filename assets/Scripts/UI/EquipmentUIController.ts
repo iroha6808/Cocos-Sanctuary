@@ -43,4 +43,8 @@ export default class EquipmentUIController extends cc.Component {
             }
         });
     }
+
+    onDestroy() {
+        EventCenter.off(GameEvent.EQUIPMENT_UPDATED, this.refreshUI, this);
+    }
 }

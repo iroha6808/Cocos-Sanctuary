@@ -5,6 +5,7 @@ import EffectsManager, { EffectType } from "../Core/EffectsManager";
 import EventCenter from "../Core/EventCenter";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
+import EquipmentManager from "../Core/EquipmentManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -171,7 +172,15 @@ export default class CombatHitbox extends cc.Component {
     }
 
     private applyDamage(target: BaseEntity) {
-        const targetDefense = (target as any).defense || 0;
+        // 1. 取得基礎防禦力
+        let targetDefense = (target as any).defense || 0;
+        
+        // 2. 【關鍵修正】如果目標是玩家，把裝備防禦力也加進來！
+        if (target.type === EntityType.PLAYER) {
+            targetDefense += EquipmentManager.Instance.getTotalDefenseBonus();
+        }
+
+        // 3. 計算最終傷害
         const finalDamage = Math.max(1, this.damage - targetDefense);
 
         const hitInfo: CombatHitInfo = {
@@ -182,7 +191,7 @@ export default class CombatHitbox extends cc.Component {
             knockbackY: this.knockbackY
         };
 
-        this.log(`Hit ${target.node.name}, 原本攻擊=${this.damage}, 防禦=${targetDefense}, 最終傷害=${finalDamage}`);
+        this.log(`Hit ${target.node.name}, 原本攻擊=${this.damage}, 總防禦=${targetDefense}, 最終傷害=${finalDamage}`);
 
         const hitWorldPosition = this.getNodeWorldPosition(target.node);
         AudioManager.play(SfxType.HIT);
