@@ -10,6 +10,7 @@ const KEY_G = 71;
 const KEY_E = 69;
 const KEY_Q = 81;
 const KEY_R = 82;
+const KEY_V = 86;
 const KEY_1 = 49;
 const KEY_2 = 50;
 const KEY_3 = 51;
@@ -45,6 +46,9 @@ export function getActionForKey(keyCode: number): InputAction {
             return InputAction.Inventory;
         case cc.macro.KEY.c:
             return InputAction.Crafting;
+        case cc.macro.KEY.v:
+        case KEY_V:
+            return InputAction.RecipeList;
         case cc.macro.KEY.enter:
             return InputAction.Confirm;
         case cc.macro.KEY.escape:
@@ -108,6 +112,8 @@ export function getActionForKeyboardEvent(event: cc.Event.EventKeyboard): InputA
 
     const key = getKeyboardString(event, "key");
     switch (key) {
+        case "v":
+            return InputAction.RecipeList;
         case "escape":
         case "esc":
             return InputAction.Cancel;
@@ -137,6 +143,8 @@ export function getActionForKeyboardEvent(event: cc.Event.EventKeyboard): InputA
 
     const code = getKeyboardString(event, "code");
     switch (code) {
+        case "keyv":
+            return InputAction.RecipeList;
         case "escape":
             return InputAction.Cancel;
         case "keye":
@@ -186,6 +194,7 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.Interact:
         case InputAction.Inventory:
         case InputAction.Crafting:
+        case InputAction.RecipeList:
         case InputAction.Confirm:
         case InputAction.Cancel:
         case InputAction.ToggleMute:

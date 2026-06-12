@@ -21,9 +21,15 @@ export default class InputManager extends cc.Component {
     private contextStack: InputContextEntry[] = [];
     private lastActionTimes: { [action: string]: number } = {};
     private canvasNode: cc.Node = null;
+    private isShuttingDown: boolean = false;
 
     public static getOrCreate(hostNode?: cc.Node): InputManager {
-        if (InputManager.instance && cc.isValid(InputManager.instance.node)) {
+        if (
+            InputManager.instance
+            && !InputManager.instance.isShuttingDown
+            && cc.isValid(InputManager.instance)
+            && cc.isValid(InputManager.instance.node)
+        ) {
             return InputManager.instance;
         }
 
@@ -52,7 +58,12 @@ export default class InputManager extends cc.Component {
 
         const managers = scene.getComponentsInChildren(InputManager);
         for (const manager of managers) {
-            if (manager && cc.isValid(manager.node)) {
+            if (
+                manager
+                && !manager.isShuttingDown
+                && cc.isValid(manager)
+                && cc.isValid(manager.node)
+            ) {
                 return manager;
             }
         }
@@ -65,11 +76,15 @@ export default class InputManager extends cc.Component {
             return;
         }
 
+        this.isShuttingDown = false;
+        this.contextStack = this.contextStack || [];
+        this.lastActionTimes = this.lastActionTimes || {};
         InputManager.instance = this;
         this.bindInputEvents();
     }
 
     onDestroy(): void {
+        this.isShuttingDown = true;
         this.unbindInputEvents();
         if (InputManager.instance === this) {
             InputManager.instance = null;
@@ -79,11 +94,17 @@ export default class InputManager extends cc.Component {
     }
 
     public pushContext(context: InputContext, handler: InputHandler, owner?: any): void {
-        if (!context || !handler) {
+        if (!cc.isValid(this) || this.isShuttingDown || !context || !handler) {
             return;
         }
 
+        if (!this.contextStack) {
+            this.contextStack = [];
+        }
         this.popContext(context, owner);
+        if (this.isShuttingDown || !this.contextStack) {
+            return;
+        }
         this.contextStack.push({
             context,
             handler: owner ? handler.bind(owner) : handler,
@@ -92,6 +113,10 @@ export default class InputManager extends cc.Component {
     }
 
     public popContext(context: InputContext, owner?: any): void {
+        if (!cc.isValid(this) || this.isShuttingDown || !this.contextStack) {
+            return;
+        }
+
         for (let index = this.contextStack.length - 1; index >= 0; index--) {
             const entry = this.contextStack[index];
             if (entry.context !== context) {
@@ -105,10 +130,13 @@ export default class InputManager extends cc.Component {
     }
 
     public clearOwner(owner: any): void {
-        if (owner === undefined || owner === null) {
-            return;
-        }
-        if (!this.contextStack) {
+        if (
+            this.isShuttingDown
+            || !cc.isValid(this)
+            || owner === undefined
+            || owner === null
+            || !this.contextStack
+        ) {
             return;
         }
         this.contextStack = this.contextStack.filter(entry => entry.owner !== owner);
@@ -137,6 +165,9 @@ export default class InputManager extends cc.Component {
     }
 
     private onKeyDown(event: cc.Event.EventKeyboard): void {
+        if (this.isShuttingDown) {
+            return;
+        }
         const action = getActionForKeyboardEvent(event);
         if (!action) {
             return;
@@ -155,6 +186,9 @@ export default class InputManager extends cc.Component {
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
+        if (this.isShuttingDown) {
+            return;
+        }
         const action = getActionForKeyboardEvent(event);
         if (!action) {
             return;
@@ -169,6 +203,9 @@ export default class InputManager extends cc.Component {
     }
 
     private onMouseDown(event: cc.Event.EventMouse): void {
+        if (this.isShuttingDown) {
+            return;
+        }
         if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }
@@ -186,6 +223,9 @@ export default class InputManager extends cc.Component {
     }
 
     private onMouseWheel(event: cc.Event.EventMouse): void {
+        if (this.isShuttingDown) {
+            return;
+        }
         const wheelY = event.getScrollY();
         if (wheelY === 0) {
             return;
@@ -201,19 +241,37 @@ export default class InputManager extends cc.Component {
     }
 
     private dispatch(payload: InputPayload): boolean {
-        for (let index = this.contextStack.length - 1; index >= 0; index--) {
-            const entry = this.contextStack[index];
+        if (!cc.isValid(this) || this.isShuttingDown || !this.contextStack) {
+            return false;
+        }
+
+        const stack = this.contextStack.slice();
+        for (let index = stack.length - 1; index >= 0; index--) {
+            const entry = stack[index];
             if (!entry || !entry.handler) {
                 continue;
             }
-            if (entry.handler(payload)) {
-                return true;
+            try {
+                if (entry.handler(payload)) {
+                    return true;
+                }
+            } catch (error) {
+                cc.error(
+                    `[InputManager] ${entry.context} handler failed for ${payload.action}:`,
+                    error
+                );
             }
         }
         return false;
     }
 
     private isActionCoolingDown(action: InputAction): boolean {
+        if (this.isShuttingDown) {
+            return true;
+        }
+        if (!this.lastActionTimes) {
+            this.lastActionTimes = {};
+        }
         const now = Date.now();
         const lastTime = this.lastActionTimes[action] || 0;
         if (now - lastTime < ONE_SHOT_DEBOUNCE_MS) {

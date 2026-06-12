@@ -8,6 +8,7 @@ export enum InputAction {
     Interact = "Interact",
     Inventory = "Inventory",
     Crafting = "Crafting",
+    RecipeList = "RecipeList",
     Confirm = "Confirm",
     Cancel = "Cancel",
     NavigateUp = "NavigateUp",

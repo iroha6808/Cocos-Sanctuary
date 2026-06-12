@@ -5,6 +5,7 @@ import RecipeMatcher, {
     RecipeMatch,
     SlotConsumption
 } from "./RecipeMatcher";
+import RecipeCatalog from "./RecipeCatalog";
 
 export interface CraftingSlot extends CraftingGridSlot {
 }
@@ -209,6 +210,75 @@ export default class CraftingSession {
         this.changed();
     }
 
+    public getStationType(): string {
+        return this.stationType;
+    }
+
+    public canLoadRecipe(recipe: CraftingRecipe): boolean {
+        return !!recipe
+            && (!recipe.stationType || recipe.stationType === this.stationType)
+            && this.getMissingRequirementsForLoad(recipe).length === 0;
+    }
+
+    public getMissingRequirementsForLoad(recipe: CraftingRecipe): ItemAmount[] {
+        if (!recipe) {
+            return [];
+        }
+
+        const available: { [itemId: string]: number } = {};
+        for (const item of InventoryManager.instance.getItemsSnapshot()) {
+            available[item.id] = (available[item.id] || 0) + item.count;
+        }
+        for (const item of this.aggregateSlots()) {
+            available[item.itemId] = (available[item.itemId] || 0) + item.count;
+        }
+
+        return RecipeCatalog.getRequirements(recipe)
+            .map(requirement => ({
+                itemId: requirement.itemId,
+                count: Math.max(0, requirement.count - (available[requirement.itemId] || 0))
+            }))
+            .filter(requirement => requirement.count > 0);
+    }
+
+    public tryLoadRecipe(recipe: CraftingRecipe): boolean {
+        if (
+            !recipe
+            || (recipe.stationType && recipe.stationType !== this.stationType)
+            || this.getMissingRequirementsForLoad(recipe).length > 0
+        ) {
+            return false;
+        }
+
+        const returning = this.toAmountMap(this.aggregateSlots());
+        const requirements = this.toAmountMap(RecipeCatalog.getRequirements(recipe));
+        const itemIds = Object.keys({ ...returning, ...requirements });
+        const remove: ItemAmount[] = [];
+        const add: ItemAmount[] = [];
+
+        for (const itemId of itemIds) {
+            const difference = (returning[itemId] || 0) - (requirements[itemId] || 0);
+            if (difference > 0) {
+                add.push({ itemId, count: difference });
+            } else if (difference < 0) {
+                remove.push({ itemId, count: -difference });
+            }
+        }
+
+        if (!InventoryManager.instance.transact(remove, add)) {
+            cc.warn(`[CraftingSession] Unable to load recipe ${recipe.id}.`);
+            return false;
+        }
+
+        this.slots = RecipeCatalog.getPreviewGrid(recipe).map(slot => ({
+            itemId: slot.itemId,
+            count: slot.count
+        }));
+        this.changed();
+        cc.log(`[CraftingSession] Loaded recipe ${recipe.id}.`);
+        return true;
+    }
+
     private consume(consumption: SlotConsumption[]): void {
         for (const entry of consumption) {
             const slot = this.slots[entry.index];
@@ -258,6 +328,16 @@ export default class CraftingSession {
             }
         }
         return Object.keys(totals).map(itemId => ({ itemId, count: totals[itemId] }));
+    }
+
+    private toAmountMap(amounts: ItemAmount[]): { [itemId: string]: number } {
+        const totals: { [itemId: string]: number } = {};
+        for (const amount of amounts) {
+            if (amount && amount.itemId && amount.count > 0) {
+                totals[amount.itemId] = (totals[amount.itemId] || 0) + amount.count;
+            }
+        }
+        return totals;
     }
 
     private changed(): void {
