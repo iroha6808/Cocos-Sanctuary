@@ -273,7 +273,7 @@ export default class GameManager extends cc.Component {
     }
 
     public isGamePaused(): boolean {
-        return this.isPaused;
+        return this.isPaused || this.isMapEditorFreezingGame;
     }
 
     public getScore(): number {
