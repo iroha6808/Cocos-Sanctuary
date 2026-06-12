@@ -85,6 +85,9 @@ export default class MapEditorController extends cc.Component {
     @property(cc.Integer)
     previewOpacity: number = 120;
 
+    @property(cc.Boolean)
+    alignPlacementCenterToCursor: boolean = true;
+
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
     private isEditing: boolean = false;
@@ -327,7 +330,7 @@ export default class MapEditorController extends cc.Component {
         node.setScale(scale, scale);
         node.angle = this.rotation;
         parent.addChild(node);
-        this.setNodePositionFromRootLocal(node, parent, rootLocal);
+        this.setEditorNodePosition(node, parent, rootLocal);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
         this.persistState();
@@ -549,11 +552,40 @@ export default class MapEditorController extends cc.Component {
     }
 
     private getMouseWorld(event: cc.Event.EventMouse): cc.Vec2 {
+        const screenLocation = this.getMouseScreenLocation(event);
         const camera = this.getCamera();
         if (camera) {
-            return camera.getScreenToWorldPoint(event.getLocation());
+            return this.screenToWorld(camera, screenLocation);
+        }
+        return screenLocation;
+    }
+
+    private getMouseScreenLocation(event: cc.Event.EventMouse): cc.Vec2 {
+        const anyEvent = event as any;
+        const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
+        if (nativeEvent && typeof nativeEvent.clientX === "number" && typeof nativeEvent.clientY === "number") {
+            const canvas = (cc.game as any).canvas;
+            const rect = canvas && canvas.getBoundingClientRect
+                ? canvas.getBoundingClientRect()
+                : { left: 0, top: 0 };
+            const location = cc.v2();
+            cc.view.convertToLocationInView(nativeEvent.clientX, nativeEvent.clientY, rect, location);
+            return location;
         }
         return event.getLocation();
+    }
+
+    private screenToWorld(camera: cc.Camera, screenLocation: cc.Vec2): cc.Vec2 {
+        const cameraNode = camera.node;
+        const cameraWorld = cameraNode.parent
+            ? cameraNode.parent.convertToWorldSpaceAR(cameraNode.position)
+            : cc.v2(cameraNode.x, cameraNode.y);
+        const visibleSize = cc.view.getVisibleSize();
+        const zoom = Math.max(0.01, (camera as any).zoomRatio || 1);
+        return cc.v2(
+            cameraWorld.x + (screenLocation.x - visibleSize.width * 0.5) / zoom,
+            cameraWorld.y + (screenLocation.y - visibleSize.height * 0.5) / zoom
+        );
     }
 
     private getCamera(): cc.Camera {
@@ -575,6 +607,25 @@ export default class MapEditorController extends cc.Component {
         }
         const world = root.convertToWorldSpaceAR(rootLocal);
         node.setPosition(parent.convertToNodeSpaceAR(world));
+    }
+
+    private setEditorNodePosition(node: cc.Node, parent: cc.Node, rootLocal: cc.Vec2): void {
+        this.setNodePositionFromRootLocal(node, parent, rootLocal);
+        if (!this.alignPlacementCenterToCursor) {
+            return;
+        }
+
+        const box = node.getBoundingBox();
+        if (!box || box.width <= 0 || box.height <= 0) {
+            return;
+        }
+
+        const visualCenterX = box.x + box.width * 0.5;
+        const visualCenterY = box.y + box.height * 0.5;
+        node.setPosition(
+            node.x - (visualCenterX - node.x),
+            node.y - (visualCenterY - node.y)
+        );
     }
 
     private createPlacementState(
@@ -720,7 +771,7 @@ export default class MapEditorController extends cc.Component {
         }
 
         this.previewNode.angle = this.rotation;
-        this.setNodePositionFromRootLocal(this.previewNode, parent, rootLocal);
+        this.setEditorNodePosition(this.previewNode, parent, rootLocal);
     }
 
     private destroyPlacementPreview(): void {

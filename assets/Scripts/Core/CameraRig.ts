@@ -58,6 +58,12 @@ export default class CameraRig extends cc.Component {
     @property(cc.Float)
     public maxZoomNodeScale: number = 5;
 
+    @property(cc.Float)
+    public maxInverseZoomNodeScale: number = 16;
+
+    @property(cc.Float)
+    public overviewInverseZoomScaleBoost: number = 1.25;
+
     private lastTargetPosition: cc.Vec2 = null;
     private shakeTime: number = 0;
     private shakeDuration: number = 0;
@@ -439,7 +445,13 @@ export default class CameraRig extends cc.Component {
 
         const safeZoom = Math.max(0.01, this.camera.zoomRatio || 1);
         const directFactor = this.clamp(safeZoom / this.zoomScaleReference, this.minZoomNodeScale, this.maxZoomNodeScale);
-        const inverseFactor = this.clamp(this.zoomScaleReference / safeZoom, this.minZoomNodeScale, this.maxZoomNodeScale);
+        const inverseMaxScale = Math.max(this.maxZoomNodeScale, this.maxInverseZoomNodeScale);
+        const overviewBoost = this.overviewActive ? Math.max(1, this.overviewInverseZoomScaleBoost) : 1;
+        const inverseFactor = this.clamp(
+            (this.zoomScaleReference / safeZoom) * overviewBoost,
+            this.minZoomNodeScale,
+            inverseMaxScale
+        );
         this.applyScaleList(this.zoomScaledNodes, this.zoomScaledBaseScales, directFactor);
         this.applyScaleList(this.inverseZoomScaledNodes, this.inverseZoomScaledBaseScales, inverseFactor);
         this.applyScreenFixedScaleList(this.screenFixedZoomScaledNodes, this.screenFixedZoomScaledBaseScales, this.screenFixedZoomScaledBasePositions, directFactor);
