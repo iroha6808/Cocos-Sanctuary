@@ -13,6 +13,7 @@ import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
 import Rope from '../Entity/Resources/Rope';
 import AudioManager, { SfxType } from "../Core/AudioManager";
+import EquipmentManager from "../Core/EquipmentManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -978,7 +979,9 @@ export default class PlayerController extends BaseEntity {
 
         if (this.attackHitbox) {
             const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
-            (this.attackHitbox as any).activate(facingRight, this.attackDamage, this.node, 0);
+            const totalAttack = this.attackDamage + EquipmentManager.Instance.getTotalAttackBonus();
+            cc.log(`⚔️ [玩家攻擊] 基礎攻擊: ${this.attackDamage}, 總攻擊: ${totalAttack}`);
+            (this.attackHitbox as any).activate(facingRight, totalAttack, this.node, 0);
         }
     }
 
@@ -1530,9 +1533,9 @@ export default class PlayerController extends BaseEntity {
         cc.log(`[PlayerController] 獲得 Buff: 防禦力 +${amount}，持續 ${duration} 秒`);
     }
 
-    public takeDamage(damage: number) {
-        if (this.isDead) return;
-        cc.log(`🛡️ [玩家受傷] 經過護甲抵擋後，實際扣除血量: ${damage}`);
-        super.takeDamage(damage);
+    public takeDamage(damage: number): number {
+        if (this.isDead) return 0;
+        cc.log(`🛡️ [玩家受傷] CombatHitbox 傳來的最終實際扣血: ${damage}`);
+        return super.takeDamage(damage);
     }
 }
