@@ -4,6 +4,9 @@ import { InventoryManager } from "../Player/InventoryManager";
 import { getItemDefinition } from "../Data/ItemData";
 import ItemIconLoader from "./ItemIconLoader";
 import EquipmentManager from "../Core/EquipmentManager";
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
 
 @ccclass
 export default class InventoryUIController extends cc.Component {
@@ -47,13 +50,21 @@ export default class InventoryUIController extends cc.Component {
     private spriteCache: { [id: string]: cc.SpriteFrame } = {};
     private selectedIndex: number = -1;
     private mainCamera: cc.Camera = null!;
+    private inputManager: InputManager = null!;
+    private opened: boolean = false;
 
     onLoad() {
         this.setupReferences();
+        this.inputManager = InputManager.getOrCreate(this.node);
+        this.opened = this.node.activeInHierarchy;
         cc.systemEvent.on("INVENTORY_CHANGED", this.refreshUI, this);
     }
 
     start() {
+        if (this.opened && this.inputManager) {
+            this.inputManager.pushContext(InputContext.Inventory, this.handleInventoryInput, this);
+        }
+
         if (this.gridContainer) {
             const slots = this.gridContainer.children;
             for (let i = 0; i < slots.length; i++) {
@@ -102,6 +113,69 @@ export default class InventoryUIController extends cc.Component {
 
     onDestroy() {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refreshUI, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
+    }
+
+    public open(): boolean {
+        this.setupReferences();
+        if (!this.inputManager) {
+            this.inputManager = InputManager.getOrCreate(this.node);
+        }
+        if (this.opened && this.node.active) {
+            return true;
+        }
+
+        this.opened = true;
+        this.node.active = true;
+        this.hideActionMenu();
+        this.hideItemTooltip();
+        this.refreshUI();
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Inventory, this.handleInventoryInput, this);
+        }
+        return true;
+    }
+
+    public close(): boolean {
+        if (!this.inputManager) {
+            this.inputManager = InputManager.getOrCreate(this.node);
+        }
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.Inventory, this);
+        }
+        this.hideActionMenu();
+        this.hideItemTooltip();
+        this.opened = false;
+        if (this.node && cc.isValid(this.node)) {
+            this.node.active = false;
+        }
+        return true;
+    }
+
+    public toggle(): boolean {
+        return this.isOpen() ? this.close() : this.open();
+    }
+
+    public isOpen(): boolean {
+        return this.opened && !!this.node && cc.isValid(this.node) && this.node.activeInHierarchy;
+    }
+
+    private handleInventoryInput(payload: InputPayload): boolean {
+        if (!this.isOpen()) {
+            return false;
+        }
+        if (!payload.isDown) {
+            return true;
+        }
+        if (payload.action === InputAction.Inventory || payload.action === InputAction.Cancel) {
+            this.close();
+        } else if (payload.action === InputAction.Crafting) {
+            this.close();
+            cc.systemEvent.emit("CRAFTING_OPEN_REQUESTED");
+        }
+        return true;
     }
 
     onSlotMouseUp(index: number, event: cc.Event.EventMouse) {
@@ -151,28 +225,52 @@ export default class InventoryUIController extends cc.Component {
 
     showTooltip(index: number) {
         const items = InventoryManager.instance.getItemsSnapshot();
-        if (index >= items.length) return;
+        if (index >= items.length) {
+            this.hideItemTooltip();
+            return;
+        }
 
         const item = items[index];
-        const def = getItemDefinition(item.id);
-
-        if (this.descriptionLabel) {
-            this.descriptionLabel.string = (def && def.description)
-                ? def.description
-                : "這件物品沒有留下任何描述。";
-        }
-
         const slotNode = this.gridContainer ? this.gridContainer.children[index] : null;
-        if (slotNode && this.descriptionTooltip) {
-            const slotWorldPos = slotNode.convertToWorldSpaceAR(cc.v2(0, 0));
-            const localPos = this.node.convertToNodeSpaceAR(slotWorldPos);
-            this.descriptionTooltip.setPosition(localPos.x, localPos.y + (slotNode.height / 2) + 30);
-            this.descriptionTooltip.active = true;
-        }
+        this.showItemTooltip(item.id, slotNode);
     }
 
     hideTooltip() {
-        if (this.descriptionTooltip) this.descriptionTooltip.active = false;
+        this.hideItemTooltip();
+    }
+
+    public showItemTooltip(itemId: string, anchorNode: cc.Node): void {
+        if (!itemId || !anchorNode || !cc.isValid(anchorNode) || !this.descriptionTooltip) {
+            this.hideItemTooltip();
+            return;
+        }
+
+        const definition = getItemDefinition(itemId);
+        if (this.descriptionLabel) {
+            this.descriptionLabel.string = definition && definition.description
+                ? definition.description
+                : "這件物品沒有留下任何描述。";
+        }
+
+        const tooltipParent = this.descriptionTooltip.parent;
+        if (!tooltipParent || !cc.isValid(tooltipParent)) {
+            return;
+        }
+
+        const anchorWorldPos = anchorNode.convertToWorldSpaceAR(
+            cc.v2(0, anchorNode.height * 0.5 + 30)
+        );
+        this.descriptionTooltip.setPosition(
+            tooltipParent.convertToNodeSpaceAR(anchorWorldPos)
+        );
+        this.descriptionTooltip.zIndex = this.uiZIndex + 100;
+        this.descriptionTooltip.active = true;
+    }
+
+    public hideItemTooltip(): void {
+        if (this.descriptionTooltip && cc.isValid(this.descriptionTooltip)) {
+            this.descriptionTooltip.active = false;
+        }
     }
 
     onUseBtnClicked() {

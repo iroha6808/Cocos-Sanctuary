@@ -1,6 +1,8 @@
 import { getItemDefinition, ItemDefinition } from "../Data/ItemData";
 import { MerchantStockItem } from "../Data/MerchantPool";
-import { InputAction } from "../Input/InputAction";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import InputManager from "../Input/InputManager";
+import { InputContext } from "../Input/InputContext";
 import MerchantNPC from "../NPC/MerchantNPC";
 import { InventoryManager } from "../Player/InventoryManager";
 import ItemIconLoader from "./ItemIconLoader";
@@ -88,6 +90,7 @@ export default class MerchantShopUIController extends cc.Component {
     private decreaseButton: cc.Button = null!;
     private increaseButton: cc.Button = null!;
     private closeButton: cc.Button = null!;
+    private inputManager: InputManager = null!;
 
     private readonly normalRowColor = cc.color(37, 50, 63, 255);
     private readonly soldOutRowColor = cc.color(55, 55, 58, 255);
@@ -101,6 +104,7 @@ export default class MerchantShopUIController extends cc.Component {
         this.canBuyColor = cc.color(72, 112, 88, 255);
         this.cannotBuyColor = cc.color(91, 94, 98, 255);
         this.setupReferences();
+        this.inputManager = InputManager.getOrCreate(this.node);
         this.ensureUIBuilt();
         this.close();
     }
@@ -122,6 +126,9 @@ export default class MerchantShopUIController extends cc.Component {
 
     onDestroy(): void {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
         this.clearItemRows();
         this.merchant = null!;
     }
@@ -146,6 +153,9 @@ export default class MerchantShopUIController extends cc.Component {
 
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.MerchantShop, this.handleMerchantInput, this);
+        }
 
         this.updatePanelPosition();
         this.refresh();
@@ -156,6 +166,9 @@ export default class MerchantShopUIController extends cc.Component {
         this.selectedIndex = 0;
         this.buyAmount = 1;
         this.closeRequested = false;
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.MerchantShop, this);
+        }
 
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         const panel = this.getDisplayRoot();
@@ -285,6 +298,16 @@ export default class MerchantShopUIController extends cc.Component {
             default:
                 return true;
         }
+    }
+
+    private handleMerchantInput(payload: InputPayload): boolean {
+        if (!this.isOpen()) {
+            return false;
+        }
+        if (!payload.isDown) {
+            return true;
+        }
+        return this.handleInput(payload.action);
     }
 
     private requestClose(): void {
