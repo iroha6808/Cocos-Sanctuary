@@ -1,5 +1,12 @@
 const { ccclass, property } = cc._decorator;
 
+export enum SpawnEnvironment {
+    LAND = 0,
+    WATER = 1
+}
+
+cc.Enum(SpawnEnvironment);
+
 @ccclass("MonsterSpawnEntry")
 export class MonsterSpawnEntry {
     @property(cc.String)
@@ -34,6 +41,22 @@ export class MonsterSpawnEntry {
 
     @property(cc.Float)
     public spawnClearanceHeight: number = 64;
+
+    @property({
+        type: cc.Float,
+        range: [0, 1, 0.05],
+        slide: true,
+        tooltip: "Water only. 0 is near the surface and 1 is near the bottom."
+    })
+    public minDepthRatio: number = 0;
+
+    @property({
+        type: cc.Float,
+        range: [0, 1, 0.05],
+        slide: true,
+        tooltip: "Water only. 0 is near the surface and 1 is near the bottom."
+    })
+    public maxDepthRatio: number = 1;
 }
 
 export interface MonsterSpawnContext {
