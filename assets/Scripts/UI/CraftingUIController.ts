@@ -7,6 +7,7 @@ import { InputAction, InputPayload } from "../Input/InputAction";
 import { InputContext } from "../Input/InputContext";
 import InventoryUIController from "./InventoryUIController";
 import CraftingRecipeListController from "./CraftingRecipeListController";
+import { CraftingRecipe } from "../Data/RecipeData";
 
 const { ccclass, property } = cc._decorator;
 
@@ -97,7 +98,7 @@ export default class CraftingUIController extends cc.Component {
 
     private readonly enabledColor = cc.color(55, 150, 105);
     private readonly disabledColor = cc.color(95, 95, 95);
-    private readonly recipeListBuildVersion = "2026-06-13-v2";
+    private readonly recipeListBuildVersion = "2026-06-13-v5";
 
     onLoad() {
         this.setupReferences();
@@ -274,13 +275,20 @@ export default class CraftingUIController extends cc.Component {
         }
 
         if (this.viewMode === CraftingViewMode.RECIPE_LIST) {
-            if (action === InputAction.RecipeList || action === InputAction.Cancel) {
+            if (action === InputAction.RecipeList) {
                 this.closeRecipeList();
                 return true;
             }
 
-            if (action === InputAction.Crafting) {
+            if (action === InputAction.Crafting || action === InputAction.Cancel) {
                 this.close();
+                return true;
+            }
+
+            if (action === InputAction.NavigateUp || action === InputAction.NavigateDown) {
+                this.recipeListController.scrollCatalog(
+                    action === InputAction.NavigateDown ? -120 : 120
+                );
                 return true;
             }
 
@@ -897,8 +905,20 @@ export default class CraftingUIController extends cc.Component {
             this.root,
             this.inventoryUI,
             CraftingSession.shared.getStationType(),
-            () => this.closeRecipeList()
+            () => this.closeRecipeList(),
+            recipe => this.useRecipeFromList(recipe)
         );
+    }
+
+    private useRecipeFromList(recipe: CraftingRecipe): boolean {
+        if (!CraftingSession.shared.tryLoadRecipe(recipe)) {
+            return false;
+        }
+
+        this.closeRecipeList();
+        this.setStatus(`Loaded recipe ${recipe.id}.`);
+        this.refresh();
+        return true;
     }
 
     private getInventorySlotTemplate(): cc.Node {

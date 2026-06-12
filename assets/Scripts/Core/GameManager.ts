@@ -421,6 +421,9 @@ export default class GameManager extends cc.Component {
             case InputAction.Cancel:
                 this.togglePause();
                 return true;
+            case InputAction.Crafting:
+                cc.systemEvent.emit("CRAFTING_OPEN_REQUESTED");
+                return true;
             case InputAction.ToggleMute:
                 AudioManager.toggleMute();
                 return true;

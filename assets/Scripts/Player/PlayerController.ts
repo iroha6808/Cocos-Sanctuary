@@ -135,6 +135,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("CRAFTING_OPEN_REQUESTED", this.onCraftingOpenRequested, this);
         cc.systemEvent.on("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
@@ -271,10 +272,8 @@ export default class PlayerController extends BaseEntity {
         }
 
         if (this.isCraftingUIOpen()) {
-            if (isDown && keyCode === cc.macro.KEY.c) {
-                this.toggleCrafting();
-            }
-
+            // CraftingUIController owns C/V/Esc while its input context is active.
+            // Handling C here as well can close and immediately reopen the UI.
             this.blockPlayerControlForUI();
             return;
         }
@@ -330,12 +329,6 @@ export default class PlayerController extends BaseEntity {
             case cc.macro.KEY.b:
                 if (isDown) {
                     this.toggleInventory();
-                }
-                break;
-
-            case cc.macro.KEY.c:
-                if (isDown) {
-                    this.toggleCrafting();
                 }
                 break;
 
@@ -470,6 +463,12 @@ export default class PlayerController extends BaseEntity {
         }
 
         this.blockPlayerControlForUI();
+    }
+
+    private onCraftingOpenRequested() {
+        if (!this.isCraftingUIOpen()) {
+            this.toggleCrafting();
+        }
     }
 
     private closeCrafting() {
@@ -1080,6 +1079,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("CRAFTING_OPEN_REQUESTED", this.onCraftingOpenRequested, this);
         cc.systemEvent.off("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         const gameCanvas = (cc.game as any).canvas;

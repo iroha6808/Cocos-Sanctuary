@@ -1,5 +1,6 @@
 import RecipeCatalog, { RecipeCatalogEntry } from "../Crafting/RecipeCatalog";
-import { RecipeType } from "../Data/RecipeData";
+import CraftingSession from "../Crafting/CraftingSession";
+import { CraftingRecipe, RecipeType } from "../Data/RecipeData";
 import { getItemDefinition } from "../Data/ItemData";
 import { InventoryManager } from "../Player/InventoryManager";
 import ItemIconLoader from "./ItemIconLoader";
@@ -27,8 +28,10 @@ export default class CraftingRecipeListController extends cc.Component {
     private inventoryUI: cc.Node = null!;
     private stationType: string = "crafting_table";
     private onBack: () => void = null!;
+    private onUseRecipe: (recipe: CraftingRecipe) => boolean = null!;
     private opened: boolean = false;
     private built: boolean = false;
+    private useRecipeInProgress: boolean = false;
 
     private catalogRoot: cc.Node = null!;
     private detailRoot: cc.Node = null!;
@@ -40,10 +43,10 @@ export default class CraftingRecipeListController extends cc.Component {
 
     private recipeNameLabel: cc.Label = null!;
     private recipeDescriptionLabel: cc.Label = null!;
-    private stationLabel: cc.Label = null!;
-    private recipeTypeLabel: cc.Label = null!;
     private materialStatusLabel: cc.Label = null!;
     private outputSlot: PreviewSlotView = null!;
+    private useRecipeButton: cc.Button = null!;
+    private browserWheelHandler: any = null!;
 
     private inventoryWasActive: boolean = false;
     private tooltipOriginalParent: cc.Node = null!;
@@ -63,6 +66,7 @@ export default class CraftingRecipeListController extends cc.Component {
 
     onDestroy(): void {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refreshInventoryState, this);
+        this.unbindBrowserWheel();
         this.hideTooltip();
         this.restoreInventoryVisuals();
         this.destroyRuntimeRoots();
@@ -72,12 +76,14 @@ export default class CraftingRecipeListController extends cc.Component {
         craftingRoot: cc.Node,
         inventoryUI: cc.Node,
         stationType: string,
-        onBack: () => void
+        onBack: () => void,
+        onUseRecipe: (recipe: CraftingRecipe) => boolean
     ): void {
         this.craftingRoot = craftingRoot;
         this.inventoryUI = inventoryUI;
         this.stationType = stationType || "crafting_table";
         this.onBack = onBack;
+        this.onUseRecipe = onUseRecipe;
     }
 
     public open(): boolean {
@@ -99,6 +105,7 @@ export default class CraftingRecipeListController extends cc.Component {
         this.updatePositions();
         this.refreshCatalogSelection();
         this.refreshSelectedRecipe();
+        this.bindBrowserWheel();
         if (!this.catalogRoot.activeInHierarchy || !this.detailRoot.activeInHierarchy) {
             cc.warn(
                 `[RecipeListUI] Cannot show roots. craftingRoot=${this.craftingRoot.activeInHierarchy}, catalog=${this.catalogRoot.activeInHierarchy}, detail=${this.detailRoot.activeInHierarchy}`
@@ -124,6 +131,7 @@ export default class CraftingRecipeListController extends cc.Component {
         }
 
         this.hideTooltip();
+        this.unbindBrowserWheel();
         this.opened = false;
         if (this.catalogRoot && cc.isValid(this.catalogRoot)) {
             this.catalogRoot.active = false;
@@ -141,6 +149,21 @@ export default class CraftingRecipeListController extends cc.Component {
 
     public getSelectedRecipeId(): string | null {
         return this.selectedRecipeId || null;
+    }
+
+    public scrollCatalog(scrollY: number): void {
+        if (!this.opened || !this.scrollView || !this.content || scrollY === 0) {
+            return;
+        }
+
+        this.scrollView.stopAutoScroll();
+        const current = this.scrollView.getScrollOffset();
+        const maximum = this.scrollView.getMaxScrollOffset();
+        const nextY = Math.max(
+            0,
+            Math.min(maximum.y, current.y - scrollY * 0.8)
+        );
+        this.scrollView.scrollToOffset(cc.v2(0, nextY), 0.08, false);
     }
 
     public updatePositions(): void {
@@ -236,7 +259,6 @@ export default class CraftingRecipeListController extends cc.Component {
         this.scrollView.horizontal = false;
         this.scrollView.inertia = true;
         this.scrollView.brake = 0.75;
-
         this.entries = [];
         for (const entry of RecipeCatalog.getCatalogEntries(this.stationType)) {
             this.entries.push(this.createCatalogEntry(entry));
@@ -374,34 +396,12 @@ export default class CraftingRecipeListController extends cc.Component {
         this.recipeDescriptionLabel.node.setPosition(65, 128);
         this.recipeDescriptionLabel.overflow = cc.Label.Overflow.SHRINK;
 
-        this.stationLabel = this.createLabel(
-            "Station",
-            this.detailRoot,
-            "",
-            12,
-            cc.color(185, 200, 210),
-            250,
-            cc.Label.HorizontalAlign.LEFT
-        );
-        this.stationLabel.node.setPosition(65, 96);
-
-        this.recipeTypeLabel = this.createLabel(
-            "RecipeType",
-            this.detailRoot,
-            "",
-            12,
-            cc.color(185, 200, 210),
-            250,
-            cc.Label.HorizontalAlign.LEFT
-        );
-        this.recipeTypeLabel.node.setPosition(65, 72);
-
         this.previewSlots = [];
         for (let index = 0; index < 9; index++) {
             const slot = this.createPreviewSlot(`PreviewSlot_${index}`, this.detailRoot);
             const column = index % 3;
             const row = Math.floor(index / 3);
-            slot.node.setPosition(-66 + column * 66, 25 - row * 66);
+            slot.node.setPosition(-66 + column * 66, 45 - row * 66);
             slot.node.on(cc.Node.EventType.MOUSE_ENTER, () => {
                 this.showTooltip(slot.itemId, slot.node);
             }, this);
@@ -423,12 +423,22 @@ export default class CraftingRecipeListController extends cc.Component {
             "BackButton",
             this.detailRoot,
             "BACK",
-            cc.v2(0, -215),
+            cc.v2(150, 218),
             () => {
                 if (this.onBack) {
                     this.onBack();
                 }
-            }
+            },
+            88,
+            34
+        );
+
+        this.useRecipeButton = this.createButton(
+            "UseRecipeButton",
+            this.detailRoot,
+            "USE RECIPE",
+            cc.v2(0, -215),
+            () => this.useSelectedRecipe()
         );
     }
 
@@ -515,14 +525,6 @@ export default class CraftingRecipeListController extends cc.Component {
 
         this.recipeNameLabel.string = definition ? definition.name : recipe.outputItemId;
         this.recipeDescriptionLabel.string = definition ? definition.description : "";
-        this.stationLabel.string = `Station: ${this.formatStation(recipe.stationType)}`;
-        this.stationLabel.node.color = selected.entry.stationCompatible
-            ? cc.color(185, 200, 210)
-            : cc.color(255, 145, 120);
-        this.recipeTypeLabel.string = recipe.type === RecipeType.SHAPED
-            ? "Type: Shaped"
-            : "Type: Shapeless (position does not matter)";
-
         this.setPreviewSlot(this.outputSlot, recipe.outputItemId, recipe.outputCount, false);
         const grid = RecipeCatalog.getPreviewGrid(recipe);
         for (let index = 0; index < this.previewSlots.length; index++) {
@@ -534,7 +536,9 @@ export default class CraftingRecipeListController extends cc.Component {
             );
         }
 
-        const missing = RecipeCatalog.getMissingRequirements(recipe);
+        const missing = CraftingSession.shared.getMissingRequirementsForLoad(recipe);
+        const canLoad = selected.entry.stationCompatible && missing.length === 0;
+        this.setButtonState(this.useRecipeButton, canLoad);
         if (!selected.entry.stationCompatible) {
             this.materialStatusLabel.string =
                 `Requires ${this.formatStation(recipe.stationType)}`;
@@ -547,6 +551,85 @@ export default class CraftingRecipeListController extends cc.Component {
             this.materialStatusLabel.string = "Materials available";
             this.materialStatusLabel.node.color = cc.color(170, 225, 200);
         }
+    }
+
+    private useSelectedRecipe(): void {
+        if (this.useRecipeInProgress || !this.opened) {
+            return;
+        }
+        const selected = this.entries.find(
+            view => view.entry.recipe.id === this.selectedRecipeId
+        );
+        if (!selected || !this.onUseRecipe) {
+            return;
+        }
+
+        this.useRecipeInProgress = true;
+        const loaded = this.onUseRecipe(selected.entry.recipe);
+        this.useRecipeInProgress = false;
+        if (!loaded) {
+            this.refreshSelectedRecipe();
+            this.materialStatusLabel.string =
+                "Unable to load recipe. Check inventory space.";
+            this.materialStatusLabel.node.color = cc.color(255, 145, 120);
+        }
+    }
+
+    private onCatalogMouseWheel(event: cc.Event.EventMouse): void {
+        event.stopPropagation();
+        this.scrollCatalog(event.getScrollY());
+    }
+
+    private bindBrowserWheel(): void {
+        if (this.browserWheelHandler) {
+            return;
+        }
+
+        const canvas = (cc.game as any).canvas;
+        if (!canvas || !canvas.addEventListener) {
+            return;
+        }
+
+        this.browserWheelHandler = (event: any) => {
+            if (!this.opened || !this.isPointerOverCatalog(event, canvas)) {
+                return;
+            }
+
+            // Browser deltaY is positive when scrolling down; Cocos scrollY uses
+            // the opposite sign in this project.
+            this.scrollCatalog(-event.deltaY);
+            if (event.preventDefault) {
+                event.preventDefault();
+            }
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            }
+        };
+        canvas.addEventListener("wheel", this.browserWheelHandler, false);
+    }
+
+    private unbindBrowserWheel(): void {
+        if (!this.browserWheelHandler) {
+            return;
+        }
+
+        const canvas = (cc.game as any).canvas;
+        if (canvas && canvas.removeEventListener) {
+            canvas.removeEventListener("wheel", this.browserWheelHandler, false);
+        }
+        this.browserWheelHandler = null!;
+    }
+
+    private isPointerOverCatalog(event: any, canvas: any): boolean {
+        if (!event || !canvas || !canvas.getBoundingClientRect) {
+            return true;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const clientX = typeof event.clientX === "number"
+            ? event.clientX
+            : rect.left;
+        return clientX >= rect.left && clientX <= rect.left + rect.width * 0.52;
     }
 
     private refreshInventoryState(): void {
@@ -741,14 +824,16 @@ export default class CraftingRecipeListController extends cc.Component {
         parent: cc.Node,
         text: string,
         position: cc.Vec2,
-        callback: () => void
+        callback: () => void,
+        width: number = 130,
+        height: number = 38
     ): cc.Button {
-        const node = this.createBox(name, parent, 130, 38, cc.color(55, 150, 105));
+        const node = this.createBox(name, parent, width, height, cc.color(55, 150, 105));
         node.setPosition(position);
         const button = node.addComponent(cc.Button);
         button.transition = cc.Button.Transition.NONE;
-        const label = this.createLabel("Label", node, text, 14, cc.Color.WHITE, 130);
-        label.node.setContentSize(130, 38);
+        const label = this.createLabel("Label", node, text, 14, cc.Color.WHITE, width);
+        label.node.setContentSize(width, height);
         label.node.zIndex = 2;
         node.on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
             event.stopPropagation();
@@ -766,6 +851,24 @@ export default class CraftingRecipeListController extends cc.Component {
             }
         }, this);
         return button;
+    }
+
+    private setButtonState(button: cc.Button, enabled: boolean): void {
+        if (!button || !button.node || !cc.isValid(button.node)) {
+            return;
+        }
+
+        button.interactable = enabled;
+        const graphics = button.node.getComponent(cc.Graphics);
+        if (graphics) {
+            this.drawBox(
+                graphics,
+                button.node.width,
+                button.node.height,
+                enabled ? cc.color(55, 150, 105) : cc.color(95, 95, 95),
+                false
+            );
+        }
     }
 
     private destroyRuntimeRoots(): void {
