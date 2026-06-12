@@ -2,6 +2,11 @@ import { InputAction } from "./InputAction";
 
 const KEY_ESCAPE = 27;
 const KEY_M = 77;
+const KEY_EQUAL_OR_PLUS = 187;
+const KEY_MINUS = 189;
+const KEY_NUMPAD_PLUS = 107;
+const KEY_NUMPAD_MINUS = 109;
+const KEY_G = 71;
 
 export function getActionForKey(keyCode: number): InputAction {
     switch (keyCode) {
@@ -37,6 +42,15 @@ export function getActionForKey(keyCode: number): InputAction {
         case cc.macro.KEY.m:
         case KEY_M:
             return InputAction.ToggleMute;
+        case KEY_EQUAL_OR_PLUS:
+        case KEY_NUMPAD_PLUS:
+            return InputAction.CameraZoomIn;
+        case KEY_MINUS:
+        case KEY_NUMPAD_MINUS:
+            return InputAction.CameraZoomOut;
+        case cc.macro.KEY.g:
+        case KEY_G:
+            return InputAction.GenerateMap;
         case cc.macro.KEY.t:
             return InputAction.DebugAddCoconut;
         case cc.macro.KEY.y:
@@ -55,6 +69,9 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.Confirm:
         case InputAction.Cancel:
         case InputAction.ToggleMute:
+        case InputAction.CameraZoomIn:
+        case InputAction.CameraZoomOut:
+        case InputAction.GenerateMap:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:
             return true;

@@ -1,4 +1,3 @@
-import CameraFollow from "../Camera/CameraFollow";
 import BaseEntity from "../Core/BaseEntity";
 import EventCenter from "../Core/EventCenter";
 import { GameEvent, EntityType } from "../Core/Constants";
@@ -10,6 +9,9 @@ import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
 import VehicleInteractable from "../Vehicle/VehicleInteractable";
+import PhysicsContactFilter from "../Core/PhysicsContactFilter";
+import { PhysicsTag } from "../Core/PhysicsTags";
+import Rope from '../Entity/Resources/Rope';
 
 const { ccclass, property } = cc._decorator;
 
@@ -73,8 +75,12 @@ export default class PlayerController extends BaseEntity {
     @property(cc.Float)
     knockbackLockTime: number = 0.12;
 
+    @property({ tooltip: '離開藤蔓的水平偏移距離（px）' })
+    private climbFallOffDistance: number = 40;
+
     private moveDir: cc.Vec2 = cc.v2(0, 0);
     private keyStates: { [key: number]: boolean } = {};
+    private merchantShopKeyStates: { [key: number]: boolean } = {};
 
     private anim: cc.Animation = null!;
     private currentAnimName: string = "";
@@ -101,11 +107,14 @@ export default class PlayerController extends BaseEntity {
     private browserMouseWheelHandler: any = null!;
     private useBrowserMouseInput: boolean = false;
 
+    private isClimbing: boolean = false;
+    private currentRope: any = null;
+    private nearbyRope: any = null;  
+
     onLoad() {
         super.onLoad();
         this.type = EntityType.PLAYER;
         this.applyRuntimeMovementTuning();
-        this.setupCameraFollow();
 
         const physicsManager = cc.director.getPhysicsManager();
         physicsManager.enabled = true;
@@ -115,6 +124,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
         this.setupMouseAttackInput();
@@ -141,6 +151,7 @@ export default class PlayerController extends BaseEntity {
         if (this.rb) {
             this.originalGravityScale = (this.rb as any).gravityScale || 1;
         }
+        PhysicsContactFilter.ensureForNode(this.node, PhysicsTag.PLAYER_BODY);
 
         if (!this.attackHitbox) {
             const hitboxNode = this.node.getChildByName("AttackHitbox");
@@ -213,10 +224,27 @@ export default class PlayerController extends BaseEntity {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            if (this.merchantShopKeyStates[event.keyCode]) {
+                return;
+            }
+
+            this.merchantShopKeyStates[event.keyCode] = true;
+            this.handleMerchantShopKey(event.keyCode);
+            this.blockPlayerControlForUI();
+            return;
+        }
+
         this.applyMoveKey(event.keyCode, true);
     }
 
     onKeyUp(event: cc.Event.EventKeyboard) {
+        if (this.merchantShopKeyStates[event.keyCode]) {
+            delete this.merchantShopKeyStates[event.keyCode];
+            this.keyStates[event.keyCode] = false;
+            return;
+        }
+
         this.applyMoveKey(event.keyCode, false);
     }
 
@@ -278,7 +306,9 @@ export default class PlayerController extends BaseEntity {
 
             case cc.macro.KEY.space:
                 if (isDown) {
-                    if (this.isInOcean) {
+                    if (this.isClimbing) {
+                        this.exitClimb(true);
+                    } else if (this.isInOcean) {
                         this.boostInOcean();
                     } else {
                         this.jump();
@@ -307,6 +337,12 @@ export default class PlayerController extends BaseEntity {
             case cc.macro.KEY.t:
                 if (isDown) {
                     InventoryManager.instance.addItem("coconut", 10);
+                }
+                break;
+            case cc.macro.KEY.w:
+            case cc.macro.KEY.up:
+                if (isDown && !this.isClimbing && this.nearbyRope) {
+                    this.enterClimb(this.nearbyRope);
                 }
                 break;
         }
@@ -652,6 +688,13 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
+        if (this.isClimbing) {
+            this.updateClimb(dt);
+            return;
+        }
+
+        this.updateNearbyRope();
+
         const isMovingX = this.moveDir.x !== 0;
         const targetSpeedX = this.moveDir.x * this.moveSpeed * 0.8;
 
@@ -803,34 +846,6 @@ export default class PlayerController extends BaseEntity {
         }
 
         return input;
-    }
-
-    private setupCameraFollow() {
-        const cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
-
-        if (!cameraNode) {
-            cc.warn("[PlayerController] Main Camera not found.");
-            return;
-        }
-
-        let cameraFollow = cameraNode.getComponent(CameraFollow);
-
-        if (!cameraFollow) {
-            cameraFollow = cameraNode.addComponent(CameraFollow);
-        }
-
-        cameraFollow.target = this.node;
-        cameraFollow.targetPath = "";
-        cameraFollow.followX = true;
-        cameraFollow.followY = true;
-        cameraFollow.smoothFollow = true;
-        cameraFollow.smoothSpeed = 6;
-        cameraFollow.targetOffsetX = 0;
-        cameraFollow.targetOffsetY = 160;
-
-        // 先給一組比舊版大的安全範圍
-        // 後面如果有更完整地圖資訊再精調
-        cameraFollow.setBounds(-2000, 4000, -1200, 400);
     }
 
     private applyRuntimeMovementTuning() {
@@ -1029,6 +1044,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         const gameCanvas = (cc.game as any).canvas;
 
@@ -1201,24 +1217,33 @@ export default class PlayerController extends BaseEntity {
         }
 
         switch (keyCode) {
+            case cc.macro.KEY.w:
             case cc.macro.KEY.up:
                 this.merchantShopUI.selectPrevItem();
                 return true;
 
+            case cc.macro.KEY.s:
             case cc.macro.KEY.down:
                 this.merchantShopUI.selectNextItem();
                 return true;
 
+            case cc.macro.KEY.a:
             case cc.macro.KEY.left:
                 this.merchantShopUI.decreaseAmount();
                 return true;
 
+            case cc.macro.KEY.d:
             case cc.macro.KEY.right:
                 this.merchantShopUI.increaseAmount();
                 return true;
 
+            case cc.macro.KEY.f:
             case cc.macro.KEY.enter:
                 this.merchantShopUI.buySelected();
+                return true;
+
+            case cc.macro.KEY.escape:
+                this.closeMerchantFlow();
                 return true;
 
             default:
@@ -1238,5 +1263,196 @@ export default class PlayerController extends BaseEntity {
             this.currentDialogueOptions.map(option => option.label),
             anchorNode
         );
+    }
+
+    public onNearRope(rope: any) {
+        this.nearbyRope = rope;
+        cc.log('[PlayerController] 靠近藤蔓');
+    }
+
+    // 把 nearbyRope 改成靠距離判斷，在 updateMerchantPrompt 旁邊加：
+    private updateNearbyRope() {
+        if (this.isClimbing) return;
+
+        const canvas = cc.find('Canvas');
+        if (!canvas) return;
+
+        // 找場景裡所有 Rope
+        let closest: any = null;
+        let closestDist = 80; // 判定距離（px）
+
+        this.findRopes(canvas, (rope: any) => {
+            const ropeWorldPos = rope.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+            const playerWorldPos = this.node.parent
+                ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+                : cc.v2(this.node.x, this.node.y);
+            const dist = ropeWorldPos.sub(playerWorldPos).mag();
+            if (dist < closestDist) {
+                closest = rope;
+                closestDist = dist;
+            }
+        });
+
+        this.nearbyRope = closest;
+    }
+
+    private findRopes(node: cc.Node, callback: (rope: any) => void) {
+        const rope = node.getComponent('Rope');
+        if (rope) callback(rope);
+        for (const child of node.children) {
+            this.findRopes(child, callback);
+        }
+    }
+    
+    public onLeaveRope(rope: any) {
+    if (this.nearbyRope === rope) this.nearbyRope = null;
+        
+        // ★ 正在爬這條藤蔓時，離開範圍事件不取消爬行
+        // （切換 Kinematic 會觸發 onEndContact，這是誤判）
+        if (this.currentRope === rope && !this.isClimbing) {
+            this.exitClimb(false);
+        }
+        
+        cc.log('[PlayerController] 離開藤蔓範圍');
+    }
+    
+    // 進入爬行
+    private enterClimb(rope: any) {
+        if (this.isDead || this.isHurting) return;
+
+        this.isClimbing  = true;
+        this.currentRope = rope;
+
+        if (this.rb) {
+            this.rb.linearVelocity = cc.v2(0, 0);
+            (this.rb as any).gravityScale = 0;
+            this.rb.type = cc.RigidBodyType.Kinematic;
+        }
+
+        // ★ 加 null 檢查
+        const ropeWorldX = rope.getCenterWorldX();
+        if (this.node && this.node.parent) {
+            const localX = this.node.parent.convertToNodeSpaceAR(cc.v2(ropeWorldX, 0)).x;
+            this.node.setPosition(localX, this.node.y);
+        }
+
+        this.playAnimation('PlayerClimb');
+        cc.log('[PlayerController] 開始爬藤蔓');
+    }
+    
+    // 離開爬行
+    private exitClimb(jumpOff: boolean) {
+        if (!this.isClimbing) return;
+
+        this.isClimbing  = false;
+        this.currentRope = null;
+
+        if (this.rb) {
+            // ★ 先切回 Dynamic，再設速度
+            this.rb.type = cc.RigidBodyType.Dynamic;
+            (this.rb as any).gravityScale = this.originalGravityScale;
+
+            if (jumpOff) {
+                this.rb.linearVelocity = cc.v2(
+                    this.moveDir.x * this.moveSpeed * 0.6,
+                    this.jumpForce * 0.7
+                );
+                cc.log('[PlayerController] 跳離藤蔓');
+            } else {
+                // ★ 不要設成 0,0，讓重力自然接管
+                this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
+            }
+        }
+
+        this.currentAnimName = '';
+        cc.log('[PlayerController] 離開爬行狀態');
+    }
+    
+    // 爬行 update（在 update() 最前面呼叫）
+    private updateClimb(dt: number) {
+        if (!this.currentRope || !this.rb) return;
+    
+        const climbSpeed   = this.currentRope.getClimbSpeed();
+        const driftSpeed   = this.currentRope.getDriftSpeed();
+        const topY         = this.currentRope.getTopWorldY();
+        const bottomY      = this.currentRope.getBottomWorldY();
+    
+        // 取得玩家目前世界 Y
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
+    
+        // 上下移動
+        let velY = 0;
+        if (this.keyStates[cc.macro.KEY.w] || this.keyStates[cc.macro.KEY.up]) {
+            velY = climbSpeed;
+        } else if (this.keyStates[cc.macro.KEY.s] || this.keyStates[cc.macro.KEY.down]) {
+            velY = -climbSpeed;
+        }
+    
+        // 左右微移
+        let velX = this.moveDir.x * driftSpeed;
+        if (this.bodyNode && this.moveDir.x !== 0) {
+            this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
+        }
+
+        this.rb.linearVelocity = cc.v2(velX, velY);
+
+        // ★ 檢查水平偏移是否超過閾值
+        const ropeWorldX = this.currentRope.getCenterWorldX();
+        const playerWorldX = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y)).x
+            : this.node.x;
+        const offsetX = Math.abs(playerWorldX - ropeWorldX);
+
+        if (offsetX > this.climbFallOffDistance) {
+            cc.log(`[PlayerController] 水平偏移 ${offsetX.toFixed(0)}px，從藤蔓掉落`);
+            this.exitClimb(false);
+            return;
+        }
+    
+        // 頂端邊界：到頂自動離開
+        if (playerWorldPos.y >= topY && velY > 0) {
+            // 先看 nearbyRope 有沒有更高的藤蔓可以接
+            if (this.nearbyRope && this.nearbyRope !== this.currentRope) {
+                cc.log('[PlayerController] 切換到下一段藤蔓');
+                this.isClimbing = false;
+                this.currentRope = null;
+                this.enterClimb(this.nearbyRope);
+                return;
+            }
+            cc.log('[PlayerController] 到達藤蔓頂端，自動離開');
+            this.exitClimb(false);
+            return;
+        }
+    
+        // 底端邊界：到底停住（不自動離開，讓玩家自己走開）
+        if (playerWorldPos.y <= bottomY && velY < 0) {
+            velY = 0;
+            cc.log('[PlayerController] 到達藤蔓底端');
+        }
+    
+        this.rb.linearVelocity = cc.v2(velX, velY);
+    
+        // 爬行動畫：有移動才播，靜止就 Idle
+        if (velY !== 0 || velX !== 0) {
+            this.playAnimation('PlayerClimb');
+        } else {
+            this.playAnimation('PlayerIdle');
+        }
+    }
+
+    public heal(amount: number) {
+        if (this.isDead) return;
+        if (this.currentHp >= this.maxHp) {
+            cc.log(`[PlayerController] HP 已滿 (${this.currentHp}/${this.maxHp})，無法再補血。`);
+            return;
+        }
+        this.currentHp += amount;
+        if (this.currentHp > this.maxHp) {
+            this.currentHp = this.maxHp;
+        }
+        cc.log(`[PlayerController] 補血 +${amount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
+        EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
     }
 }

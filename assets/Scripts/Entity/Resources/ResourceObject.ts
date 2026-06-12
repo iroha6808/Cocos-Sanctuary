@@ -7,8 +7,7 @@ const { ccclass, property } = cc._decorator;
  * ResourceObject — 基底類別
  * ─────────────────────────────────────────────
  * 管理「被攻擊幾下後觸發掉落」的核心邏輯。
- * depletedSpriteFrame / targetSprite / dropAmount
- * 統一在這裡宣告，子類直接用，不要重複宣告。
+ * 支援全域武器物理碰撞受擊與滑鼠世界座標點擊判定。
  */
 @ccclass
 export default class ResourceObject extends cc.Component {
@@ -32,17 +31,34 @@ export default class ResourceObject extends cc.Component {
     private inputLockedByGamePause: boolean = false;
 
     onLoad() {
-        const canvas = cc.find('Canvas');
-        if (canvas) canvas.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        // 🌟 修正 1：改為全域場景監聽，避免超出 Canvas 框群組後失效
+        const scene = cc.director.getScene();
+        if (scene) {
+            scene.on(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        }
         EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
     }
 
     onDestroy() {
-        const canvas = cc.find('Canvas');
-        if (canvas) canvas.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        const scene = cc.director.getScene();
+        if (scene) {
+            scene.off(cc.Node.EventType.MOUSE_DOWN, this.onMouseDown, this);
+        }
         EventCenter.off(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
+    }
+
+    /** 🌟 修正 2：加入 Box2D 物理碰撞監聽，讓武器揮砍判定與滑鼠分離 */
+    onBeginContact(contact: cc.PhysicsContact, selfCollider: cc.PhysicsCollider, otherCollider: cc.PhysicsCollider) {
+        // 根據日誌，判定是否命中帶有 CombatHitbox 腳本或名稱為 AttackHitbox 的武器節點
+        const isWeapon = otherCollider.node.name === "AttackHitbox" || otherCollider.getComponent("CombatHitbox");
+        
+        if (isWeapon) {
+            cc.log(`[ResourceObject] ${this.node.name} 被武器物理碰撞擊中`);
+            if (!this.canInteract()) return;
+            this.receiveHit();
+        }
     }
 
     private onMouseDown(event: cc.Event.EventMouse) {
@@ -51,7 +67,25 @@ export default class ResourceObject extends cc.Component {
         if (inventoryUI && inventoryUI.active) return;
         if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) return;
 
-        cc.log(`[ResourceObject] 點擊 ${this.node.name}`);
+        // 🌟 修正 3：滑鼠螢幕座標透過相機轉換為真實世界座標，解決相機移動後的座標錯位
+        let mouseWorldPos = event.getLocation();
+        const cameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera");
+        if (cameraNode) {
+            const mainCamera = cameraNode.getComponent(cc.Camera);
+            if (mainCamera) {
+                mouseWorldPos = mainCamera.getScreenToWorldPoint(event.getLocation());
+            }
+        }
+
+        // 取得該資源物件在世界座標系的 Bounding Box
+        const nodeBoundingBox = this.node.getBoundingBoxToWorld();
+        
+        // 精準檢查點擊範圍是否落在物件身上
+        if (!nodeBoundingBox.contains(mouseWorldPos)) {
+            return;
+        }
+
+        cc.log(`[ResourceObject] 滑鼠點擊精準命中 ${this.node.name}`);
         if (!this.checkDistance()) return;
         if (!this.canInteract()) return;
 
@@ -74,7 +108,7 @@ export default class ResourceObject extends cc.Component {
 
     private receiveHit() {
         this.hitCount++;
-        cc.log(`[ResourceObject] ${this.node.name} 被攻擊 ${this.hitCount}/${this.hitsPerDrop}`);
+        cc.log(`[ResourceObject] ${this.node.name} 累計受擊 ${this.hitCount}/${this.hitsPerDrop}`);
 
         if (this.hitCount >= this.hitsPerDrop) {
             this.hitCount = 0;

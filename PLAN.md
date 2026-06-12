@@ -1,6 +1,6 @@
 # Cocos Sanctuary Plan
 
-> 更新日期：2026-06-10
+> 更新日期：2026-06-11
 > 本檔只放高層規劃、目前進度、下一步與手動設定。詳細架構見 `structure.md`，功能追蹤見 `NOTE.md`。
 
 ## 目錄
@@ -17,12 +17,12 @@
 - [Git 流程](#git-流程)
 
 ## 下一步優先順序
-
-1. 確認 Main Camera 只用一套跟隨：`CameraRig` 和新增 `CameraFollow` 不要同時控制鏡頭，避免雙重位移。
-2. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
-3. 實測車 / 船：靠近顯示 prompt，按 `F` 上下，載具中玩家不能攻擊 / 開 UI / 用工具。
-4. 實測工具模式：`1` 槍、`2` 噴射背包 Space 上升、`3` 鉤索右鍵鉤地形。
-5. 實測 Boss / 刷怪、Portal / BouncePad / PathGraph / PlayerGun / realtime snapshot。
+目前自動生成範圍改成按按鍵後才開始生成，鏡頭先慢慢拉至整個生成範圍，等 0.5 秒後每 0.25 秒顯示(或生成)一塊新地形，生成完再等 1 秒回到玩家
+1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
+2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
+3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
+4. 實測車 / 船：靠近顯示 prompt，按 `F` 上下，載具中玩家不能攻擊 / 開 UI / 用工具。
+5. 實測工具模式、Boss / 刷怪、Portal / BouncePad / PathGraph / PlayerGun / realtime snapshot。
 6. 實測跟鏡頭 UI：`MerchantShopUI`、`InventoryUI`、`CraftingUI`、`DialogueUI` 已有 camera-bound / clamp 邏輯，需確認 OceanArea 不跑出畫面。
 7. 檢查 Cocos Editor Inspector 綁定：Player、NPC、Boss、Spawner、Projectile、OceanArea、Resource、UI。
 
@@ -51,6 +51,7 @@
 - [x] 背包資料與背包 UI
 - [x] 商人對話與商店交易
 - [x] MerchantSpawner 旅行商人生成腳本
+- [x] TravelingMerchant 新商人 sprite / idle / talk 動畫素材與 prefab 綁定
 - [x] NPC 遠程攻擊程式與 BurningCoconut projectile prefab
 - [x] OceanArea 水域判定與玩家游泳控制
 - [x] Tree / Ore 資源互動與掉落物生成
@@ -66,6 +67,9 @@
 - [x] 傳送法師 Mini Boss、Boss Arena、敵人距離刷新腳本
 - [x] 傷害數字與額外 runtime 粒子效果
 - [x] 車 / 船互動腳本、水域 BGM crossfade、ThemeManager 雛形
+- [x] Blue / Red / Yellow Potion scripts / prefab / resources 圖
+- [x] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab
+- [x] AutoMapGenerator 腳本：在 `Canvas/platform/auto generate` 生成跳躍平台
 - [ ] 正式 Game Over 結算 UI
 - [ ] 地圖資料化 / TileRenderer
 
@@ -89,12 +93,12 @@
 
 | 項目 | 分數 | 細節 | 狀態 |
 | --- | --- | --- | --- |
-| 帳號系統 | 7 | 註冊 / 登入 / 登出 3%；排行榜 4% | `SaveService` localStorage 假 Firebase 已補；待 UI 綁定 |
-| 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補；待 UI 綁定與真 Firebase 替換 |
+| 帳號系統 | 7 | 註冊 / 登入 / 登出 3%；排行榜 4% | `SaveService` localStorage 假 Firebase 已補，含 login/logout metadata 與 backend snapshot；待 UI 綁定 |
+| 存檔 / 讀檔 | 6 | Firebase；每帳號有固定存檔欄位，可覆寫或新增 | API 已補，save summaries 可查分數 / HP / 背包統計 / map seed；待 UI 綁定與真 Firebase 替換 |
 | 物理系統 | 13 | 正確重力系統和碰撞系統 | 已有 physics / collider / OceanArea / 斜坡跳躍修正；需實測 |
 | 遊戲音效 | 7 | 各場景 BGM 2%；五種不同音效 5% | `AudioManager` 已補 land / water BGM crossfade + 6 SFX；待拖 AudioClip |
 | 遊戲操作 | 13 | 所有角色移動 4%；三種移動以外操作 9%，包含單機多人 | 已補 A/D、Space、F、B、C、Esc、M、mouse、wheel、水中 boost、空中 fast fall、車 / 船；R 快捷鍵已移除 |
-| 遊戲動畫 | 12 | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC 動畫已有；fade transition 已補；開場 / 結束 UI 動畫待補 |
+| 遊戲動畫 | 12 | 所有角色動作 4%；轉場 2%；開場 2%；結束 / 通關 2%；Action 2% | Player / NPC / TravelingMerchant 動畫已有；fade transition 已補；開場 / 結束 UI 動畫待補 |
 | 遊戲特效 | 5 | 五種不同粒子特效 | `EffectsManager` 已補 hit / collect / heal / fire / water；待粒子圖 |
 | 版本控制 | 7 | 使用 Git | 已使用 Git；提交訊息與分支流程需保持乾淨 |
 | Notice | 70 -> 60 | 技術表總分 70，最高可拿 60 | 腳本已補主要缺口，剩 Cocos Editor 手動綁定 |
@@ -107,8 +111,8 @@
 | 遊戲渲染 | 客製化渲染效果 Shader 0-4%；2.5D 0-2% | 暫未做 |
 | 遊戲特效 | 打擊感 0-3%；特殊遊戲運鏡 0-4% | 橡皮筋鏡頭、`HitFeelManager` 已補 hit stop / flash / shake |
 | 物理系統 | 客製化物理系統，例如外太空無重力場景 0-4% | `OceanArea` 水中物理可展示 |
-| 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | 傳送法師 Mini Boss / Boss Arena 已補腳本；MapManager 尚未補 |
-| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把玩家狀態寫進 localStorage 假後端，待 UI / 真同步 |
+| 關卡設計 | 關卡編輯器 0-8%；自動地圖生成 0-4%；無限地圖 0-3%；魔王機制 0-2% | 傳送法師 Mini Boss / Boss Arena 已補腳本；AutoMapGenerator 已補腳本 |
+| 線上多人連線 | 可同時看到自己與其他使用者動作 0-8% | `RealtimeStateReporter` 已先把 client/session、位置、HP、score、exp、背包統計、狀態寫進 localStorage 假後端，待 UI / 真同步 |
 | 其他 | 同學可以自由發揮 | 打擊感、橡皮筋鏡頭可當展示亮點 |
 | Notice | 最高可拿 20% | 優先保住打擊感 / 運鏡 / AI / 水中物理 |
 
@@ -138,10 +142,11 @@
 | Final Project 遊戲流程 | 暫停 / 繼續、正式 GameOver、回主畫面 / 重玩會直接影響流程 10% | MVP |
 | 課程技術配分缺口 | 帳號 / 排行榜、Firebase、音效、粒子尚未完整追蹤，會影響技術 60% | MVP |
 | 水域碰撞 / OceanArea | 需要 sensor collider、玩家 contact listener、進出水域時重力還原要穩 | MVP |
-| Camera / UI 座標 | Camera 已跟玩家移動，Dialogue / MerchantShop / Inventory / Crafting 已有跟鏡頭與 clamp 邏輯；需實測與避免雙 camera follow | MVP |
+| Camera / UI 座標 | Camera 以 `CameraRig` 跟玩家移動，Dialogue / MerchantShop / Inventory / Crafting 已有跟鏡頭與 clamp 邏輯 | MVP |
 | 遠程攻擊 prefab 綁定 | SkeletonMage、projectile prefab、spawn node、projectile parent 都靠 Inspector 設定 | MVP |
 | Player 狀態流 | HP、EXP、Score、食物回血 API 已接；仍需實機測試 UI / save 還原 | MVP |
 | 商人交易 | 已有對話、商店與生成腳本，但仍依賴 Inspector UI 綁定與 coconut 貨幣測試 | MVP |
+| 商人動畫 prefab | `8b456ff` 後 TravelingMerchant 換新 sprite 與 Animation clips；需實測 idle / talk 是否被正確播放 | MVP |
 | Portal / PathGraph 手動節點 | 尋路效果仰賴 PathNode 鄰接與 Portal pair 設定，缺節點會 fallback 直接追擊 | 延伸 |
 | PlayerGun prefab 綁定 | 槍需要 projectile prefab 有 `CombatProjectile`、RigidBody、PhysicsCollider；未綁只 warn | 延伸 |
 | Tool mode 輸入重疊 | `PlayerController` 仍直接處理 Space / mouse；ToolController 會關掉 PlayerGun 直接右鍵，但 Space 在 Jetpack 仍會先保留原跳躍 | 延伸 |
@@ -164,7 +169,7 @@
 | 礦物掉落物 | 新增多種 smallore icon、資料與 DropOre prefab，讓採礦展示更完整 | MVP |
 | 敵人 AI / Node Pooling | 對應進階功能配分，可用在敵人、projectile、掉落物效能優化 | 延伸 |
 | 傳送門 / 彈跳板 | 可展示關卡機制、敵人追擊與方向物理互動 | 延伸 |
-| 假多人 realtime state | 先有資料介面，之後可替換 Firebase / multiplayer UI | 延伸 |
+| 假多人 / 假後端 state | 先有 client/session、玩家狀態、背包統計、current map state 與 `getBackendSnapshot()`，之後可替換 Firebase / multiplayer UI | 延伸 |
 | 工具模式 / 噴射背包 / 鉤索 | 展示操作爽感，對主觀分數有感 | 延伸 |
 | Boss / 自動刷新 / 傷害數字 | 展示戰鬥完整度，能串 AI、粒子、Score | 延伸 |
 | 音效 / 粒子 / 打擊感 / 運鏡 | 分數明確且展示效果明顯，已用 hit stop、shake、flash、CameraRig 補強 | 延伸 |
@@ -178,9 +183,9 @@
 
 | 狀態 | 摘要 |
 | --- | --- |
-| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、NPC 近遠程攻擊、資源掉落、水域、smallore、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number、車 / 船、BGM crossfade 腳本 |
-| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 車船 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
-| 未完成 | Firebase 真後端替換、正式 UI 美術、MapManager / TileRenderer、素材清理、多人角色顯示 UI |
+| 已完成 | 場景 / prefab 基礎、Player 操作與動畫、背包與交易、商人 idle / talk 動畫素材、NPC 近遠程攻擊、資源掉落、水域、smallore、potions、Rocksets、AutoMapGenerator、CameraRig、HitFeel、Portal、BouncePad、PlayerGun、ProjectilePool、PathGraph、Realtime snapshot、Tool mode、Mini Boss、Respawner、Damage number、車 / 船、BGM crossfade 腳本 |
+| 進行中 | Inspector 綁定檢查、流程 UI 手動設定、AutoMapGenerator prefab 欄位、商人動畫 / 商店 / 背包 / 合成 / 遠程攻擊 / 水域 / 車船 / 傳送門 / 彈跳板 / 槍 / 鉤索 / Boss / 刷怪實測 |
+| 未完成 | Firebase 真後端替換、正式 UI 美術、TileRenderer、素材清理、多人角色顯示 UI |
 
 ## 分工
 
@@ -198,10 +203,10 @@
 | --- | --- | --- |
 | Core | `EventCenter`、`Constants`、`SaveService`、score / exp、pause / save / leaderboard、`AudioManager` land / water crossfade、`ThemeManager`、`CameraRig`、`HitFeelManager`、`RealtimeStateReporter`、`DamageNumberManager` | Firebase 真後端替換、正式 GameOver 視覺、多人 UI、正式色調 / shader |
 | Player / Inventory | 移動、跳躍、fast fall、攻擊、右鍵槍、工具模式、Jetpack、Grapple、背包、水中控制、外部控制鎖、存檔匯出 / 還原 | 移除 debug key、道具使用 API polish、確認 InputManager / PlayerController 輸入責任 |
-| NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、Boss、距離刷怪、商人交易、drop table | SkeletonMage / Boss / Respawner 實測、PathNode 手動連線 |
-| Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
+| NPC / Merchant | 三類 NPC、巡邏 / 追擊、waypoint path agent、近遠程攻擊、Boss、距離刷怪、商人交易、TravelingMerchant sprite / idle / talk clips、drop table | SkeletonMage / Boss / Respawner 實測、商人動畫播放實測、PathNode 手動連線 |
+| Resource / Item | Tree / Ore、AppleTree、OreRock、DropItem、Orebase、smallore、FoodBase、potions、ItemData | Coconut eat/drop 與 PlayerController API 統一、礦物製作 |
 | UI | HP / EXP / Score HUD、Inventory、Dialogue、Merchant Shop、Crafting、Menu / GameOver 腳本 API；多數 panel 已可跟 Main Camera / clamp | 手動接 Menu / Pause / GameOver panels，實測 OceanArea UI |
-| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | MapManager、TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
+| Map / Assets | OceanArea、OceanLayerOrder、OceanPrefabBuilder、AutoMapGenerator 逐塊生成、Portal、BouncePad、PathNode、PathGraph、Camera 跟隨玩家到水域 | TileData / TileRenderer、素材路徑整理、Unity 殘留檔隔離 |
 | Vehicle | `VehicleInteractable`、`VehicleController`、`CarController`、`BoatController` | 車 / 船 prefab 視覺、seat / exitOffset / collider 手動調整 |
 
 ## 手動設定
@@ -213,11 +218,17 @@
 - [ ] SkeletonMage 接 `projectilePrefab`、`projectileSpawnNode`、`projectileParent`
 - [ ] BurningCoconutProjectile prefab 要有 `CombatProjectile`、RigidBody、PhysicsCollider、視覺 / 火焰動畫
 - [ ] TravelingMerchant 同節點掛 `NPC_AI` + `MerchantNPC`
+- [ ] TravelingMerchant prefab 已有新 sprite 與 `cc.Animation`，確認 default clip / clips 包含 idle / talk，並實測對話時切 talk 或至少顯示新商人圖。
 - [ ] MerchantSpawner 接 `merchantPrefab`、`playerNode`、`spawnParent`
 - [ ] OceanArea 節點掛 `PhysicsBoxCollider` sensor + `OceanArea.ts`
 - [ ] OceanArea root 可掛 `OceanLayerOrder.ts`；若要清掉舊 GeneratedContent 可掛 `OceanPrefabBuilder.ts`
 - [ ] Resource prefab 接 `dropPrefab`
 - [ ] DropOre prefab 掛對應 `Orebase` 子類，item id 要對上 `ItemData.ts` 的 smallore key
+- [ ] Potion prefab / resources 圖已匯入；若要可食用回血，確認 Blue / Red / Yellow Potion prefab 掛對應 potion script。
+- [ ] Rockleft / Rockright / Rockplatform3 / 4 / 5 map prefab 已匯入；放進場景後要檢查 collider 與 spacing。
+- [ ] `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`；拖入 `assets/Prefabs/Map/` 的 Rockleft、Rockright、Rockplatform3、Rockplatform4、Rockplatform5。
+- [ ] AutoMapGenerator 的 `manualTriggerOnly` 預設開啟；開場 / 讀檔只套 seed 與參數不生成，Gameplay 按 `G` 後鏡頭用 `cameraFrameDuration = 1.6` 秒拉遠，等 `startAfterCameraDelay = 0.5` 秒，再在 `x -5000~0`、`y -2000~0` 每 `generationStepInterval = 0.25` 秒逐塊生成並小幅震動，完成後等 `returnAfterGenerationDelay = 1.0` 秒再回玩家。
+- [ ] AutoMapGenerator 使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`minPatternCount/maxPatternCount` 控制組數，`slopePatternChance` 控制斜坡組比例；存檔保存 map seed / 範圍 / 主要參數，不保存 runtime 節點。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
@@ -229,9 +240,9 @@
 - [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、可選 `waterBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`；`bgmFadeDuration` 控制進出水域淡入淡出。
 - [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
-- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player
-- [ ] 若改用 `CameraFollow.ts`，不要同時啟用 `CameraRig.ts` 控制同一台 Main Camera
-- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceExponentScale` / `lookAheadScale`，或 `HitFeelManager` 的 hitStop / shake / zoom 數值
+- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator。
+- [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
+- [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep` / `overviewPadding` / `overviewMinZoomRatio`，或 `AutoMapGenerator.spawnShakeDuration/spawnShakeAmplitude`、`HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕
 - [ ] Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`
 - [ ] Player 或 Player 子節點掛 `PlayerGun.ts`；`projectilePrefab` 拖玩家子彈 prefab，`muzzleNode` 可拖槍口節點，`projectileParent` 建議拖 Bullet_Layer。
@@ -243,7 +254,7 @@
 - [ ] BouncePad 節點掛 `BouncePad.ts`、PhysicsCollider sensor；旋轉節點即可改變 local up 反彈方向，調 `bounceSpeed`。
 - [ ] PathGraph root 掛 `PathGraph.ts`；子節點掛 `PathNode.ts`，用 `neighbors` 手動連線，portal 入口 / 出口附近的 PathNode 可拖對應 `Portal`。
 - [ ] 需要升級尋路的 Hostile NPC 掛 `NPCPathAgent.ts`；可拖 `PathGraph`，不拖則使用 `PathGraph.instance`。
-- [ ] GameManager 節點可掛 `RealtimeStateReporter.ts` 並拖 `playerNode`；沒掛時 GameManager 會 runtime 補一個。
+- [ ] GameManager 節點可掛 `RealtimeStateReporter.ts` 並拖 `playerNode`；沒掛時 GameManager 會 runtime 補一個。Fake backend 可用 `SaveService.getBackendSnapshot()` 查 users / saves / leaderboard / realtime players / current map / storage keys。
 - [ ] GameManager 或 UI Root 可掛 `DamageNumberManager.ts`；沒掛時 GameManager 會 runtime 補一個，`numberRoot` 可拖 UI Root。
 - [ ] Boss prefab 掛 `NPC_AI.ts` + `MiniBossAI.ts`；`MiniBossAI` 拖 `npcAI`、`targetPlayer`、`teleportPoints`、`minionPrefabs`、`minionParent`。
 - [ ] Boss Arena sensor 節點掛 `BossArenaController.ts`，拖 `boss` / `bossNode`、`playerNode`、可選 `gateNode`、`clearRewardNode`。
@@ -257,7 +268,7 @@
 
 ### Cocos Inspector 設定
 
-- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
+- [ ] 掛 `GameManager.ts` 的節點需要把玩家節點拖到 `playerNode`，Main Camera 的 CameraRig 拖到 `cameraRig`，AutoMapGenerator 拖到 `autoMapGenerator`，暫停 UI 拖到 `pausePanel`，轉場黑幕拖到 `fadeOverlay`。
 - [ ] 掛 `PlayerController.ts` 的玩家節點可以調整 `maxHp`、`moveSpeed`、`jumpForce`、`attackDamage`。
 - [ ] `PlayerController.ts` 需要接 `inventoryUI`、`attackHitbox`、`dialogueUI`、`merchantShopUI`、`craftingUI`。
 - [ ] 玩家節點建議有 `RigidBody`、`Sprite_Body`、`AttackHitbox` 子節點。

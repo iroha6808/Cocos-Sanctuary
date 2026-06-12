@@ -25,6 +25,9 @@ export default class UIManager extends cc.Component {
     @property(cc.ProgressBar)
     hpBar: cc.ProgressBar = null;
 
+    @property(cc.Label)
+    hpLabel: cc.Label = null;
+
     private activeModal: ModalUIType = ModalUIType.NONE;
 
     onLoad() {

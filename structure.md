@@ -1,8 +1,8 @@
 # Cocos Sanctuary 專案架構
 
-> 更新日期：2026-06-10
+> 更新日期：2026-06-11
 > 引擎：Cocos Creator 2.4.8
-> 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人、水域控制、資源掉落、背包與 UI。
+> 目前重點：Final Project 流程 / 技術配分、玩家 / NPC 戰鬥、旅行商人動畫、水域控制、車船互動、potions、Rocksets、資源掉落、背包與 UI。
 
 ## 目錄
 
@@ -41,8 +41,14 @@ assets/
     Projectiles/
       BurningCoconutProjectile.prefab
     Resources/
+      Rocksets/
+        Rockleft.prefab ... Rockright.prefab
       DropOre/
         Amber Sphere.prefab ... Raw Gold.prefab
+      potions/
+        Blue Potion.prefab
+        Red Potion.prefab
+        Yellow Potion.prefab
       Tree.prefab
       Ore.prefab
       FruitDrop.prefab
@@ -91,6 +97,10 @@ assets/
           appletree.ts
         food/
           FoodBase.ts
+          potions/
+            bluepotion.ts
+            redpotion.ts
+            yellowpotion.ts
           fruits/
             apple.ts
             avacado.ts
@@ -102,6 +112,7 @@ assets/
             acorn.ts
             cashew.ts ... pistachio.ts
     Map/
+      AutoMapGenerator.ts
       NewScript - 001.ts
       BouncePad.ts
       OceanArea.ts
@@ -148,6 +159,21 @@ assets/
     npcs/sprites/characters/
 
   resources/
+    npcs/
+      sprites/
+        characters/
+          merchant/
+            Idle1/
+              1.png ... 4.png
+              idle_rigjt.anim
+            Speak1/
+              1.png ... 4.png
+              talk_right.anim
+    potions/
+      bluepotion.png
+      redpotion.png
+      yellowpotion.png
+      potions.png
     100 FOOD ASSETS/
       Assets/food/food/
         fruits1/
@@ -163,45 +189,21 @@ local plans/
   note.md
 ```
 
-## 目前 Scene 建議結構
+## 目前 Game.fire Canvas 結構
 
 ```text
 Canvas
   Main Camera
-    CameraRig or CameraFollow      # 二選一，避免雙重控制鏡頭
-  Background
-  tempFloor
-  Title
+    Background
   Core Controllers
-    GameManager
-    AudioManager                    # BGM + SFX，需拖 AudioClip
-    EffectsManager                  # runtime particle，需拖 effectRoot / particleSpriteFrame
-    DamageNumberManager             # 可手動掛；未掛時 GameManager runtime 補
-    MerchantSpawner                # 建議掛在這裡或 NPC root 上
-    RealtimeStateReporter          # 可手動掛；未掛時 GameManager runtime 補
   World Root
-    OceanArea                      # PhysicsBoxCollider sensor + OceanArea / OceanLayerOrder
-    PathGraph                      # PathGraph + PathNode children
-    Portal_A_In / Portal_A_Out     # Portal + sensor collider，pairId 相同
-    BouncePad                      # BouncePad + sensor collider，旋轉節點改反彈方向
-    Car                            # VehicleInteractable + CarController
-    Boat                           # VehicleInteractable + BoatController
-    Bullet_Layer                   # PlayerGun / projectile pool 建議 parent
   UI Root
-    Screen UI Root                # 建議固定跟 Main Camera / 螢幕座標
-    FadeOverlay                   # optional，全螢幕黑幕，Retry / Main Menu 切場景淡出用
-    PausePanel                    # Esc 暫停時顯示的 UI 容器，放 resume / retry / menu / save
     ExpLabel
-    ScoreLabel
     HpBar
       bar
-    MerchantPrompt
-      Label
-    DialoguePanel
-      DialogueLabel
-      OptionTrade
-      OptionChat
-      OptionLeave
+    FloatingDialogueRoot
+      PromptBubble / PromptLabel
+      DialogueBubble / DialogueLabel / OptionTrade / OptionChat / OptionLeave
     MerchantShopPanel
       CurrencyLabel
       ItemList
@@ -217,20 +219,26 @@ Canvas
       BuyButton
       AmountMinusButton
       AmountPlusButton
-    MenuPanels                    # MenuScene main/login/settings/leaderboard panels
-    GameOverPanel                 # GameOverScene labels/buttons
+    CraftingUIHost
+      CraftingUIRoot
   Player
-  Ore
-  Tree
+    Sprite_Body
+    AttackHitbox
+  Orerock
+  applebush
+  Meteorite Chunk
   NPC
-    TravelingMerchant              # 可手動放，也可由 MerchantSpawner 生成
-    SkeletonMage                   # 遠程 NPC prefab
-    MiniBoss                       # NPC_AI + MiniBossAI
-    EnemyRespawner                 # 距離刷怪點
+    Slime
+    Boar
+    SkeletonMage
   coconuts
-  InventoryUI
-    GridContainer
+  platform
+    auto generate
+      AutoRock_* runtime nodes
+    Rockleft / Rockright / Rockplatform3 / 4 / 5 copies
 ```
+
+建議新增但目前需手動放置的節點：`AudioManager`、`EffectsManager`、`DamageNumberManager`、`MerchantSpawner`、`RealtimeStateReporter`、`Car`、`Boat`、`PathGraph`、`Portal`、`BouncePad`。
 
 ## Core
 
@@ -244,7 +252,10 @@ Canvas
   - 全域事件中心，提供 `on()`、`emit()`、`off()`、`clear()`。
 - `SaveService.ts`
   - localStorage 假後端，提供註冊、登入、登出、每帳號存讀檔、排行榜、最後一局結果。
+  - 使用者 metadata：`createdAt`、`lastLoginAt`、`lastLogoutAt`、`loginCount`。
   - fake multiplayer realtime snapshot：`upsertRealtimePlayerState()`、`getRealtimePlayers()`、`clearStaleRealtimePlayers()`。
+  - debug / future Firebase bridge：`getBackendSnapshot()` 回傳 current user、client/session、users、saves、leaderboard、realtime players、current map、last run、storage keys。
+  - 自動地圖只存 seed / 範圍 / pattern 統計 / 主要參數，不存 runtime 生成節點。
 - `AudioManager.ts`
   - land / water BGM 雙 channel crossfade；監聽 `PLAYER_WATER_STATE_CHANGED`。
   - 六種 SFX：attack、hit、collect、buy、heal、skill。
@@ -256,16 +267,18 @@ Canvas
   - 監聽 `COMBAT_HIT_CONFIRMED`，用 pooled runtime Label 顯示上飄傷害數字。
   - GameManager 會 runtime 補一個；也可手動掛到 UI Root 並指定 `numberRoot`。
 - `CameraRig.ts`
-  - Main Camera runtime 依距離指數函數加速跟隨玩家，支援 look-ahead、shake、impulse、zoom kick。
+  - Main Camera runtime 依 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))` 取得 follow speed，再用 `1 - exp(-followSpeed * dt)` 算追趕比例；支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
+  - `frameWorldRect()` / `returnToTarget()` 可暫時切到 overview framing，用於自動地圖逐塊生成展示；overview 期間仍可疊加 `addShake()`。
 - `CameraFollow.ts`
-  - 簡單 smooth follow，支援 X/Y 跟隨、offset、bounds；和 `CameraRig` 二選一使用。
+  - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
   - 監聽 `COMBAT_HIT_CONFIRMED`，做中等 hit stop、隨機方向小幅鏡頭打擊回饋與 sprite 閃白。
 - `RealtimeStateReporter.ts`
-  - 定期把玩家名稱、場景、位置、HP、Score、EXP、背包摘要寫入 `SaveService` localStorage。
+  - 定期把玩家名稱、clientId、sessionId、場景、位置、HP、Score、EXP、背包摘要 / 統計、online / paused 狀態寫入 `SaveService` localStorage。
   - 目前是多人功能資料介面，不會顯示其他玩家。
 - `GameManager.ts`
   - 遊戲初始化、PhysicsManager、CameraRig / HitFeelManager runtime 建立、Score / EXP、Pause / Resume、Retry、回主畫面、存讀檔、死亡結算。
+  - Gameplay `G` 會呼叫 `AutoMapGenerator.beginTimedGeneration()`；Pause 中不觸發。
   - `pausePanel` 是暫停 UI 容器；`fadeOverlay` 是 Retry / Main Menu 切場景前的淡出黑幕。
 
 ## Attack
@@ -313,8 +326,8 @@ Canvas
   - Gun 模式右鍵呼叫 `PlayerGun`；Jetpack 模式 Space 消耗 fuel 上升；Grapple 模式右鍵 raycast 非 sensor 地形並拉玩家。
   - 可接 tool label、fuel bar、jetpack flame root、grapple line root。
 - `Input/`
-  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel。
-  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M fallback；R 快捷鍵已移除。
+  - `InputAction.ts` 定義抽象操作，例如 MoveLeft、Attack、Cancel、CameraZoomIn、CameraZoomOut、GenerateMap。
+  - `InputBindings.ts` 集中 keyCode -> action 對應與 Esc/M/`+/-`/G fallback；R 快捷鍵已移除。
   - `InputContext.ts` 定義 Gameplay、Inventory、Crafting、Dialogue、MerchantShop、Vehicle、Paused。
   - `InputManager.ts` 統一監聽 Game 場景輸入，依 context stack 由上往下分派。
 - `InventoryManager.ts`
@@ -361,6 +374,9 @@ Canvas
   - 可指定 `merchantPrefab`、`playerNode`、`spawnParent`、生成距離、生成間隔。
   - 若場上已有旅行商人，會重用現有商人，不重複生成。
   - 生成位置依玩家世界座標計算；玩家在 OceanArea 時商人會生成在水域附近。
+- `TravelingMerchant.prefab`
+  - `8b456ff` 後已接新商人 sprite 與 `cc.Animation`。
+  - animation clips 來源為 `resources/npcs/sprites/characters/merchant/Idle1/idle_rigjt.anim` 與 `Speak1/talk_right.anim`。
 
 ## Data
 
@@ -392,6 +408,8 @@ Canvas
 - `FoodBase.ts`
   - 食物基底，處理 falling / ground / collect 類行為。
   - 食物收集進背包；吃掉時優先找 `PlayerStats`，沒有則使用 `PlayerController.heal()`。
+- `food/potions/*.ts`
+  - Blue / Red / Yellow Potion 食物類腳本，搭配 `assets/Prefabs/Resources/potions/` prefab 與 `assets/resources/potions/` 圖。
 - `fruits/*.ts`、`nuts/*.ts`
   - 從 `ItemData` 套用食物名稱、描述、回血、體力與腐敗時間。
 - `coconut.ts`
@@ -399,6 +417,14 @@ Canvas
 
 ## Map / Scene
 
+- `Map/AutoMapGenerator.ts`
+  - 掛在 `Canvas/platform/auto generate`，用 `assets/Prefabs/Map/` 的 Rock prefabs 生成跳躍平台。
+  - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
+  - `manualTriggerOnly` 預設開啟；開場 / 讀檔只套參數不生成，Gameplay 按 `G` 後逐塊生成，每 `generationStepInterval` 秒 spawn 一塊。
+  - 逐塊生成前透過 `CameraRig.frameWorldRect()` 看完整生成範圍，等 `startAfterCameraDelay` 後開始鋪地形；每塊生成可觸發 `spawnShakeDuration/spawnShakeAmplitude` 小震動，完成後等 `returnAfterGenerationDelay` 再 `returnToTarget()` 回玩家。
+  - 生成後呼叫 `SaveService.setCurrentMapGenerationState()` 並 emit `MAP_GENERATION_UPDATED`。
+  - 讀到 `SAVE_LOADED` 且存檔有 `mapState` 時，只套用 seed / range / settings；玩家按 `G` 後才重生同一張地圖。
+  - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
 - `Map/OceanArea.ts`
   - 掛在水域 sensor collider 上，目前用 collider bounds 偵測 Player 進出。
   - 進入時呼叫 `PlayerController.enterOceanArea()`，離開時呼叫 `exitOceanArea()`。
@@ -477,6 +503,9 @@ Canvas
     - `Stock Item Count`
     - `Max Life Time`
     - `No Trade Despawn Time`
+  - `cc.Animation`
+    - default clip：商人 idle
+    - clips：idle / talk
   - `RigidBody` + body collider。
 - MerchantSpawner
   - `merchantPrefab`：`assets/Prefabs/NPCs/TravelingMerchant.prefab`
@@ -548,6 +577,13 @@ Canvas
   - Ocean root 可掛 `OceanLayerOrder.ts`；需要清舊生成內容時掛 `OceanPrefabBuilder.ts`。
 - DropOre
   - prefab 掛對應 `Oredrops/*.ts` 子類或 `Orebase.ts`，並確認 item id 對上 `ItemData` smallore key。
+- Potions
+  - `Blue Potion` / `Red Potion` / `Yellow Potion` prefab 建議掛對應 potion script，確認 item id 與 `ItemData` 一致。
+- Rocksets
+  - Rockleft / Rockright / Rockplatform3 / 4 / 5 prefab 放入場景後需確認 collider、spacing、layer。
+  - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
+  - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
+  - `manualTriggerOnly` 預設開啟；GameManager 可拖 `autoMapGenerator`，Gameplay 按 `G` 逐塊生成，`generationStepInterval` 預設 0.25，`cameraFrameDuration/cameraReturnDuration` 預設 1.6。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
   - `DialogueUIController` prompt / panel / option labels
@@ -674,7 +710,42 @@ Score / save / leaderboard
 1. 將 `local plans/` 作為後續 step 文件來源。
 2. 手動完成 Menu / Pause / GameOver / Audio / Effects 的 Inspector 綁定。
 3. 實測 SkeletonMage、OceanArea、DropOre、存讀檔、排行榜、音效與五種粒子特效。
-4. 確認 Main Camera 只啟用 `CameraRig` 或 `CameraFollow` 其中一套。
+4. 確認 Main Camera 只啟用 `CameraRig`；不要再掛 legacy `CameraFollow`。
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
 6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
 7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。
+# 怪物自動生成系統（2026-06-11）
+
+## Runtime 架構
+
+```text
+Canvas
+├─ Core Controllers
+│  ├─ GameManager
+│  ├─ MonsterSpawner（GameManager 啟動時自動補上）
+│  └─ MonsterSpawnPositionResolver（GameManager 啟動時自動補上）
+└─ NPC／World Root
+   └─ Runtime Monsters（MonsterSpawner 自動建立）
+```
+
+## 相關檔案
+
+- `assets/Scripts/Data/MonsterPool.ts`
+  - 怪物池 entry、條件過濾與權重抽選。
+- `assets/Scripts/NPC/MonsterSpawnPositionResolver.ts`
+  - 玩家周邊地面 raycast、鏡頭排除、空間與怪物間距檢查。
+- `assets/Scripts/NPC/MonsterSpawner.ts`
+  - 生成冷卻、全域／種類上限、spawn budget、AI target 與過遠回收。
+- `assets/Scripts/NPC/SpawnedMonster.ts`
+  - 追蹤系統生成怪物，在死亡或銷毀後釋放生成名額。
+- `assets/Scripts/NPC/EnemyRespawner.ts`
+  - 保留作為固定區域、巢穴或事件型生成器，不納入全域生成數量。
+
+## 預設怪物池
+
+- Slime：weight 50、種類上限 4、cost 1。
+- Boar：weight 30、種類上限 3、cost 1。
+- Skeleton Mage：weight 20、種類上限 2、cost 2。
+
+`GameManager.enableAutomaticMonsterSpawning` 可關閉整套自動生成。若手動在
+`Core Controllers` 掛上 `MonsterSpawner`，則可用 Inspector 自訂完整怪物池與參數。
