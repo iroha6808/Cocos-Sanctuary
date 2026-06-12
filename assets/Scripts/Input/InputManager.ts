@@ -13,6 +13,17 @@ interface InputContextEntry {
 }
 
 const ONE_SHOT_DEBOUNCE_MS = 160;
+const INPUT_EVENT_HANDLED_FLAG = "__cocosSanctuaryInputHandled";
+
+export function isInputEventHandled(event: any): boolean {
+    return !!event && !!event[INPUT_EVENT_HANDLED_FLAG];
+}
+
+export function markInputEventHandled(event: any): void {
+    if (event) {
+        event[INPUT_EVENT_HANDLED_FLAG] = true;
+    }
+}
 
 @ccclass
 export default class InputManager extends cc.Component {
@@ -20,6 +31,7 @@ export default class InputManager extends cc.Component {
 
     private contextStack: InputContextEntry[] = [];
     private lastActionTimes: { [action: string]: number } = {};
+    private pressedKeyboardActions: { [action: string]: boolean } = {};
     private canvasNode: cc.Node | null = null;
 
     public static getOrCreate(hostNode?: cc.Node): InputManager {
@@ -76,6 +88,7 @@ export default class InputManager extends cc.Component {
         }
         this.contextStack = [];
         this.lastActionTimes = {};
+        this.pressedKeyboardActions = {};
     }
 
     public pushContext(context: InputContext, handler: InputHandler, owner?: any): void {
@@ -139,7 +152,16 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        if (isOneShotAction(action) && this.isActionCoolingDown(action)) {
+        if (isOneShotAction(action)) {
+            if (this.pressedKeyboardActions[action]) {
+                return;
+            }
+            this.pressedKeyboardActions[action] = true;
+        }
+
+        // PlayerController still owns gameplay input. If that handler opened
+        // a UI with this event, do not immediately close/confirm the new UI.
+        if (isInputEventHandled(event)) {
             return;
         }
 
@@ -150,14 +172,25 @@ export default class InputManager extends cc.Component {
             originalEvent: event
         });
 
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
+        if (handled) {
+            markInputEventHandled(event);
+            if (event && typeof event.stopPropagation === "function") {
+                event.stopPropagation();
+            }
         }
     }
 
     private onKeyUp(event: cc.Event.EventKeyboard): void {
         const action = getActionForKeyboardEvent(event);
         if (!action) {
+            return;
+        }
+
+        if (isOneShotAction(action)) {
+            delete this.pressedKeyboardActions[action];
+        }
+
+        if (isInputEventHandled(event)) {
             return;
         }
 
@@ -168,8 +201,11 @@ export default class InputManager extends cc.Component {
             originalEvent: event
         });
 
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
+        if (handled) {
+            markInputEventHandled(event);
+            if (event && typeof event.stopPropagation === "function") {
+                event.stopPropagation();
+            }
         }
     }
 

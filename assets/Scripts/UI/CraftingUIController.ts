@@ -73,7 +73,7 @@ export default class CraftingUIController extends cc.Component {
     private inventoryOriginalScale: cc.Vec2 = null!;
     private inventoryWidgets: cc.Widget[] = [];
     private inventoryWidgetStates: boolean[] = [];
-    private inventoryListenersBound: boolean = false;
+    private boundInventorySlots: cc.Node[] = [];
     private isDestroying: boolean = false;
     private canvasNode: cc.Node = null!;
     private mainCamera: cc.Camera = null!;
@@ -83,6 +83,8 @@ export default class CraftingUIController extends cc.Component {
     private highlightedNode: cc.Node = null!;
     private highlightedColor: cc.Color = null!;
     private inputManager: InputManager = null!;
+    private currentResultItemId: string = null!;
+    private resultHovered: boolean = false;
 
     private readonly enabledColor = cc.color(55, 150, 105);
     private readonly disabledColor = cc.color(95, 95, 95);
@@ -98,7 +100,6 @@ export default class CraftingUIController extends cc.Component {
         this.inputManager = InputManager.getOrCreate(this.node);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("CRAFTING_SESSION_CHANGED", this.refresh, this);
-        this.bindGlobalDragEvents();
         this.setVisible(false);
         cc.log(
             `[CraftingUI] loaded root=${!!this.root}, inventory=${!!this.inventoryUI}, slots=${this.craftingSlots.length}`
@@ -140,6 +141,7 @@ export default class CraftingUIController extends cc.Component {
         this.setVisible(true);
         this.updatePanelPosition();
         this.bindInventorySelection();
+        this.bindGlobalDragEvents();
         this.refresh();
 
         cc.log("[CraftingUI] opened: inventory left, crafting table right");
@@ -157,6 +159,7 @@ export default class CraftingUIController extends cc.Component {
         }
 
         this.cancelDrag();
+        this.hideResultTooltip();
         if (!CraftingSession.shared.returnAllToInventory()) {
             this.setStatus("Inventory is full. Clear space before closing.", true);
             return false;
@@ -174,6 +177,8 @@ export default class CraftingUIController extends cc.Component {
         this.selectedItemId = null!;
         this.opened = false;
         this.setVisible(false);
+        this.unbindGlobalDragEvents();
+        this.unbindInventorySelection();
 
         if (this.inputManager) {
             this.inputManager.popContext(InputContext.Crafting, this);
@@ -249,12 +254,14 @@ export default class CraftingUIController extends cc.Component {
     onDestroy() {
         this.isDestroying = true;
         this.cancelDrag();
+        this.hideResultTooltip();
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.off("CRAFTING_SESSION_CHANGED", this.refresh, this);
         if (this.inputManager) {
             this.inputManager.clearOwner(this);
         }
         this.unbindGlobalDragEvents();
+        this.unbindInventorySelection();
         if (!CraftingSession.shared.isEmpty()) {
             CraftingSession.shared.returnAllToInventory();
         }
@@ -582,13 +589,15 @@ export default class CraftingUIController extends cc.Component {
     }
 
     private bindInventorySelection(): void {
-        if (this.inventoryListenersBound || !this.inventoryGrid) {
+        if (!this.inventoryGrid) {
             return;
         }
 
+        this.unbindInventorySelection();
         const slots = this.inventoryGrid.children;
         for (let index = 0; index < slots.length; index++) {
-            slots[index].on(cc.Node.EventType.MOUSE_DOWN, (event: cc.Event.EventMouse) => {
+            const slotNode = slots[index];
+            slotNode.on(cc.Node.EventType.MOUSE_DOWN, (event: cc.Event.EventMouse) => {
                 if (!this.opened || event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
                     return;
                 }
@@ -599,10 +608,10 @@ export default class CraftingUIController extends cc.Component {
                         sourceIndex: index,
                         itemId: item.id,
                         count: 1
-                    }, slots[index], event.getLocation());
+                    }, slotNode, event.getLocation());
                 }
             }, this);
-            slots[index].on(cc.Node.EventType.TOUCH_START, (event: cc.Event.EventTouch) => {
+            slotNode.on(cc.Node.EventType.TOUCH_START, (event: cc.Event.EventTouch) => {
                 if (!this.opened) {
                     return;
                 }
@@ -613,10 +622,10 @@ export default class CraftingUIController extends cc.Component {
                         sourceIndex: index,
                         itemId: item.id,
                         count: 1
-                    }, slots[index], event.getLocation());
+                    }, slotNode, event.getLocation());
                 }
             }, this);
-            slots[index].on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
+            slotNode.on(cc.Node.EventType.MOUSE_UP, (event: cc.Event.EventMouse) => {
                 if (!this.opened || event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
                     return;
                 }
@@ -631,14 +640,23 @@ export default class CraftingUIController extends cc.Component {
                 this.setStatus(item ? `Selected ${item.name}.` : "Selection cleared.");
                 this.refreshSelection();
             }, this);
-            slots[index].on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
+            slotNode.on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
                 if (this.dragState && this.dragState.didDrag) {
                     this.onPointerEnd(event);
                     event.stopPropagation();
                 }
             }, this);
+            this.boundInventorySlots.push(slotNode);
         }
-        this.inventoryListenersBound = true;
+    }
+
+    private unbindInventorySelection(): void {
+        for (const slot of this.boundInventorySlots) {
+            if (slot && cc.isValid(slot)) {
+                slot.targetOff(this);
+            }
+        }
+        this.boundInventorySlots = [];
     }
 
     private buildCraftingPanel(): void {
@@ -727,6 +745,14 @@ export default class CraftingUIController extends cc.Component {
         this.resultSlot.node.on(cc.Node.EventType.TOUCH_END, (event: cc.Event.EventTouch) => {
             event.stopPropagation();
             this.claimResult();
+        }, this);
+        this.resultSlot.node.on(cc.Node.EventType.MOUSE_ENTER, () => {
+            this.resultHovered = true;
+            this.showResultTooltip();
+        }, this);
+        this.resultSlot.node.on(cc.Node.EventType.MOUSE_LEAVE, () => {
+            this.resultHovered = false;
+            this.hideResultTooltip();
         }, this);
         this.createLabel("ResultHint", panel, "Click result to collect", 12, cc.color(205, 220, 235))
             .node.setPosition(118, -12);
@@ -848,7 +874,8 @@ export default class CraftingUIController extends cc.Component {
         if (!this.canvasNode || !this.inventoryUI) {
             this.resolveSceneNodes();
         }
-        this.dragEventNode = cc.director.getScene();
+        this.unbindGlobalDragEvents();
+        this.dragEventNode = this.canvasNode;
         if (!this.dragEventNode) {
             return;
         }
@@ -982,8 +1009,9 @@ export default class CraftingUIController extends cc.Component {
         if (!this.dragVisual || !this.dragVisual.node.parent) {
             return;
         }
-        // Event locations and direct children of the Scene use design-resolution coordinates.
-        this.dragVisual.node.setPosition(worldPosition);
+        this.dragVisual.node.setPosition(
+            this.dragVisual.node.parent.convertToNodeSpaceAR(worldPosition)
+        );
     }
 
     private updateDropHighlight(worldPosition: cc.Vec2): void {
@@ -1110,6 +1138,12 @@ export default class CraftingUIController extends cc.Component {
             recipe ? recipe.outputItemId : null,
             recipe ? recipe.outputCount : 0
         );
+        this.currentResultItemId = recipe ? recipe.outputItemId : null!;
+        if (this.resultHovered) {
+            this.showResultTooltip();
+        } else if (!this.currentResultItemId) {
+            this.hideResultTooltip();
+        }
         this.recipeNameLabel.string = definition ? definition.name : "No matching recipe";
         this.recipeDescriptionLabel.string = definition ? definition.description : "";
         this.craftableCountLabel.string = `Craftable: ${craftable}`;
@@ -1130,6 +1164,29 @@ export default class CraftingUIController extends cc.Component {
         }
         this.setStatus(`Collected ${definition ? definition.name : recipe.outputItemId}.`);
         this.refresh();
+    }
+
+    private showResultTooltip(): void {
+        if (!this.currentResultItemId || !this.resultSlot) {
+            this.hideResultTooltip();
+            return;
+        }
+        const inventoryController = this.inventoryUI
+            ? this.inventoryUI.getComponent("InventoryUIController") as any
+            : null;
+        if (inventoryController && typeof inventoryController.showItemTooltip === "function") {
+            inventoryController.showItemTooltip(this.currentResultItemId, this.resultSlot.node);
+        }
+    }
+
+    private hideResultTooltip(): void {
+        this.resultHovered = false;
+        const inventoryController = this.inventoryUI
+            ? this.inventoryUI.getComponent("InventoryUIController") as any
+            : null;
+        if (inventoryController && typeof inventoryController.hideItemTooltip === "function") {
+            inventoryController.hideItemTooltip();
+        }
     }
 
     private refreshSelection(): void {

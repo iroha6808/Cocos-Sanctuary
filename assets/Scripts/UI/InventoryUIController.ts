@@ -231,25 +231,46 @@ export default class InventoryUIController extends cc.Component {
         if (index >= items.length) return;
 
         const item = items[index];
-        const def = getItemDefinition(item.id);
-
-        if (this.descriptionLabel) {
-            this.descriptionLabel.string = (def && def.description)
-                ? def.description
-                : "這件物品沒有留下任何描述。";
-        }
-
         const slotNode = this.gridContainer ? this.gridContainer.children[index] : null;
-        if (slotNode && this.descriptionTooltip) {
-            const slotWorldPos = slotNode.convertToWorldSpaceAR(cc.v2(0, 0));
-            const localPos = this.node.convertToNodeSpaceAR(slotWorldPos);
-            this.descriptionTooltip.setPosition(localPos.x, localPos.y + (slotNode.height / 2) + 30);
-            this.descriptionTooltip.active = true;
-        }
+        this.showItemTooltip(item.id, slotNode);
     }
 
     hideTooltip() {
-        if (this.descriptionTooltip) this.descriptionTooltip.active = false;
+        this.hideItemTooltip();
+    }
+
+    public showItemTooltip(itemId: string, anchorNode: cc.Node): void {
+        if (!itemId || !anchorNode || !cc.isValid(anchorNode) || !this.descriptionTooltip) {
+            this.hideItemTooltip();
+            return;
+        }
+
+        const definition = getItemDefinition(itemId);
+        if (this.descriptionLabel) {
+            this.descriptionLabel.string = definition && definition.description
+                ? definition.description
+                : "這件物品沒有留下任何描述。";
+        }
+
+        const tooltipParent = this.descriptionTooltip.parent;
+        if (!tooltipParent || !cc.isValid(tooltipParent)) {
+            return;
+        }
+
+        const anchorWorldPos = anchorNode.convertToWorldSpaceAR(
+            cc.v2(0, anchorNode.height * 0.5 + 30)
+        );
+        this.descriptionTooltip.setPosition(
+            tooltipParent.convertToNodeSpaceAR(anchorWorldPos)
+        );
+        this.descriptionTooltip.zIndex = this.uiZIndex + 100;
+        this.descriptionTooltip.active = true;
+    }
+
+    public hideItemTooltip(): void {
+        if (this.descriptionTooltip) {
+            this.descriptionTooltip.active = false;
+        }
     }
 
     onUseBtnClicked() {

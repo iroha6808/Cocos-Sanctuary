@@ -49,6 +49,15 @@ export default class MonsterSpawner extends cc.Component {
             spawnCost: 2,
             width: 48,
             height: 80
+        },
+        {
+            id: "fox",
+            uuid: "abc5db68-de64-432f-91fe-a2d1f33cb1ff",
+            weight: 30,
+            maxAlive: 2,
+            spawnCost: 2,
+            width: 48,
+            height: 48
         }
     ];
 

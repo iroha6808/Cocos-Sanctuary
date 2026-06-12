@@ -119,8 +119,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 48,
-      "height": 48
+      "width": 64,
+      "height": 64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -587,8 +587,8 @@
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 45,
-      "height": 45
+      "width": 60,
+      "height": 60
     },
     "_id": ""
   },
@@ -644,8 +644,8 @@
       "__id__": 11
     },
     "detectRadius": 100,
-    "attackRange": 30,
-    "attackDamage": 5,
+    "attackRange": 60,
+    "attackDamage": 10,
     "attackCooldown": 1,
     "moveSpeed": 60,
     "moveMode": 1,
@@ -744,12 +744,12 @@
     "_offset": {
       "__type__": "cc.Vec2",
       "x": 0,
-      "y": -13
+      "y": -17
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 30,
-      "height": 23
+      "width": 40,
+      "height": 30
     },
     "_id": ""
   },

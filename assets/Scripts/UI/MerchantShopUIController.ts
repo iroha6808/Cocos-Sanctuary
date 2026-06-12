@@ -1,6 +1,6 @@
 import { getItemDefinition, ItemDefinition } from "../Data/ItemData";
 import { MerchantStockItem } from "../Data/MerchantPool";
-import { InputAction } from "../Input/InputAction";
+import { InputAction, InputPayload } from "../Input/InputAction";
 import InputManager from "../Input/InputManager";
 import { InputContext } from "../Input/InputContext";
 import MerchantNPC from "../NPC/MerchantNPC";
@@ -157,7 +157,7 @@ export default class MerchantShopUIController extends cc.Component {
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
 
         if (this.inputManager) {
-            this.inputManager.pushContext(InputContext.MerchantShop, this.handleInput, this);
+            this.inputManager.pushContext(InputContext.MerchantShop, this.handleMerchantInput, this);
         }
 
         this.updatePanelPosition();
@@ -303,6 +303,16 @@ export default class MerchantShopUIController extends cc.Component {
             default:
                 return true;
         }
+    }
+
+    private handleMerchantInput(payload: InputPayload): boolean {
+        if (!this.isOpen()) {
+            return false;
+        }
+        if (!payload.isDown) {
+            return true;
+        }
+        return this.handleInput(payload.action);
     }
 
     private requestClose(): void {
