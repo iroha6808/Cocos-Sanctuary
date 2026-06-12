@@ -1,16 +1,20 @@
 const { ccclass, property } = cc._decorator;
-import Orebase from '../orebase';
+import DropItem from '../../DropItem';
 import { getItemDefinition } from "../../../../Data/ItemData";
 @ccclass
-export default class copper_sword extends Orebase {
+export default class copper_sword extends DropItem {
     itemName: string = 'copper_sword';
+    equipName: string = '';
+    description: string = '';
+    defBoost: number = 0;
     onLoad() {
         super.onLoad();
         cc.log(`[copper_sword] onLoad → ${this.itemName}`);
         const def = getItemDefinition("copper_sword");
         if (def) {
-            this.oreName = def.name;
+            this.equipName = def.name;
             if (def.description !== undefined) this.description = def.description;
+            if (def.defBoost !== undefined) this.defBoost = def.defBoost;
         }
     }
 }

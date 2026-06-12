@@ -2,15 +2,15 @@ const { ccclass, property } = cc._decorator;
 import DropItem from '../../DropItem';
 import { getItemDefinition } from "../../../../Data/ItemData";
 @ccclass
-export default class iron_sword extends DropItem {
-    itemName: string = 'iron_sword';
+export default class charcoal extends DropItem {
+    itemName: string = 'charcoal';
     equipName: string = '';
     description: string = '';
     defBoost: number = 0;
     onLoad() {
         super.onLoad();
-        cc.log(`[iron_sword] onLoad → ${this.itemName}`);
-        const def = getItemDefinition("iron_sword");
+        cc.log(`[charcoal] onLoad → ${this.itemName}`);
+        const def = getItemDefinition("charcoal");
         if (def) {
             this.equipName = def.name;
             if (def.description !== undefined) this.description = def.description;

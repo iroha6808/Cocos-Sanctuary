@@ -1,3 +1,5 @@
+import charcoal from "../Entity/Resources/Ore/Oredrops/charcoal";
+
 export interface ItemDefinition {
     id: string;
     name: string;
@@ -9,8 +11,6 @@ export interface ItemDefinition {
     attackBoost?: number;
     defBoost?: number;
     // ---- 2026 新增：裝備與冒險工具數值加成 ----
-    attack?: number;          // 武器：攻擊力
-    defense?: number;         // 防具/盾牌：防禦力
     speedBonus?: number;      // 鞋子/飾品：移動速度加成 (%)
     critChance?: number;      // 飾品：暴擊率加成 (%)
     miningPower?: number;     // 工具：挖掘力 (影響破壞方塊速度)
@@ -80,6 +80,15 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         staminaRestore: 16,
         rottenTime: 1580
     },
+    banana: {
+        id: "banana",
+        name: "banana",
+        description: "sweet banana.",
+        iconPath: "100 FOOD ASSETS/Assets/food/food/fruits1/banana.png",
+        hpRestore: 11,
+        staminaRestore: 2,
+        rottenTime: 819
+    },
     blueberries: {
         id: "blueberries",
         name: "Blueberries",
@@ -112,6 +121,12 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         hpRestore: 0,
         staminaRestore: 3,
         rottenTime: 3469
+    },
+    charcoal: {
+        id: "charcoal",
+        name: "charcoal",
+        description: "a hard, black substance similar to coal that can be used as fuel or, in the form of sticks, as something to draw with.",
+        iconPath: "combined/charcoal.png",
     },
     cherry: {
         id: "cherry",
@@ -515,7 +530,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     // ==========================================
     antidote_potion: { id: "antidote_potion", name: "Purifying Antidote", description: "Neutralizes all basic toxins and poisons instantly.", iconPath: "combined/antidote_potion.png", hpRestore: 50 },
     rad_shield_serum: { id: "rad_shield_serum", name: "Rad-Shield Serum", description: "Tastes metallic. Grants heavy immunity to environmental radiation.", iconPath: "combined/rad_shield_serum.png", radResistance: 75 },
-    berserk_brew: { id: "berserk_brew", name: "Crimson Berserk Brew", description: "Ignites your blood! Grants temporary damage boost but drains stamina.", iconPath: "combined/berserk_brew.png", hpRestore: -50, attack: 15 },
+    berserk_brew: { id: "berserk_brew", name: "Crimson Berserk Brew", description: "Ignites your blood! Grants temporary damage boost but drains stamina.", iconPath: "combined/berserk_brew.png", hpRestore: -50, attackBoost: 15 },
     frozen_tonic: { id: "frozen_tonic", name: "Glacial Ward Tonic", description: "Freezes your body temperature, making you completely immune to fire areas.", iconPath: "combined/frozen_tonic.png", staminaRestore: 50 },
     midas_oil: { id: "midas_oil", name: "Midas Touch Oil", description: "Coat your weapons to make monsters explode into extra coins upon death.", iconPath: "combined/midas_oil.png", critChance: 5 },
     starlight_elixir: { id: "starlight_elixir", name: "Cosmic Starlight Elixir", description: "An otherworldly potion that increases spell power and speed.", iconPath: "combined/starlight_elixir.png", hpRestore: 200, staminaRestore: 200 },
@@ -529,57 +544,57 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     // ==========================================
     // 4. 新增合成道具：工具類 (74 - 83)
     // ==========================================
-    copper_pickaxe: { id: "copper_pickaxe", name: "Copper Pickaxe", description: "A simple starter tool for breakable rocks.", iconPath: "combined/copper_pickaxe.png", attack: 4, miningPower: 25 },
-    copper_axe: { id: "copper_axe", name: "Copper Axe", description: "Basic hatchet to chop down wooden trees.", iconPath: "combined/copper_axe.png", attack: 5, miningPower: 20 },
-    iron_pickaxe: { id: "iron_pickaxe", name: "Heavy Iron Pickaxe", description: "Sturdy industrial pickaxe capable of breaking mid-tier ores.", iconPath: "combined/iron_pickaxe.png", attack: 8, miningPower: 50 },
-    iron_axe: { id: "iron_axe", name: "Heavy Iron Axe", description: "Chops trees down in just a few heavy swings.", iconPath: "combined/iron_axe.png", attack: 10, miningPower: 45 },
-    silver_pickaxe: { id: "silver_pickaxe", name: "Gleaming Silver Pickaxe", description: "Beautiful tool that glimmers in the dark. Higher speed.", iconPath: "combined/silver_pickaxe.png", attack: 11, miningPower: 65 },
-    silver_axe: { id: "silver_axe", name: "Gleaming Silver Axe", description: "Polished silver edge cuts smoothly through dense logs.", iconPath: "combined/silver_axe.png", attack: 13, miningPower: 60 },
-    gold_pickaxe: { id: "gold_pickaxe", name: "Gilded Pickaxe", description: "Extremely fast, but has slightly lower durability.", iconPath: "combined/gold_pickaxe.png", attack: 12, miningPower: 80 },
-    gold_axe: { id: "gold_axe", name: "Gilded Axe", description: "Luxury woodcutting axe that occasionally yields rare drops.", iconPath: "combined/gold_axe.png", attack: 14, miningPower: 75 },
-    cobalt_pickaxe: { id: "cobalt_pickaxe", name: "Cobalt Sonic Pickaxe", description: "Lightweight otherworldly pickaxe that mines exceptionally fast.", iconPath: "combined/cobalt_pickaxe.png", attack: 16, miningPower: 110 },
-    cobalt_axe: { id: "cobalt_axe", name: "Cobalt Sonic Axe", description: "Slices through ancient wood like butter.", iconPath: "combined/cobalt_axe.png", attack: 18, miningPower: 100 },
-    starmetal_pickaxe: { id: "starmetal_pickaxe", name: "Cosmic Star-Metal Pickaxe", description: "Forged from fallen stars. Can mine any deep-underground block.", iconPath: "combined/starmetal_pickaxe.png", attack: 22, miningPower: 150 },
-    starmetal_axe: { id: "starmetal_axe", name: "Cosmic Star-Metal Axe", description: "Infused with stellar light. Leaves trail effects on swing.", iconPath: "combined/starmetal_axe.png", attack: 25, miningPower: 140 },
-    void_hoe: { id: "void_hoe", name: "Void Infused Hoe", description: "Tills soil in a 3x3 area instantly using spatial rifts.", iconPath: "combined/void_hoe.png", attack: 5 },
+    copper_pickaxe: { id: "copper_pickaxe", name: "Copper Pickaxe", description: "A simple starter tool for breakable rocks.", iconPath: "combined/copper_pickaxe.png", attackBoost: 4, miningPower: 25 },
+    copper_axe: { id: "copper_axe", name: "Copper Axe", description: "Basic hatchet to chop down wooden trees.", iconPath: "combined/copper_axe.png", attackBoost: 5, miningPower: 20 },
+    iron_pickaxe: { id: "iron_pickaxe", name: "Heavy Iron Pickaxe", description: "Sturdy industrial pickaxe capable of breaking mid-tier ores.", iconPath: "combined/iron_pickaxe.png", attackBoost: 8, miningPower: 50 },
+    iron_axe: { id: "iron_axe", name: "Heavy Iron Axe", description: "Chops trees down in just a few heavy swings.", iconPath: "combined/iron_axe.png", attackBoost: 10, miningPower: 45 },
+    silver_pickaxe: { id: "silver_pickaxe", name: "Gleaming Silver Pickaxe", description: "Beautiful tool that glimmers in the dark. Higher speed.", iconPath: "combined/silver_pickaxe.png", attackBoost: 11, miningPower: 65 },
+    silver_axe: { id: "silver_axe", name: "Gleaming Silver Axe", description: "Polished silver edge cuts smoothly through dense logs.", iconPath: "combined/silver_axe.png", attackBoost: 13, miningPower: 60 },
+    gold_pickaxe: { id: "gold_pickaxe", name: "Gilded Pickaxe", description: "Extremely fast, but has slightly lower durability.", iconPath: "combined/gold_pickaxe.png", attackBoost: 12, miningPower: 80 },
+    gold_axe: { id: "gold_axe", name: "Gilded Axe", description: "Luxury woodcutting axe that occasionally yields rare drops.", iconPath: "combined/gold_axe.png", attackBoost: 14, miningPower: 75 },
+    cobalt_pickaxe: { id: "cobalt_pickaxe", name: "Cobalt Sonic Pickaxe", description: "Lightweight otherworldly pickaxe that mines exceptionally fast.", iconPath: "combined/cobalt_pickaxe.png", attackBoost: 16, miningPower: 110 },
+    cobalt_axe: { id: "cobalt_axe", name: "Cobalt Sonic Axe", description: "Slices through ancient wood like butter.", iconPath: "combined/cobalt_axe.png", attackBoost: 18, miningPower: 100 },
+    starmetal_pickaxe: { id: "starmetal_pickaxe", name: "Cosmic Star-Metal Pickaxe", description: "Forged from fallen stars. Can mine any deep-underground block.", iconPath: "combined/starmetal_pickaxe.png", attackBoost: 22, miningPower: 150 },
+    starmetal_axe: { id: "starmetal_axe", name: "Cosmic Star-Metal Axe", description: "Infused with stellar light. Leaves trail effects on swing.", iconPath: "combined/starmetal_axe.png", attackBoost: 25, miningPower: 140 },
+    void_hoe: { id: "void_hoe", name: "Void Infused Hoe", description: "Tills soil in a 3x3 area instantly using spatial rifts.", iconPath: "combined/void_hoe.png", attackBoost: 5 },
     lucky_fishing_rod: { id: "lucky_fishing_rod", name: "Jade Lucky Rod", description: "Increases the chance of pulling up rare treasure chests while fishing.", iconPath: "combined/lucky_fishing_rod.png", critChance: 10 },
-    alchemists_hammer: { id: "alchemists_hammer", name: "Alchemist's Breaker Hammer", description: "Used to crush geodes and raw mineral clusters into double ingredients.", iconPath: "combined/alchemists_hammer.png", attack: 15, miningPower: 40 },
+    alchemists_hammer: { id: "alchemists_hammer", name: "Alchemist's Breaker Hammer", description: "Used to crush geodes and raw mineral clusters into double ingredients.", iconPath: "combined/alchemists_hammer.png", attackBoost: 15, miningPower: 40 },
 
     // ==========================================
     // 5. 新增合成道具：武器與彈藥類 (84 - 94)
     // ==========================================
-    copper_sword: { id: "copper_sword", name: "Copper Shortsword", description: "Better than your bare fists, but not by much.", iconPath: "combined/copper_sword.png", attack: 6 },
-    silver_sword: { id: "silver_sword", name: "Holy Silver Blade", description: "Deals 50% bonus radiant damage to undead and shadow monsters.", iconPath: "combined/silver_sword.png", attack: 22, critChance: 5 },
-    golden_rapier: { id: "golden_rapier", name: "Royal Citrine Rapier", description: "A swift thrusting sword that boosts critical strike rates.", iconPath: "combined/golden_rapier.png", attack: 26, critChance: 12 },
-    ruby_flameblade: { id: "ruby_flameblade", name: "Ruby Volcano Flameblade", description: "Sears enemies with a volcanic burn, dealing damage over time.", iconPath: "combined/ruby_flameblade.png", attack: 38 },
-    starmetal_sword: { id: "starmetal_sword", name: "Celestial Star-Metal Greatsword", description: "Summons tiny falling stars to strike targets on critical hits.", iconPath: "combined/starmetal_sword.png", attack: 52, critChance: 8 },
-    void_dagger: { id: "void_dagger", name: "Void Fracture Dagger", description: "Attacks incredibly fast. Ignores 30% of the target's physical armor.", iconPath: "combined/void_dagger.png", attack: 28, speedBonus: 10 },
-    frost_spear: { id: "frost_spear", name: "Glacial Shard Spear", description: "Long melee reach. Freezes and slows down enemy movement speeds.", iconPath: "combined/frost_spear.png", attack: 32 },
-    ocean_mace: { id: "ocean_mace", name: "Deep Ocean Mace", description: "A heavy blunt weapon crafted from calcified ancient materials.", iconPath: "combined/ocean_mace.png", attack: 45, miningPower: 30 },
-    nature_staff: { id: "nature_staff", name: "Gaean Moss Agate Staff", description: "Shoots homing nature orbs that heal the user for a small fraction of damage dealt.", iconPath: "combined/nature_staff.png", attack: 30 },
-    meteor_bullet: { id: "meteor_bullet", name: "Meteorite Bullets", description: "High velocity firearm ammunition that pierces through one enemy.", iconPath: "combined/meteor_bullet.png", attack: 12 },
-    crystal_arrow: { id: "crystal_arrow", name: "Citrine Crystal Arrow", description: "Shatters on impact, dealing minor splash damage to surrounding targets.", iconPath: "combined/crystal_arrow.png", attack: 10 },
-    flame_arrow: { id: "flame_arrow", name: "Incendiary Flame Arrow", description: "Sets targets on fire upon impact.", iconPath: "combined/flame_arrow.png", attack: 8 },
-    ice_arrow: { id: "ice_arrow", name: "Frostbite Crystal Arrow", description: "Slows down target hit boxes.", iconPath: "combined/ice_arrow.png", attack: 8 },
-    poison_dart: { id: "poison_dart", name: "Rad-Toxic Blowpipe Dart", description: "Inflicts a nasty chemical sickness that ticks away health.", iconPath: "combined/poison_dart.png", attack: 5 },
+    copper_sword: { id: "copper_sword", name: "Copper Shortsword", description: "Better than your bare fists, but not by much.", iconPath: "combined/copper_sword.png", attackBoost: 6 },
+    silver_sword: { id: "silver_sword", name: "Holy Silver Blade", description: "Deals 50% bonus radiant damage to undead and shadow monsters.", iconPath: "combined/silver_sword.png", attackBoost: 22, critChance: 5 },
+    golden_rapier: { id: "golden_rapier", name: "Royal Citrine Rapier", description: "A swift thrusting sword that boosts critical strike rates.", iconPath: "combined/golden_rapier.png", attackBoost: 26, critChance: 12 },
+    ruby_flameblade: { id: "ruby_flameblade", name: "Ruby Volcano Flameblade", description: "Sears enemies with a volcanic burn, dealing damage over time.", iconPath: "combined/ruby_flameblade.png", attackBoost: 38 },
+    starmetal_sword: { id: "starmetal_sword", name: "Celestial Star-Metal Greatsword", description: "Summons tiny falling stars to strike targets on critical hits.", iconPath: "combined/starmetal_sword.png", attackBoost: 52, critChance: 8 },
+    void_dagger: { id: "void_dagger", name: "Void Fracture Dagger", description: "Attacks incredibly fast. Ignores 30% of the target's physical armor.", iconPath: "combined/void_dagger.png", attackBoost: 28, speedBonus: 10 },
+    frost_spear: { id: "frost_spear", name: "Glacial Shard Spear", description: "Long melee reach. Freezes and slows down enemy movement speeds.", iconPath: "combined/frost_spear.png", attackBoost: 32 },
+    ocean_mace: { id: "ocean_mace", name: "Deep Ocean Mace", description: "A heavy blunt weapon crafted from calcified ancient materials.", iconPath: "combined/ocean_mace.png", attackBoost: 45, miningPower: 30 },
+    nature_staff: { id: "nature_staff", name: "Gaean Moss Agate Staff", description: "Shoots homing nature orbs that heal the user for a small fraction of damage dealt.", iconPath: "combined/nature_staff.png", attackBoost: 30 },
+    meteor_bullet: { id: "meteor_bullet", name: "Meteorite Bullets", description: "High velocity firearm ammunition that pierces through one enemy.", iconPath: "combined/meteor_bullet.png", attackBoost: 12 },
+    crystal_arrow: { id: "crystal_arrow", name: "Citrine Crystal Arrow", description: "Shatters on impact, dealing minor splash damage to surrounding targets.", iconPath: "combined/crystal_arrow.png", attackBoost: 10 },
+    flame_arrow: { id: "flame_arrow", name: "Incendiary Flame Arrow", description: "Sets targets on fire upon impact.", iconPath: "combined/flame_arrow.png", attackBoost: 8 },
+    ice_arrow: { id: "ice_arrow", name: "Frostbite Crystal Arrow", description: "Slows down target hit boxes.", iconPath: "combined/ice_arrow.png", attackBoost: 8 },
+    poison_dart: { id: "poison_dart", name: "Rad-Toxic Blowpipe Dart", description: "Inflicts a nasty chemical sickness that ticks away health.", iconPath: "combined/poison_dart.png", attackBoost: 5 },
 
     // ==========================================
     // 6. 新增合成道具：防具與飾品類 (95 - 105)
     // ==========================================
-    iron_shield: { id: "iron_shield", name: "Iron Round Shield", description: "Block oncoming projectiles and physical strikes to mitigate damage.", iconPath: "combined/iron_shield.png", defense: 5 },
-    copper_helmet: { id: "copper_helmet", name: "Copper Cap", description: "Cheap skull protection.", iconPath: "combined/copper_helmet.png", defense: 2 },
-    copper_chestplate: { id: "copper_chestplate", name: "Copper Mail", description: "A basic metallic coat to guard your vitals.", iconPath: "combined/copper_chestplate.png", defense: 4 },
-    iron_helmet: { id: "iron_helmet", name: "Iron Great Helm", description: "Provides reliable physical head protection.", iconPath: "combined/iron_helmet.png", defense: 4 },
-    iron_chestplate: { id: "iron_chestplate", name: "Iron Cuirass", description: "The standard military armor plate for seasoned guards.", iconPath: "combined/iron_chestplate.png", defense: 8 },
-    silver_helmet: { id: "silver_helmet", name: "Knightly Silver Visor", description: "Exquisite craftsmanship offering holy defensive boosts.", iconPath: "combined/silver_helmet.png", defense: 6 },
-    silver_chestplate: { id: "silver_chestplate", name: "Knightly Silver Breastplate", description: "Polished and bright armor plating.", iconPath: "combined/silver_chestplate.png", defense: 12 },
-    gilded_breastplate: { id: "gilded_breastplate", name: "Gilded Jade Vest", description: "Regal gold plated heavy armor that increases luck metrics.", iconPath: "combined/gilded_breastplate.png", defense: 15, critChance: 4 },
-    cobalt_shield: { id: "cobalt_shield", name: "Cobalt Aegis Shield", description: "Completely immunizes the user against knockback effects.", iconPath: "combined/cobalt_shield.png", defense: 10 },
-    starmetal_helmet: { id: "starmetal_helmet", name: "Astral Star-Metal Mask", description: "Increases starlight attunement and critical multipliers.", iconPath: "combined/starmetal_helmet.png", defense: 10, critChance: 5 },
-    starmetal_chestplate: { id: "starmetal_chestplate", name: "Astral Star-Metal Chestplate", description: "Defends with the protective hardness of a meteor shield.", iconPath: "combined/starmetal_chestplate.png", defense: 22 },
-    void_armor: { id: "void_armor", name: "Abyssal Void Exoskeleton", description: "Endgame plates that wrap the user in a defensive spatial shroud.", iconPath: "combined/void_armor.png", defense: 30, radResistance: 50 },
-    fire_ring: { id: "fire_ring", name: "Volcanic Ruby Band", description: "Accessory. Adds +5 fire damage to all base physical attacks.", iconPath: "combined/fire_ring.png", attack: 5 },
-    ice_ring: { id: "ice_ring", name: "Glacial Mana Loop", description: "Accessory. Reduces stamina consumption of sprinting and tools by 15%.", iconPath: "combined/ice_ring.png", defense: 2 },
+    iron_shield: { id: "iron_shield", name: "Iron Round Shield", description: "Block oncoming projectiles and physical strikes to mitigate damage.", iconPath: "combined/iron_shield.png", defBoost: 5 },
+    copper_helmet: { id: "copper_helmet", name: "Copper Cap", description: "Cheap skull protection.", iconPath: "combined/copper_helmet.png", defBoost: 2 },
+    copper_chestplate: { id: "copper_chestplate", name: "Copper Mail", description: "A basic metallic coat to guard your vitals.", iconPath: "combined/copper_chestplate.png", defBoost: 4 },
+    iron_helmet: { id: "iron_helmet", name: "Iron Great Helm", description: "Provides reliable physical head protection.", iconPath: "combined/iron_helmet.png", defBoost: 4 },
+    iron_chestplate: { id: "iron_chestplate", name: "Iron Cuirass", description: "The standard military armor plate for seasoned guards.", iconPath: "combined/iron_chestplate.png", defBoost: 8 },
+    silver_helmet: { id: "silver_helmet", name: "Knightly Silver Visor", description: "Exquisite craftsmanship offering holy defensive boosts.", iconPath: "combined/silver_helmet.png", defBoost: 6 },
+    silver_chestplate: { id: "silver_chestplate", name: "Knightly Silver Breastplate", description: "Polished and bright armor plating.", iconPath: "combined/silver_chestplate.png", defBoost: 12 },
+    gilded_breastplate: { id: "gilded_breastplate", name: "Gilded Jade Vest", description: "Regal gold plated heavy armor that increases luck metrics.", iconPath: "combined/gilded_breastplate.png", defBoost: 15, critChance: 4 },
+    cobalt_shield: { id: "cobalt_shield", name: "Cobalt Aegis Shield", description: "Completely immunizes the user against knockback effects.", iconPath: "combined/cobalt_shield.png", defBoost: 10 },
+    starmetal_helmet: { id: "starmetal_helmet", name: "Astral Star-Metal Mask", description: "Increases starlight attunement and critical multipliers.", iconPath: "combined/starmetal_helmet.png", defBoost: 10, critChance: 5 },
+    starmetal_chestplate: { id: "starmetal_chestplate", name: "Astral Star-Metal Chestplate", description: "Defends with the protective hardness of a meteor shield.", iconPath: "combined/starmetal_chestplate.png", defBoost: 22 },
+    void_armor: { id: "void_armor", name: "Abyssal Void Exoskeleton", description: "Endgame plates that wrap the user in a defensive spatial shroud.", iconPath: "combined/void_armor.png", defBoost: 30, radResistance: 50 },
+    fire_ring: { id: "fire_ring", name: "Volcanic Ruby Band", description: "Accessory. Adds +5 fire damage to all base physical attacks.", iconPath: "combined/fire_ring.png", attackBoost: 5 },
+    ice_ring: { id: "ice_ring", name: "Glacial Mana Loop", description: "Accessory. Reduces stamina consumption of sprinting and tools by 15%.", iconPath: "combined/ice_ring.png", defBoost: 2 },
     radiation_ring: { id: "radiation_ring", name: "Lead-Coated Rad Ring", description: "Accessory. Passively cleanses minor radioactive exposure build up.", iconPath: "combined/radiation_ring.png", radResistance: 25 },
 
     // ==========================================
@@ -589,7 +604,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
     wayfinder_compass: { id: "wayfinder_compass", name: "Wayfinder Moss Compass", description: "Points directly toward the nearest deep-underground temple or dungeon.", iconPath: "combined/wayfinder_compass.png" },
     recall_hearthstone: { id: "recall_hearthstone", name: "Hearthstone of Return", description: "Channel for 5 seconds to warp instantly back to your spawn bed.", iconPath: "combined/recall_hearthstone.png" },
     lucky_jade_amulet: { id: "lucky_jade_amulet", name: "Lucky Jade Charm", description: "Significantly enhances loot tables and monster coin value drop chances.", iconPath: "combined/lucky_jade_amulet.png", critChance: 7 },
-    haste_talisman: { id: "haste_talisman", name: "Caffeinated Gold Medallion", description: "Accessory. Boosts attack and mining speed velocities by 12%.", iconPath: "combined/haste_talisman.png", speedBonus: 10 },
+    haste_talisman: { id: "haste_talisman", name: "Caffeinated Gold Medallion", description: "Accessory. Boosts attackBoost and mining speed velocities by 12%.", iconPath: "combined/haste_talisman.png", speedBonus: 10 },
     diving_charm: { id: "diving_charm", name: "Fossilized Oceanic Totem", description: "Allows the user to breathe underwater for twice as long.", iconPath: "combined/diving_charm.png" },
     gravitational_orb: { id: "gravitational_orb", name: "Dense Gravitational Core", description: "Increases item pickup radius by 4 blocks and slows falling speed.", iconPath: "combined/gravitational_orb.png" },
     toxic_filter: { id: "toxic_filter", name: "Bio-Hazard Charcoal Mask", description: "Provides temporary total protection against toxic gas pockets.", iconPath: "combined/toxic_filter.png", radResistance: 40 },
