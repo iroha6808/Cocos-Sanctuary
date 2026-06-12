@@ -241,7 +241,7 @@
 - [ ] Game 場景加 `AudioManager` 節點並拖 `sceneBgm`、可選 `waterBgm`、`attackSfx`、`hitSfx`、`collectSfx`、`buySfx`、`healSfx`、`skillSfx`；`bgmFadeDuration` 控制進出水域淡入淡出。
 - [ ] 可選：Game 場景加 `ThemeManager.ts`，拖 `tintOverlay` / `tintTargets`；若勾 `autoApplyOceanTheme`，進出 OceanArea 會套 ocean/default tint。
 - [ ] Game 場景加 `EffectsManager` 節點，`effectRoot` 指向畫面 / Canvas 底下的特效容器，`particleSpriteFrame` 可用粒子圖
-- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator；Background 可拖 `zoomScaledNodes`，HP bar / EXP label 拖 `screenFixedZoomScaledNodes` 做原地縮放，避免以螢幕中心當支點跑位。
+- [ ] Main Camera 手動掛 `CameraRig.ts`；GameManager 的 `cameraRig` 欄位拖 Main Camera 上的 CameraRig component，`playerNode` 拖 Player，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 的 AutoMapGenerator；Background 可拖 `zoomScaledNodes` / `inverseZoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
 - [ ] 不要再把 legacy `CameraFollow.ts` 掛到 Main Camera；相機跟隨統一用 `CameraRig.ts`
 - [ ] 可選：調整 `CameraRig` 的 `minFollowSpeed` / `maxFollowSpeed` / `distanceSpeedK` / `distanceResponseScale` / `lookAheadScale` / `minZoomRatio` / `maxZoomRatio` / `zoomStep` / `overviewPadding` / `overviewMinZoomRatio`，或 `AutoMapGenerator.spawnShakeDuration/spawnShakeAmplitude`、`HitFeelManager` 的 hitStop / shake / zoom 數值
 - [ ] GameManager 接 `pausePanel`、`fadeOverlay`；`pausePanel` 是暫停時顯示的 UI 容器，`fadeOverlay` 是 Retry / Main Menu 切場景前淡出的全螢幕黑幕

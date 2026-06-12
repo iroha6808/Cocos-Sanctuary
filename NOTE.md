@@ -169,7 +169,8 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 - `EffectsManager.ts`：用 runtime `cc.ParticleSystem` 產生 hit / collect / heal / fire / water 五種粒子特效。
 - `InputManager.ts`：統一監聽 Game 場景 key / mouse / wheel，依 `InputContext` stack 分派 `InputAction`；新增 `Vehicle` context，載具中優先吃 A/D/W/S/Space/F。
 - `CameraRig.ts`：手動掛到 Main Camera，跟隨速度使用 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))`，再用 `minFollowSpeed/maxFollowSpeed` 夾住手感；搭配 look-ahead / shake / impulse / zoom kick 做較貼身的橡皮筋運鏡。另提供 `frameWorldRect()` / `returnToTarget()`，供自動地圖生成時暫時拉遠看完整生成範圍。
-- `CameraRig.ts`：`zoomScaledNodes` 可拖 Background 這類世界背景；`inverseZoomScaledNodes` 可拖需要反向補償 zoom、維持鋪滿畫面的背景層；`screenFixedZoomScaledNodes` 給 HP bar、EXP label 這類 HUD，只會依 zoom 原地縮放並保留節點 local position，不再用相機中心補位。
+- `CameraRig.ts`：`zoomScaledNodes` 可拖 Background 這類世界背景；`inverseZoomScaledNodes` 可拖需要反向補償 zoom、維持鋪滿畫面的背景層。`screenFixedZoomScaledNodes` 是備用 HUD 欄位；若節點已掛 `CameraUIFollower`，`CameraRig` 會自動跳過，避免兩邊搶位置。
+- `CameraUIFollower.ts`：給 `ExpLabel`、`HpBar` 這種固定螢幕位置的 HUD 使用；記住初始 camera offset，依 camera zoom 反向補位置。`compensateCameraZoomScale` 預設開啟，會在相機放大時反向縮 node，讓 HUD 螢幕大小穩定；關掉才會跟著 zoom 變大變小。
 - `CameraFollow.ts`：舊版簡單 smooth follow，已不再由 PlayerController runtime 補掛；正式展示以 `CameraRig.ts` 為主。
 - `HitFeelManager.ts`：監聽 `COMBAT_HIT_CONFIRMED`，命中時觸發短 hit stop、隨機方向的小幅鏡頭回饋與目標閃白。
 - `RealtimeStateReporter.ts`：每 0.25 秒把玩家 `username`、`clientId`、`sessionId`、scene、position、HP、Score、EXP、背包摘要 / 統計與 online / paused 狀態寫入 `SaveService` localStorage，之後可換成 Firebase realtime 資料流。
@@ -582,7 +583,7 @@ Portal / enemy pathing
 ## Cocos Inspector 設定
 
 - `GameManager.ts`：接 `playerNode`、`cameraRig`、`autoMapGenerator`、`pausePanel`、`fadeOverlay`；`cameraRig` 拖 Main Camera 上的 `CameraRig.ts` component，`autoMapGenerator` 拖 `Canvas/platform/auto generate` 上的 AutoMapGenerator。Pause panel 按鈕綁 `resumeGame()`、`restartGame()`、`backToMenu()`、`saveCurrentGame()`。
-- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。overview 期間也會套用 `addShake()`，所以地圖逐塊生成可看到震動。Background 可拖 `zoomScaledNodes` 或 `inverseZoomScaledNodes`；HP bar / EXP label 請拖 `screenFixedZoomScaledNodes`，它會原地縮放，不會以螢幕中心當支點位移。
+- `CameraRig.ts`：掛在 Main Camera；`target` 可直接拖 Player，或由 `GameManager.playerNode` 在 onLoad 指派。不要依賴 `Canvas/Player`、`Canvas/Main Camera` 這種路徑查找。`+/-` 會調整 `baseZoom`，可用 `minZoomRatio/maxZoomRatio/zoomStep` 限制縮放範圍；`overviewPadding` / `overviewMinZoomRatio` 控制自動生成 overview 拉遠程度。overview 期間也會套用 `addShake()`，所以地圖逐塊生成可看到震動。Background 可拖 `zoomScaledNodes` 或 `inverseZoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
 - `CameraFollow.ts`：legacy 備用腳本，預設 `useXLimit/useYLimit` 關閉；目前不建議掛在 Main Camera，避免和 `CameraRig.ts` 同時控制相機。
 - `PlayerController.ts`：接 `craftingUI`，並確認 `inventoryUI`、`dialogueUI`、`merchantShopUI` 仍有綁定。
 - `UIManager.ts`：接 `hpBar`、`expLabel`、`scoreLabel`。

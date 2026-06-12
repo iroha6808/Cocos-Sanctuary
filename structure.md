@@ -269,7 +269,9 @@ Canvas
 - `CameraRig.ts`
   - Main Camera runtime 依 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))` 取得 follow speed，再用 `1 - exp(-followSpeed * dt)` 算追趕比例；支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
   - `frameWorldRect()` / `returnToTarget()` 可暫時切到 overview framing，用於自動地圖逐塊生成展示；overview 期間仍可疊加 `addShake()`。
-  - `zoomScaledNodes` / `inverseZoomScaledNodes` 給背景層跟 camera zoom 同步縮放或反向補償；`screenFixedZoomScaledNodes` 給 HP bar、EXP label 這類 HUD，在縮放時保留節點 local position，只做原地縮放。
+  - `zoomScaledNodes` / `inverseZoomScaledNodes` 給背景層跟 camera zoom 同步縮放或反向補償；`screenFixedZoomScaledNodes` 是備用 HUD 欄位，若節點已掛 `CameraUIFollower` 會自動跳過。
+  - `CameraUIFollower.ts`
+    - 給 `ExpLabel`、`HpBar` 這種固定螢幕位置的 HUD 使用，依 camera zoom 反向補位置；`compensateCameraZoomScale` 預設開啟，會補償相機放大造成的 HUD 視覺放大。
 - `CameraFollow.ts`
   - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
@@ -589,7 +591,7 @@ Canvas
   - 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；fruitore prefab 未建立時留空即可。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
-  - Background 若要跟 zoom 變大變小，拖到 Main Camera 的 `CameraRig.zoomScaledNodes`；HP bar、EXP label 拖 `screenFixedZoomScaledNodes`，讓 HUD 原地縮放，避免以螢幕中心當支點跑位。
+  - Background 若要跟 zoom 變大變小，拖到 Main Camera 的 `CameraRig.zoomScaledNodes`；ExpLabel / HpBar 保持掛 `CameraUIFollower`，targetCamera 拖 Main Camera，`compensateCameraZoomScale` 保持勾選，不需要再拖到 `screenFixedZoomScaledNodes`。
   - `DialogueUIController` prompt / panel / option labels
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
   - `DialogueUIController` / `InventoryUIController` / `MerchantShopUIController` / `CraftingUIController` 可接 `mainCameraNode`，讓 panel 跟鏡頭並 clamp。
