@@ -14105,12 +14105,8 @@
     "descriptionLabel": {
       "__id__": 288
     },
-    "canvasNode": {
-      "__id__": 2
-    },
-    "mainCameraNode": {
-      "__id__": 3
-    },
+    "canvasNode": null,
+    "mainCameraNode": null,
     "followMainCamera": true,
     "clampToCameraView": true,
     "screenPadding": 24,
@@ -14133,9 +14129,7 @@
       "__id__": 20
     },
     "buildUIAtRuntime": true,
-    "mainCameraNode": {
-      "__id__": 3
-    },
+    "mainCameraNode": null,
     "followMainCamera": true,
     "clampToCameraView": true,
     "screenPadding": 24,
@@ -14406,7 +14400,6 @@
     },
     "followX": true,
     "followY": true,
-    "compensateCameraZoomScale": true,
     "_id": "3fSpoFn29Nsr1uJUCzqONM"
   },
   {
@@ -14637,7 +14630,6 @@
     },
     "followX": true,
     "followY": true,
-    "compensateCameraZoomScale": true,
     "_id": "bdTqh8Qf9Ed5rQ6BMb7bkO"
   },
   {
@@ -17691,7 +17683,6 @@
     },
     "followX": true,
     "followY": true,
-    "compensateCameraZoomScale": true,
     "_id": "d4ypVDfEVJCpEY57VEKBzh"
   },
   {
@@ -17720,15 +17711,9 @@
       "__id__": 295
     },
     "_enabled": true,
-    "floatingRoot": {
-      "__id__": 295
-    },
-    "canvasNode": {
-      "__id__": 2
-    },
-    "mainCameraNode": {
-      "__id__": 3
-    },
+    "floatingRoot": null,
+    "canvasNode": null,
+    "mainCameraNode": null,
     "promptNode": {
       "__id__": 306
     },
@@ -17786,12 +17771,8 @@
     "root": {
       "__id__": 318
     },
-    "canvasNode": {
-      "__id__": 2
-    },
-    "mainCameraNode": {
-      "__id__": 3
-    },
+    "canvasNode": null,
+    "mainCameraNode": null,
     "followMainCamera": true,
     "clampToCameraView": true,
     "screenPadding": 24,
@@ -18138,7 +18119,9 @@
     "rockPlatform5Prefab": {
       "__uuid__": "c16dcc12-5235-48de-bd26-4d9b7ec9520c"
     },
-    "resourceRoot": null,
+    "resourceRoot": {
+      "__id__": 378
+    },
     "appleBushPrefab": {
       "__uuid__": "272a0285-edee-46c1-87c9-b3d8c83367c4"
     },
@@ -18183,7 +18166,7 @@
     "scatterCount": 3,
     "showDebugBounds": false,
     "spawnResourcesOnFlatPlatforms": true,
-    "resourceSpawnChance": 0.8,
+    "resourceSpawnChance": 0.9,
     "resourceEdgePadding": 130,
     "resourceYOffset": 24,
     "resourceScaleMultiplier": 1,
@@ -64188,6 +64171,63 @@
     "_groupIndex": 0,
     "groupIndex": 0,
     "_id": "c7h8lIakhJOb7/ieYpWB+d"
+  },
+  {
+    "__type__": "a9105LQcd1MjZ32yPVF2AMs",
+    "_name": "",
+    "_objFlags": 0,
+    "node": {
+      "__id__": 375
+    },
+    "_enabled": true,
+    "terrainRoot": {
+      "__id__": 378
+    },
+    "resourceRoot": {
+      "__id__": 378
+    },
+    "cameraRig": {
+      "__id__": 8
+    },
+    "autoMapGenerator": {
+      "__id__": 377
+    },
+    "playerNode": {
+      "__id__": 9
+    },
+    "editorStatusLabel": null,
+    "selectionGraphics": null,
+    "rockLeftPrefab": {
+      "__uuid__": "51d200c6-e31f-446a-b1d4-b6ca227a09a7"
+    },
+    "rockRightPrefab": {
+      "__uuid__": "c0f631c2-51f4-4122-8a6a-2ea8b490a3d4"
+    },
+    "rockPlatform3Prefab": {
+      "__uuid__": "3bd5835d-fd45-4b42-a6a5-38b292291662"
+    },
+    "rockPlatform4Prefab": {
+      "__uuid__": "6a7ab277-d507-496f-a3db-ee12804c622a"
+    },
+    "rockPlatform5Prefab": {
+      "__uuid__": "c16dcc12-5235-48de-bd26-4d9b7ec9520c"
+    },
+    "appleBushPrefab": {
+      "__uuid__": "272a0285-edee-46c1-87c9-b3d8c83367c4"
+    },
+    "oreRockPrefab": {
+      "__uuid__": "86d5c66d-efa3-477b-bd17-7c65496cc731"
+    },
+    "fruitOrePrefab": {
+      "__uuid__": "42b4f847-4f0b-473f-906c-841c87002b81"
+    },
+    "terrainScale": 10,
+    "resourceScale": 1,
+    "rotationStep": 15,
+    "deleteRadius": 120,
+    "previewOpacity": 120,
+    "alignPlacementCenterToCursor": true,
+    "_id": "18Xgxut0tA+pCMY77h6r25"
   },
   {
     "__type__": "cc.Node",
