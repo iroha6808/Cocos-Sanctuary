@@ -461,6 +461,9 @@ Canvas
   - 可掛在 Canvas 或獨立 `MenuEffectsRoot`；生成物會停用 RigidBody / PhysicsCollider，避免干擾 UI。
 - `Scene/GameOverScene.ts`
   - 死亡結算場景腳本，讀取最後一局結果，顯示玩家、Score、EXP，支援 Retry、Main Menu、Submit Score。
+- `Scene/GameOverFloatingDecor.ts`
+  - GameOver 裝飾特效腳本，可讓 `floatingNodes` 內的既有節點原地慢慢左右晃動與微旋轉，不會淡出或消失。
+  - 也可生成 prefab / spriteFrame 補畫面裝飾；生成物會停用 RigidBody / PhysicsCollider，離開場景時清掉。
 
 ## UI
 
