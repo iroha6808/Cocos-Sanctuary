@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5b75879e-bf6b-478a-8357-12e614fe896e",
+  "uuid": "ae4ee5c4-525c-4e35-9fba-e924d0762b29",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "skill3 icecube fx01": {
       "ver": "1.0.6",
-      "uuid": "dd8c0088-aff3-4025-889f-984ad5b84f05",
+      "uuid": "123cc82b-9515-479f-bd48-63ee32633eb5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5b75879e-bf6b-478a-8357-12e614fe896e",
+      "rawTextureUuid": "ae4ee5c4-525c-4e35-9fba-e924d0762b29",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

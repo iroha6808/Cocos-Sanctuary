@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3bef3a7a-88ca-488e-a9f6-733cdb69cfad",
+  "uuid": "dd25a884-1ca8-4b76-bcdf-c48b48f9e135",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Ac_Medal03": {
       "ver": "1.0.6",
-      "uuid": "b3e615d4-25f9-41f6-bbc9-43007dda5f28",
+      "uuid": "242cef8a-27f6-42a5-bd74-03cd48af2777",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3bef3a7a-88ca-488e-a9f6-733cdb69cfad",
+      "rawTextureUuid": "dd25a884-1ca8-4b76-bcdf-c48b48f9e135",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

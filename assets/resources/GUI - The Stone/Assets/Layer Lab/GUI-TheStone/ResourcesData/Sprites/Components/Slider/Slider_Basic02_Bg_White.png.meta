@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f3886829-1f90-409e-99e7-6096a4a099dd",
+  "uuid": "e7cd0024-7fec-43dc-9ad1-45581f43f591",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Basic02_Bg_White": {
       "ver": "1.0.6",
-      "uuid": "13f5b9f8-5943-4b25-9a60-1cbbe1b5667a",
+      "uuid": "531565b0-cbf7-4325-a970-47edd7dde07a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f3886829-1f90-409e-99e7-6096a4a099dd",
+      "rawTextureUuid": "e7cd0024-7fec-43dc-9ad1-45581f43f591",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

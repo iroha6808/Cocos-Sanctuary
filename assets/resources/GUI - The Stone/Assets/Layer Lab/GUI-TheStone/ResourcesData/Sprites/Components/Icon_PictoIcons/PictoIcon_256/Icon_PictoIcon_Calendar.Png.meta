@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a8702b5d-dec6-4f5a-8a03-6db4fbecf6c0",
+  "uuid": "e8ccd31d-89e8-4d2d-96bb-041872bb0f88",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Calendar": {
       "ver": "1.0.6",
-      "uuid": "ce8d2d94-458f-4f78-a01f-8023c7b25d14",
+      "uuid": "0ba51d4f-08f0-4ebb-af27-6ea9bae183c3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a8702b5d-dec6-4f5a-8a03-6db4fbecf6c0",
+      "rawTextureUuid": "e8ccd31d-89e8-4d2d-96bb-041872bb0f88",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

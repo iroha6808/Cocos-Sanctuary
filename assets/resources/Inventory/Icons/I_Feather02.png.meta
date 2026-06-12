@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a470280d-1feb-4c12-91e0-6f160f178a67",
+  "uuid": "63d537e3-da8c-4905-bf6f-67988752f730",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Feather02": {
       "ver": "1.0.6",
-      "uuid": "a85fef88-7115-4e65-8428-9dc0e9dfcc6c",
+      "uuid": "1644afa2-80cc-4357-b356-06e132534d3a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a470280d-1feb-4c12-91e0-6f160f178a67",
+      "rawTextureUuid": "63d537e3-da8c-4905-bf6f-67988752f730",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

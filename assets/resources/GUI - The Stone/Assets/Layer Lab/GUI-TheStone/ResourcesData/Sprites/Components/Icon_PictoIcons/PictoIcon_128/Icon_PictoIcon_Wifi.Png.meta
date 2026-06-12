@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5fbb45e6-b94b-47fa-a646-577f408c951c",
+  "uuid": "769452db-4cc9-4382-b165-2667d8c7b892",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Wifi": {
       "ver": "1.0.6",
-      "uuid": "d6f39f8e-ebd1-4298-99ea-e7ee27ef3637",
+      "uuid": "273d898b-63aa-4d27-b8b0-9ed9eb6f8dd1",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5fbb45e6-b94b-47fa-a646-577f408c951c",
+      "rawTextureUuid": "769452db-4cc9-4382-b165-2667d8c7b892",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

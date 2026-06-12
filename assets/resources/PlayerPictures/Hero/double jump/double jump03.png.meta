@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fa500aff-aa34-452f-9acf-ee57034ebbad",
+  "uuid": "dddb5a36-a945-45db-993a-37619b96ad11",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "double jump03": {
       "ver": "1.0.6",
-      "uuid": "bf8d10bf-a525-4353-b4c9-f569735d51ab",
+      "uuid": "ae990ec2-b84c-413a-b2db-f11dcb66379a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fa500aff-aa34-452f-9acf-ee57034ebbad",
+      "rawTextureUuid": "dddb5a36-a945-45db-993a-37619b96ad11",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

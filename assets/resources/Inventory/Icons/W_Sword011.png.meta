@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "af475f2f-b4ff-4785-acea-bc658276558b",
+  "uuid": "7b57e2a3-cb69-4b6e-91f7-068ae56b2a03",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Sword011": {
       "ver": "1.0.6",
-      "uuid": "8d5c3ad7-3daa-40a9-a597-3c19fb08f8d5",
+      "uuid": "24ec4226-95b4-45ac-a830-41673e701a85",
       "importer": "sprite-frame",
-      "rawTextureUuid": "af475f2f-b4ff-4785-acea-bc658276558b",
+      "rawTextureUuid": "7b57e2a3-cb69-4b6e-91f7-068ae56b2a03",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

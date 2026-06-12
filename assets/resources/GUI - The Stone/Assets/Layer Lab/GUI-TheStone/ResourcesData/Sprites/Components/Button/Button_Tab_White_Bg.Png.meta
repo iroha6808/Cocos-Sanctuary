@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "903fadd3-f93a-4530-8e40-3f1c7606020b",
+  "uuid": "ed37fc88-011c-40f6-bc2c-48a5a6a07e96",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Button_Tab_White_Bg": {
       "ver": "1.0.6",
-      "uuid": "22177bd9-4f21-4a42-a57a-014b3a3737e7",
+      "uuid": "257b6327-7e9f-4e15-b8e6-49e22bc2af37",
       "importer": "sprite-frame",
-      "rawTextureUuid": "903fadd3-f93a-4530-8e40-3f1c7606020b",
+      "rawTextureUuid": "ed37fc88-011c-40f6-bc2c-48a5a6a07e96",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

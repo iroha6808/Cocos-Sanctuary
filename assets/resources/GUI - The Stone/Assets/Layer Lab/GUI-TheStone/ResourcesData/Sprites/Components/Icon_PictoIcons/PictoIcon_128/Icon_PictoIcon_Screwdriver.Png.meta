@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "be418fc1-7110-4c60-99aa-cf2776ff50d1",
+  "uuid": "93491c85-44ef-40f7-a070-9bf2320dd024",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Screwdriver": {
       "ver": "1.0.6",
-      "uuid": "035e795e-7dfc-4157-96a7-3ea6d7dc50db",
+      "uuid": "85bb18ea-3388-4305-8a95-0c9a8368d993",
       "importer": "sprite-frame",
-      "rawTextureUuid": "be418fc1-7110-4c60-99aa-cf2776ff50d1",
+      "rawTextureUuid": "93491c85-44ef-40f7-a070-9bf2320dd024",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

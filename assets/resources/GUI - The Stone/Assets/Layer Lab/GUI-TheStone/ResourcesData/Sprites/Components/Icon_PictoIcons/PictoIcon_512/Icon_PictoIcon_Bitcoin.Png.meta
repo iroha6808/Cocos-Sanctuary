@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "72b55dae-84e9-4fa5-80bf-8e171b67af9f",
+  "uuid": "123852b5-8346-4d4d-8b61-03cd1cb86480",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Bitcoin": {
       "ver": "1.0.6",
-      "uuid": "9d907e4e-165b-422f-9984-8ff3a86dadb1",
+      "uuid": "2b5553f2-4c3f-4b4e-95ae-abbbe3da3dd7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "72b55dae-84e9-4fa5-80bf-8e171b67af9f",
+      "rawTextureUuid": "123852b5-8346-4d4d-8b61-03cd1cb86480",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

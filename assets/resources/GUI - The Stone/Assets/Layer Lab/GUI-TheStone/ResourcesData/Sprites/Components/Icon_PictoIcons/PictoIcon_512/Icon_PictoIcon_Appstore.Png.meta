@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "97551816-3309-4cb7-8ea5-11ba98063841",
+  "uuid": "cab6f77b-7550-43fd-8ab5-8e95e6db5522",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Appstore": {
       "ver": "1.0.6",
-      "uuid": "80ff57e8-3be7-49ba-90f8-c6d1bade05de",
+      "uuid": "82c084c6-9dc2-419f-b855-9d1041848587",
       "importer": "sprite-frame",
-      "rawTextureUuid": "97551816-3309-4cb7-8ea5-11ba98063841",
+      "rawTextureUuid": "cab6f77b-7550-43fd-8ab5-8e95e6db5522",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

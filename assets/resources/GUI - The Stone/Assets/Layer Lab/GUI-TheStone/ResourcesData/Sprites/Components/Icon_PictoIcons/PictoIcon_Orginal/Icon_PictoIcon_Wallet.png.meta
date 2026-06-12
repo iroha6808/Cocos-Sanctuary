@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6b22e43f-a196-43e6-972b-8c8810218d97",
+  "uuid": "ce919ae1-afce-4e99-a91a-dbdeb1cddd96",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Wallet": {
       "ver": "1.0.6",
-      "uuid": "a3e78d74-fee8-48e1-9463-d9c186eaca70",
+      "uuid": "9dc36d35-7903-4e07-a1a5-a75efa4fe81c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6b22e43f-a196-43e6-972b-8c8810218d97",
+      "rawTextureUuid": "ce919ae1-afce-4e99-a91a-dbdeb1cddd96",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

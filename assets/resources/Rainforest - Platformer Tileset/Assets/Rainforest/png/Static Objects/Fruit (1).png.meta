@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "59730057-ddaa-4b66-99d0-7223391a7fa0",
+  "uuid": "5555a1a6-c487-4b42-9d6f-2d0294f1609a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Fruit (1)": {
       "ver": "1.0.6",
-      "uuid": "dc75e054-a2fe-455c-b699-a36779198038",
+      "uuid": "85f8f6eb-9c72-4847-98ff-c9d9868b03d0",
       "importer": "sprite-frame",
-      "rawTextureUuid": "59730057-ddaa-4b66-99d0-7223391a7fa0",
+      "rawTextureUuid": "5555a1a6-c487-4b42-9d6f-2d0294f1609a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

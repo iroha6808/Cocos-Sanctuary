@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f938035e-fa8b-46a7-ab41-1f314c9d9146",
+  "uuid": "7113ae12-0ecb-46c9-9fa3-7eea54fbdf1a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Ladder (2)": {
       "ver": "1.0.6",
-      "uuid": "e39fe4bb-eb6b-4bbb-a6af-c4fd82ae8733",
+      "uuid": "ab251f21-f343-4ed6-b599-c0c43238f8b3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f938035e-fa8b-46a7-ab41-1f314c9d9146",
+      "rawTextureUuid": "7113ae12-0ecb-46c9-9fa3-7eea54fbdf1a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

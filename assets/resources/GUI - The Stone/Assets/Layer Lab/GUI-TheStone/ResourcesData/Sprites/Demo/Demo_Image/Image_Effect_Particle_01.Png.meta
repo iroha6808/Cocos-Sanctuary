@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "4d88c480-4130-44e9-8fec-fe6fbe64cee8",
+  "uuid": "d6b6aef0-8f91-4dee-882e-b9488e223010",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Image_Effect_Particle_01": {
       "ver": "1.0.6",
-      "uuid": "303aa34c-bcd1-4ff3-af73-580db2d1100a",
+      "uuid": "d17a2ab8-71bc-40e5-abd4-641f84ae2c74",
       "importer": "sprite-frame",
-      "rawTextureUuid": "4d88c480-4130-44e9-8fec-fe6fbe64cee8",
+      "rawTextureUuid": "d6b6aef0-8f91-4dee-882e-b9488e223010",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

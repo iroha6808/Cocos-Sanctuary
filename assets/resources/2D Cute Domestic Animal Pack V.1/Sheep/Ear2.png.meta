@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "83ee5480-fad2-406d-a33c-88f06d07bb64",
+  "uuid": "a478688d-ca28-48b4-bda8-8e59954611b4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Ear2": {
       "ver": "1.0.6",
-      "uuid": "ba0b7255-a31d-4261-9594-bbdb702b5829",
+      "uuid": "76873122-2fbd-4626-992f-976025528e2e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "83ee5480-fad2-406d-a33c-88f06d07bb64",
+      "rawTextureUuid": "a478688d-ca28-48b4-bda8-8e59954611b4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

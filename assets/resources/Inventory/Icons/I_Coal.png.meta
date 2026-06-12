@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c78d2dd5-5627-4378-8f76-f9627bf1f941",
+  "uuid": "28ca20e1-b81e-421d-a915-38fb4e847a9d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Coal": {
       "ver": "1.0.6",
-      "uuid": "280e3185-69cf-4aef-876f-9310581810aa",
+      "uuid": "dfa46681-f73b-46f0-930f-585ba7597939",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c78d2dd5-5627-4378-8f76-f9627bf1f941",
+      "rawTextureUuid": "28ca20e1-b81e-421d-a915-38fb4e847a9d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

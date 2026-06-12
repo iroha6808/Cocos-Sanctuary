@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8e8ffdc6-d22c-45ad-a7d6-c2429ddf281d",
+  "uuid": "690e86a6-2e36-4ecc-8e97-0b6c894b7675",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_FishTail": {
       "ver": "1.0.6",
-      "uuid": "3b3f3839-d5c3-4a69-9ed9-c439f804ed30",
+      "uuid": "cf656a0e-6f21-4844-8f5a-648d7145ec0a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8e8ffdc6-d22c-45ad-a7d6-c2429ddf281d",
+      "rawTextureUuid": "690e86a6-2e36-4ecc-8e97-0b6c894b7675",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

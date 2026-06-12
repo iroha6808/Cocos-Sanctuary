@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e896cc75-ec60-4fc1-8f2d-8b44ee86471b",
+  "uuid": "adcef8b7-ce6e-4612-94b1-a0ef9261f106",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "InputField_Icon_Email": {
       "ver": "1.0.6",
-      "uuid": "35d26305-f4b0-4c51-a4a7-26421e5d33e0",
+      "uuid": "964a8023-5b55-4ef3-b12b-791ee6d475d2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e896cc75-ec60-4fc1-8f2d-8b44ee86471b",
+      "rawTextureUuid": "adcef8b7-ce6e-4612-94b1-a0ef9261f106",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

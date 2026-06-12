@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "554b2c6b-01de-4802-8b5a-78855773cb97",
+  "uuid": "6ce628ac-2e45-4421-a668-6a8d0707ffa7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ResourceBar_Icon_Coin": {
       "ver": "1.0.6",
-      "uuid": "2332ab44-d409-4a58-8314-aad18887f856",
+      "uuid": "6558afa7-6069-4881-8f46-ec7750b62d5e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "554b2c6b-01de-4802-8b5a-78855773cb97",
+      "rawTextureUuid": "6ce628ac-2e45-4421-a668-6a8d0707ffa7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

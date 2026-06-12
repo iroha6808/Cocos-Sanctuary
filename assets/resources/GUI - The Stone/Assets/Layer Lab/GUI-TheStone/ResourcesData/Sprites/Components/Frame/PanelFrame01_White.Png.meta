@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8a670142-c927-4fb1-8228-fa047e8edd06",
+  "uuid": "60eb630f-73d6-4b55-8334-1480dd703579",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "PanelFrame01_White": {
       "ver": "1.0.6",
-      "uuid": "258c05a9-9b15-4a2b-83b4-c0b5d4b8e372",
+      "uuid": "eef1648e-5216-4442-b4b8-eb9b8d3d1e1b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8a670142-c927-4fb1-8228-fa047e8edd06",
+      "rawTextureUuid": "60eb630f-73d6-4b55-8334-1480dd703579",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

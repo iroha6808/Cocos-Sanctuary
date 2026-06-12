@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a84560c1-1519-4646-a3d5-3cbf9681cd0f",
+  "uuid": "9e1e3fb2-c7ad-4d39-8065-4d7505dc574e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Fist005": {
       "ver": "1.0.6",
-      "uuid": "902506e8-2d4e-4114-ab56-3fe9691b1475",
+      "uuid": "16230671-df28-44a2-9474-fa8ccc85976c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a84560c1-1519-4646-a3d5-3cbf9681cd0f",
+      "rawTextureUuid": "9e1e3fb2-c7ad-4d39-8065-4d7505dc574e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

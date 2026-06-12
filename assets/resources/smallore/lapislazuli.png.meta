@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "720b434b-10f6-492b-ae7e-4de0dc67e171",
+  "uuid": "843f9058-a51f-469a-8352-04e2610c1c69",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "lapislazuli": {
       "ver": "1.0.6",
-      "uuid": "76d81931-8efc-46a8-b1a5-ae4e82526847",
+      "uuid": "ab7711c8-420d-4b4e-ba21-4fe9fbb3f744",
       "importer": "sprite-frame",
-      "rawTextureUuid": "720b434b-10f6-492b-ae7e-4de0dc67e171",
+      "rawTextureUuid": "843f9058-a51f-469a-8352-04e2610c1c69",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

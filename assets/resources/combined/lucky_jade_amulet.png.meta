@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "18c1b98a-d87e-4f74-add0-7126621a37ed",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 226,
+  "height": 224,
+  "platformSettings": {},
+  "subMetas": {
+    "lucky_jade_amulet": {
+      "ver": "1.0.6",
+      "uuid": "df052f61-3d8e-49c0-90f8-d1317c04df71",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "18c1b98a-d87e-4f74-add0-7126621a37ed",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 18,
+      "offsetY": 25.5,
+      "trimX": 55,
+      "trimY": 0,
+      "width": 152,
+      "height": 173,
+      "rawWidth": 226,
+      "rawHeight": 224,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

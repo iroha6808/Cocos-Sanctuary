@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "95af2ec8-c613-4615-b88a-eec2e370d620",
+  "uuid": "71895e6b-d678-4637-b525-3d4b140847d1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "07_LuckyBox": {
       "ver": "1.0.6",
-      "uuid": "be80746d-432d-485f-b9b2-45cfd981c761",
+      "uuid": "782e3950-f7eb-4c38-889b-7000f16a21cf",
       "importer": "sprite-frame",
-      "rawTextureUuid": "95af2ec8-c613-4615-b88a-eec2e370d620",
+      "rawTextureUuid": "71895e6b-d678-4637-b525-3d4b140847d1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "4502d030-9ebd-426c-ab89-c8bced08972f",
+  "uuid": "b2686735-0dc3-4ccf-8aa3-b194210a35c0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "SlipperyIceTiles": {
       "ver": "1.0.6",
-      "uuid": "2717b648-b6a4-4a36-a96c-5bd7c50ebe21",
+      "uuid": "97ea5956-4ff7-4065-af87-2cecc4a4b64d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "4502d030-9ebd-426c-ab89-c8bced08972f",
+      "rawTextureUuid": "b2686735-0dc3-4ccf-8aa3-b194210a35c0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

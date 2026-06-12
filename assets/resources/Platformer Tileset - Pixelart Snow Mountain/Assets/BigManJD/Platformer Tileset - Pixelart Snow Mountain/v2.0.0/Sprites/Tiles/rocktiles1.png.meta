@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c5d93991-4029-4904-8459-9baf9666e006",
+  "uuid": "6ad43a3d-0dd1-426f-9c03-aff3e7dac9a8",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rocktiles1": {
       "ver": "1.0.6",
-      "uuid": "e1b95249-2f7e-461b-9ccb-f1fe6f6ea614",
+      "uuid": "4acfeedb-246e-4c96-a299-960677a99b49",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c5d93991-4029-4904-8459-9baf9666e006",
+      "rawTextureUuid": "6ad43a3d-0dd1-426f-9c03-aff3e7dac9a8",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

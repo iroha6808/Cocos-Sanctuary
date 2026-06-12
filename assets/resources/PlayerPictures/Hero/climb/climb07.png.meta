@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ebed69f2-240b-48f4-836f-488b125e677b",
+  "uuid": "c1e6efeb-cfdd-4872-8c7b-3518bef81ba3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "climb07": {
       "ver": "1.0.6",
-      "uuid": "2270a38f-4c62-43ac-8728-a8743aac5fce",
+      "uuid": "4ab82f61-918c-44bf-8403-8b9432446740",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ebed69f2-240b-48f4-836f-488b125e677b",
+      "rawTextureUuid": "c1e6efeb-cfdd-4872-8c7b-3518bef81ba3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

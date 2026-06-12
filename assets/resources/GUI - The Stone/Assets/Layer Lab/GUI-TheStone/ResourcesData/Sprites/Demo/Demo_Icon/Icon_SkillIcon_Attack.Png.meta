@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2060e8a6-efa2-47a6-b818-cad74e7e25d5",
+  "uuid": "b8535a1d-0e39-4320-8df8-acba3a5d4b80",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_SkillIcon_Attack": {
       "ver": "1.0.6",
-      "uuid": "7a82b6d1-023a-4cb6-8566-5e2c929e64bc",
+      "uuid": "5c0e4713-406b-4ff0-b4bc-bea9722d4ed6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2060e8a6-efa2-47a6-b818-cad74e7e25d5",
+      "rawTextureUuid": "b8535a1d-0e39-4320-8df8-acba3a5d4b80",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

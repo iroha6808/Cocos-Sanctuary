@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c6754b0a-8aca-4c32-aa01-72c3ebfb5560",
+  "uuid": "1801ad6e-6764-4b1f-9767-e6367f20c17e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "button_orange_hover": {
       "ver": "1.0.6",
-      "uuid": "ae639e24-51e3-4169-9933-b35431d20ce3",
+      "uuid": "df7fabae-3c89-4106-b370-555eae62b001",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c6754b0a-8aca-4c32-aa01-72c3ebfb5560",
+      "rawTextureUuid": "1801ad6e-6764-4b1f-9767-e6367f20c17e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

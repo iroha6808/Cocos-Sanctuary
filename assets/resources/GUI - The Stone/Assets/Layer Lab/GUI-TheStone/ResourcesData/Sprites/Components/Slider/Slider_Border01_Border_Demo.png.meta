@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0c638bfb-6aee-46c2-8fbf-5755ed9a4317",
+  "uuid": "0336c9b2-af5a-404f-8e9c-985382cbc2fd",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Border01_Border_Demo": {
       "ver": "1.0.6",
-      "uuid": "f5aa9b11-cd2e-4a4d-8f4e-6b06abcd4aeb",
+      "uuid": "b2546e43-0ae3-46b9-a090-43f48763622c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0c638bfb-6aee-46c2-8fbf-5755ed9a4317",
+      "rawTextureUuid": "0336c9b2-af5a-404f-8e9c-985382cbc2fd",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

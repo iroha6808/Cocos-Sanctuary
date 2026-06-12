@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f8b260cd-3d6a-4292-ba45-70e61438909b",
+  "uuid": "8fb8184e-7028-4eb4-ab9d-b79b42b0d069",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ResourceBar_Bg01": {
       "ver": "1.0.6",
-      "uuid": "f9ec3e71-ccdd-4689-b42a-032dc7c2c047",
+      "uuid": "0025ed27-b666-49fe-add8-035ea091fc52",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f8b260cd-3d6a-4292-ba45-70e61438909b",
+      "rawTextureUuid": "8fb8184e-7028-4eb4-ab9d-b79b42b0d069",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

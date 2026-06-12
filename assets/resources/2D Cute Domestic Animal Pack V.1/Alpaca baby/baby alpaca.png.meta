@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a8116ace-a96b-41aa-ba42-ae73c977d6e0",
+  "uuid": "3d7cafcd-c971-46f7-bb7a-c9596c5453dd",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "baby alpaca": {
       "ver": "1.0.6",
-      "uuid": "a05af1b0-aa2a-4e8c-8027-193de72f1688",
+      "uuid": "20cd525d-fa75-4811-bab9-97a11b49c250",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a8116ace-a96b-41aa-ba42-ae73c977d6e0",
+      "rawTextureUuid": "3d7cafcd-c971-46f7-bb7a-c9596c5453dd",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

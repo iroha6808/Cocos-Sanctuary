@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "580f486d-4813-41c6-ac34-aa798efdd320",
+  "uuid": "2c49ea0d-6aa5-4be2-b74a-7598282659aa",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "bluepotion": {
       "ver": "1.0.6",
-      "uuid": "feda6966-0884-4d78-839f-8f091d4afcac",
+      "uuid": "86833a32-7453-4244-80c9-1eadf0c50451",
       "importer": "sprite-frame",
-      "rawTextureUuid": "580f486d-4813-41c6-ac34-aa798efdd320",
+      "rawTextureUuid": "2c49ea0d-6aa5-4be2-b74a-7598282659aa",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

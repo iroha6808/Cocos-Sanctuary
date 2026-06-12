@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c55d4cb9-7232-4db0-ac18-edfed3a16228",
+  "uuid": "202c3fda-5418-4c27-b1e5-3a59421468e8",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Gold_Sword": {
       "ver": "1.0.6",
-      "uuid": "e15ad6d5-6cd0-460a-a1e3-c63d438d3b8a",
+      "uuid": "e5bb887c-2fe2-41cf-915d-8f11866fa142",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c55d4cb9-7232-4db0-ac18-edfed3a16228",
+      "rawTextureUuid": "202c3fda-5418-4c27-b1e5-3a59421468e8",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

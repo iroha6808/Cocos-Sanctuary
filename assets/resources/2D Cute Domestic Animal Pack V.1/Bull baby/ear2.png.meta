@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b8b61d09-88cb-46b7-ae62-d8a4c20b1405",
+  "uuid": "eba7e462-baf1-4e6a-a820-126fed1c04f6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ear2": {
       "ver": "1.0.6",
-      "uuid": "d50926b2-e0d1-4138-a3e4-20e8dae3b4fd",
+      "uuid": "6af0b8d9-6482-44f5-8778-dd0abf58afe9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b8b61d09-88cb-46b7-ae62-d8a4c20b1405",
+      "rawTextureUuid": "eba7e462-baf1-4e6a-a820-126fed1c04f6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

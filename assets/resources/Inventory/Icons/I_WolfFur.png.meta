@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3138d3da-26f5-4c89-a546-89c80bb457b5",
+  "uuid": "c5c6e88a-4e83-4c96-884c-d1fee923e8db",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_WolfFur": {
       "ver": "1.0.6",
-      "uuid": "97e396d1-075b-4287-bae7-8e356e891a11",
+      "uuid": "8149d79a-f86d-4fa7-8525-baf44b05357f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3138d3da-26f5-4c89-a546-89c80bb457b5",
+      "rawTextureUuid": "c5c6e88a-4e83-4c96-884c-d1fee923e8db",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

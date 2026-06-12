@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "be037d2f-edb9-4248-b316-665988318e6a",
+  "uuid": "6988e259-753d-4d55-a39f-111ea8106562",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Googleplay": {
       "ver": "1.0.6",
-      "uuid": "e240e20d-1fb9-4b05-94c0-f232c0f0c109",
+      "uuid": "b2ae3169-cb78-4006-a049-c24a767eaf39",
       "importer": "sprite-frame",
-      "rawTextureUuid": "be037d2f-edb9-4248-b316-665988318e6a",
+      "rawTextureUuid": "6988e259-753d-4d55-a39f-111ea8106562",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

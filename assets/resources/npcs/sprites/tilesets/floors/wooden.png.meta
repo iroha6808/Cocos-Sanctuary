@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a9bc6b46-776f-4a19-8dbd-461f12c18a95",
+  "uuid": "cfe3f164-89c9-4860-88be-ac299cc51ac5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "wooden": {
       "ver": "1.0.6",
-      "uuid": "cdf9ca1e-c287-46a8-a2d0-13470327ac20",
+      "uuid": "cb12f8f2-571f-4107-9e02-5a4511394a43",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a9bc6b46-776f-4a19-8dbd-461f12c18a95",
+      "rawTextureUuid": "cfe3f164-89c9-4860-88be-ac299cc51ac5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

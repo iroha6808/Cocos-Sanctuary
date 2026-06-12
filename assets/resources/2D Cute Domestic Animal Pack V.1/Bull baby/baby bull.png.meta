@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "7ae7f2da-e5b7-402f-aada-6499ca5e1fd4",
+  "uuid": "40ea3eac-d455-4b21-ab2f-00ea3cb3c5e0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "baby bull": {
       "ver": "1.0.6",
-      "uuid": "b92d51c4-2e9b-4b47-ad84-ab8f353a49f8",
+      "uuid": "e1a43abb-5d44-4a0a-9e45-7e4acf07363d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "7ae7f2da-e5b7-402f-aada-6499ca5e1fd4",
+      "rawTextureUuid": "40ea3eac-d455-4b21-ab2f-00ea3cb3c5e0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6940bd3c-8184-4ab3-a7e0-0d93e456b2d0",
+  "uuid": "b673e8ac-dc8e-4168-b94e-01896d98fc77",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_BronzeBar": {
       "ver": "1.0.6",
-      "uuid": "c8226556-46dd-4e52-85f6-1dcdf2c058a0",
+      "uuid": "41ce6642-4e41-48a4-99c9-6cc5ab2a5490",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6940bd3c-8184-4ab3-a7e0-0d93e456b2d0",
+      "rawTextureUuid": "b673e8ac-dc8e-4168-b94e-01896d98fc77",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

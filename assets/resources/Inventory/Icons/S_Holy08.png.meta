@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "95370a5a-eb37-47e5-8b20-93c2c5a6b6d9",
+  "uuid": "8185a559-151c-439b-9b31-3c06a997b08b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Holy08": {
       "ver": "1.0.6",
-      "uuid": "8703fe50-f580-4083-a092-35de37bd4093",
+      "uuid": "5cef24a1-ae0d-48be-9987-5b4f69eb8216",
       "importer": "sprite-frame",
-      "rawTextureUuid": "95370a5a-eb37-47e5-8b20-93c2c5a6b6d9",
+      "rawTextureUuid": "8185a559-151c-439b-9b31-3c06a997b08b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

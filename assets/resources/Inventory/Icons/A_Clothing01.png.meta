@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9f984909-0d23-4af8-861f-c7fcc0516fcb",
+  "uuid": "6abd4ba1-5ba5-4346-a378-92a96e803c7c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "A_Clothing01": {
       "ver": "1.0.6",
-      "uuid": "e1c267d2-77bd-4b65-ac61-76ced2a80f1f",
+      "uuid": "4ee265dc-cd24-414f-a36d-590c6d87de3f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9f984909-0d23-4af8-861f-c7fcc0516fcb",
+      "rawTextureUuid": "6abd4ba1-5ba5-4346-a378-92a96e803c7c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

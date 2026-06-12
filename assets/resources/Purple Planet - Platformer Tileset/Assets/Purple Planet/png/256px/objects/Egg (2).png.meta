@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "32b405c6-3e36-4974-9a28-5d8c54eb8765",
+  "uuid": "a2d84d6a-2c67-4e3c-8406-6358644a7774",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Egg (2)": {
       "ver": "1.0.6",
-      "uuid": "1c6ea855-da66-47db-9799-bcc66b887357",
+      "uuid": "8480bef5-cccf-412f-9e23-992afd608da1",
       "importer": "sprite-frame",
-      "rawTextureUuid": "32b405c6-3e36-4974-9a28-5d8c54eb8765",
+      "rawTextureUuid": "a2d84d6a-2c67-4e3c-8406-6358644a7774",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

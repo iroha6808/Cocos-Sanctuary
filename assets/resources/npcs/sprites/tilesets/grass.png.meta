@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c4ac86ca-c1a9-49fa-8f25-b83a9ced39a8",
+  "uuid": "1668aecb-abe7-4c32-ad75-7bcc8a8a4281",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "grass": {
       "ver": "1.0.6",
-      "uuid": "b5fb0a2b-5af1-44fa-a7ba-381ff944de02",
+      "uuid": "6beaa8d3-187e-400f-a061-9b1ca0affdce",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c4ac86ca-c1a9-49fa-8f25-b83a9ced39a8",
+      "rawTextureUuid": "1668aecb-abe7-4c32-ad75-7bcc8a8a4281",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

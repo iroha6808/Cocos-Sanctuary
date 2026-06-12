@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f436fed3-f868-46ae-bb8d-cdef12181aeb",
+  "uuid": "92727103-bbc5-4ae2-934e-120653874306",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "E_Bones02": {
       "ver": "1.0.6",
-      "uuid": "aa146379-8a43-45a9-b9f2-1d70b00d0008",
+      "uuid": "58903c05-bf7b-4c35-99be-b2037f4b1434",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f436fed3-f868-46ae-bb8d-cdef12181aeb",
+      "rawTextureUuid": "92727103-bbc5-4ae2-934e-120653874306",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

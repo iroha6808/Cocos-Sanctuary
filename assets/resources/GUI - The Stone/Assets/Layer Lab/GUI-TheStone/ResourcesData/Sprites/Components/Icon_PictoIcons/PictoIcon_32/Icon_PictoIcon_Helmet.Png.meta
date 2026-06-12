@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d8d40d62-a986-4926-969e-1ac955a88d77",
+  "uuid": "292dae96-733e-4c0a-af0f-590629014ed5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Helmet": {
       "ver": "1.0.6",
-      "uuid": "1bc3c153-c5f6-4a66-ba7f-d5f835577f82",
+      "uuid": "1f6ca6a5-7edf-4bbc-9649-66d7f9014726",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d8d40d62-a986-4926-969e-1ac955a88d77",
+      "rawTextureUuid": "292dae96-733e-4c0a-af0f-590629014ed5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

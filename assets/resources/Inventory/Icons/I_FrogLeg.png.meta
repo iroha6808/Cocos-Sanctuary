@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5896109d-b8b8-4e1f-8d03-c84709fa1f7a",
+  "uuid": "920f105c-47f0-49a8-b487-f73ee6b6325e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_FrogLeg": {
       "ver": "1.0.6",
-      "uuid": "c10f8d45-5ae3-4a5e-8da3-a012f5e41d07",
+      "uuid": "529cb3e3-feb3-4a56-853e-6e9822e121ae",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5896109d-b8b8-4e1f-8d03-c84709fa1f7a",
+      "rawTextureUuid": "920f105c-47f0-49a8-b487-f73ee6b6325e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

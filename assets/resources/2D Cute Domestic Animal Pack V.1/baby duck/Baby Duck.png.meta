@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5192fb75-edc3-41e5-8736-eb9170729c2d",
+  "uuid": "715a9ef9-ccad-48e1-8b08-46c55c84461e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Baby Duck": {
       "ver": "1.0.6",
-      "uuid": "780a6106-c837-478a-9eb6-28fd8990da64",
+      "uuid": "1a83fbd3-e2f6-40e2-a138-e191473f5fdc",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5192fb75-edc3-41e5-8736-eb9170729c2d",
+      "rawTextureUuid": "715a9ef9-ccad-48e1-8b08-46c55c84461e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

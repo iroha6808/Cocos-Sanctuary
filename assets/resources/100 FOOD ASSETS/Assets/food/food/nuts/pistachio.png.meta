@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "dd1f00df-5d28-45f1-a05f-123f91614acd",
+  "uuid": "63585989-d451-420e-9f97-0526a62ac2f0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "pistachio": {
       "ver": "1.0.6",
-      "uuid": "435cfd74-d373-4916-8a38-a1adca4c2702",
+      "uuid": "b358e5e2-ef1c-42c0-bf3a-4469a5155eb2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "dd1f00df-5d28-45f1-a05f-123f91614acd",
+      "rawTextureUuid": "63585989-d451-420e-9f97-0526a62ac2f0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

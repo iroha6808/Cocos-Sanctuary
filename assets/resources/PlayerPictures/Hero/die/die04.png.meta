@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d6e8776a-d077-46fa-b4b2-fbc47865d49b",
+  "uuid": "503b2055-05a8-40e7-82bb-8c933805f219",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "die04": {
       "ver": "1.0.6",
-      "uuid": "86d7690b-498d-4c41-ae10-f185140e9f07",
+      "uuid": "dc1f33b4-be47-4e07-aa5d-98c16ebd803d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d6e8776a-d077-46fa-b4b2-fbc47865d49b",
+      "rawTextureUuid": "503b2055-05a8-40e7-82bb-8c933805f219",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

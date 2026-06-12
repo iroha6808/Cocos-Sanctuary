@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f5029fdf-34d6-4216-9630-e5599e8ad5f4",
+  "uuid": "b3624fd1-579b-4d35-80f4-51c946a09349",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "water_lillies": {
       "ver": "1.0.6",
-      "uuid": "f2118fa0-9b0a-4725-af1c-6384c758b402",
+      "uuid": "fd1119ea-1350-4dda-a022-930ccc1a880d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f5029fdf-34d6-4216-9630-e5599e8ad5f4",
+      "rawTextureUuid": "b3624fd1-579b-4d35-80f4-51c946a09349",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

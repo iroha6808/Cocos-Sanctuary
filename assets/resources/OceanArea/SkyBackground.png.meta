@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5fb4b1a8-58f3-48d7-bd85-31c76c6d2d8c",
+  "uuid": "1a0afddc-6a52-42a1-b71f-be98cfb30220",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "SkyBackground": {
       "ver": "1.0.6",
-      "uuid": "978a0345-cb1f-46c7-b590-9e757fcfb121",
+      "uuid": "c2dbf879-a9dc-409f-ac27-c66e0cefae71",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5fb4b1a8-58f3-48d7-bd85-31c76c6d2d8c",
+      "rawTextureUuid": "1a0afddc-6a52-42a1-b71f-be98cfb30220",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

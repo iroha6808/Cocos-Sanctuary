@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a427b7e5-03b0-4f40-975f-48002f30292f",
+  "uuid": "40441469-518c-4162-8501-7dd3e12b2d7f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_GoldBar": {
       "ver": "1.0.6",
-      "uuid": "483ef26b-5b3d-4be2-b07c-8d0d8dfe6e97",
+      "uuid": "b3c5995c-c636-4c9b-855c-c07312cc0ffd",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a427b7e5-03b0-4f40-975f-48002f30292f",
+      "rawTextureUuid": "40441469-518c-4162-8501-7dd3e12b2d7f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6c6df470-258d-4b21-bdc5-5e6e07485669",
+  "uuid": "39bebf87-4e48-4563-b687-285d9cbf6479",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Button01_Blue": {
       "ver": "1.0.6",
-      "uuid": "ef133075-2151-4e32-ad9c-3bf35984834e",
+      "uuid": "989ab81e-d6a3-479a-b567-85cf19d4b26d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6c6df470-258d-4b21-bdc5-5e6e07485669",
+      "rawTextureUuid": "39bebf87-4e48-4563-b687-285d9cbf6479",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "418e41c3-04b8-4c25-ac7c-572789e15c87",
+  "uuid": "c05bd5eb-65c0-47a9-befc-358ace008e49",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Ac_Ring01": {
       "ver": "1.0.6",
-      "uuid": "fe996439-25b7-4589-a57a-d6a12c450e73",
+      "uuid": "10344c52-6400-470f-bc1e-e759d2efc2e4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "418e41c3-04b8-4c25-ac7c-572789e15c87",
+      "rawTextureUuid": "c05bd5eb-65c0-47a9-befc-358ace008e49",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

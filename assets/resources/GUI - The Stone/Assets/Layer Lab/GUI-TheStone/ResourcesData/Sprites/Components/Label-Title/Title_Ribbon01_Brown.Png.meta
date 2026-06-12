@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "468492b3-15bc-4f3a-9460-f3c8cd7afac4",
+  "uuid": "500a8e3c-08f0-493e-999d-0e239bc4823d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Title_Ribbon01_Brown": {
       "ver": "1.0.6",
-      "uuid": "95a2fc34-df8c-4e2c-a7b5-5e68967bb84b",
+      "uuid": "9476e7c2-18ae-40c2-b509-ac2870a4019c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "468492b3-15bc-4f3a-9460-f3c8cd7afac4",
+      "rawTextureUuid": "500a8e3c-08f0-493e-999d-0e239bc4823d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

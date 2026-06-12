@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0209f027-12fe-4c8c-9ba2-0150fe27e458",
+  "uuid": "9d847f96-1b2b-4aab-94e4-86d46ffcafb9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Joysick_Point": {
       "ver": "1.0.6",
-      "uuid": "2fb231f6-1f4d-4481-8b5d-4f1d6c786af3",
+      "uuid": "f5739b94-ec1a-46e2-b77c-174830808e2f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0209f027-12fe-4c8c-9ba2-0150fe27e458",
+      "rawTextureUuid": "9d847f96-1b2b-4aab-94e4-86d46ffcafb9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

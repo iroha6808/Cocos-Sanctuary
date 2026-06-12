@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "209f75ae-4391-4487-8f1e-704767fca261",
+  "uuid": "efb239ac-70fe-4f65-bac5-83198d9837ef",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Skeleton Mage": {
       "ver": "1.0.6",
-      "uuid": "59c2c04a-03fb-4744-9303-7d175f1944a8",
+      "uuid": "3cbaf5d9-08f0-453f-8428-4456e9f2bb08",
       "importer": "sprite-frame",
-      "rawTextureUuid": "209f75ae-4391-4487-8f1e-704767fca261",
+      "rawTextureUuid": "efb239ac-70fe-4f65-bac5-83198d9837ef",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

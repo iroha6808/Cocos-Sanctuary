@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8f6e9688-3fb9-4f73-a904-8ff0c119c343",
+  "uuid": "a45816ec-fa45-4269-a614-d46ee90a95ef",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Infinity": {
       "ver": "1.0.6",
-      "uuid": "3f9ffb1e-9c37-45a6-a163-13548e1f3a80",
+      "uuid": "4147d928-ff91-488f-b8d3-88c811b868f4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8f6e9688-3fb9-4f73-a904-8ff0c119c343",
+      "rawTextureUuid": "a45816ec-fa45-4269-a614-d46ee90a95ef",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

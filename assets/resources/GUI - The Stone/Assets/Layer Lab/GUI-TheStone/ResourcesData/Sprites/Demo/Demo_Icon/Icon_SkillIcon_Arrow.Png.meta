@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8ec15616-b541-46e6-bbbe-74cf3ebce363",
+  "uuid": "ee162e99-9918-4b2d-8b81-553422156823",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_SkillIcon_Arrow": {
       "ver": "1.0.6",
-      "uuid": "04954c7e-0e70-4ea8-989d-9a4299cccb34",
+      "uuid": "46fbcebf-7a8f-4451-98fd-e9fcfeb4b183",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8ec15616-b541-46e6-bbbe-74cf3ebce363",
+      "rawTextureUuid": "ee162e99-9918-4b2d-8b81-553422156823",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

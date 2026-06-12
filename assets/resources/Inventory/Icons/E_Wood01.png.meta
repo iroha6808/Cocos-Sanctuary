@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cccc86b3-89c9-4752-a9a4-3630fa629425",
+  "uuid": "8674e506-cbd6-4114-b929-d91cd4744ba9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "E_Wood01": {
       "ver": "1.0.6",
-      "uuid": "0ef896b4-40b5-4655-8e4f-2a6d843ae65a",
+      "uuid": "bd7ea5d8-d320-4815-ae69-6d5cc6d145fc",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cccc86b3-89c9-4752-a9a4-3630fa629425",
+      "rawTextureUuid": "8674e506-cbd6-4114-b929-d91cd4744ba9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

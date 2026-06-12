@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e8d63f79-1136-498b-9ae7-69c02686c471",
+  "uuid": "d268aa1a-c4ab-43e8-ab7b-4ea978f91882",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "tealprism": {
       "ver": "1.0.6",
-      "uuid": "ac4ae1f1-ba4b-42aa-bad0-d1b8a7d153ff",
+      "uuid": "a6f4a153-45a2-4ed6-9594-2539b7cfa1b3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e8d63f79-1136-498b-9ae7-69c02686c471",
+      "rawTextureUuid": "d268aa1a-c4ab-43e8-ab7b-4ea978f91882",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

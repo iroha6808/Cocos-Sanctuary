@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "018aa990-6dac-4514-b038-b22f7631e2bd",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 226,
+  "height": 224,
+  "platformSettings": {},
+  "subMetas": {
+    "amethyst_lamp": {
+      "ver": "1.0.6",
+      "uuid": "bf42eaec-1a17-4614-86bc-d4aecdf3ce01",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "018aa990-6dac-4514-b038-b22f7631e2bd",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 5.5,
+      "offsetY": -9,
+      "trimX": 41,
+      "trimY": 41,
+      "width": 155,
+      "height": 160,
+      "rawWidth": 226,
+      "rawHeight": 224,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

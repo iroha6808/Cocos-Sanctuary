@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6fe79ca9-3e3c-4de1-b878-5d78331557f0",
+  "uuid": "408e4c5c-fee1-49ff-ade2-67f6fff09e13",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Bottle02": {
       "ver": "1.0.6",
-      "uuid": "62143f3d-b1b0-4868-8288-8d123b6a89d6",
+      "uuid": "340c6c2f-ee72-4845-a793-c7b8d6597e8d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6fe79ca9-3e3c-4de1-b878-5d78331557f0",
+      "rawTextureUuid": "408e4c5c-fee1-49ff-ade2-67f6fff09e13",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

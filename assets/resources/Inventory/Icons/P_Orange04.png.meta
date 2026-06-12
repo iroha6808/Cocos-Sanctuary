@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "59aaf366-696f-462b-a0e1-19ddbc8b4ef8",
+  "uuid": "24389d21-bb68-4c87-82f9-f943775e10b7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "P_Orange04": {
       "ver": "1.0.6",
-      "uuid": "450febfe-f983-4aab-a04a-2a88f42f66c6",
+      "uuid": "598c6f02-2e77-4d7e-9856-9a5a9f2ac200",
       "importer": "sprite-frame",
-      "rawTextureUuid": "59aaf366-696f-462b-a0e1-19ddbc8b4ef8",
+      "rawTextureUuid": "24389d21-bb68-4c87-82f9-f943775e10b7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

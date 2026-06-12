@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "79abd4d9-9bc7-4944-80e2-5f8bd3270407",
+  "uuid": "c7a1eb8d-8026-4f5d-bc2d-eb998e570da4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "baby sheep": {
       "ver": "1.0.6",
-      "uuid": "5cb9fb85-932d-44df-8f84-7e03e850072e",
+      "uuid": "9c0ec5bf-13b6-413d-9e98-4489d2d6c043",
       "importer": "sprite-frame",
-      "rawTextureUuid": "79abd4d9-9bc7-4944-80e2-5f8bd3270407",
+      "rawTextureUuid": "c7a1eb8d-8026-4f5d-bc2d-eb998e570da4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

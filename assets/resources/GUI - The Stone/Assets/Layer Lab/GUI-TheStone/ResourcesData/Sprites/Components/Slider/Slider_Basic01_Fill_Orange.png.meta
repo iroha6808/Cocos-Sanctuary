@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8f1c2fc8-461d-408d-8f31-94c4e3214947",
+  "uuid": "7385a02d-9d2b-4d19-b68d-eb273bf3d548",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Basic01_Fill_Orange": {
       "ver": "1.0.6",
-      "uuid": "c889a181-3e1f-42dc-80d3-96371fd0f6d9",
+      "uuid": "2132a102-094e-4038-8139-b8f60759155a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8f1c2fc8-461d-408d-8f31-94c4e3214947",
+      "rawTextureUuid": "7385a02d-9d2b-4d19-b68d-eb273bf3d548",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

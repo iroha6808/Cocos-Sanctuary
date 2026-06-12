@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "dba77f0e-aeea-4c34-9404-cfab8b826868",
+  "uuid": "8c1032f8-41d2-46a1-bffa-04a3e93c1445",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Button01_Red": {
       "ver": "1.0.6",
-      "uuid": "66628021-ea08-4fe8-a50d-a84a21da2328",
+      "uuid": "851b4056-3272-4736-a1f0-a5fe9539c2a9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "dba77f0e-aeea-4c34-9404-cfab8b826868",
+      "rawTextureUuid": "8c1032f8-41d2-46a1-bffa-04a3e93c1445",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

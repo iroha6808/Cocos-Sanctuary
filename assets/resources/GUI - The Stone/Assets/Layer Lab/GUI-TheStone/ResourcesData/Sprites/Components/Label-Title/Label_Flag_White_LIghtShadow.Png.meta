@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e0bfc7b0-4c08-49d0-8189-4043c2f27eea",
+  "uuid": "f61bd313-a08e-470b-aa95-2d77552ec9eb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Label_Flag_White_LIghtShadow": {
       "ver": "1.0.6",
-      "uuid": "e22bbc53-c30c-4038-9c74-142157473569",
+      "uuid": "f7cd33de-3527-4015-b4cc-fcd4f136d21f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e0bfc7b0-4c08-49d0-8189-4043c2f27eea",
+      "rawTextureUuid": "f61bd313-a08e-470b-aa95-2d77552ec9eb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

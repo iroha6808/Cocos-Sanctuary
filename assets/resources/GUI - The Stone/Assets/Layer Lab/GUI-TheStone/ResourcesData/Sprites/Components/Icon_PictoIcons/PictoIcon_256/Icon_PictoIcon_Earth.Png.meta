@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a14c4c63-a3d5-436b-8a7e-e45daf7c5db4",
+  "uuid": "91950c97-b485-4722-ad78-e0325b5fa65b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Earth": {
       "ver": "1.0.6",
-      "uuid": "a89e8a15-ef74-4c4f-afb8-0f5c90df0527",
+      "uuid": "0e76223c-a3af-4a6e-8887-f6fed7e2ac4b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a14c4c63-a3d5-436b-8a7e-e45daf7c5db4",
+      "rawTextureUuid": "91950c97-b485-4722-ad78-e0325b5fa65b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

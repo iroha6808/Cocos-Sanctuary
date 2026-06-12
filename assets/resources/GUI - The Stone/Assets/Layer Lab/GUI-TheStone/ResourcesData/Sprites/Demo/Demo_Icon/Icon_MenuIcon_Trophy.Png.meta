@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f04d3cd3-7101-4126-9cc4-b6fbd4c5c64c",
+  "uuid": "f136e6c5-0936-4097-b81e-41f1a4d1d964",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_MenuIcon_Trophy": {
       "ver": "1.0.6",
-      "uuid": "8564c2ec-c11a-4076-b9a2-c8a5e2bfc2b4",
+      "uuid": "532e276d-e018-4edd-8959-049b32010e9b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f04d3cd3-7101-4126-9cc4-b6fbd4c5c64c",
+      "rawTextureUuid": "f136e6c5-0936-4097-b81e-41f1a4d1d964",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

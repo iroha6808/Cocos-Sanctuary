@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "99b6877a-1627-4b09-84f7-6f1adca6f0eb",
+  "uuid": "610fa31f-8d5f-4950-9a36-8a1625d1d845",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Horn2": {
       "ver": "1.0.6",
-      "uuid": "609f6420-02c7-4c4a-9610-9c723fd40f9a",
+      "uuid": "2706a6f7-9f8c-4828-bb89-ceac0f9e7490",
       "importer": "sprite-frame",
-      "rawTextureUuid": "99b6877a-1627-4b09-84f7-6f1adca6f0eb",
+      "rawTextureUuid": "610fa31f-8d5f-4950-9a36-8a1625d1d845",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

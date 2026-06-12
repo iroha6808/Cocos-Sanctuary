@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b0f4630f-3166-4fe7-b97b-5066bc8c0184",
+  "uuid": "586033a8-4310-4274-9ef4-af78a21ba6ce",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Image_DefeatScene_Skull2": {
       "ver": "1.0.6",
-      "uuid": "a06f8f1e-42ed-49f0-af9d-24762bc54c41",
+      "uuid": "fdd90b72-58e2-43e1-89d3-0ea8fce4d68f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b0f4630f-3166-4fe7-b97b-5066bc8c0184",
+      "rawTextureUuid": "586033a8-4310-4274-9ef4-af78a21ba6ce",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fdd377e2-cba4-4d1e-a2e9-14addbc74698",
+  "uuid": "1f6f5040-4b72-4cd8-a51e-d29c1f5e5527",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_SkillIcon_Energe": {
       "ver": "1.0.6",
-      "uuid": "4238a2f3-67e2-4721-bce9-3c544050b54b",
+      "uuid": "35d4b4af-b281-4da2-8ab3-8bea996a0657",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fdd377e2-cba4-4d1e-a2e9-14addbc74698",
+      "rawTextureUuid": "1f6f5040-4b72-4cd8-a51e-d29c1f5e5527",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

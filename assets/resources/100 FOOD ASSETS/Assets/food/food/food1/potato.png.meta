@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0c6beb71-17cb-47f2-9121-bf4b3fdb60d1",
+  "uuid": "5ed4c337-01e7-4293-86ea-10d78bd31320",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "potato": {
       "ver": "1.0.6",
-      "uuid": "3cbc8e95-7b6a-48a5-8e3e-75843cc2998a",
+      "uuid": "cda0176c-5229-4146-b710-76872c6d3add",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0c6beb71-17cb-47f2-9121-bf4b3fdb60d1",
+      "rawTextureUuid": "5ed4c337-01e7-4293-86ea-10d78bd31320",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

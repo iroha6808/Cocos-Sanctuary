@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "a4650d0e-36e7-44e1-b7db-dcdad8f6079c",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 226,
+  "height": 224,
+  "platformSettings": {},
+  "subMetas": {
+    "wayfinder_compass": {
+      "ver": "1.0.6",
+      "uuid": "e4b237d3-db78-4e37-8d80-35ffc4bd7b0d",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "a4650d0e-36e7-44e1-b7db-dcdad8f6079c",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -6,
+      "offsetY": 23.5,
+      "trimX": 41,
+      "trimY": 6,
+      "width": 132,
+      "height": 165,
+      "rawWidth": 226,
+      "rawHeight": 224,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

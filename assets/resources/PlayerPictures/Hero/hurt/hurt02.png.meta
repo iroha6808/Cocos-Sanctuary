@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "84edcfe8-dd98-4abf-a023-116d7956640b",
+  "uuid": "74194120-da09-4e5e-85d9-6b73f7835409",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "hurt02": {
       "ver": "1.0.6",
-      "uuid": "c8fecc53-00ab-445f-ba98-12fae4b0d45b",
+      "uuid": "fc688392-09b4-4cd8-ba9f-d0922e1bba22",
       "importer": "sprite-frame",
-      "rawTextureUuid": "84edcfe8-dd98-4abf-a023-116d7956640b",
+      "rawTextureUuid": "74194120-da09-4e5e-85d9-6b73f7835409",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c912e4b0-29b3-4009-b10a-c395c95bfe4e",
+  "uuid": "fc1b5c2c-e5e1-40d4-ab51-b8af74c3e231",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Nostrils": {
       "ver": "1.0.6",
-      "uuid": "e859521e-120a-419c-8f00-575d46d46226",
+      "uuid": "2bf7c959-51a2-4e71-9c63-0232bbeb1ef7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c912e4b0-29b3-4009-b10a-c395c95bfe4e",
+      "rawTextureUuid": "fc1b5c2c-e5e1-40d4-ab51-b8af74c3e231",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "77c79d9f-d052-48bc-92e8-ea5fa3618cce",
+  "uuid": "c53d92d8-056a-41ca-9e06-98e25aa6a746",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "SnowTiles": {
       "ver": "1.0.6",
-      "uuid": "5c674d03-dac1-43a0-8049-2a78f94ff516",
+      "uuid": "a0ccc827-d694-4366-9880-a43f5c09eac6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "77c79d9f-d052-48bc-92e8-ea5fa3618cce",
+      "rawTextureUuid": "c53d92d8-056a-41ca-9e06-98e25aa6a746",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

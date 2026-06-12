@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ba56a1d3-86a7-4778-9b23-f64f3d0db0ad",
+  "uuid": "0ffae060-b955-4ee8-96c4-215d12d9d080",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "silverbar": {
       "ver": "1.0.6",
-      "uuid": "38fe0517-f693-460e-889f-299f5a87da6f",
+      "uuid": "2ef1fb29-3945-45cb-9243-e757543166f0",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ba56a1d3-86a7-4778-9b23-f64f3d0db0ad",
+      "rawTextureUuid": "0ffae060-b955-4ee8-96c4-215d12d9d080",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

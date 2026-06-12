@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6af92104-b38f-447e-974e-22ffb7b31ff5",
+  "uuid": "7d79d08e-ec20-4929-9f5f-3883ed07c90b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Bush (3)": {
       "ver": "1.0.6",
-      "uuid": "8b7fbc2a-1bf3-4230-b94f-1dc1a7077f1a",
+      "uuid": "8b148917-a2b2-4b9d-a505-51ff981e9cef",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6af92104-b38f-447e-974e-22ffb7b31ff5",
+      "rawTextureUuid": "7d79d08e-ec20-4929-9f5f-3883ed07c90b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

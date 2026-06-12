@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "17ced634-5afd-43bd-ae26-b0255d6e0894",
+  "uuid": "6bad21ad-ea2f-43d4-871c-efadea4e97ad",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Mace006": {
       "ver": "1.0.6",
-      "uuid": "551b4965-c860-44d4-a92d-38e8bd37a010",
+      "uuid": "cdfcbc97-715e-4fee-9eca-954f0a502dc5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "17ced634-5afd-43bd-ae26-b0255d6e0894",
+      "rawTextureUuid": "6bad21ad-ea2f-43d4-871c-efadea4e97ad",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

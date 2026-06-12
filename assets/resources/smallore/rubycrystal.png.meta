@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "964a3e74-b501-48a0-909c-e90d09b48a81",
+  "uuid": "926351a4-806e-4910-a518-5636b346b831",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rubycrystal": {
       "ver": "1.0.6",
-      "uuid": "d0e8a1b3-4cc2-4292-972c-31a6cd1c679a",
+      "uuid": "2b0fafcb-fb94-4477-bdd7-ed5d9f60e48d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "964a3e74-b501-48a0-909c-e90d09b48a81",
+      "rawTextureUuid": "926351a4-806e-4910-a518-5636b346b831",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

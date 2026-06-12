@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5eccdc07-e859-4131-a982-83949296bdd8",
+  "uuid": "fae935b2-7861-46b2-a10c-a4b3acfb78d2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Title_Ribbon02_Orange": {
       "ver": "1.0.6",
-      "uuid": "62da67c7-63c1-4dcc-bc45-99f87158e416",
+      "uuid": "bca3d609-8757-4b9b-b0f8-023989e04484",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5eccdc07-e859-4131-a982-83949296bdd8",
+      "rawTextureUuid": "fae935b2-7861-46b2-a10c-a4b3acfb78d2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ef0ed8cb-6394-487f-a879-fdfaae7bf21e",
+  "uuid": "6b52a27a-1da6-44a8-8a7d-376ae078104a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Leaf": {
       "ver": "1.0.6",
-      "uuid": "e948f036-ecd0-413a-babd-66566b101fac",
+      "uuid": "fb211961-f4e1-4fa0-8488-c78e7f57490b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ef0ed8cb-6394-487f-a879-fdfaae7bf21e",
+      "rawTextureUuid": "6b52a27a-1da6-44a8-8a7d-376ae078104a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

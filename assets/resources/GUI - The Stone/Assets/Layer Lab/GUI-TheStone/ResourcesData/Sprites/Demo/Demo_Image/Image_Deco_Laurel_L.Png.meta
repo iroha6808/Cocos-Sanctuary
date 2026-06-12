@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "765da253-f6e0-4e18-beb0-e57179ae274d",
+  "uuid": "6302c83b-2877-45eb-90d6-6c8ef3642e46",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Image_Deco_Laurel_L": {
       "ver": "1.0.6",
-      "uuid": "4c26df9c-3f2e-4992-9716-1fb1bcb48b59",
+      "uuid": "61211908-cc05-470d-a0f4-eea5bbe61781",
       "importer": "sprite-frame",
-      "rawTextureUuid": "765da253-f6e0-4e18-beb0-e57179ae274d",
+      "rawTextureUuid": "6302c83b-2877-45eb-90d6-6c8ef3642e46",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

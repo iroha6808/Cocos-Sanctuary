@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c0406e9d-7d15-403b-a0f3-546df0a92365",
+  "uuid": "c8343132-fa16-484b-a986-1d38579913d6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "coppercluster": {
       "ver": "1.0.6",
-      "uuid": "9f4aa691-f04b-47e2-8834-ce68f570d652",
+      "uuid": "650e4f19-4c2d-4069-8e55-029f3b248003",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c0406e9d-7d15-403b-a0f3-546df0a92365",
+      "rawTextureUuid": "c8343132-fa16-484b-a986-1d38579913d6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

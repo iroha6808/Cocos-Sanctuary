@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a700386c-0f80-4029-9249-9b696c889066",
+  "uuid": "4b9bca17-89ef-4a02-a0fe-3ddf43006477",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Tentacle": {
       "ver": "1.0.6",
-      "uuid": "536a522e-a412-49f9-aea7-44f42c307a34",
+      "uuid": "0ed0ff61-9f31-44ce-ab5d-10485268ff55",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a700386c-0f80-4029-9249-9b696c889066",
+      "rawTextureUuid": "4b9bca17-89ef-4a02-a0fe-3ddf43006477",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a979bf29-90de-404d-91f2-165457a511b3",
+  "uuid": "acdd6570-19f9-497b-a2b4-023432430a8c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Earth05": {
       "ver": "1.0.6",
-      "uuid": "b3e57466-6983-44f1-9177-39f523c4c83b",
+      "uuid": "220ac5a3-9d72-4e93-aee7-f1c325d9c31d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a979bf29-90de-404d-91f2-165457a511b3",
+      "rawTextureUuid": "acdd6570-19f9-497b-a2b4-023432430a8c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

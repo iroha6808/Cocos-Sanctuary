@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9859436d-81fa-4e82-93fe-abefd5b89183",
+  "uuid": "47125127-65c6-4e3b-9f2b-5b465182e3cd",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_RabbitPaw": {
       "ver": "1.0.6",
-      "uuid": "f4c7394d-866e-4b06-b37c-093fb4c971d6",
+      "uuid": "55943224-bf8b-480c-8e76-0563e5e03dab",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9859436d-81fa-4e82-93fe-abefd5b89183",
+      "rawTextureUuid": "47125127-65c6-4e3b-9f2b-5b465182e3cd",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

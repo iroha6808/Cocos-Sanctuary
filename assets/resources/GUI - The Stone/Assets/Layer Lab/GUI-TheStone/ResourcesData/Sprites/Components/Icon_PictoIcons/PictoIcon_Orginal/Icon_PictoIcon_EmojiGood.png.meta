@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "45a67c9e-6769-42df-a50d-ddb3193e3ee4",
+  "uuid": "9a98324a-f737-449c-b906-b9ef23b67616",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_EmojiGood": {
       "ver": "1.0.6",
-      "uuid": "535d6457-a73b-4544-8643-df4698468f11",
+      "uuid": "75d58699-80e6-4410-a5f5-73d405220a94",
       "importer": "sprite-frame",
-      "rawTextureUuid": "45a67c9e-6769-42df-a50d-ddb3193e3ee4",
+      "rawTextureUuid": "9a98324a-f737-449c-b906-b9ef23b67616",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

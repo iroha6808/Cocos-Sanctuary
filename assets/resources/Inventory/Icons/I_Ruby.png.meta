@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5933b0f1-511a-49f4-b87b-24ef4c12a4c9",
+  "uuid": "1fd35b85-5027-4d25-ab77-19819949a659",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Ruby": {
       "ver": "1.0.6",
-      "uuid": "a50e1382-deb8-4e2c-a207-cbd619eda5ae",
+      "uuid": "c6f49d14-db84-4395-bb42-7645c16e436c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5933b0f1-511a-49f4-b87b-24ef4c12a4c9",
+      "rawTextureUuid": "1fd35b85-5027-4d25-ab77-19819949a659",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

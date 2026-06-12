@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "459ba051-dc1d-4862-930f-09dec7022478",
+  "uuid": "124c4cb8-9a17-4e10-b473-dcdf0107e2d9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Checken brown": {
       "ver": "1.0.6",
-      "uuid": "ce143032-fac5-4364-ad51-2c878c19b6de",
+      "uuid": "f3a621da-e813-4c26-b01b-a6bc394d261b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "459ba051-dc1d-4862-930f-09dec7022478",
+      "rawTextureUuid": "124c4cb8-9a17-4e10-b473-dcdf0107e2d9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f9fb96b0-b59a-4ae5-b56a-52898b6074ac",
+  "uuid": "d9a3d68a-fc29-465c-9730-9ecc1fc73ba9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "P_Yellow08": {
       "ver": "1.0.6",
-      "uuid": "da0f75af-a744-473e-bd2f-1623948073e6",
+      "uuid": "2fc99ba0-3ba6-45c1-b2a3-de9daf7e8548",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f9fb96b0-b59a-4ae5-b56a-52898b6074ac",
+      "rawTextureUuid": "d9a3d68a-fc29-465c-9730-9ecc1fc73ba9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

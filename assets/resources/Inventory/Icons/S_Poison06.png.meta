@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a60c5325-3fac-4288-bab1-173235397ce8",
+  "uuid": "d8e04ba0-01a0-4bcf-8c61-b404932a90e0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Poison06": {
       "ver": "1.0.6",
-      "uuid": "0d48ad3e-7de0-46ca-95ed-3edeb219714a",
+      "uuid": "9e3645e5-a012-4933-86a0-d24be2019c90",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a60c5325-3fac-4288-bab1-173235397ce8",
+      "rawTextureUuid": "d8e04ba0-01a0-4bcf-8c61-b404932a90e0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

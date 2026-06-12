@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "00392a2c-77bb-45ac-a535-706642008828",
+  "uuid": "773fde7f-1e6d-4ad3-a20a-7033e17951af",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Dagger015": {
       "ver": "1.0.6",
-      "uuid": "db9e8127-7257-45bf-8392-3e5e55cc0a57",
+      "uuid": "4b800fcf-a542-4038-9f71-f5178b0200ce",
       "importer": "sprite-frame",
-      "rawTextureUuid": "00392a2c-77bb-45ac-a535-706642008828",
+      "rawTextureUuid": "773fde7f-1e6d-4ad3-a20a-7033e17951af",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

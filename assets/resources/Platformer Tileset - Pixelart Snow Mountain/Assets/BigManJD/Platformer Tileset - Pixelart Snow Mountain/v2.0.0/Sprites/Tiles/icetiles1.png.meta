@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6f371f58-6341-4a25-83eb-e2e75b3df51a",
+  "uuid": "44d4df90-b5cc-4ff7-9a93-9b93d5d4893c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "icetiles1": {
       "ver": "1.0.6",
-      "uuid": "06bc8900-5edb-4178-9c86-ee604350f873",
+      "uuid": "5ee6c5a7-2a20-4dab-9c44-d5ab0526dc57",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6f371f58-6341-4a25-83eb-e2e75b3df51a",
+      "rawTextureUuid": "44d4df90-b5cc-4ff7-9a93-9b93d5d4893c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

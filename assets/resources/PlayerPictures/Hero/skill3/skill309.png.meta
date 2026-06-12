@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d74e66ad-5b58-4414-8697-6806f494e62f",
+  "uuid": "12b42f2b-2656-465b-8c14-eeedf90d8050",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "skill309": {
       "ver": "1.0.6",
-      "uuid": "ab920ff7-5bea-439d-bae1-e8c3b9cef152",
+      "uuid": "b75c2684-780a-4c44-8294-be7efe71af61",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d74e66ad-5b58-4414-8697-6806f494e62f",
+      "rawTextureUuid": "12b42f2b-2656-465b-8c14-eeedf90d8050",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

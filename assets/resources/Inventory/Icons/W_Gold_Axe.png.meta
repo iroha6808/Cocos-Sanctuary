@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "81d78f08-e2dd-4fb4-a748-aeffb8a324fd",
+  "uuid": "e855369d-6191-4701-99fc-5c529b4adc8f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Gold_Axe": {
       "ver": "1.0.6",
-      "uuid": "e1fc492d-a165-452b-8ee7-1dadf75ecbe4",
+      "uuid": "ed5ee3a9-37dd-498e-aceb-37cf541efdf6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "81d78f08-e2dd-4fb4-a748-aeffb8a324fd",
+      "rawTextureUuid": "e855369d-6191-4701-99fc-5c529b4adc8f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

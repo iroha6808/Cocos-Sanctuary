@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8b6f36b3-de29-43a5-88ab-c84250cc320b",
+  "uuid": "1f88b5c9-cd95-4ede-9efb-04f42fa81e25",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Coffee": {
       "ver": "1.0.6",
-      "uuid": "2c7c67af-a016-4d16-a051-f1820d884e5c",
+      "uuid": "f8f728cd-be17-4b4f-85e8-e2f637ff3587",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8b6f36b3-de29-43a5-88ab-c84250cc320b",
+      "rawTextureUuid": "1f88b5c9-cd95-4ede-9efb-04f42fa81e25",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

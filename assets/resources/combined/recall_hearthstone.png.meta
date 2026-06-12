@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "bfba9603-728b-4a95-ab20-63ab741e05b3",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 226,
+  "height": 224,
+  "platformSettings": {},
+  "subMetas": {
+    "recall_hearthstone": {
+      "ver": "1.0.6",
+      "uuid": "363bbfaa-6b47-4ac5-929d-b9d5651bd58f",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "bfba9603-728b-4a95-ab20-63ab741e05b3",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 9.5,
+      "offsetY": 25,
+      "trimX": 53,
+      "trimY": 18,
+      "width": 139,
+      "height": 138,
+      "rawWidth": 226,
+      "rawHeight": 224,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

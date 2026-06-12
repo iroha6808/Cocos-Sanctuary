@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b139b4c7-6c33-429a-8b5c-75a7504158da",
+  "uuid": "f44ad763-1d68-4a90-bbc5-9df19b5af410",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "SignsDecor": {
       "ver": "1.0.6",
-      "uuid": "78febd67-cfac-4934-a7a0-be1bfb57e630",
+      "uuid": "99190089-395e-41d1-9f3e-230e494dfab9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b139b4c7-6c33-429a-8b5c-75a7504158da",
+      "rawTextureUuid": "f44ad763-1d68-4a90-bbc5-9df19b5af410",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

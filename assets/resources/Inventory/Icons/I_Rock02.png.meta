@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "07d3a412-871e-404b-af5c-001b555e8e96",
+  "uuid": "e7a2b8de-ad9f-4eb9-866d-601078fd25a3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Rock02": {
       "ver": "1.0.6",
-      "uuid": "a245a32e-e3c7-4cf1-8c85-82aae9d8326d",
+      "uuid": "2356d362-7611-459d-abcf-5e370e166e43",
       "importer": "sprite-frame",
-      "rawTextureUuid": "07d3a412-871e-404b-af5c-001b555e8e96",
+      "rawTextureUuid": "e7a2b8de-ad9f-4eb9-866d-601078fd25a3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

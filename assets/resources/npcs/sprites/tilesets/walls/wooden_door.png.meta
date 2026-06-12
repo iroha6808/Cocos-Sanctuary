@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "eb1cac97-c925-4e81-839d-f4d465314a40",
+  "uuid": "cdd4b767-57c1-4647-8ef9-685ed14228b1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "wooden_door": {
       "ver": "1.0.6",
-      "uuid": "34d5240f-2337-40ac-b3ad-b75f36045880",
+      "uuid": "91167077-8bb7-403e-88e0-f8d8046e1ec2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "eb1cac97-c925-4e81-839d-f4d465314a40",
+      "rawTextureUuid": "cdd4b767-57c1-4647-8ef9-685ed14228b1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

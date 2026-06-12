@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b264e784-ac99-4c93-94c3-753eff0c87a0",
+  "uuid": "9195d195-85ab-4438-871e-58ca9c608b40",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Baby Chick": {
       "ver": "1.0.6",
-      "uuid": "d2edd21a-3f77-476e-8863-9e0eb7135306",
+      "uuid": "019921f7-4bf2-4a3c-9bee-bcc573b70f5e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b264e784-ac99-4c93-94c3-753eff0c87a0",
+      "rawTextureUuid": "9195d195-85ab-4438-871e-58ca9c608b40",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

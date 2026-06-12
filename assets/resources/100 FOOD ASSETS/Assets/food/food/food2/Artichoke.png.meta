@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "48c58279-7f96-4f9b-818d-8f312c2cd58d",
+  "uuid": "8e80d6d1-ce54-4b4e-a796-ab054ee858ad",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Artichoke": {
       "ver": "1.0.6",
-      "uuid": "9df42ad4-e07b-4e23-950b-e1cce2abf4d2",
+      "uuid": "860663a6-e50d-40e1-9455-97c5fbe3d757",
       "importer": "sprite-frame",
-      "rawTextureUuid": "48c58279-7f96-4f9b-818d-8f312c2cd58d",
+      "rawTextureUuid": "8e80d6d1-ce54-4b4e-a796-ab054ee858ad",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

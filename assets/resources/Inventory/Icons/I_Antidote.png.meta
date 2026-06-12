@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d4de4826-7087-4a04-970f-bf842ecbb928",
+  "uuid": "ebbe8c10-1f56-40a1-9410-529ba013d340",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Antidote": {
       "ver": "1.0.6",
-      "uuid": "8bdbd18f-e0d3-4e68-9094-1d29a432e6fa",
+      "uuid": "a238d20d-966d-4c63-a75e-03a7859aa194",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d4de4826-7087-4a04-970f-bf842ecbb928",
+      "rawTextureUuid": "ebbe8c10-1f56-40a1-9410-529ba013d340",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

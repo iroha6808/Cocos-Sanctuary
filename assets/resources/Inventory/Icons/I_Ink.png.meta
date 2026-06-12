@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cf52fcee-d105-44ca-b7b1-b3097b2cfb6a",
+  "uuid": "7a0c6dd0-5e41-405d-a1f9-7b908cea8422",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Ink": {
       "ver": "1.0.6",
-      "uuid": "cd03aa4c-f395-4695-a012-eb7457df13aa",
+      "uuid": "321cb039-041c-4421-b54c-aed1b1121948",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cf52fcee-d105-44ca-b7b1-b3097b2cfb6a",
+      "rawTextureUuid": "7a0c6dd0-5e41-405d-a1f9-7b908cea8422",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

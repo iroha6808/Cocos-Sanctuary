@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ec504ae0-f8ca-462e-bd2d-91faf398d154",
+  "uuid": "e3ad6422-eb62-44fb-933a-f66708ebf09e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ResourceBar_Icon_Gem": {
       "ver": "1.0.6",
-      "uuid": "eb9cdc3c-deaf-4dd8-a2fc-f812e9b5562b",
+      "uuid": "b1f9dac0-3a80-407f-a99a-d6f96a459c76",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ec504ae0-f8ca-462e-bd2d-91faf398d154",
+      "rawTextureUuid": "e3ad6422-eb62-44fb-933a-f66708ebf09e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

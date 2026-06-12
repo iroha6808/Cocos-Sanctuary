@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "df892664-00a5-4ce8-8a6b-396b0d057252",
+  "uuid": "d9f705ea-504f-446f-bdd2-976b1116f623",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "InventoryRect": {
       "ver": "1.0.6",
-      "uuid": "917a4435-c09f-4684-a591-ee00a8565145",
+      "uuid": "569cac87-6f65-408c-b7dd-8ccddd5ac219",
       "importer": "sprite-frame",
-      "rawTextureUuid": "df892664-00a5-4ce8-8a6b-396b0d057252",
+      "rawTextureUuid": "d9f705ea-504f-446f-bdd2-976b1116f623",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

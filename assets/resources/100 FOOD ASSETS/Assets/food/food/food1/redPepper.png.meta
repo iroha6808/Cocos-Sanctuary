@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "97ec0f57-2171-4bff-9b6a-af239287fc7b",
+  "uuid": "1ca648a0-43d0-4c3d-88ad-852726f819fb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "redPepper": {
       "ver": "1.0.6",
-      "uuid": "99db22cc-1dca-407c-ad6d-af9f555cd3f9",
+      "uuid": "6a188774-04ac-4fa8-b150-f235b443a69b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "97ec0f57-2171-4bff-9b6a-af239287fc7b",
+      "rawTextureUuid": "1ca648a0-43d0-4c3d-88ad-852726f819fb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

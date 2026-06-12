@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "56f132e8-ba84-49f7-b938-b824545dbfe6",
+  "uuid": "1389691e-7d68-4865-9017-fff71406f1f0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Wattle": {
       "ver": "1.0.6",
-      "uuid": "ea65c639-9f92-476e-aa10-76a7702a16da",
+      "uuid": "96487e40-bc71-4c2c-9377-822dd5e5fd86",
       "importer": "sprite-frame",
-      "rawTextureUuid": "56f132e8-ba84-49f7-b938-b824545dbfe6",
+      "rawTextureUuid": "1389691e-7d68-4865-9017-fff71406f1f0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

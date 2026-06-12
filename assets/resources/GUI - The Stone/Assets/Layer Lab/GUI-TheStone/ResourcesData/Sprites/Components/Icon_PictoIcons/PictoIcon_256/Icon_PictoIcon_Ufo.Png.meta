@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "7d8b47c0-5e13-4911-b740-a9b6afa65e58",
+  "uuid": "a2329dac-9b9a-4b20-ba4a-7b500c9bbf1a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Ufo": {
       "ver": "1.0.6",
-      "uuid": "f45150bd-58d9-4102-b8b5-2de0ee51a6b5",
+      "uuid": "687eb6cb-74e3-4b35-9486-0d51b99694c2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "7d8b47c0-5e13-4911-b740-a9b6afa65e58",
+      "rawTextureUuid": "a2329dac-9b9a-4b20-ba4a-7b500c9bbf1a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "1498fecc-447c-4499-8572-bc6049ffbbbb",
+  "uuid": "57d9be29-8720-4ae5-8e1b-c8e140f38740",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_SkillIcon_Potion": {
       "ver": "1.0.6",
-      "uuid": "b959f140-9086-4475-832d-3a38262f9dd0",
+      "uuid": "d9aa829e-f500-4abf-b0f4-dc6e6be05530",
       "importer": "sprite-frame",
-      "rawTextureUuid": "1498fecc-447c-4499-8572-bc6049ffbbbb",
+      "rawTextureUuid": "57d9be29-8720-4ae5-8e1b-c8e140f38740",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

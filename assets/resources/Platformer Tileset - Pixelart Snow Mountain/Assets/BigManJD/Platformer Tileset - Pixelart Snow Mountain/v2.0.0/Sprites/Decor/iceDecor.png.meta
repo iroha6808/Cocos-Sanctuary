@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d2d2d5aa-e6cb-4749-869d-5f17609127cc",
+  "uuid": "53ae7787-3c15-421c-9eef-0b2f2591410a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "iceDecor": {
       "ver": "1.0.6",
-      "uuid": "613d983c-3a53-45ba-b56a-7efcd221e717",
+      "uuid": "8d6d0c0a-19c5-462b-81b7-9ce1d7a52a8b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d2d2d5aa-e6cb-4749-869d-5f17609127cc",
+      "rawTextureUuid": "53ae7787-3c15-421c-9eef-0b2f2591410a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "4c2c4957-6643-4e6d-aa52-57da546f5e8e",
+  "uuid": "18eb8c03-4df3-4743-9074-d276571365c0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "A_Shoes01": {
       "ver": "1.0.6",
-      "uuid": "53d4b35a-72f3-4736-876c-8944aab9f16b",
+      "uuid": "08dd52d3-3d28-4206-a608-5dff742d2e4e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "4c2c4957-6643-4e6d-aa52-57da546f5e8e",
+      "rawTextureUuid": "18eb8c03-4df3-4743-9074-d276571365c0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

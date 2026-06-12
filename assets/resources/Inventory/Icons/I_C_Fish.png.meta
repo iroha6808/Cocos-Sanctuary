@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a94a97a0-9ea6-418e-80bf-234cb43330b9",
+  "uuid": "64d7776e-3a24-4e86-8d1f-a7bfd693df49",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Fish": {
       "ver": "1.0.6",
-      "uuid": "4d2d6b63-1bb7-4f32-8def-03b06855cce4",
+      "uuid": "38d904d6-4df1-4cc4-b721-4a00f00d3a28",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a94a97a0-9ea6-418e-80bf-234cb43330b9",
+      "rawTextureUuid": "64d7776e-3a24-4e86-8d1f-a7bfd693df49",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

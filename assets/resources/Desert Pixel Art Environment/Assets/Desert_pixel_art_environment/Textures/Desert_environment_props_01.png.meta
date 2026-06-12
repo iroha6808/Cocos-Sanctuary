@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3842e1c0-9376-4eec-9405-8e4ee119c74a",
+  "uuid": "5ab322c4-f50c-488a-8144-cb25e54a31a0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Desert_environment_props_01": {
       "ver": "1.0.6",
-      "uuid": "f46b26ac-8dc7-437d-8748-960a81e0aa79",
+      "uuid": "30d53e2e-a8e4-43b5-9d3c-12610179f8dd",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3842e1c0-9376-4eec-9405-8e4ee119c74a",
+      "rawTextureUuid": "5ab322c4-f50c-488a-8144-cb25e54a31a0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

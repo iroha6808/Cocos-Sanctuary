@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "58cd9069-b0dd-4b01-85c4-42c97223672f",
+  "uuid": "7e4d6628-1bc8-438b-ba98-c46d3a6a1db3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "11_ShopGem": {
       "ver": "1.0.6",
-      "uuid": "648a30df-bc66-4b86-9b25-89c53a981486",
+      "uuid": "066227d2-9d99-48ce-a6c2-44a5d41e26f6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "58cd9069-b0dd-4b01-85c4-42c97223672f",
+      "rawTextureUuid": "7e4d6628-1bc8-438b-ba98-c46d3a6a1db3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d8a747b4-5b1f-4d9f-82f6-396116b8051d",
+  "uuid": "00e11b75-be00-45aa-9290-6c79f7ed0de4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "citrinegeode": {
       "ver": "1.0.6",
-      "uuid": "51e4f417-90d6-4672-8d82-d71f7198c146",
+      "uuid": "efb46c05-67bd-4429-a4c3-f95770bc33a8",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d8a747b4-5b1f-4d9f-82f6-396116b8051d",
+      "rawTextureUuid": "00e11b75-be00-45aa-9290-6c79f7ed0de4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

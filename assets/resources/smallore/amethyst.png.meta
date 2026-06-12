@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "314d5237-2804-423c-9b9a-49436678f384",
+  "uuid": "d877b166-b1c6-4739-b0a0-ead9987a8696",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "amethyst": {
       "ver": "1.0.6",
-      "uuid": "4f1d4f00-f6d7-4e5b-9c28-d01bcb28243d",
+      "uuid": "945774a1-8193-4d08-93d2-4523aa779edc",
       "importer": "sprite-frame",
-      "rawTextureUuid": "314d5237-2804-423c-9b9a-49436678f384",
+      "rawTextureUuid": "d877b166-b1c6-4739-b0a0-ead9987a8696",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

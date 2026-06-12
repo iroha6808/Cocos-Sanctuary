@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ae67396e-3594-4544-a875-da89ca037e6a",
+  "uuid": "140946bb-a546-4d13-9eae-3d7dbfeb8845",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Sandglass": {
       "ver": "1.0.6",
-      "uuid": "6b9aa98b-026a-4ba0-a264-14b12b56879e",
+      "uuid": "052b3830-1464-47e4-b80e-0da969cd5068",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ae67396e-3594-4544-a875-da89ca037e6a",
+      "rawTextureUuid": "140946bb-a546-4d13-9eae-3d7dbfeb8845",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

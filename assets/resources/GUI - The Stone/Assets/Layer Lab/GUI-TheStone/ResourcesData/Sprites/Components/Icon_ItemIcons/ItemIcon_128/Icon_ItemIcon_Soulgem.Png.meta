@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b661e0f3-5482-4c01-bffb-7b21ce5d3eac",
+  "uuid": "fd957dac-0758-4b5f-8627-034729a5e4e3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_ItemIcon_Soulgem": {
       "ver": "1.0.6",
-      "uuid": "4d09188d-2540-49ec-ad2b-2a40262c67a2",
+      "uuid": "b68d382c-4171-4e87-b4f8-696d94445e35",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b661e0f3-5482-4c01-bffb-7b21ce5d3eac",
+      "rawTextureUuid": "fd957dac-0758-4b5f-8627-034729a5e4e3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

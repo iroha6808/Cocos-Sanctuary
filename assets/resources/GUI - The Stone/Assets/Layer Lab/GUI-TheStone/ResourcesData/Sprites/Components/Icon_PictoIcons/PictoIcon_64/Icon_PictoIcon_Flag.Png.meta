@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fab5b70a-bada-4cbe-8c6b-616a10ac2d5b",
+  "uuid": "3d855787-f46f-4879-a55e-842d2f835d3d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Flag": {
       "ver": "1.0.6",
-      "uuid": "dd2b6d16-7ac5-47e7-93e0-0d386f72e8b4",
+      "uuid": "38594056-7b1b-42ff-9d43-296a150cd1d9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fab5b70a-bada-4cbe-8c6b-616a10ac2d5b",
+      "rawTextureUuid": "3d855787-f46f-4879-a55e-842d2f835d3d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

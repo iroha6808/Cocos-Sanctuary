@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "1a6e86d5-3e08-4bd4-99ee-7e5c48d916d0",
+  "uuid": "c865f930-450e-4ebc-a717-0ed1c20f4a58",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "E_Gold02": {
       "ver": "1.0.6",
-      "uuid": "4235a730-8880-42c4-a1b2-ba735c42646c",
+      "uuid": "724d16d2-123f-4f9c-ad41-6a4a19516e7b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "1a6e86d5-3e08-4bd4-99ee-7e5c48d916d0",
+      "rawTextureUuid": "c865f930-450e-4ebc-a717-0ed1c20f4a58",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

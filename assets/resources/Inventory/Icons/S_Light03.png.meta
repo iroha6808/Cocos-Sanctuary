@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "18331855-01e7-4883-b8d0-1838b0b4b329",
+  "uuid": "f17cf357-d087-4bad-a646-102ee4468764",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Light03": {
       "ver": "1.0.6",
-      "uuid": "1d7b637e-e4a6-4be6-80fa-a083fa2e1c5f",
+      "uuid": "84c1759d-f521-4e72-85cd-49b35aab1973",
       "importer": "sprite-frame",
-      "rawTextureUuid": "18331855-01e7-4883-b8d0-1838b0b4b329",
+      "rawTextureUuid": "f17cf357-d087-4bad-a646-102ee4468764",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6f7226f3-ecce-41a7-b4e5-50a982c20c53",
+  "uuid": "0bf9a48b-5901-416f-852e-b1f127d4853f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "jump attack01": {
       "ver": "1.0.6",
-      "uuid": "aaef6ddc-e88a-4990-8b03-1a0f86e9753f",
+      "uuid": "47b82435-f7a9-425c-ab66-68dcb7e7ba2a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6f7226f3-ecce-41a7-b4e5-50a982c20c53",
+      "rawTextureUuid": "0bf9a48b-5901-416f-852e-b1f127d4853f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

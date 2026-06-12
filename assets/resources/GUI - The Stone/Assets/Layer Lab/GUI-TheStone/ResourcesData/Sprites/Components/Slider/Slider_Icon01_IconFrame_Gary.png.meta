@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ea024e52-bca4-40b5-a490-9a67a7e0d261",
+  "uuid": "8401f08b-a375-4cd8-b251-79f502c43408",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Icon01_IconFrame_Gary": {
       "ver": "1.0.6",
-      "uuid": "42329077-2506-4367-bd3f-9236b26e523e",
+      "uuid": "e8ade1df-0675-480d-80e7-d4945e6c600d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ea024e52-bca4-40b5-a490-9a67a7e0d261",
+      "rawTextureUuid": "8401f08b-a375-4cd8-b251-79f502c43408",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

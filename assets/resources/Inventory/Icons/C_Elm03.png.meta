@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a4a41b44-17fe-42de-8d5c-ca830dbb2efa",
+  "uuid": "7546a9e6-0610-41b7-a411-3ff01f41ac2f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "C_Elm03": {
       "ver": "1.0.6",
-      "uuid": "c0dff5e7-52fe-4aa5-a1ce-c07c035b880d",
+      "uuid": "f1573b47-653c-40f3-a38b-e84202f5bd8f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a4a41b44-17fe-42de-8d5c-ca830dbb2efa",
+      "rawTextureUuid": "7546a9e6-0610-41b7-a411-3ff01f41ac2f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

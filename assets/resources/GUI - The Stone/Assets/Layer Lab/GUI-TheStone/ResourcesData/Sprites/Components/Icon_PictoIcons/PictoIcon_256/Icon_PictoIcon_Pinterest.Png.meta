@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "139800c5-1ccb-4e0f-97e4-261e3e21ffd7",
+  "uuid": "8714ec8e-239e-4a6b-b337-0e914d92731e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Pinterest": {
       "ver": "1.0.6",
-      "uuid": "21a0e1bf-ed1e-407d-af74-5eb03479008c",
+      "uuid": "dfe7001c-28d0-4891-b48e-a520b21b971f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "139800c5-1ccb-4e0f-97e4-261e3e21ffd7",
+      "rawTextureUuid": "8714ec8e-239e-4a6b-b337-0e914d92731e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

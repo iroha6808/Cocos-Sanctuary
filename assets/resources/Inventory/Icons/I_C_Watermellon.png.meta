@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "739e202a-ae4b-428b-bfd7-5e00c9fd25ce",
+  "uuid": "a5f7ec30-7831-44c9-8382-5faf10ab1de5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Watermellon": {
       "ver": "1.0.6",
-      "uuid": "4afa074e-770e-4ae4-acbb-feec4c069951",
+      "uuid": "cc81597c-7c79-49d0-933d-746dcec8deb6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "739e202a-ae4b-428b-bfd7-5e00c9fd25ce",
+      "rawTextureUuid": "a5f7ec30-7831-44c9-8382-5faf10ab1de5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

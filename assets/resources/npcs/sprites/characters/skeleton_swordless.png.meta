@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "42fdeefc-a0af-40d0-93a3-4a0aaa69ccf1",
+  "uuid": "17eba995-c5c5-4f8c-a374-e537b6a88bd4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "skeleton_swordless": {
       "ver": "1.0.6",
-      "uuid": "cf460402-3d87-4011-b214-a77d6034632e",
+      "uuid": "246f9892-44a3-4e9d-a6b7-4ed2910635dd",
       "importer": "sprite-frame",
-      "rawTextureUuid": "42fdeefc-a0af-40d0-93a3-4a0aaa69ccf1",
+      "rawTextureUuid": "17eba995-c5c5-4f8c-a374-e537b6a88bd4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

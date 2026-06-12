@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "1f14db23-9770-4c52-add3-2ee576767b26",
+  "uuid": "6cea63be-10e0-4dfe-92d1-b50f17aa9895",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "potions": {
       "ver": "1.0.6",
-      "uuid": "6da04d5b-6c09-4d9d-86b0-721c3e709855",
+      "uuid": "940d79e0-d5f0-484f-b979-ac46741e063c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "1f14db23-9770-4c52-add3-2ee576767b26",
+      "rawTextureUuid": "6cea63be-10e0-4dfe-92d1-b50f17aa9895",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

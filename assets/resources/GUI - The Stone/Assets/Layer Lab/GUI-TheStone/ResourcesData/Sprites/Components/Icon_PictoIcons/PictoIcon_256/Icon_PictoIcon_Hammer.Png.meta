@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "05d39161-ac1d-41b0-8743-6ebc1d7e7a32",
+  "uuid": "39226109-843b-490d-b9df-f33981220362",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Hammer": {
       "ver": "1.0.6",
-      "uuid": "984f5dd7-9612-4a68-8738-7a8640b4c494",
+      "uuid": "8bf9301c-c7cb-45fa-9ce1-d67415b00dee",
       "importer": "sprite-frame",
-      "rawTextureUuid": "05d39161-ac1d-41b0-8743-6ebc1d7e7a32",
+      "rawTextureUuid": "39226109-843b-490d-b9df-f33981220362",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

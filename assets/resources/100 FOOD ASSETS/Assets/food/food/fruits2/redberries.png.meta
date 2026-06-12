@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fb32c322-449e-4bf1-b7a4-501d49efdb3c",
+  "uuid": "5c628d06-8c56-40e6-8b28-f1d7edb2ba40",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "redberries": {
       "ver": "1.0.6",
-      "uuid": "54ef9084-fa27-4af4-8604-ac61f9308588",
+      "uuid": "154d3d6b-4dbf-47d5-94ec-424028431456",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fb32c322-449e-4bf1-b7a4-501d49efdb3c",
+      "rawTextureUuid": "5c628d06-8c56-40e6-8b28-f1d7edb2ba40",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

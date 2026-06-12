@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f8152171-f59e-4c64-adb5-344e519e4369",
+  "uuid": "1d960778-c141-47f1-910a-24aba77db0e2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "blueberrys": {
       "ver": "1.0.6",
-      "uuid": "6dd80893-ce9b-4406-bdde-1eb45b0bd0a8",
+      "uuid": "bc7601a1-3a45-4e63-9ac6-cd15937ca11c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f8152171-f59e-4c64-adb5-344e519e4369",
+      "rawTextureUuid": "1d960778-c141-47f1-910a-24aba77db0e2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

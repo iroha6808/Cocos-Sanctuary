@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "97bc09a7-8a4e-4337-b3ad-2ae8db68dee5",
+  "uuid": "6db48c1e-1ab2-4a43-9c70-f8a844dbdf5f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_GoldCoin": {
       "ver": "1.0.6",
-      "uuid": "ea77e81d-c35c-496a-ae55-8669f4108e56",
+      "uuid": "1aabf563-d32b-4d45-a150-cd0cdf7dc597",
       "importer": "sprite-frame",
-      "rawTextureUuid": "97bc09a7-8a4e-4337-b3ad-2ae8db68dee5",
+      "rawTextureUuid": "6db48c1e-1ab2-4a43-9c70-f8a844dbdf5f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8ccbe3cc-7049-4bb3-a854-678eb2b33405",
+  "uuid": "975eb94c-c6dd-4510-9250-f828ca4214f3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Skype": {
       "ver": "1.0.6",
-      "uuid": "c5263fc6-86e9-4cdf-b9fc-cd2de06253e0",
+      "uuid": "475a7f72-4ade-4640-825e-b0ba59cd9e3d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8ccbe3cc-7049-4bb3-a854-678eb2b33405",
+      "rawTextureUuid": "975eb94c-c6dd-4510-9250-f828ca4214f3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

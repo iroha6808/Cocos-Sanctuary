@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "4955dacf-187d-4658-af48-2e502b6e8a3e",
+  "uuid": "9ae45f0a-e438-41e8-8952-3f97738d3e0c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "01_Login": {
       "ver": "1.0.6",
-      "uuid": "1fe6febe-d3e9-40ea-bd20-f4bacf4d35af",
+      "uuid": "4b45378a-872a-42d6-94ba-1c57712f1d37",
       "importer": "sprite-frame",
-      "rawTextureUuid": "4955dacf-187d-4658-af48-2e502b6e8a3e",
+      "rawTextureUuid": "9ae45f0a-e438-41e8-8952-3f97738d3e0c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e07f6b7a-84fe-417b-a42a-a797f068ee7f",
+  "uuid": "605f4e12-f892-43f3-ab58-8a34cf45fc92",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Carrot": {
       "ver": "1.0.6",
-      "uuid": "4ac7210d-ac44-4f4e-bdd4-f780c300db11",
+      "uuid": "47158ffc-19bd-4c20-8f01-fcbddba07a73",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e07f6b7a-84fe-417b-a42a-a797f068ee7f",
+      "rawTextureUuid": "605f4e12-f892-43f3-ab58-8a34cf45fc92",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

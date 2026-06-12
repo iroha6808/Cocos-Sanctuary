@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "98fd7045-2d2d-4d55-9fce-d700acb30202",
+  "uuid": "31e60786-2795-47a0-9419-0eae35c91dd2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Leg2": {
       "ver": "1.0.6",
-      "uuid": "8118331d-8023-40cf-b7d5-1288b567b766",
+      "uuid": "9b437512-88dc-476e-8583-a090ac6b2c1b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "98fd7045-2d2d-4d55-9fce-d700acb30202",
+      "rawTextureUuid": "31e60786-2795-47a0-9419-0eae35c91dd2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

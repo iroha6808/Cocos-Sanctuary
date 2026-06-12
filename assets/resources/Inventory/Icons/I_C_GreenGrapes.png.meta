@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d7e5bfae-c00e-48a6-9dea-d5a92c9b48fb",
+  "uuid": "6ecebd44-4165-4cd3-ad28-78755b12ef9a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_GreenGrapes": {
       "ver": "1.0.6",
-      "uuid": "a0ff72c4-8d11-4403-84f7-927218b33096",
+      "uuid": "048b42b3-4d04-41a6-8560-59ac7a753999",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d7e5bfae-c00e-48a6-9dea-d5a92c9b48fb",
+      "rawTextureUuid": "6ecebd44-4165-4cd3-ad28-78755b12ef9a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

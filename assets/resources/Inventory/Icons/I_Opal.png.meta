@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6bff9acc-dd60-4947-a801-527bf1d29813",
+  "uuid": "02b6ea75-d4cc-401e-8105-6531d5c741fb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Opal": {
       "ver": "1.0.6",
-      "uuid": "fe98d815-4b53-4845-9234-0c6aca78266e",
+      "uuid": "ada15149-6721-4727-8733-46e0a3fec65d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6bff9acc-dd60-4947-a801-527bf1d29813",
+      "rawTextureUuid": "02b6ea75-d4cc-401e-8105-6531d5c741fb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

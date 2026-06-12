@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0bbe3660-96a5-4423-a0d2-9fc07836907c",
+  "uuid": "c6afccdf-0f55-4568-97bd-d560bb7aaec8",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Ice09": {
       "ver": "1.0.6",
-      "uuid": "f84ecea3-1872-422d-a488-e6d1c83761ce",
+      "uuid": "85311dc4-2f31-4962-88b0-1519fa7cc82c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0bbe3660-96a5-4423-a0d2-9fc07836907c",
+      "rawTextureUuid": "c6afccdf-0f55-4568-97bd-d560bb7aaec8",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

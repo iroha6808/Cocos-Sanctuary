@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e54c7f56-26dc-41aa-975a-0ba35cc546f4",
+  "uuid": "8cd2f571-843c-4655-8810-f261b83605c4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ClimberDecor": {
       "ver": "1.0.6",
-      "uuid": "1abc10ee-cd52-45de-bbb7-b0ce172944cd",
+      "uuid": "09b0bc29-7f48-4db2-b7ed-0435f2a9bb4f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e54c7f56-26dc-41aa-975a-0ba35cc546f4",
+      "rawTextureUuid": "8cd2f571-843c-4655-8810-f261b83605c4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

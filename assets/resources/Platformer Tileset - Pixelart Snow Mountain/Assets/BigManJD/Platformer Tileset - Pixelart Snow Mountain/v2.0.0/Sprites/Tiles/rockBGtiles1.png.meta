@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d56e530d-bd1b-40ae-bafd-93f4c84e3e67",
+  "uuid": "cb161b3c-0266-47d4-a6d9-ecea09cb43b1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rockBGtiles1": {
       "ver": "1.0.6",
-      "uuid": "366a6e4c-0ba4-4792-b606-bba97d704d59",
+      "uuid": "508ee593-9b5e-4d5d-b4d1-42cfc5274e58",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d56e530d-bd1b-40ae-bafd-93f4c84e3e67",
+      "rawTextureUuid": "cb161b3c-0266-47d4-a6d9-ecea09cb43b1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

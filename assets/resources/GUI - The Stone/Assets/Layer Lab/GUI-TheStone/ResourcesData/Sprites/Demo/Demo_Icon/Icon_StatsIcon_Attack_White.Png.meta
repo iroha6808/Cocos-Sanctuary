@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0f3e14d2-a646-4680-bebb-4b355b19eb6b",
+  "uuid": "6def823b-76b0-412a-86c8-85b44ed85e13",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_StatsIcon_Attack_White": {
       "ver": "1.0.6",
-      "uuid": "79e872d7-81ae-4d9a-9fc1-bc481a3aee51",
+      "uuid": "21b0c89e-49e0-495f-b614-c47997b5313b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0f3e14d2-a646-4680-bebb-4b355b19eb6b",
+      "rawTextureUuid": "6def823b-76b0-412a-86c8-85b44ed85e13",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

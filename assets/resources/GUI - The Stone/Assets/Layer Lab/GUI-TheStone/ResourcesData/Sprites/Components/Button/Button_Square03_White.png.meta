@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "dabcdbe8-9041-49f2-b506-8e3b2fcebec9",
+  "uuid": "4a18fd79-48f2-4414-9b3c-524e37f276ce",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Button_Square03_White": {
       "ver": "1.0.6",
-      "uuid": "9f758d30-0e4e-4df8-ac69-352b37ee8cf5",
+      "uuid": "b823b343-5681-49ab-acb1-5afc41f0e588",
       "importer": "sprite-frame",
-      "rawTextureUuid": "dabcdbe8-9041-49f2-b506-8e3b2fcebec9",
+      "rawTextureUuid": "4a18fd79-48f2-4414-9b3c-524e37f276ce",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

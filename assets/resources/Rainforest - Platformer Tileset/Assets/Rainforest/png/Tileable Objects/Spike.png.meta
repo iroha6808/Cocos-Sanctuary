@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "635643fc-e673-40af-9b4a-ec6feaf41a29",
+  "uuid": "30e4a2e6-e467-498f-94dc-a606b974eb0b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Spike": {
       "ver": "1.0.6",
-      "uuid": "ea2e6762-3e7b-4fa0-9f75-420ab6e71e08",
+      "uuid": "9cb37fa8-1338-45ad-9bda-faebf09847a7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "635643fc-e673-40af-9b4a-ec6feaf41a29",
+      "rawTextureUuid": "30e4a2e6-e467-498f-94dc-a606b974eb0b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

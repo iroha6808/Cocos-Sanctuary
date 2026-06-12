@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6e32c8b2-0db6-476d-bcad-e8d670738c01",
+  "uuid": "8acd8843-16ea-4e30-a8fb-fbfab02f04b9",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "coallump": {
       "ver": "1.0.6",
-      "uuid": "bbc394c4-0a92-465b-9667-74d68c2c2e64",
+      "uuid": "50a9244c-b9a2-4381-9de1-c0e265f5bade",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6e32c8b2-0db6-476d-bcad-e8d670738c01",
+      "rawTextureUuid": "8acd8843-16ea-4e30-a8fb-fbfab02f04b9",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

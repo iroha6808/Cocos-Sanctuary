@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "55708a19-7fef-4721-a0c9-ee91c3ee7fba",
+  "uuid": "bf086d48-cae7-49c1-8605-96aff6a0d55d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ItemFrama01_White_InnerBg": {
       "ver": "1.0.6",
-      "uuid": "3b46081f-1411-4208-8139-7d9e7d2d07cd",
+      "uuid": "7a5d8e41-e5f3-492b-8482-78ce728853d6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "55708a19-7fef-4721-a0c9-ee91c3ee7fba",
+      "rawTextureUuid": "bf086d48-cae7-49c1-8605-96aff6a0d55d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

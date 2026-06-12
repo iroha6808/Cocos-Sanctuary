@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c8047fc3-71b8-4c97-82e9-c1feebaa3dc8",
+  "uuid": "c1b80168-0447-4a71-9d30-d0e5420a14d7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Physic01": {
       "ver": "1.0.6",
-      "uuid": "e14385db-3820-493f-9274-c19df563a4c4",
+      "uuid": "2d935aad-05b9-4e56-a688-49ff5c964639",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c8047fc3-71b8-4c97-82e9-c1feebaa3dc8",
+      "rawTextureUuid": "c1b80168-0447-4a71-9d30-d0e5420a14d7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

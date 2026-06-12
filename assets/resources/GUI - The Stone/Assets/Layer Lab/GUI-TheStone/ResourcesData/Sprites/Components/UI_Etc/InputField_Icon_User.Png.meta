@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3e3dc0f5-8511-491b-973c-ff68720d15d7",
+  "uuid": "de6d4f95-ff23-4295-8621-3721f4cba313",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "InputField_Icon_User": {
       "ver": "1.0.6",
-      "uuid": "e059ee12-c06b-438f-821b-f6d323a999a0",
+      "uuid": "84500024-909e-4936-bd97-f779c66b4bdb",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3e3dc0f5-8511-491b-973c-ff68720d15d7",
+      "rawTextureUuid": "de6d4f95-ff23-4295-8621-3721f4cba313",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

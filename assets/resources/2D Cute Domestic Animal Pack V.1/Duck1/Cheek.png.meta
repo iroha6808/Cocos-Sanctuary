@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6d22b2a1-6fec-4ad2-a476-2d1aaca10573",
+  "uuid": "c99caffd-03f2-4b46-8380-904434237da0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Cheek": {
       "ver": "1.0.6",
-      "uuid": "5d8bdf52-031d-4777-b60a-7252390d64c1",
+      "uuid": "1a763d7e-3606-4b9b-8caf-39c6b8914b8f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6d22b2a1-6fec-4ad2-a476-2d1aaca10573",
+      "rawTextureUuid": "c99caffd-03f2-4b46-8380-904434237da0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

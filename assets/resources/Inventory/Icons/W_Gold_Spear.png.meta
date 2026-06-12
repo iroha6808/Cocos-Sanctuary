@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "1f11f81c-994f-4d02-837f-b29b8856fb78",
+  "uuid": "ade4296e-05ff-46b8-80b5-982e2b44605e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Gold_Spear": {
       "ver": "1.0.6",
-      "uuid": "4d39088d-78d2-4d27-a55c-3f15f008b7eb",
+      "uuid": "5d6062cb-6549-4814-9d6c-40f6d8bb6ad4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "1f11f81c-994f-4d02-837f-b29b8856fb78",
+      "rawTextureUuid": "ade4296e-05ff-46b8-80b5-982e2b44605e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

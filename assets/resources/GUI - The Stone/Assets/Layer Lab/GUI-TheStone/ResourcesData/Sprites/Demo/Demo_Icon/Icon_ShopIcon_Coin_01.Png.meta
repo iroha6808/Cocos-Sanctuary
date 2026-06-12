@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "05bd78a9-36d8-429a-aeb7-43fe06a55b0f",
+  "uuid": "411350a2-de2f-48d5-8c72-47173037591f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_ShopIcon_Coin_01": {
       "ver": "1.0.6",
-      "uuid": "8ddd95c7-1078-4d88-a50d-717ab1dc2658",
+      "uuid": "b57300b5-bc07-4edc-99a9-1153de0b6280",
       "importer": "sprite-frame",
-      "rawTextureUuid": "05bd78a9-36d8-429a-aeb7-43fe06a55b0f",
+      "rawTextureUuid": "411350a2-de2f-48d5-8c72-47173037591f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

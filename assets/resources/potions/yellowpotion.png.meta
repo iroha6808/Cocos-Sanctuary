@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a0b18649-2547-46b2-bafa-c7b79880d6d1",
+  "uuid": "4445064a-8151-4e88-b96a-ed031c46ee4e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "yellowpotion": {
       "ver": "1.0.6",
-      "uuid": "2ddf9198-c168-4a9a-a001-e5902505f355",
+      "uuid": "3909a145-d8cc-4603-9dc8-dc9feab2caaa",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a0b18649-2547-46b2-bafa-c7b79880d6d1",
+      "rawTextureUuid": "4445064a-8151-4e88-b96a-ed031c46ee4e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

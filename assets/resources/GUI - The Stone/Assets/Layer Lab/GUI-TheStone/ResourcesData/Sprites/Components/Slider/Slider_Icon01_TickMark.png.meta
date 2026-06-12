@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "312985c9-fa21-461a-b6d2-f71463eae7b5",
+  "uuid": "82e8053e-a831-44a1-a3ac-d6d7757d730a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Icon01_TickMark": {
       "ver": "1.0.6",
-      "uuid": "9f6a36d0-c9b3-4e2c-ab1c-640b3ebbc77b",
+      "uuid": "2b0e97ab-18ab-4bec-a082-d5b7c43289e9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "312985c9-fa21-461a-b6d2-f71463eae7b5",
+      "rawTextureUuid": "82e8053e-a831-44a1-a3ac-d6d7757d730a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

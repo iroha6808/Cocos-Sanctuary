@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9ec6ebf2-6b9a-4650-a49c-464ada268e94",
+  "uuid": "9d47b175-6f2a-4af9-a5b6-17beb95795ce",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "mossagate": {
       "ver": "1.0.6",
-      "uuid": "845af441-1912-49f8-a19c-044fb9bac397",
+      "uuid": "32622be5-4991-46c6-b42b-018650c326a5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9ec6ebf2-6b9a-4650-a49c-464ada268e94",
+      "rawTextureUuid": "9d47b175-6f2a-4af9-a5b6-17beb95795ce",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

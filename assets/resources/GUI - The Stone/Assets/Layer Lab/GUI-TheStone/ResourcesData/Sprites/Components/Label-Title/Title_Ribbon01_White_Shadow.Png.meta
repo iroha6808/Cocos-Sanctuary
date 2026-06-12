@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c79bc53b-2f84-4082-8c3e-224056c46d64",
+  "uuid": "93cad8b7-741c-46b7-8e0b-202a4696076b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Title_Ribbon01_White_Shadow": {
       "ver": "1.0.6",
-      "uuid": "d3e22fd7-a770-4a83-9d99-ceff09b485cb",
+      "uuid": "6e429735-f1dc-43f0-bda5-c545728c72b9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c79bc53b-2f84-4082-8c3e-224056c46d64",
+      "rawTextureUuid": "93cad8b7-741c-46b7-8e0b-202a4696076b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

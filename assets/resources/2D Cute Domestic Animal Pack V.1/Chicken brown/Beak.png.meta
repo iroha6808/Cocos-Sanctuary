@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "30437a06-e577-4612-b6be-9f23b7cf24de",
+  "uuid": "8107be10-adf5-498a-a34b-dfcd1cbd30eb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Beak": {
       "ver": "1.0.6",
-      "uuid": "b94c5773-15d6-4c72-8977-c22de51ebcdd",
+      "uuid": "2e46ee1c-4c5d-4b36-a1b7-a60fcc919bac",
       "importer": "sprite-frame",
-      "rawTextureUuid": "30437a06-e577-4612-b6be-9f23b7cf24de",
+      "rawTextureUuid": "8107be10-adf5-498a-a34b-dfcd1cbd30eb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

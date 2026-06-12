@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d842fb8a-cb46-4062-a96e-08ac8e915798",
+  "uuid": "eaa56dc9-4f60-461b-88c9-d4d5b5b04660",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Chest_Luckybox_Bronze": {
       "ver": "1.0.6",
-      "uuid": "718ce6af-52f5-40fd-9bd4-26307b6b2276",
+      "uuid": "470d56dc-0676-4437-98fa-646ee4f778e6",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d842fb8a-cb46-4062-a96e-08ac8e915798",
+      "rawTextureUuid": "eaa56dc9-4f60-461b-88c9-d4d5b5b04660",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cccbd455-65ea-4dc8-a1e6-a25566bc1fa8",
+  "uuid": "a520bb25-d00b-4960-94d3-daf6b5fe8c14",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Ac_Necklace07": {
       "ver": "1.0.6",
-      "uuid": "abffb159-b911-40a8-ba5c-a3a43a6c1056",
+      "uuid": "ea9667bf-e12c-46d4-a70a-97f5a1488a04",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cccbd455-65ea-4dc8-a1e6-a25566bc1fa8",
+      "rawTextureUuid": "a520bb25-d00b-4960-94d3-daf6b5fe8c14",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

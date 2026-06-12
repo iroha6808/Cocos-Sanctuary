@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "4a25313d-89c1-4e73-9a2f-68c37971981d",
+  "uuid": "ffb5ef69-15e9-43b2-b991-c41a99e2ed6e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Image_Effect_Rotate_White": {
       "ver": "1.0.6",
-      "uuid": "88ce07a3-6f83-4dee-b2b8-a17e4b70724c",
+      "uuid": "9654f463-0217-4910-98c3-29d25c77038f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "4a25313d-89c1-4e73-9a2f-68c37971981d",
+      "rawTextureUuid": "ffb5ef69-15e9-43b2-b991-c41a99e2ed6e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

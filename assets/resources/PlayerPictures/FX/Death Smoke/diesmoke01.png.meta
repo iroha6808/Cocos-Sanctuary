@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ea7a7fb8-4116-4a20-a3c4-3528ec8da4b6",
+  "uuid": "d7cdb833-9f32-446e-81c9-8dd8bff0c3f7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "diesmoke01": {
       "ver": "1.0.6",
-      "uuid": "62cacf90-cbdb-4732-9cfa-911b4894dbcf",
+      "uuid": "31946da0-8940-443e-a7d2-20a21c08f92e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ea7a7fb8-4116-4a20-a3c4-3528ec8da4b6",
+      "rawTextureUuid": "d7cdb833-9f32-446e-81c9-8dd8bff0c3f7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

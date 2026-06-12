@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b8783386-a695-45ec-b51a-4d2c22fc75c1",
+  "uuid": "d5b5e53f-b72d-4792-80b2-2e6113a3f18b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Hair": {
       "ver": "1.0.6",
-      "uuid": "35329e9d-9a53-4b3d-9028-f82367480bf8",
+      "uuid": "3f8d851b-642c-4fd4-a94c-808e5ebd0eac",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b8783386-a695-45ec-b51a-4d2c22fc75c1",
+      "rawTextureUuid": "d5b5e53f-b72d-4792-80b2-2e6113a3f18b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

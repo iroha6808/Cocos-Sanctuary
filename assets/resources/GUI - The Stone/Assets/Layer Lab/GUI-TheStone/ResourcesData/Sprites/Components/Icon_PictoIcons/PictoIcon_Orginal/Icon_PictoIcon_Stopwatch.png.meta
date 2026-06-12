@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "90ef5063-fb6c-49a2-a4c8-15289cd353f8",
+  "uuid": "8e2a1802-65fe-4b66-a3a2-4c0a1ee3f00b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Stopwatch": {
       "ver": "1.0.6",
-      "uuid": "a7218fc2-d82f-4808-a2a4-950adba4e36c",
+      "uuid": "5cdfebb3-520c-4e30-96ca-ffa2ff15107d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "90ef5063-fb6c-49a2-a4c8-15289cd353f8",
+      "rawTextureUuid": "8e2a1802-65fe-4b66-a3a2-4c0a1ee3f00b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

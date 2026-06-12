@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a7ce6ed4-9781-4d94-b2f9-9871729fec19",
+  "uuid": "49f02514-933b-406e-b2fb-fa691cdd629f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Gmail": {
       "ver": "1.0.6",
-      "uuid": "cdcd9156-29c9-4e22-ad1a-1698b2e10fbf",
+      "uuid": "2552cbac-5843-47e2-8a63-2b425ef4b41b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a7ce6ed4-9781-4d94-b2f9-9871729fec19",
+      "rawTextureUuid": "49f02514-933b-406e-b2fb-fa691cdd629f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

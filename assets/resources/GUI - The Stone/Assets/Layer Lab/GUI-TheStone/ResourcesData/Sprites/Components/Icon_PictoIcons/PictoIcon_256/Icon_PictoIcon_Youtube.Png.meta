@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "077fdaf1-f09b-4d76-88a0-cc0993dc4583",
+  "uuid": "dda3775e-ddb5-4907-bac4-789cd4814660",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Youtube": {
       "ver": "1.0.6",
-      "uuid": "f1657263-6bc7-4307-96fd-bf68054a36cb",
+      "uuid": "1d5b11bb-f162-4be3-8f95-e86a436822de",
       "importer": "sprite-frame",
-      "rawTextureUuid": "077fdaf1-f09b-4d76-88a0-cc0993dc4583",
+      "rawTextureUuid": "dda3775e-ddb5-4907-bac4-789cd4814660",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

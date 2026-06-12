@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fc64a153-b38f-46c5-91e5-ba7c3a59de7b",
+  "uuid": "699b3625-b88e-4ac0-a7d0-5be34885cbe3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Fingerprint": {
       "ver": "1.0.6",
-      "uuid": "381325e2-f5f9-420a-b2f0-36d69c7d218e",
+      "uuid": "c40b768d-4267-4462-9066-3026d035b138",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fc64a153-b38f-46c5-91e5-ba7c3a59de7b",
+      "rawTextureUuid": "699b3625-b88e-4ac0-a7d0-5be34885cbe3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

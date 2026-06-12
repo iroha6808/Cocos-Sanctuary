@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "bf5427d0-4466-4b36-be96-7e95cc0af204",
+  "uuid": "6909af39-32c8-448d-b2d7-89314bf36e78",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "meteoritechunk": {
       "ver": "1.0.6",
-      "uuid": "5c2e5090-aa48-4313-a836-dcce67e3f2a6",
+      "uuid": "45c9eacc-daad-4f77-a95b-ba1172885b18",
       "importer": "sprite-frame",
-      "rawTextureUuid": "bf5427d0-4466-4b36-be96-7e95cc0af204",
+      "rawTextureUuid": "6909af39-32c8-448d-b2d7-89314bf36e78",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

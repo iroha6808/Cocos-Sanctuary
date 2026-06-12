@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c181324d-71d5-4cec-bc86-af02a34980d8",
+  "uuid": "8d0092cd-0e6c-44cb-802d-30a8ed48eb54",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "baby cow": {
       "ver": "1.0.6",
-      "uuid": "f1efafec-974e-46dc-84c2-c5baba2aaea0",
+      "uuid": "5acac4e8-f990-41bd-9db6-69977e8d3ace",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c181324d-71d5-4cec-bc86-af02a34980d8",
+      "rawTextureUuid": "8d0092cd-0e6c-44cb-802d-30a8ed48eb54",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

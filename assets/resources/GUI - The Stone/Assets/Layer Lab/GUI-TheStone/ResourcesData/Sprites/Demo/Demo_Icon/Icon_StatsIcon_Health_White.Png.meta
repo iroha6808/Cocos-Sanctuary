@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "99057aa6-1564-4a01-be07-9bb13b267d18",
+  "uuid": "cd701a1c-0242-4986-8335-2b55c45f368c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_StatsIcon_Health_White": {
       "ver": "1.0.6",
-      "uuid": "b8b411a2-c8bc-4a2b-b70b-3b324b46c221",
+      "uuid": "71d3c833-0d24-4197-b1cb-3353c632d4a5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "99057aa6-1564-4a01-be07-9bb13b267d18",
+      "rawTextureUuid": "cd701a1c-0242-4986-8335-2b55c45f368c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

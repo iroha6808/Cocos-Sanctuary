@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6b4df8b8-a1ad-440b-91b1-ca42794c1576",
+  "uuid": "794f227b-c1e8-4c5e-8bf1-bb8f85658a76",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Radish": {
       "ver": "1.0.6",
-      "uuid": "b3172563-c437-4aa9-9b50-dc4e1ebfeb3a",
+      "uuid": "7888d76a-a7e8-4371-b607-9dde2fa0c780",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6b4df8b8-a1ad-440b-91b1-ca42794c1576",
+      "rawTextureUuid": "794f227b-c1e8-4c5e-8bf1-bb8f85658a76",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "62131e1e-46a1-406e-b500-8f5feb21de79",
+  "uuid": "82878359-914f-40ac-8b07-656dc538004e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "S_Water03": {
       "ver": "1.0.6",
-      "uuid": "39b7f534-0935-4a31-a854-981025a918c4",
+      "uuid": "ba181f92-370b-4052-b767-8f2b540640f8",
       "importer": "sprite-frame",
-      "rawTextureUuid": "62131e1e-46a1-406e-b500-8f5feb21de79",
+      "rawTextureUuid": "82878359-914f-40ac-8b07-656dc538004e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

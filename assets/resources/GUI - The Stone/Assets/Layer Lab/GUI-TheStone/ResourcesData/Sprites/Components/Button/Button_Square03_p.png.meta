@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0a9565b0-5a38-4018-856e-02fcc1c737b6",
+  "uuid": "affd58d3-20d5-42ae-aace-779dc273fe1a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Button_Square03_p": {
       "ver": "1.0.6",
-      "uuid": "12ead50e-6656-490a-9b96-3ebc2f496701",
+      "uuid": "87667b90-3639-40fa-bf8c-587b6fa0d50c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0a9565b0-5a38-4018-856e-02fcc1c737b6",
+      "rawTextureUuid": "affd58d3-20d5-42ae-aace-779dc273fe1a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

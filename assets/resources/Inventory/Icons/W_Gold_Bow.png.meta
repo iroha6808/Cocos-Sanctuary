@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "7067dfa7-d50a-4371-a899-5b3fbb6e05e9",
+  "uuid": "6f3919e1-5046-4e21-95f8-fcf908aa847c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Gold_Bow": {
       "ver": "1.0.6",
-      "uuid": "dc1e26dd-5991-441a-acf4-06a2be762e4a",
+      "uuid": "9080b962-8142-49d4-918f-23ed9d5bb310",
       "importer": "sprite-frame",
-      "rawTextureUuid": "7067dfa7-d50a-4371-a899-5b3fbb6e05e9",
+      "rawTextureUuid": "6f3919e1-5046-4e21-95f8-fcf908aa847c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

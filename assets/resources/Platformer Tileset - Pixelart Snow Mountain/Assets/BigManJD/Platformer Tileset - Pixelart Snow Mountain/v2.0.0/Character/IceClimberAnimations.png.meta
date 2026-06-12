@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f9afee6b-5fdf-4931-94b7-7a8ef1148d84",
+  "uuid": "5f55ae7b-73e4-446e-b07a-3bde6f26fa9a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "IceClimberAnimations": {
       "ver": "1.0.6",
-      "uuid": "9bbc66c1-a8b0-4c45-897d-9f9c6daed2bd",
+      "uuid": "bdf8f055-debb-42ce-bc03-b064bf345b4c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f9afee6b-5fdf-4931-94b7-7a8ef1148d84",
+      "rawTextureUuid": "5f55ae7b-73e4-446e-b07a-3bde6f26fa9a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

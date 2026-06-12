@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "73e4bb41-6135-4871-8cf6-a401579a4e89",
+  "uuid": "8dfe2b65-53f8-4bb9-a1c1-e9a98f7a4e05",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rockDecor": {
       "ver": "1.0.6",
-      "uuid": "9dc18351-850c-458f-86c3-48a05fda364e",
+      "uuid": "28070db6-0493-4542-b2ab-5e7f394d5e8e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "73e4bb41-6135-4871-8cf6-a401579a4e89",
+      "rawTextureUuid": "8dfe2b65-53f8-4bb9-a1c1-e9a98f7a4e05",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

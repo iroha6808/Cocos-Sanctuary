@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "6c4b1346-5e7c-43c5-bc93-06d8a4d61d33",
+  "uuid": "5c13c59c-1692-4891-9103-c036e3ae7439",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Telescope": {
       "ver": "1.0.6",
-      "uuid": "9f2d7f03-e735-4799-92a9-5970a5c9fb75",
+      "uuid": "0cc12bf2-dce4-4d63-a233-00836bd78412",
       "importer": "sprite-frame",
-      "rawTextureUuid": "6c4b1346-5e7c-43c5-bc93-06d8a4d61d33",
+      "rawTextureUuid": "5c13c59c-1692-4891-9103-c036e3ae7439",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

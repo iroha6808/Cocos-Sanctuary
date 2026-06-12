@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "718adfbc-3ccc-4bc0-8278-fc33863976c6",
+  "uuid": "e28e957c-f758-47f0-8237-9724a18ea70c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_StatsIcon_Defense_White": {
       "ver": "1.0.6",
-      "uuid": "c454fc14-f1a4-4c95-a891-34c0f054977d",
+      "uuid": "0b0a1e9c-59ac-440d-b3cf-c27c592b0d9a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "718adfbc-3ccc-4bc0-8278-fc33863976c6",
+      "rawTextureUuid": "e28e957c-f758-47f0-8237-9724a18ea70c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

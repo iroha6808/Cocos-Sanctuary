@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0aec7126-01d7-45a5-94b4-8bcdc2914be9",
+  "uuid": "e4c23a73-f561-4c0f-a982-24bcbb4bec59",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Cheese": {
       "ver": "1.0.6",
-      "uuid": "f8387dea-fd67-4462-b161-ee23d7214fa2",
+      "uuid": "4c245511-46de-4e50-9d26-9ccf0c3019a9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0aec7126-01d7-45a5-94b4-8bcdc2914be9",
+      "rawTextureUuid": "e4c23a73-f561-4c0f-a982-24bcbb4bec59",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

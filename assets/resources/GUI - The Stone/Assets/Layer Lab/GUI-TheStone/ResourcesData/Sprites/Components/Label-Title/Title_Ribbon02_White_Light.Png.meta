@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c1e0892e-d0a8-4d2a-a630-24480d47edb6",
+  "uuid": "3f641f3d-fea1-496f-91a4-f0cf9aeccf61",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Title_Ribbon02_White_Light": {
       "ver": "1.0.6",
-      "uuid": "2010fa11-604f-4017-ae9e-7b320670faed",
+      "uuid": "ccf2b23c-14bb-489b-8f34-27e1e3b2e221",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c1e0892e-d0a8-4d2a-a630-24480d47edb6",
+      "rawTextureUuid": "3f641f3d-fea1-496f-91a4-f0cf9aeccf61",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

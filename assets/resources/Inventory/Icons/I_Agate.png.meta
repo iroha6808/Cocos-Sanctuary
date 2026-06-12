@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "fe6f7bee-4373-4532-918b-3fc0ccf9fe98",
+  "uuid": "d99cede7-2982-4189-9c4b-08c06c30938d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Agate": {
       "ver": "1.0.6",
-      "uuid": "46f81f9b-7884-4a32-8834-1b4e72bd902b",
+      "uuid": "41a2a42b-c29c-4f3b-9e45-e3a8452c8134",
       "importer": "sprite-frame",
-      "rawTextureUuid": "fe6f7bee-4373-4532-918b-3fc0ccf9fe98",
+      "rawTextureUuid": "d99cede7-2982-4189-9c4b-08c06c30938d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cdaf2857-f2d6-45ba-b62e-5b9938699b64",
+  "uuid": "4d4f2769-2c35-4dd5-94c4-8e8bd746596a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "StageFrame_White_InnerBg": {
       "ver": "1.0.6",
-      "uuid": "9d80c4a5-0ee9-4260-ae6c-3dea1e250dc0",
+      "uuid": "a5f8e3a7-a670-41fa-a194-1484c2a0ff1d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cdaf2857-f2d6-45ba-b62e-5b9938699b64",
+      "rawTextureUuid": "4d4f2769-2c35-4dd5-94c4-8e8bd746596a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

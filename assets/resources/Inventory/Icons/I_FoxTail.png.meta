@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "039ae302-eec8-412c-aab4-90be00399f99",
+  "uuid": "3bc34966-029e-4688-89ff-516f78e42eb2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_FoxTail": {
       "ver": "1.0.6",
-      "uuid": "a8f7958a-44d0-418d-8380-d52f0a63facc",
+      "uuid": "4b58864b-2967-4407-846d-68f3d72157d5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "039ae302-eec8-412c-aab4-90be00399f99",
+      "rawTextureUuid": "3bc34966-029e-4688-89ff-516f78e42eb2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

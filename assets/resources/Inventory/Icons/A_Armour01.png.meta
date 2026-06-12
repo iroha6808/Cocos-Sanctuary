@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8a80c4d2-9838-4c47-a3c9-5be2c4707b7f",
+  "uuid": "ba6f766e-06d2-4a35-831e-d4c14be91813",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "A_Armour01": {
       "ver": "1.0.6",
-      "uuid": "707d160c-f846-473a-a717-0810addc347c",
+      "uuid": "e10131a0-cab1-4426-bd9c-4498e0f3ed6c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8a80c4d2-9838-4c47-a3c9-5be2c4707b7f",
+      "rawTextureUuid": "ba6f766e-06d2-4a35-831e-d4c14be91813",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

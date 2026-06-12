@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "22ce7e9e-91ca-40ca-bd9d-a55d287b7650",
+  "uuid": "b919a096-9cd1-4c9f-b581-9c80baf842ff",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Piechart": {
       "ver": "1.0.6",
-      "uuid": "ac1b0fd8-2ed3-43ee-9759-ed94a25ba6a4",
+      "uuid": "5e92e81b-d93b-4cc5-8f0d-5813d002f0d9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "22ce7e9e-91ca-40ca-bd9d-a55d287b7650",
+      "rawTextureUuid": "b919a096-9cd1-4c9f-b581-9c80baf842ff",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

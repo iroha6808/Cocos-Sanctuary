@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ee3e1353-5672-4bbf-a7e6-fe5fd633afbd",
+  "uuid": "bf1369c0-f960-4e22-af65-e76eecd7c167",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Pinwheel": {
       "ver": "1.0.6",
-      "uuid": "4bde0f2d-eb1f-4648-8af1-a9b249662ed7",
+      "uuid": "efa6119c-2062-4576-a365-894ebd87a77e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ee3e1353-5672-4bbf-a7e6-fe5fd633afbd",
+      "rawTextureUuid": "bf1369c0-f960-4e22-af65-e76eecd7c167",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

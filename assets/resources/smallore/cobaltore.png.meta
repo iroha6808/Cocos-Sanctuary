@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "78ed9d87-66f0-4e49-be0c-5b6a33390faa",
+  "uuid": "6d2d7f81-b4c6-4eed-8dff-dc34e982caf6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "cobaltore": {
       "ver": "1.0.6",
-      "uuid": "335ac1c7-a87e-42ca-b570-42104713576a",
+      "uuid": "40f582e3-5f60-4052-9858-72b5214ec312",
       "importer": "sprite-frame",
-      "rawTextureUuid": "78ed9d87-66f0-4e49-be0c-5b6a33390faa",
+      "rawTextureUuid": "6d2d7f81-b4c6-4eed-8dff-dc34e982caf6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

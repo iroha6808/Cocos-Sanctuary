@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "53f174d8-eb2d-4eba-a37a-dfb138317553",
+  "uuid": "dfe3be49-430c-4090-9b5f-a7080ddce627",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "E_Metal04": {
       "ver": "1.0.6",
-      "uuid": "77af237d-3b9e-43ba-9348-dbd12e1b48d7",
+      "uuid": "6bb38f8a-c042-4ce5-9ba2-09206c66e163",
       "importer": "sprite-frame",
-      "rawTextureUuid": "53f174d8-eb2d-4eba-a37a-dfb138317553",
+      "rawTextureUuid": "dfe3be49-430c-4090-9b5f-a7080ddce627",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

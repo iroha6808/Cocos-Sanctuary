@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2754d5f7-8893-4846-9a01-492c0af01b2f",
+  "uuid": "aaef73a0-d240-4c77-a59b-b869cec5b78f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "water_decorations": {
       "ver": "1.0.6",
-      "uuid": "431d7f71-9ee6-4655-9222-fd242d9bce89",
+      "uuid": "603f78e2-a5b9-4679-98e8-28e5529c9ee7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2754d5f7-8893-4846-9a01-492c0af01b2f",
+      "rawTextureUuid": "aaef73a0-d240-4c77-a59b-b869cec5b78f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

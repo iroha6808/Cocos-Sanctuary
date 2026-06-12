@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2bd2e411-ca28-4ab5-a094-4a41cf194918",
+  "uuid": "873c5111-ee35-477d-9acc-e94f781644a1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Facebook": {
       "ver": "1.0.6",
-      "uuid": "619a1074-5851-4f1f-8a3a-3bc1d88ceed1",
+      "uuid": "fa1554be-39cd-4438-a2a4-919183aeece9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2bd2e411-ca28-4ab5-a094-4a41cf194918",
+      "rawTextureUuid": "873c5111-ee35-477d-9acc-e94f781644a1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

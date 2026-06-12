@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5fde49c8-048d-4b40-9cc8-ac226bc75179",
+  "uuid": "f0514c62-be96-4c57-a69c-04bdf7ace0bb",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Medal": {
       "ver": "1.0.6",
-      "uuid": "62132698-df35-4634-9e01-54a4047e069c",
+      "uuid": "6c9a98cb-bd2e-4283-93aa-6afc55798ba4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5fde49c8-048d-4b40-9cc8-ac226bc75179",
+      "rawTextureUuid": "f0514c62-be96-4c57-a69c-04bdf7ace0bb",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

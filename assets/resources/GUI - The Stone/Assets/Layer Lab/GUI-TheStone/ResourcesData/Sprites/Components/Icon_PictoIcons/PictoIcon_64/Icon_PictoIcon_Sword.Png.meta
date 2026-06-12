@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "93af3eed-fd30-4ebd-a60a-eb2b5d9c0631",
+  "uuid": "23b5cbe6-d0ea-4378-b04d-5c6278608fa7",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Sword": {
       "ver": "1.0.6",
-      "uuid": "8a217c5f-307a-4cf9-ad60-a1dbf004d188",
+      "uuid": "ee8a96b1-082b-47b8-8472-06e54033c027",
       "importer": "sprite-frame",
-      "rawTextureUuid": "93af3eed-fd30-4ebd-a60a-eb2b5d9c0631",
+      "rawTextureUuid": "23b5cbe6-d0ea-4378-b04d-5c6278608fa7",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ff251720-2152-43cb-a84e-1fea70fe328b",
+  "uuid": "69c45a6a-b1df-4dd9-84bd-e2673fa3b319",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "dash02": {
       "ver": "1.0.6",
-      "uuid": "d093ce60-1dbc-4128-9258-0635cdfd984b",
+      "uuid": "54026f59-c1c1-47ed-895c-44f973a48aee",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ff251720-2152-43cb-a84e-1fea70fe328b",
+      "rawTextureUuid": "69c45a6a-b1df-4dd9-84bd-e2673fa3b319",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

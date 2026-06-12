@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "20ac196e-6722-4447-a075-4036f4544815",
+  "uuid": "261c0431-7ac9-42e6-a285-3b9bf3527716",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "W_Book04": {
       "ver": "1.0.6",
-      "uuid": "59a50301-cb58-443c-8f9b-dbad0a5316ba",
+      "uuid": "02ee9e1e-841a-4f3d-aab4-ae7492f1fff9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "20ac196e-6722-4447-a075-4036f4544815",
+      "rawTextureUuid": "261c0431-7ac9-42e6-a285-3b9bf3527716",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

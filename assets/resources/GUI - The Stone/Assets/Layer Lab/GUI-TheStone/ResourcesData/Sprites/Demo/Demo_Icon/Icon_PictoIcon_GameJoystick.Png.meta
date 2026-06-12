@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b83eb165-6ab7-4e34-96c0-d6e38fea83e1",
+  "uuid": "f28c9145-1101-45e6-a80a-4273c3652b4d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_GameJoystick": {
       "ver": "1.0.6",
-      "uuid": "3da8b240-a5ca-469d-a9be-643856e40b2b",
+      "uuid": "bbdc29e5-7e0a-4840-a98e-23fba84eb54f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b83eb165-6ab7-4e34-96c0-d6e38fea83e1",
+      "rawTextureUuid": "f28c9145-1101-45e6-a80a-4273c3652b4d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

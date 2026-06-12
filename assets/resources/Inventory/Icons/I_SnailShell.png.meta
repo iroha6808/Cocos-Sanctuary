@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "40220619-0e24-4150-9c72-f4bf111e92a1",
+  "uuid": "abeb30c9-6eaa-4fd2-809d-bece801f1292",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_SnailShell": {
       "ver": "1.0.6",
-      "uuid": "1a013dd1-ea82-417c-9a10-13550e8c60bf",
+      "uuid": "99036dd6-8283-4ad4-83e7-6303bd6cb524",
       "importer": "sprite-frame",
-      "rawTextureUuid": "40220619-0e24-4150-9c72-f4bf111e92a1",
+      "rawTextureUuid": "abeb30c9-6eaa-4fd2-809d-bece801f1292",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

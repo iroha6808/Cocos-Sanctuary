@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "72524070-9a25-468b-b4cd-8a17f352fa83",
+  "uuid": "9115a98a-a02b-4ccf-8a65-59ce93a5b7ec",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Megaphone": {
       "ver": "1.0.6",
-      "uuid": "82cdec2f-1dac-4d99-9dcb-7f180da705eb",
+      "uuid": "650359cc-c7cf-4295-b08c-11056327152c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "72524070-9a25-468b-b4cd-8a17f352fa83",
+      "rawTextureUuid": "9115a98a-a02b-4ccf-8a65-59ce93a5b7ec",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

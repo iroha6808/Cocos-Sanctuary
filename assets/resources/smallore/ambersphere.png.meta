@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5d87e168-a0b9-436b-bc11-48cefb92834a",
+  "uuid": "2d6b0b95-03db-4688-89e1-257959483b3f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ambersphere": {
       "ver": "1.0.6",
-      "uuid": "8e0b3f57-8cb9-4e57-9369-80f86d8573be",
+      "uuid": "4199d3b3-695b-4935-b337-83fdf2ed93b4",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5d87e168-a0b9-436b-bc11-48cefb92834a",
+      "rawTextureUuid": "2d6b0b95-03db-4688-89e1-257959483b3f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

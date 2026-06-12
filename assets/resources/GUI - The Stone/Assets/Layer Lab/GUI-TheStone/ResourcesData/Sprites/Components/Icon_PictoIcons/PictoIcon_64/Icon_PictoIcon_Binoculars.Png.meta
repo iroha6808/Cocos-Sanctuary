@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c8cd7d5e-e3d8-4776-98e7-4a2f066d811e",
+  "uuid": "18b2904c-26a3-4a4f-bc0c-a6f6731e1f4e",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Binoculars": {
       "ver": "1.0.6",
-      "uuid": "75b889b1-8e71-422b-a7ab-4a0668f7e586",
+      "uuid": "6ea0e9f2-c4c4-434e-bd6e-a27ddce16e19",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c8cd7d5e-e3d8-4776-98e7-4a2f066d811e",
+      "rawTextureUuid": "18b2904c-26a3-4a4f-bc0c-a6f6731e1f4e",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

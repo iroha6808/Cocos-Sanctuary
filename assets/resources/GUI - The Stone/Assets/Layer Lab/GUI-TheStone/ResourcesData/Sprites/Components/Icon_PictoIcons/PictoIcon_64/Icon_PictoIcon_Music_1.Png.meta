@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "600eea7b-a2bc-4dc6-b0f9-fb2ce3428f20",
+  "uuid": "b284f6c1-810e-4649-9612-7e5b63595930",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Music_1": {
       "ver": "1.0.6",
-      "uuid": "9b00c958-0e9a-48fb-83c3-90fa45477aee",
+      "uuid": "518ac639-e056-4cb8-989b-1345b9c47eca",
       "importer": "sprite-frame",
-      "rawTextureUuid": "600eea7b-a2bc-4dc6-b0f9-fb2ce3428f20",
+      "rawTextureUuid": "b284f6c1-810e-4649-9612-7e5b63595930",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

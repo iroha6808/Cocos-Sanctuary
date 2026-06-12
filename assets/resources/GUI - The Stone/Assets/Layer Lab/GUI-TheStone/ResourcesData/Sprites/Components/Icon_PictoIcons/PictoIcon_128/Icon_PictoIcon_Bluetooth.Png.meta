@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9578f48e-ab5d-49de-b674-9cf9a392778f",
+  "uuid": "46db3dc0-4d71-4ee2-bc30-9ca2838619b3",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Bluetooth": {
       "ver": "1.0.6",
-      "uuid": "d7be2277-88d8-4982-9cd2-97e46edd1534",
+      "uuid": "aa39bd10-f0fe-4504-818d-3cd586ba0235",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9578f48e-ab5d-49de-b674-9cf9a392778f",
+      "rawTextureUuid": "46db3dc0-4d71-4ee2-bc30-9ca2838619b3",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

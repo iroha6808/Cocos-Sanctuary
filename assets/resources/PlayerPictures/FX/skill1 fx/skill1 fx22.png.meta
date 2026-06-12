@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "234a5511-13aa-46cb-ba97-566b86c2aadf",
+  "uuid": "ef866045-23f3-41ac-bd51-9a05b0fb91a0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "skill1 fx22": {
       "ver": "1.0.6",
-      "uuid": "b588911a-85fc-4d53-9a4d-e4f7f6815248",
+      "uuid": "a954c0fb-fc29-4283-b79a-c98afcb60d60",
       "importer": "sprite-frame",
-      "rawTextureUuid": "234a5511-13aa-46cb-ba97-566b86c2aadf",
+      "rawTextureUuid": "ef866045-23f3-41ac-bd51-9a05b0fb91a0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

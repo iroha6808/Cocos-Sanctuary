@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c0739639-8e3b-433c-bbc4-a3370c61663d",
+  "uuid": "ed5116b0-9673-4188-a4a5-ace5f425423b",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "attack06": {
       "ver": "1.0.6",
-      "uuid": "e8d27ac3-1e81-4fa4-a737-e0b35b8e10fd",
+      "uuid": "2391e595-a5cd-4ab8-ae42-2a43858e2d65",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c0739639-8e3b-433c-bbc4-a3370c61663d",
+      "rawTextureUuid": "ed5116b0-9673-4188-a4a5-ace5f425423b",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

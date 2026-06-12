@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "a216e6b1-c7e1-49fd-8e67-80523837dc33",
+  "uuid": "63c78e97-2dad-4cf5-b09e-f751849ec103",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Twitter": {
       "ver": "1.0.6",
-      "uuid": "751cb9b0-f5de-4bae-a8ef-983f1f5e27db",
+      "uuid": "437e5e66-b79e-45b4-b173-d099c8c5b5c2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "a216e6b1-c7e1-49fd-8e67-80523837dc33",
+      "rawTextureUuid": "63c78e97-2dad-4cf5-b09e-f751849ec103",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

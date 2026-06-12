@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3eeafd1f-977a-4d22-9cc2-b7ad14feeb11",
+  "uuid": "49ef35ea-e7fd-4faa-9fec-dba4b5328334",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Chest_Luckybox_Gold_Open": {
       "ver": "1.0.6",
-      "uuid": "bb1bc0e8-e16d-40d5-931c-9b654724bd6d",
+      "uuid": "e227545c-52fb-4d10-80f9-95c442db4d20",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3eeafd1f-977a-4d22-9cc2-b7ad14feeb11",
+      "rawTextureUuid": "49ef35ea-e7fd-4faa-9fec-dba4b5328334",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

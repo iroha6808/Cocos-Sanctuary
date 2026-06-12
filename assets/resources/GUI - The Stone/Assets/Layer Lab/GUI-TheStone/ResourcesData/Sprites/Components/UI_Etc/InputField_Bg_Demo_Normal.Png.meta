@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "eccdedc1-6238-4ef3-b9ee-3c0bb9f114ac",
+  "uuid": "ee052749-d5b6-47c7-a776-f7daca532d98",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "InputField_Bg_Demo_Normal": {
       "ver": "1.0.6",
-      "uuid": "8ec8fde2-0bff-4890-a051-6710d0d582ac",
+      "uuid": "7a657e62-c7e5-4509-b344-6de0ed821a56",
       "importer": "sprite-frame",
-      "rawTextureUuid": "eccdedc1-6238-4ef3-b9ee-3c0bb9f114ac",
+      "rawTextureUuid": "ee052749-d5b6-47c7-a776-f7daca532d98",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

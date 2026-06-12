@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "5861558f-0eb7-4f3f-9686-5e9ef35ddaca",
+  "uuid": "ac8050cd-9b6e-4a09-93b8-d1de4b947d29",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ActionText_MissionClear1": {
       "ver": "1.0.6",
-      "uuid": "4381d528-a781-4935-af54-35b775cc4566",
+      "uuid": "da253152-1858-4692-83b8-5d7f110b9e89",
       "importer": "sprite-frame",
-      "rawTextureUuid": "5861558f-0eb7-4f3f-9686-5e9ef35ddaca",
+      "rawTextureUuid": "ac8050cd-9b6e-4a09-93b8-d1de4b947d29",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

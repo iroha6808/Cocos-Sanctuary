@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "274cf4dc-5b09-4191-a60e-a95b48d6b4d3",
+  "uuid": "e3dfd80d-624d-4ff1-ba42-692af3dd3c8c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rock_in_water_02": {
       "ver": "1.0.6",
-      "uuid": "dc216487-190b-4b81-a5a8-399f2342aae0",
+      "uuid": "b8f780ed-107f-4c36-bd2c-29d262f4501e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "274cf4dc-5b09-4191-a60e-a95b48d6b4d3",
+      "rawTextureUuid": "e3dfd80d-624d-4ff1-ba42-692af3dd3c8c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

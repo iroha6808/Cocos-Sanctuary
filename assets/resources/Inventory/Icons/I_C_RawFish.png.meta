@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "37943580-c087-4a58-9985-5caea0252e47",
+  "uuid": "ad5741a4-f653-498b-b541-fbfa76b9f6d0",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_RawFish": {
       "ver": "1.0.6",
-      "uuid": "6ee89d52-a441-4e45-80bf-72581c257947",
+      "uuid": "6738e479-68bf-4542-b9d1-3d9d84a92516",
       "importer": "sprite-frame",
-      "rawTextureUuid": "37943580-c087-4a58-9985-5caea0252e47",
+      "rawTextureUuid": "ad5741a4-f653-498b-b541-fbfa76b9f6d0",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

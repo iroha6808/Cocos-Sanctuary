@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f25d8b48-24bf-4299-9a6e-62ee9f5d925f",
+  "uuid": "bc70ceb0-c5f5-425a-93f6-d5e77aa49f3a",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Border01_InnerBg": {
       "ver": "1.0.6",
-      "uuid": "0d195d6e-e938-4df8-8a51-dedf5e468f1c",
+      "uuid": "089ac966-c6ce-4a57-a5a9-bbf54b2582bf",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f25d8b48-24bf-4299-9a6e-62ee9f5d925f",
+      "rawTextureUuid": "bc70ceb0-c5f5-425a-93f6-d5e77aa49f3a",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

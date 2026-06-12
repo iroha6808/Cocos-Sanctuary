@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "29563b71-6424-4127-817b-ac70cff75a39",
+  "uuid": "5ca7490b-5601-4934-90db-f9a76c0c399d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Title_Ribbon02_White_Bg": {
       "ver": "1.0.6",
-      "uuid": "15e03515-6c15-4b12-b9db-68b8b0390c1d",
+      "uuid": "1da3b9e2-08a7-4825-9112-ab0546e6d397",
       "importer": "sprite-frame",
-      "rawTextureUuid": "29563b71-6424-4127-817b-ac70cff75a39",
+      "rawTextureUuid": "5ca7490b-5601-4934-90db-f9a76c0c399d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

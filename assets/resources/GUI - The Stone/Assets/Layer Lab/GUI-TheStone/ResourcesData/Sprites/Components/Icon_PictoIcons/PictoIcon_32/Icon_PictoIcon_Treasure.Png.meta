@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8e46c1c6-026f-4e0f-8d97-03681590d0e7",
+  "uuid": "9e972748-8738-4dc5-8cf4-1a2fce54b58d",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Treasure": {
       "ver": "1.0.6",
-      "uuid": "0679606d-a7a8-48e3-8d97-666aac5daa48",
+      "uuid": "87860045-2dbc-4b23-b527-31dd6d61afa3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8e46c1c6-026f-4e0f-8d97-03681590d0e7",
+      "rawTextureUuid": "9e972748-8738-4dc5-8cf4-1a2fce54b58d",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

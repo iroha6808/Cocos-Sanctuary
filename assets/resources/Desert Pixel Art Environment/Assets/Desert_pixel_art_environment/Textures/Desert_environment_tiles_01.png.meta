@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "93a870b8-1c41-4eda-af73-a165d31d1048",
+  "uuid": "2963c6b5-57f8-48bd-b747-918151b1c3fa",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Desert_environment_tiles_01": {
       "ver": "1.0.6",
-      "uuid": "27fc7082-8a27-4cc0-aea7-dcf11fb5a281",
+      "uuid": "8ca9b6e2-990f-4b24-b653-04d968aee96b",
       "importer": "sprite-frame",
-      "rawTextureUuid": "93a870b8-1c41-4eda-af73-a165d31d1048",
+      "rawTextureUuid": "2963c6b5-57f8-48bd-b747-918151b1c3fa",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

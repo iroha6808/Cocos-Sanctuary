@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "3c4a5a66-a1a6-422d-8071-4da75764be69",
+  "uuid": "4625545d-1d11-4e03-8188-cc0f9d99342f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Chest_Luckybox_Diamond": {
       "ver": "1.0.6",
-      "uuid": "55d9cd5c-3fee-4065-8aa4-084508ba5848",
+      "uuid": "413c6476-75f1-4d35-8c3b-42a12bea3c2c",
       "importer": "sprite-frame",
-      "rawTextureUuid": "3c4a5a66-a1a6-422d-8071-4da75764be69",
+      "rawTextureUuid": "4625545d-1d11-4e03-8188-cc0f9d99342f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

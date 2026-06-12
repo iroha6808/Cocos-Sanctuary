@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "9566be26-38ad-4646-88c2-2a8c73908b52",
+  "uuid": "7f346605-04ce-41ed-9ee1-ffb0743e19e8",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "ActionText_GameOver1": {
       "ver": "1.0.6",
-      "uuid": "d7408a56-9ead-4fe6-bfe3-d3db75fabe75",
+      "uuid": "8e4b8894-ccd1-4bdf-bbe9-fc78f0ccc57a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "9566be26-38ad-4646-88c2-2a8c73908b52",
+      "rawTextureUuid": "7f346605-04ce-41ed-9ee1-ffb0743e19e8",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

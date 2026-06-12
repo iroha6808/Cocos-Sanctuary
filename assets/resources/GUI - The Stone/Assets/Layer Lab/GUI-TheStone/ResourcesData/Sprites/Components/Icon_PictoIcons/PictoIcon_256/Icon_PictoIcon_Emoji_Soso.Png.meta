@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0b589cf4-31a7-4bfd-8de1-e81cf3b1f371",
+  "uuid": "fca77c1d-3b6d-4c66-9faf-5351ff50fc9f",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Emoji_Soso": {
       "ver": "1.0.6",
-      "uuid": "bdb2f9d4-74b3-4296-ad5a-5a7a68bc3657",
+      "uuid": "fc2507f3-37f0-4ea3-b994-759152f067c5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0b589cf4-31a7-4bfd-8de1-e81cf3b1f371",
+      "rawTextureUuid": "fca77c1d-3b6d-4c66-9faf-5351ff50fc9f",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

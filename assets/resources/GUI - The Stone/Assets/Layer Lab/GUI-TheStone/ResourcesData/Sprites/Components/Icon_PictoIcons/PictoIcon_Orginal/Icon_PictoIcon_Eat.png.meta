@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c4fc9920-37b3-49ca-891a-75e6af7835b6",
+  "uuid": "61d494d4-e152-4fcc-8b19-fa9136e8b007",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Eat": {
       "ver": "1.0.6",
-      "uuid": "f1a280af-cb8e-49a2-90a0-f0548b59c4c7",
+      "uuid": "8cb346ae-0bfe-4fae-a9dc-660fceab662d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c4fc9920-37b3-49ca-891a-75e6af7835b6",
+      "rawTextureUuid": "61d494d4-e152-4fcc-8b19-fa9136e8b007",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

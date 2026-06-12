@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f816816d-be08-42e3-afad-d55ce9c32cca",
+  "uuid": "bb00cb37-4e25-42fe-8f4a-93ab47033015",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "rosequartz": {
       "ver": "1.0.6",
-      "uuid": "3ab5232c-23f5-4501-bdc1-0d46b733faec",
+      "uuid": "4264eb9a-ff23-489c-85cf-7d8e33e76a87",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f816816d-be08-42e3-afad-d55ce9c32cca",
+      "rawTextureUuid": "bb00cb37-4e25-42fe-8f4a-93ab47033015",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

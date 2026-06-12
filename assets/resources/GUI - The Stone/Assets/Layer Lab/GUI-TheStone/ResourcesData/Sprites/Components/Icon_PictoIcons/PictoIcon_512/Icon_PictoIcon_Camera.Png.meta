@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "43dad2de-35c7-4715-80f4-1ff32af17da2",
+  "uuid": "4d34f5cf-f4eb-4452-b538-358ceff0c854",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Icon_PictoIcon_Camera": {
       "ver": "1.0.6",
-      "uuid": "00e57aa8-eb92-43fa-bac7-3a19df2f3c5f",
+      "uuid": "fd3dca70-1f3b-4130-a030-b90e6aa46320",
       "importer": "sprite-frame",
-      "rawTextureUuid": "43dad2de-35c7-4715-80f4-1ff32af17da2",
+      "rawTextureUuid": "4d34f5cf-f4eb-4452-b538-358ceff0c854",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

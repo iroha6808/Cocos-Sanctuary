@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "07d08f8c-da67-40fe-a60a-e3ed251155c0",
+  "uuid": "ece5afa5-d520-4a06-b37d-4283eba39e76",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Trampoline (2)": {
       "ver": "1.0.6",
-      "uuid": "604545b0-9c9b-4852-a56e-65e445b5bcf6",
+      "uuid": "ec938d2b-f972-4a4e-ae1c-8c14c3c706a9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "07d08f8c-da67-40fe-a60a-e3ed251155c0",
+      "rawTextureUuid": "ece5afa5-d520-4a06-b37d-4283eba39e76",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

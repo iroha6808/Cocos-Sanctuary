@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "df68c8bd-a9dc-47dd-ae57-8d623af93522",
+  "uuid": "301c4381-1d79-44dd-8f35-00bb6c43b81c",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Wall Slide FX01": {
       "ver": "1.0.6",
-      "uuid": "468491ab-d99b-411d-a51b-3a38d4e8c15b",
+      "uuid": "4e7aef3e-1b58-48b8-b08a-9510b134ac9e",
       "importer": "sprite-frame",
-      "rawTextureUuid": "df68c8bd-a9dc-47dd-ae57-8d623af93522",
+      "rawTextureUuid": "301c4381-1d79-44dd-8f35-00bb6c43b81c",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

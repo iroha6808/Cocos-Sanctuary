@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "c48040bf-c548-4f9e-baa7-0932beabc33d",
+  "uuid": "1a7a6540-fbb2-4e78-b58b-20e875f3c5a5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Pagenavi_Bg1": {
       "ver": "1.0.6",
-      "uuid": "148bfd19-662b-45c3-8796-72904ac54d85",
+      "uuid": "e861d250-275f-4d2a-8ec0-69e2f0dd6ac5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "c48040bf-c548-4f9e-baa7-0932beabc33d",
+      "rawTextureUuid": "1a7a6540-fbb2-4e78-b58b-20e875f3c5a5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

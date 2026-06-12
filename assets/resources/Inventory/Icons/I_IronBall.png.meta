@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "68071678-1467-4140-9e9b-ddf0754bf684",
+  "uuid": "947e40f0-fee5-4a41-b86d-8b6a93f83c89",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_IronBall": {
       "ver": "1.0.6",
-      "uuid": "05a3e97c-c0cb-4136-b6ea-728ffd66b56a",
+      "uuid": "64d9c042-b3bf-4c34-905c-975e1976c893",
       "importer": "sprite-frame",
-      "rawTextureUuid": "68071678-1467-4140-9e9b-ddf0754bf684",
+      "rawTextureUuid": "947e40f0-fee5-4a41-b86d-8b6a93f83c89",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

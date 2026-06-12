@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cd5bc6a4-58de-4688-8d68-73f1eaf34e6b",
+  "uuid": "fd9e8d6a-6fb5-47a8-ad8b-fc4b4a6b9a61",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "P_Medicine06": {
       "ver": "1.0.6",
-      "uuid": "f8215f3d-7688-4701-9ed4-d1bd229920d9",
+      "uuid": "bdff0392-012a-4202-badd-d9b6da873c30",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cd5bc6a4-58de-4688-8d68-73f1eaf34e6b",
+      "rawTextureUuid": "fd9e8d6a-6fb5-47a8-ad8b-fc4b4a6b9a61",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

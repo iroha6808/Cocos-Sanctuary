@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "0903de54-e13f-4744-83da-b122483d3945",
+  "uuid": "1c564cd3-10fb-479b-80f9-a2903a3e5fc6",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "icecrystal": {
       "ver": "1.0.6",
-      "uuid": "6605d1a6-60d3-4d23-a600-6b5334efeac6",
+      "uuid": "e0031d54-ef09-4754-8374-ee5c3999ff28",
       "importer": "sprite-frame",
-      "rawTextureUuid": "0903de54-e13f-4744-83da-b122483d3945",
+      "rawTextureUuid": "1c564cd3-10fb-479b-80f9-a2903a3e5fc6",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

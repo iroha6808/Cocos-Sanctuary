@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "da32d361-4477-41cb-9862-4d099a4eadfa",
+  "uuid": "bc310b2c-e1f7-490f-abb5-9fc6ed75e721",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "IceTiles": {
       "ver": "1.0.6",
-      "uuid": "83296d65-bdae-4a30-8037-bea34cd05cbc",
+      "uuid": "03d01442-bbdc-4878-8b7f-8c0b4bc38d2d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "da32d361-4477-41cb-9862-4d099a4eadfa",
+      "rawTextureUuid": "bc310b2c-e1f7-490f-abb5-9fc6ed75e721",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

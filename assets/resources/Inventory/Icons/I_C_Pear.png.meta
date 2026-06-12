@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b265a946-072a-4105-ba69-443997906694",
+  "uuid": "ab7dd778-97ec-44f9-8f0c-8431970fd581",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_C_Pear": {
       "ver": "1.0.6",
-      "uuid": "fa365f80-4cb2-470d-a13f-b8d03d9e7c33",
+      "uuid": "5c831175-7c3b-4770-aaa8-195f166c6d9d",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b265a946-072a-4105-ba69-443997906694",
+      "rawTextureUuid": "ab7dd778-97ec-44f9-8f0c-8431970fd581",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

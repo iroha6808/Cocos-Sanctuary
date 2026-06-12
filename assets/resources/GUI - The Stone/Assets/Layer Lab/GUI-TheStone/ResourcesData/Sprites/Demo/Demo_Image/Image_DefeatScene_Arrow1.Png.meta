@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "f9359084-fac0-4d48-9b9b-8089d0e2d2a3",
+  "uuid": "b21a4978-d831-4425-993b-fb122c8f5fc8",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Image_DefeatScene_Arrow1": {
       "ver": "1.0.6",
-      "uuid": "cbe2a17f-2c8f-4780-af11-f9ee3684cdd6",
+      "uuid": "27109af7-4317-44ad-9b30-9b1380afeca5",
       "importer": "sprite-frame",
-      "rawTextureUuid": "f9359084-fac0-4d48-9b9b-8089d0e2d2a3",
+      "rawTextureUuid": "b21a4978-d831-4425-993b-fb122c8f5fc8",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

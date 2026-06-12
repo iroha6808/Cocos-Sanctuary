@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "e003d81d-ddf5-493d-821e-4443740df022",
+  "uuid": "1080adb2-9719-4a2d-bdb0-2066371b6a35",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "iceBGtiles": {
       "ver": "1.0.6",
-      "uuid": "917c17f5-7a6c-475b-baff-d361973d6f6f",
+      "uuid": "880fc1c4-bb49-4c3f-87b1-f2d0044f924a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "e003d81d-ddf5-493d-821e-4443740df022",
+      "rawTextureUuid": "1080adb2-9719-4a2d-bdb0-2066371b6a35",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

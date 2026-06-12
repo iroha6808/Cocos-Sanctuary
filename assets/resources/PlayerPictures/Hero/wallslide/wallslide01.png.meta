@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "d918a313-4b36-433e-817b-2df017bd05b3",
+  "uuid": "1d868783-b5f0-48bc-a69f-76498ccaf5df",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "wallslide01": {
       "ver": "1.0.6",
-      "uuid": "227f7f76-2505-4482-9d65-0145e2ae7060",
+      "uuid": "aff1a57f-d15b-46c1-a393-fe6d7ccee527",
       "importer": "sprite-frame",
-      "rawTextureUuid": "d918a313-4b36-433e-817b-2df017bd05b3",
+      "rawTextureUuid": "1d868783-b5f0-48bc-a69f-76498ccaf5df",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

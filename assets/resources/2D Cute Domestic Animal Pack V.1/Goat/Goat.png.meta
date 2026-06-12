@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "cdc245a4-3b02-4276-9d15-122f8a2d14bb",
+  "uuid": "6c13ac08-73f5-4a9d-86f6-28f7a8858a27",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Goat": {
       "ver": "1.0.6",
-      "uuid": "9d063faf-cdb7-4358-8974-695ae0c39b15",
+      "uuid": "0d425a27-0fcb-4700-909a-985c6f9abbc7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "cdc245a4-3b02-4276-9d15-122f8a2d14bb",
+      "rawTextureUuid": "6c13ac08-73f5-4a9d-86f6-28f7a8858a27",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "b56fa0b4-39dc-4371-acff-55cc9e1c50b5",
+  "uuid": "5e74ad0b-3325-426d-853d-ccf5cdd1d387",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Bull": {
       "ver": "1.0.6",
-      "uuid": "c938dfe0-81bf-484e-a8e9-66bd26789a10",
+      "uuid": "a442c7c3-a743-490f-9024-143dda2176f2",
       "importer": "sprite-frame",
-      "rawTextureUuid": "b56fa0b4-39dc-4371-acff-55cc9e1c50b5",
+      "rawTextureUuid": "5e74ad0b-3325-426d-853d-ccf5cdd1d387",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

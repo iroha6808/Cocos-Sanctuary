@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "dc755732-f083-4bd0-9329-209225ba34bc",
+  "uuid": "f628ee0f-304b-4831-8a78-241cb7ca3fd1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Sheep": {
       "ver": "1.0.6",
-      "uuid": "e7befdf1-d6b1-4367-96d2-a96d7617cdac",
+      "uuid": "9bbb7be8-2ca9-4cff-b19a-3f72e6bf6eca",
       "importer": "sprite-frame",
-      "rawTextureUuid": "dc755732-f083-4bd0-9329-209225ba34bc",
+      "rawTextureUuid": "f628ee0f-304b-4831-8a78-241cb7ca3fd1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

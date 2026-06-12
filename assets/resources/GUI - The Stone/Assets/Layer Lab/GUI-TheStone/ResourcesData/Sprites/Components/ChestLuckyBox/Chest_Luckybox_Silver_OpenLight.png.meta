@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "8d6131d9-32a0-4898-ad43-6c0b37996fae",
+  "uuid": "b65698ef-6831-4881-8933-65ddba5f72c2",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Chest_Luckybox_Silver_OpenLight": {
       "ver": "1.0.6",
-      "uuid": "be3132dc-1f01-48ba-af6c-d60875423f2b",
+      "uuid": "68df2064-4303-4f02-80fa-4dd1d516e8e3",
       "importer": "sprite-frame",
-      "rawTextureUuid": "8d6131d9-32a0-4898-ad43-6c0b37996fae",
+      "rawTextureUuid": "b65698ef-6831-4881-8933-65ddba5f72c2",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

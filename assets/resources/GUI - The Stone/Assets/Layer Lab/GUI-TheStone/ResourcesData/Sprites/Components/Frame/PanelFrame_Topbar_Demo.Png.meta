@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "21f76af4-c226-4255-af6a-14fba08cfc81",
+  "uuid": "61fe8fb3-c251-4717-8d4f-05f977322bfd",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "PanelFrame_Topbar_Demo": {
       "ver": "1.0.6",
-      "uuid": "be3a04aa-808e-425d-8df1-2209f3f8eb8b",
+      "uuid": "59443978-c9ce-4edc-b650-313d33a9dd0f",
       "importer": "sprite-frame",
-      "rawTextureUuid": "21f76af4-c226-4255-af6a-14fba08cfc81",
+      "rawTextureUuid": "61fe8fb3-c251-4717-8d4f-05f977322bfd",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

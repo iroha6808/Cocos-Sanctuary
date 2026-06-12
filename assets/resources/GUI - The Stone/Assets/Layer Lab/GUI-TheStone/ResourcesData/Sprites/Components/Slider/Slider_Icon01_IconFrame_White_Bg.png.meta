@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "ee7aeb0c-ef04-4ecd-bc44-45a2088401ac",
+  "uuid": "347a38e3-240d-4384-bd98-cda10bea44d4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_Icon01_IconFrame_White_Bg": {
       "ver": "1.0.6",
-      "uuid": "8c6e14ff-0ae3-4cbe-ab87-8cea2c0225cd",
+      "uuid": "4507d65b-836b-4bcb-864c-bb677bf9d16a",
       "importer": "sprite-frame",
-      "rawTextureUuid": "ee7aeb0c-ef04-4ecd-bc44-45a2088401ac",
+      "rawTextureUuid": "347a38e3-240d-4384-bd98-cda10bea44d4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

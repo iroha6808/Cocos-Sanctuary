@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "614965b3-acd4-4f9b-8a51-1c9aace7c35a",
+  "uuid": "1644fb76-92f0-4ad4-89bb-cc056dda2ad5",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "I_Jade": {
       "ver": "1.0.6",
-      "uuid": "80ca45b0-5ba7-42eb-b0d8-627da337865c",
+      "uuid": "f253c5b9-c847-4dae-951f-5cf7d45746b7",
       "importer": "sprite-frame",
-      "rawTextureUuid": "614965b3-acd4-4f9b-8a51-1c9aace7c35a",
+      "rawTextureUuid": "1644fb76-92f0-4ad4-89bb-cc056dda2ad5",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

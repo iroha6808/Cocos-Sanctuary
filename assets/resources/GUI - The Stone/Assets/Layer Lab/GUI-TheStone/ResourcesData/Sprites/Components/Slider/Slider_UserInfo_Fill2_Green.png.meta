@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "72d199bf-8305-4191-a3a1-8dc2d1ab6810",
+  "uuid": "5b715716-5a6e-4888-aba6-279e2a2fb6a1",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Slider_UserInfo_Fill2_Green": {
       "ver": "1.0.6",
-      "uuid": "c8e673bb-2d26-4d74-8bdf-53be6738bf08",
+      "uuid": "7eaa92ff-4afe-470c-b63d-d73537d3dc07",
       "importer": "sprite-frame",
-      "rawTextureUuid": "72d199bf-8305-4191-a3a1-8dc2d1ab6810",
+      "rawTextureUuid": "5b715716-5a6e-4888-aba6-279e2a2fb6a1",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

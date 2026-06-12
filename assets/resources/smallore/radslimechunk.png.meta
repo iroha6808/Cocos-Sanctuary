@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "7f9bd22e-1202-427d-860a-4bcd54214d3d",
+  "uuid": "218516ee-405c-4dae-9db5-838ae3f7d0ac",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "radslimechunk": {
       "ver": "1.0.6",
-      "uuid": "25f2c137-b82d-4ee4-be80-5c3c81d70303",
+      "uuid": "52a26657-d1d8-4814-9240-9640e7e0e975",
       "importer": "sprite-frame",
-      "rawTextureUuid": "7f9bd22e-1202-427d-860a-4bcd54214d3d",
+      "rawTextureUuid": "218516ee-405c-4dae-9db5-838ae3f7d0ac",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,

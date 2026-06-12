@@ -1,6 +1,6 @@
 {
   "ver": "2.3.7",
-  "uuid": "2509e6c1-57dd-487f-98c6-e114a4772e3d",
+  "uuid": "851dda19-d12a-4236-93fc-0547c662c6d4",
   "importer": "texture",
   "type": "sprite",
   "wrapMode": "clamp",
@@ -14,9 +14,9 @@
   "subMetas": {
     "Chest_Luckybox_Diamond_OpenLight": {
       "ver": "1.0.6",
-      "uuid": "df2fc6aa-e81f-487e-855a-5503bd380589",
+      "uuid": "bf8dfed0-2d4c-46d3-872c-35f85429d1a9",
       "importer": "sprite-frame",
-      "rawTextureUuid": "2509e6c1-57dd-487f-98c6-e114a4772e3d",
+      "rawTextureUuid": "851dda19-d12a-4236-93fc-0547c662c6d4",
       "trimType": "auto",
       "trimThreshold": 1,
       "rotated": false,
