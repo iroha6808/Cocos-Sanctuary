@@ -79,6 +79,7 @@ export default class MerchantShopUIController extends cc.Component {
     private generatedPanel: cc.Node = null!;
     private uiBuilt: boolean = false;
     private closeRequested: boolean = false;
+    private displayRootBaseScale: cc.Vec2 = null!;
 
     private itemScrollView: cc.ScrollView = null!;
     private itemContent: cc.Node = null!;
@@ -122,6 +123,7 @@ export default class MerchantShopUIController extends cc.Component {
         if (this.followMainCamera) {
             this.updatePanelPosition();
         }
+        this.applyPanelZoomScale();
     }
 
     onDestroy(): void {
@@ -159,6 +161,7 @@ export default class MerchantShopUIController extends cc.Component {
         }
 
         this.updatePanelPosition();
+        this.applyPanelZoomScale();
         this.refresh();
     }
 
@@ -891,6 +894,33 @@ export default class MerchantShopUIController extends cc.Component {
         const target = cc.v2(cameraWorldPos.x, cameraWorldPos.y + this.runtimePanelOffsetY);
         panel.setPosition(panel.parent.convertToNodeSpaceAR(target));
         panel.zIndex = this.uiZIndex;
+    }
+
+    private applyPanelZoomScale(): void {
+        const panel = this.getDisplayRoot();
+        if (!panel || !cc.isValid(panel)) {
+            return;
+        }
+        if (!this.displayRootBaseScale || !cc.isValid(panel)) {
+            this.displayRootBaseScale = cc.v2(panel.scaleX || 1, panel.scaleY || 1);
+        }
+
+        const zoom = this.getCameraZoomRatio();
+        const scaleFactor = 1 / zoom;
+        panel.scaleX = this.displayRootBaseScale.x * scaleFactor;
+        panel.scaleY = this.displayRootBaseScale.y * scaleFactor;
+    }
+
+    private getCameraZoomRatio(): number {
+        if (!this.mainCamera || !cc.isValid(this.mainCamera.node)) {
+            if (!this.mainCameraNode || !cc.isValid(this.mainCameraNode)) {
+                this.mainCameraNode = cc.find("Canvas/Main Camera") || cc.find("Main Camera") || null!;
+            }
+            this.mainCamera = this.mainCameraNode
+                ? this.mainCameraNode.getComponent(cc.Camera) || null!
+                : null!;
+        }
+        return this.mainCamera ? Math.max(0.01, this.mainCamera.zoomRatio || 1) : 1;
     }
 
     private getCameraWorldPosition(): cc.Vec2 | null {

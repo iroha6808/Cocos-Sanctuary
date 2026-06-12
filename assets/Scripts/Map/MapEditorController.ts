@@ -105,6 +105,7 @@ export default class MapEditorController extends cc.Component {
     private browserMouseMoveHandler: any = null;
     private browserMouseUpHandler: any = null;
     private preventContextMenuHandler: any = null;
+    private placedDuringCurrentClick: boolean = false;
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -114,7 +115,8 @@ export default class MapEditorController extends cc.Component {
     }
 
     start(): void {
-        this.rebuildFromState(SaveService.getCurrentMapEditorState());
+        // Map editor is currently scene-authoritative: do not rebuild from the
+        // fake backend on scene start, or it may overwrite freshly edited terrain.
         this.refreshStatus();
     }
 
@@ -342,6 +344,7 @@ export default class MapEditorController extends cc.Component {
             return;
         }
         this.lastMouseRootLocal = rootLocal.clone();
+        this.placedDuringCurrentClick = false;
 
         if (button === cc.Event.EventMouse.BUTTON_RIGHT) {
             this.deleteAtWorld(world);
@@ -360,7 +363,7 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
-        this.placeAt(rootLocal);
+        this.placedDuringCurrentClick = this.placeAt(rootLocal);
     }
 
     private handleEditorMouseMove(rootLocal: cc.Vec2): void {
@@ -382,25 +385,36 @@ export default class MapEditorController extends cc.Component {
     }
 
     private handleEditorMouseUp(button: number, rootLocal: cc.Vec2): void {
-        if (!this.selectionStart || button !== cc.Event.EventMouse.BUTTON_LEFT || !rootLocal) {
+        if (button !== cc.Event.EventMouse.BUTTON_LEFT || !rootLocal) {
+            this.placedDuringCurrentClick = false;
             return;
         }
-        this.selectionCurrent = rootLocal;
-        this.generateInSelection();
-        this.clearSelection();
+
+        if (this.selectionStart) {
+            this.selectionCurrent = rootLocal;
+            this.generateInSelection();
+            this.clearSelection();
+            this.placedDuringCurrentClick = false;
+            return;
+        }
+
+        if (!this.placedDuringCurrentClick && this.tool !== MapEditorTool.BoxGenerate) {
+            this.placeAt(rootLocal);
+        }
+        this.placedDuringCurrentClick = false;
     }
 
-    private placeAt(rootLocal: cc.Vec2): void {
+    private placeAt(rootLocal: cc.Vec2): boolean {
         const entry = this.getCurrentEntry();
         if (!entry || !entry.prefab) {
             cc.warn("[MapEditor] No prefab assigned for current tool.");
-            return;
+            return false;
         }
 
         const parent = entry.kind === "resource" ? this.getResourceRoot() : this.getTerrainRoot();
         if (!parent) {
             cc.warn("[MapEditor] Missing terrainRoot/resourceRoot.");
-            return;
+            return false;
         }
 
         const node = cc.instantiate(entry.prefab);
@@ -409,10 +423,11 @@ export default class MapEditorController extends cc.Component {
         node.setScale(scale, scale);
         node.angle = this.rotation;
         parent.addChild(node);
-        this.setEditorNodePosition(node, parent, rootLocal);
+        this.setPlacementNodePosition(node, parent, rootLocal, entry.kind);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
         this.commitEditorChangesToScene();
+        return true;
     }
 
     private deleteAtWorld(world: cc.Vec2): void {
@@ -446,11 +461,20 @@ export default class MapEditorController extends cc.Component {
             cc.warn("[MapEditor] AutoMapGenerator is missing.");
             return;
         }
-        const states = generator.generateInRect(rect, { clearExisting: true });
-        for (let i = 0; i < states.length; i++) {
-            this.upsertPlacement(states[i]);
+        const started = generator.beginTimedGenerationInRect(rect, {
+            clearExisting: true,
+            useRealtimeTimer: true,
+            onPlacementSpawned: (state: MapEditorPlacementState) => {
+                this.upsertPlacement(state);
+                this.commitEditorChangesToScene();
+            },
+            onComplete: () => {
+                this.commitEditorChangesToScene();
+            }
+        });
+        if (!started) {
+            this.commitEditorChangesToScene();
         }
-        this.commitEditorChangesToScene();
     }
 
     private setTool(tool: MapEditorTool): void {
@@ -598,8 +622,10 @@ export default class MapEditorController extends cc.Component {
         }
     }
 
-    private onSaveLoaded(saveData: SaveData): void {
-        this.rebuildFromState(saveData ? saveData.mapEditorState : null);
+    private onSaveLoaded(_saveData: SaveData): void {
+        // Intentionally ignore backend/editor save data for now. Manual terrain
+        // edits should stay in the live scene until the editor save flow is stable.
+        this.refreshStatus();
     }
 
     private getTerrainEntries(): EditorPrefabEntry[] {
@@ -801,6 +827,19 @@ export default class MapEditorController extends cc.Component {
         );
     }
 
+    private setPlacementNodePosition(
+        node: cc.Node,
+        parent: cc.Node,
+        rootLocal: cc.Vec2,
+        kind: "terrain" | "resource"
+    ): void {
+        if (kind === "terrain") {
+            this.setNodePositionFromRootLocal(node, parent, rootLocal);
+            return;
+        }
+        this.setEditorNodePosition(node, parent, rootLocal);
+    }
+
     private createPlacementState(
         node: cc.Node,
         kind: "terrain" | "resource",
@@ -951,7 +990,7 @@ export default class MapEditorController extends cc.Component {
         }
 
         this.previewNode.angle = this.rotation;
-        this.setEditorNodePosition(this.previewNode, parent, rootLocal);
+        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry.kind);
     }
 
     private destroyPlacementPreview(): void {
