@@ -30,16 +30,23 @@ export default class Rope extends cc.Component {
     @property({ tooltip: '底端偏移（從節點中心往下，px）' })
     bottomOffset: number = 0;
 
+    @property({ tooltip: 'Whether player snaps to rope center when entering climb.' })
+    snapToCenterOnEnter: boolean = true;
+
     // 目前在範圍內的玩家（sensor overlap）
     private playerInRange: cc.Node | null = null;
 
     onLoad() {
+        if (this.node.name === "TreeClimbZone") {
+            this.snapToCenterOnEnter = false;
+        }
+
         const col = this.getComponent(cc.PhysicsCollider);
         if (col) {
             col.sensor = true;
             (col as any).enabledContactListener = true;
-            col.apply(); // ← 加這行，確保設定生效
-            cc.log('[Rope] collider 設定完成, sensor=true');
+            col.apply();
+            cc.log(`[Rope] collider ready, node=${this.node.name}, snapToCenterOnEnter=${this.snapToCenterOnEnter}`);
         }
     }
 
@@ -94,6 +101,15 @@ export default class Rope extends cc.Component {
     /** 藤蔓中心的世界 X 座標（讓玩家對齊用） */
     getCenterWorldX(): number {
         return this.node.convertToWorldSpaceAR(cc.Vec2.ZERO).x;
+    }
+
+    getAllowedHorizontalOffset(): number {
+        const box = this.getComponent(cc.PhysicsBoxCollider);
+        if (box && box.size) {
+            return Math.max(20, box.size.width * Math.abs(this.node.scaleX) / 2);
+        }
+
+        return 80;
     }
 
     getClimbSpeed(): number    { return this.climbSpeed; }
