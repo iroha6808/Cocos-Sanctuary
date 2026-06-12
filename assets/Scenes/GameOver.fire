@@ -1524,13 +1524,13 @@
       "__id__": 30
     },
     "_enabled": true,
+    "sceneBgm": null,
     "menuBgm": {
       "__uuid__": "b203e4e4-2b63-4c03-ba09-48c102ef86b1"
     },
     "gameOverBgm": {
       "__uuid__": "440418d4-2781-4adf-810a-f9def689e13a"
     },
-    "sceneBgm": null,
     "waterBgm": null,
     "attackSfx": null,
     "hitSfx": null,
@@ -1542,6 +1542,7 @@
     "sfxVolume": 0.8,
     "playBgmOnStart": true,
     "bgmFadeDuration": 0.8,
+    "waterRepeatDelay": 2,
     "_id": "7dtmp0HYdHha3QfyjiEu/U"
   },
   {
