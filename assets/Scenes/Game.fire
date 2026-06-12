@@ -64199,6 +64199,8 @@
     "sceneBgm": {
       "__uuid__": "094f2612-9b5b-43b1-af80-9291d72fc786"
     },
+    "menuBgm": null,
+    "gameOverBgm": null,
     "waterBgm": {
       "__uuid__": "2ed17e72-fee2-4f0f-b2e2-a1d1665d91e4"
     },

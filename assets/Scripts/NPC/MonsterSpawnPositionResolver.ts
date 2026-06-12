@@ -1,14 +1,23 @@
-import { MonsterSpawnEntry } from "../Data/MonsterPool";
-import LandSpawnPositionResolver, {
-    LandSpawnResult
-} from "./LandSpawnPositionResolver";
+import {
+    MonsterSpawnEntry,
+    SpawnEnvironment
+} from "../Data/MonsterPool";
+import AquaticSpawnPositionResolver from "./AquaticSpawnPositionResolver";
+import LandSpawnPositionResolver from "./LandSpawnPositionResolver";
 
 const { ccclass, property } = cc._decorator;
 
-export interface MonsterSpawnPositionResult extends LandSpawnResult {}
+export interface MonsterSpawnPositionResult {
+    worldPosition: cc.Vec2;
+    localPosition: cc.Vec2;
+    groundNode?: cc.Node;
+}
 
 @ccclass
 export default class MonsterSpawnPositionResolver extends cc.Component {
+    @property({ type: cc.Enum(SpawnEnvironment) })
+    public environment: SpawnEnvironment = SpawnEnvironment.LAND;
+
     @property(cc.Float)
     public minSpawnDistance: number = 500;
 
@@ -58,6 +67,7 @@ export default class MonsterSpawnPositionResolver extends cc.Component {
     public debugDraw: boolean = false;
 
     private landResolver: LandSpawnPositionResolver = null;
+    private aquaticResolver: AquaticSpawnPositionResolver = null;
 
     public findSpawnPosition(
         playerNode: cc.Node,
@@ -70,14 +80,34 @@ export default class MonsterSpawnPositionResolver extends cc.Component {
             return null;
         }
 
-        const resolver = this.getLandResolver();
-        if (!resolver) {
+        if (this.environment === SpawnEnvironment.WATER) {
+            const aquaticResolver = this.getAquaticResolver();
+            if (!aquaticResolver) {
+                this.log("missing AquaticSpawnPositionResolver");
+                return null;
+            }
+            this.syncAquaticResolverSettings(aquaticResolver);
+            return aquaticResolver.findAquaticPosition({
+                playerNode,
+                spawnParent,
+                entry,
+                minDistance: this.minSpawnDistance,
+                maxDistance: this.maxSpawnDistance,
+                occupiedWorldPositions: occupiedWorldPositions || [],
+                minimumSpacing: this.minimumMonsterSpacing,
+                avoidCameraView: this.avoidCameraView,
+                cameraPadding: this.cameraPadding
+            });
+        }
+
+        const landResolver = this.getLandResolver();
+        if (!landResolver) {
             this.log("missing LandSpawnPositionResolver");
             return null;
         }
 
-        this.syncResolverSettings(resolver);
-        return resolver.findLandPosition({
+        this.syncLandResolverSettings(landResolver);
+        return landResolver.findLandPosition({
             playerNode,
             spawnParent,
             minDistance: this.minSpawnDistance,
@@ -99,7 +129,15 @@ export default class MonsterSpawnPositionResolver extends cc.Component {
         return this.landResolver;
     }
 
-    private syncResolverSettings(resolver: LandSpawnPositionResolver): void {
+    public getAquaticResolver(): AquaticSpawnPositionResolver {
+        if (!this.aquaticResolver || !cc.isValid(this.aquaticResolver)) {
+            this.aquaticResolver = this.getComponent(AquaticSpawnPositionResolver)
+                || this.addComponent(AquaticSpawnPositionResolver);
+        }
+        return this.aquaticResolver;
+    }
+
+    private syncLandResolverSettings(resolver: LandSpawnPositionResolver): void {
         resolver.raycastHeight = this.raycastHeight;
         resolver.raycastDepth = this.raycastDepth;
         resolver.spawnHeightOffset = this.spawnHeightOffset;
@@ -109,6 +147,14 @@ export default class MonsterSpawnPositionResolver extends cc.Component {
         resolver.supportInset = this.supportInset;
         resolver.maxSupportHeightDifference = this.maxSupportHeightDifference;
         resolver.allowGroundGroupFallback = this.allowGroundGroupFallback;
+        resolver.debugLog = this.debugLog;
+        resolver.debugDraw = this.debugDraw;
+    }
+
+    private syncAquaticResolverSettings(
+        resolver: AquaticSpawnPositionResolver
+    ): void {
+        resolver.maxPositionAttempts = this.maxPositionAttempts;
         resolver.debugLog = this.debugLog;
         resolver.debugDraw = this.debugDraw;
     }

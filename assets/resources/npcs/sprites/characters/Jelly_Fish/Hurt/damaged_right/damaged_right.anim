@@ -1,0 +1,31 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "damaged_right",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.375,
+  "sample": 8,
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "788e5b49-4fd2-41b7-9041-110bb4e4f980"
+            }
+          },
+          {
+            "frame": 0.25,
+            "value": {
+              "__uuid__": "b109ce28-57c7-4f68-b7e6-338eb83abc0d"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}

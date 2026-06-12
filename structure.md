@@ -726,7 +726,7 @@ Score / save / leaderboard
 5. 實測商店 / 背包 / 合成 / 對話 UI 在 OceanArea 不會跑出鏡頭。
 6. 實測車 / 船 seat、exit offset、collider、玩家上下載具與水域 BGM crossfade。
 7. Map / Resource / Food 腳本仍有 placeholder、固定路徑、命名大小寫與素材來源檔，後續需要整理。
-# 怪物自動生成系統（2026-06-11）
+# NPC 自動生成系統（2026-06-13）
 
 ## Runtime 架構
 
@@ -734,30 +734,52 @@ Score / save / leaderboard
 Canvas
 ├─ Core Controllers
 │  ├─ GameManager
-│  ├─ MonsterSpawner（GameManager 啟動時自動補上）
-│  └─ MonsterSpawnPositionResolver（GameManager 啟動時自動補上）
+│  ├─ Monster Spawner - land-hostile
+│  ├─ Monster Spawner - land-neutral
+│  └─ Monster Spawner - aquatic
 └─ NPC／World Root
    └─ Runtime Monsters（MonsterSpawner 自動建立）
 ```
+
+三個生成節點由 `GameManager` 啟動時自動建立，每個節點各自掛：
+
+- `MonsterSpawner`
+- `MonsterSpawnPositionResolver`
+- 陸地模式按需補上 `LandSpawnPositionResolver`
+- 水域模式按需補上 `AquaticSpawnPositionResolver`
+
+各人口群擁有獨立的總數、種類上限與 spawn budget，不會互相占用名額。
 
 ## 相關檔案
 
 - `assets/Scripts/Data/MonsterPool.ts`
   - 怪物池 entry、條件過濾與權重抽選。
 - `assets/Scripts/NPC/MonsterSpawnPositionResolver.ts`
-  - 玩家周邊地面 raycast、鏡頭排除、空間與怪物間距檢查。
+  - 依 `SpawnEnvironment` 將位置查詢分流至陸地或水域 resolver。
+- `assets/Scripts/NPC/LandSpawnPositionResolver.ts`
+  - 玩家周邊地面 raycast、OceanArea 排除、支撐面與空間檢查。
+- `assets/Scripts/NPC/AquaticSpawnPositionResolver.ts`
+  - 在 OceanArea 內按水深抽選位置，檢查完整 clearance、地形、鏡頭與 NPC 間距。
 - `assets/Scripts/NPC/MonsterSpawner.ts`
-  - 生成冷卻、全域／種類上限、spawn budget、AI target 與過遠回收。
+  - 生成冷卻、人口群／種類上限、spawn budget、AI target 與過遠回收。
 - `assets/Scripts/NPC/SpawnedMonster.ts`
   - 追蹤系統生成怪物，在死亡或銷毀後釋放生成名額。
 - `assets/Scripts/NPC/EnemyRespawner.ts`
   - 保留作為固定區域、巢穴或事件型生成器，不納入全域生成數量。
 
-## 預設怪物池
+## 預設生成池
 
-- Slime：weight 50、種類上限 4、cost 1。
-- Boar：weight 30、種類上限 3、cost 1。
-- Skeleton Mage：weight 20、種類上限 2、cost 2。
+- `land-hostile`
+  - Slime：weight 50、種類上限 4、cost 1。
+  - Skeleton Mage：weight 20、種類上限 2、cost 2。
+- `land-neutral`
+  - Boar：weight 60、種類上限 3、cost 1。
+  - Fox：weight 40、種類上限 2、cost 1。
+- `aquatic`
+  - Sea Turtle：weight 45、種類上限 2、cost 1，淺至中層。
+  - Marlin：weight 30、種類上限 2、cost 1，中至深層。
+  - Jelly Fish：weight 25、種類上限 2、cost 1，中至深層。
 
-`GameManager.enableAutomaticMonsterSpawning` 可關閉整套自動生成。若手動在
-`Core Controllers` 掛上 `MonsterSpawner`，則可用 Inspector 自訂完整怪物池與參數。
+`GameManager.enableAutomaticMonsterSpawning` 可關閉整套自動生成。生成位置依
+`LAND/WATER` 決定，NPC 出生後的 peace／neutral／hostile 行為則由 prefab 的
+`NPC_AI.type` 決定。

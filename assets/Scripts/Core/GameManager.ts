@@ -156,11 +156,14 @@ export default class GameManager extends cc.Component {
             physicsTagValidator.validateNow();
         }
         if (this.enableAutomaticMonsterSpawning) {
-            const monsterSpawner = MonsterSpawner.getOrCreate(this.node);
-            if (monsterSpawner) {
-                monsterSpawner.debugLog = this.monsterSpawnDebugLog;
-                if (monsterSpawner.positionResolver) {
-                    monsterSpawner.positionResolver.debugLog = this.monsterSpawnDebugLog;
+            const monsterSpawners = MonsterSpawner.getOrCreateDefaultSystems(this.node);
+            for (const monsterSpawner of monsterSpawners) {
+                if (monsterSpawner) {
+                    monsterSpawner.debugLog = this.monsterSpawnDebugLog;
+                    if (monsterSpawner.positionResolver) {
+                        monsterSpawner.positionResolver.debugLog
+                            = this.monsterSpawnDebugLog;
+                    }
                 }
             }
         }

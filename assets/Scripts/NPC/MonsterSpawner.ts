@@ -3,7 +3,8 @@ import {
     MonsterAliveCounts,
     MonsterSpawnContext,
     MonsterSpawnEntry,
-    pickWeightedMonsterEntry
+    pickWeightedMonsterEntry,
+    SpawnEnvironment
 } from "../Data/MonsterPool";
 import { GameEvent } from "../Core/Constants";
 import EventCenter from "../Core/EventCenter";
@@ -22,7 +23,8 @@ interface SpawnRecord {
 
 @ccclass
 export default class MonsterSpawner extends cc.Component {
-    private static readonly DEFAULT_MONSTERS = [
+    private static readonly DEFAULT_POOLS: { [spawnerId: string]: any[] } = {
+        "land-hostile": [
         {
             id: "slime",
             uuid: "5fc94d69-3068-45e8-9948-62a8a7113ceb",
@@ -33,15 +35,6 @@ export default class MonsterSpawner extends cc.Component {
             height: 48
         },
         {
-            id: "boar",
-            uuid: "4d212252-f317-43dc-869b-176845549b7b",
-            weight: 30,
-            maxAlive: 3,
-            spawnCost: 1,
-            width: 64,
-            height: 52
-        },
-        {
             id: "skeleton_mage",
             uuid: "d1a7c91c-ce7c-44d5-9c8a-52de8a941a74",
             weight: 20,
@@ -50,7 +43,69 @@ export default class MonsterSpawner extends cc.Component {
             width: 48,
             height: 80
         }
-    ];
+        ],
+        "land-neutral": [
+            {
+                id: "boar",
+                uuid: "4d212252-f317-43dc-869b-176845549b7b",
+                weight: 60,
+                maxAlive: 3,
+                spawnCost: 1,
+                width: 64,
+                height: 52
+            },
+            {
+                id: "fox",
+                uuid: "abc5db68-de64-432f-91fe-a2d1f33cb1ff",
+                weight: 40,
+                maxAlive: 2,
+                spawnCost: 1,
+                width: 48,
+                height: 56
+            }
+        ],
+        "aquatic": [
+            {
+                id: "sea_turtle",
+                uuid: "3f85654f-d2fd-4428-8cc4-59791ff28ed2",
+                weight: 45,
+                maxAlive: 2,
+                spawnCost: 1,
+                width: 64,
+                height: 48,
+                minDepth: 0.15,
+                maxDepth: 0.65
+            },
+            {
+                id: "marlin",
+                uuid: "1f3a8d57-327e-4788-9951-1bf88b128e7e",
+                weight: 30,
+                maxAlive: 2,
+                spawnCost: 1,
+                width: 80,
+                height: 48,
+                minDepth: 0.3,
+                maxDepth: 0.85
+            },
+            {
+                id: "jelly_fish",
+                uuid: "3a7f15d7-b307-46eb-bc6e-9daf37afcf35",
+                weight: 25,
+                maxAlive: 2,
+                spawnCost: 1,
+                width: 48,
+                height: 64,
+                minDepth: 0.25,
+                maxDepth: 0.85
+            }
+        ]
+    };
+
+    @property(cc.String)
+    public spawnerId: string = "land-hostile";
+
+    @property({ type: cc.Enum(SpawnEnvironment) })
+    public spawnEnvironment: SpawnEnvironment = SpawnEnvironment.LAND;
 
     @property(cc.Node)
     public playerNode: cc.Node = null;
@@ -101,16 +156,36 @@ export default class MonsterSpawner extends cc.Component {
     private poolReady: boolean = false;
     private playerDead: boolean = false;
 
-    public static getOrCreate(host: cc.Node): MonsterSpawner {
+    public static getOrCreate(
+        host: cc.Node,
+        spawnerId: string = "land-hostile"
+    ): MonsterSpawner {
         if (!host) {
             return null;
         }
-        const resolver = host.getComponent(MonsterSpawnPositionResolver)
-            || host.addComponent(MonsterSpawnPositionResolver);
-        const spawner = host.getComponent(MonsterSpawner)
-            || host.addComponent(MonsterSpawner);
+
+        const nodeName = `Monster Spawner - ${spawnerId}`;
+        let spawnerNode = host.getChildByName(nodeName);
+        if (!spawnerNode) {
+            spawnerNode = new cc.Node(nodeName);
+            host.addChild(spawnerNode);
+        }
+        const resolver = spawnerNode.getComponent(MonsterSpawnPositionResolver)
+            || spawnerNode.addComponent(MonsterSpawnPositionResolver);
+        const spawner = spawnerNode.getComponent(MonsterSpawner)
+            || spawnerNode.addComponent(MonsterSpawner);
+        spawner.spawnerId = spawnerId;
         spawner.positionResolver = resolver;
+        spawner.applyProfileDefaults();
         return spawner;
+    }
+
+    public static getOrCreateDefaultSystems(host: cc.Node): MonsterSpawner[] {
+        return [
+            MonsterSpawner.getOrCreate(host, "land-hostile"),
+            MonsterSpawner.getOrCreate(host, "land-neutral"),
+            MonsterSpawner.getOrCreate(host, "aquatic")
+        ].filter(spawner => !!spawner);
     }
 
     onLoad(): void {
@@ -184,9 +259,7 @@ export default class MonsterSpawner extends cc.Component {
             return null;
         }
 
-        const occupiedPositions = this.records
-            .filter(record => record.node && cc.isValid(record.node))
-            .map(record => this.getWorldPosition(record.node));
+        const occupiedPositions = this.getOccupiedNpcPositions();
         const position = this.positionResolver.findSpawnPosition(
             this.playerNode,
             this.spawnParent,
@@ -205,7 +278,10 @@ export default class MonsterSpawner extends cc.Component {
         const ai = monsterNode.getComponent(NPC_AI)
             || monsterNode.getComponentInChildren(NPC_AI);
         if (!ai) {
-            cc.warn(`[MonsterSpawner] ${entry.id} prefab has no NPC_AI component.`);
+            cc.warn(
+                `[MonsterSpawner:${this.spawnerId}] `
+                + `${entry.id} prefab has no NPC_AI component.`
+            );
             monsterNode.destroy();
             return null;
         }
@@ -321,7 +397,11 @@ export default class MonsterSpawner extends cc.Component {
             }
         }
         if (!this.positionResolver) {
-            this.positionResolver = this.getComponent(MonsterSpawnPositionResolver);
+            this.positionResolver = this.getComponent(MonsterSpawnPositionResolver)
+                || this.addComponent(MonsterSpawnPositionResolver);
+        }
+        if (this.positionResolver) {
+            this.positionResolver.environment = this.spawnEnvironment;
         }
     }
 
@@ -341,14 +421,24 @@ export default class MonsterSpawner extends cc.Component {
         }
 
         this.poolLoading = true;
-        let remaining = MonsterSpawner.DEFAULT_MONSTERS.length;
+        const configs = MonsterSpawner.DEFAULT_POOLS[this.spawnerId] || [];
+        if (configs.length <= 0) {
+            this.poolLoading = false;
+            this.poolReady = true;
+            this.validateEntries();
+            this.log("pool ready: no default entries");
+            return;
+        }
+
+        let remaining = configs.length;
         const loadedEntries: MonsterSpawnEntry[] = [];
 
-        for (const config of MonsterSpawner.DEFAULT_MONSTERS) {
+        for (const config of configs) {
             cc.assetManager.loadAny(config.uuid, (error: Error, asset: cc.Asset) => {
                 if (error || !(asset instanceof cc.Prefab)) {
                     cc.warn(
-                        `[MonsterSpawner] Cannot load default ${config.id} prefab: `
+                        `[MonsterSpawner:${this.spawnerId}] Cannot load default `
+                        + `${config.id} prefab: `
                         + `${error ? error.message : "asset is not a prefab"}`
                     );
                 } else {
@@ -360,6 +450,12 @@ export default class MonsterSpawner extends cc.Component {
                     entry.spawnCost = config.spawnCost;
                     entry.spawnClearanceWidth = config.width;
                     entry.spawnClearanceHeight = config.height;
+                    entry.minDepthRatio = typeof config.minDepth === "number"
+                        ? config.minDepth
+                        : 0;
+                    entry.maxDepthRatio = typeof config.maxDepth === "number"
+                        ? config.maxDepth
+                        : 1;
                     loadedEntries.push(entry);
                 }
 
@@ -391,10 +487,76 @@ export default class MonsterSpawner extends cc.Component {
                 continue;
             }
             if (ids[entry.id]) {
-                cc.warn(`[MonsterSpawner] Duplicate monster id: ${entry.id}`);
+                cc.warn(
+                    `[MonsterSpawner:${this.spawnerId}] Duplicate NPC id: ${entry.id}`
+                );
             }
+            entry.minDepthRatio = Math.max(
+                0,
+                Math.min(1, entry.minDepthRatio)
+            );
+            entry.maxDepthRatio = Math.max(
+                entry.minDepthRatio,
+                Math.min(1, entry.maxDepthRatio)
+            );
             ids[entry.id] = true;
         }
+    }
+
+    private applyProfileDefaults(): void {
+        if (this.spawnerId === "aquatic") {
+            this.spawnEnvironment = SpawnEnvironment.WATER;
+            this.spawnInterval = 7;
+            this.maxAliveTotal = 5;
+            this.maxSpawnBudget = 5;
+            if (this.positionResolver) {
+                this.positionResolver.minSpawnDistance = 450;
+                this.positionResolver.maxSpawnDistance = 900;
+                this.positionResolver.minimumMonsterSpacing = 80;
+                this.positionResolver.maxPositionAttempts = 20;
+            }
+        } else if (this.spawnerId === "land-neutral") {
+            this.spawnEnvironment = SpawnEnvironment.LAND;
+            this.spawnInterval = 6;
+            this.maxAliveTotal = 4;
+            this.maxSpawnBudget = 4;
+            if (this.positionResolver) {
+                this.positionResolver.minSpawnDistance = 500;
+                this.positionResolver.maxSpawnDistance = 900;
+                this.positionResolver.minimumMonsterSpacing = 100;
+            }
+        } else {
+            this.spawnerId = "land-hostile";
+            this.spawnEnvironment = SpawnEnvironment.LAND;
+        }
+        if (this.positionResolver) {
+            this.positionResolver.environment = this.spawnEnvironment;
+        }
+    }
+
+    private getOccupiedNpcPositions(): cc.Vec2[] {
+        if (!this.spawnParent || !cc.isValid(this.spawnParent)) {
+            return [];
+        }
+
+        const positions: cc.Vec2[] = [];
+        const visit = (node: cc.Node): void => {
+            if (!node || !cc.isValid(node)) {
+                return;
+            }
+            if (node !== this.spawnParent) {
+                const ai = node.getComponent(NPC_AI);
+                if (ai) {
+                    positions.push(this.getWorldPosition(node));
+                    return;
+                }
+            }
+            for (const child of node.children) {
+                visit(child);
+            }
+        };
+        visit(this.spawnParent);
+        return positions;
     }
 
     private getWorldPosition(node: cc.Node): cc.Vec2 {
@@ -405,7 +567,7 @@ export default class MonsterSpawner extends cc.Component {
 
     private log(message: string): void {
         if (this.debugLog) {
-            cc.log(`[MonsterSpawner] ${message}`);
+            cc.log(`[MonsterSpawner:${this.spawnerId}] ${message}`);
         }
     }
 }

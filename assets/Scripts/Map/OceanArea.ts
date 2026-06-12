@@ -154,6 +154,18 @@ export default class OceanArea extends cc.Component {
             && rect.yMax >= bounds.yMin;
     }
 
+    public containsWorldRect(rect: cc.Rect): boolean {
+        if (!rect || !this.oceanCollider || !cc.isValid(this.node)) {
+            return false;
+        }
+
+        const bounds = this.getWorldBounds();
+        return rect.xMin >= bounds.xMin
+            && rect.xMax <= bounds.xMax
+            && rect.yMin >= bounds.yMin
+            && rect.yMax <= bounds.yMax;
+    }
+
     public getWorldBounds(): cc.Rect {
         if (!this.oceanCollider || !cc.isValid(this.node)) {
             return cc.rect(0, 0, 0, 0);
@@ -185,6 +197,10 @@ export default class OceanArea extends cc.Component {
 
     public static overlapsAnyOcean(rect: cc.Rect): boolean {
         return OceanArea.getValidAreas().some(area => area.overlapsWorldRect(rect));
+    }
+
+    public static containsRectInAnyOcean(rect: cc.Rect): boolean {
+        return OceanArea.getValidAreas().some(area => area.containsWorldRect(rect));
     }
 
     public static getActiveAreas(): OceanArea[] {
