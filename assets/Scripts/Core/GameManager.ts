@@ -13,6 +13,7 @@ import DamageNumberManager from "./DamageNumberManager";
 import MonsterSpawner from "../NPC/MonsterSpawner";
 import PhysicsTagValidator from "./PhysicsTagValidator";
 import AutoMapGenerator from "../Map/AutoMapGenerator";
+import MapEditorController from "../Map/MapEditorController";
 
 const { ccclass, property } = cc._decorator;
 
@@ -38,6 +39,9 @@ export default class GameManager extends cc.Component {
 
     @property(AutoMapGenerator)
     autoMapGenerator: AutoMapGenerator = null;
+
+    @property(MapEditorController)
+    mapEditorController: MapEditorController = null;
 
     @property
     menuSceneName: string = "MenuScene";
@@ -140,10 +144,14 @@ export default class GameManager extends cc.Component {
     start() {
         console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:28");
         // TODO: 在這裡呼叫 MapManager 生成初始地圖
+        const openMapEditor = SaveService.consumeMapEditorOnNextGame();
         if (this.autoLoadRequestedSave && SaveService.consumeLoadOnNextGame()) {
             this.loadCurrentUserSave();
         } else {
             this.emitScoreState();
+        }
+        if (openMapEditor) {
+            this.scheduleOnce(this.enterMapEditorMode, 0);
         }
     }
 
@@ -406,6 +414,9 @@ export default class GameManager extends cc.Component {
             case InputAction.GenerateMap:
                 this.beginAutoMapGeneration();
                 return true;
+            case InputAction.ToggleMapEditor:
+                this.enterMapEditorMode();
+                return true;
             default:
                 return false;
         }
@@ -491,8 +502,37 @@ export default class GameManager extends cc.Component {
             maxHp,
             inventory: InventoryManager.instance.getSaveSnapshot(),
             mapState: SaveService.getCurrentMapGenerationState(),
+            mapEditorState: SaveService.getCurrentMapEditorState(),
             updatedAt: Date.now()
         };
+    }
+
+    private enterMapEditorMode(): void {
+        const editor = this.getOrCreateMapEditorController();
+        if (editor) {
+            editor.enterEditorMode();
+        }
+    }
+
+    private getOrCreateMapEditorController(): MapEditorController {
+        if (this.mapEditorController && cc.isValid(this.mapEditorController.node)) {
+            return this.mapEditorController;
+        }
+
+        const host = this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)
+            ? this.autoMapGenerator.node
+            : this.node;
+        let editor = host.getComponent(MapEditorController);
+        if (!editor) {
+            editor = host.addComponent(MapEditorController);
+        }
+        editor.terrainRoot = editor.terrainRoot || (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node) ? this.autoMapGenerator.node : host);
+        editor.resourceRoot = editor.resourceRoot || editor.terrainRoot;
+        editor.autoMapGenerator = editor.autoMapGenerator || this.autoMapGenerator;
+        editor.cameraRig = editor.cameraRig || this.cameraRig;
+        editor.playerNode = editor.playerNode || this.playerNode;
+        this.mapEditorController = editor;
+        return editor;
     }
 
     private restorePlayerHp(saveData: SaveData): void {

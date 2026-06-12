@@ -1,6 +1,6 @@
 import EventCenter from "../Core/EventCenter";
 import { GameEvent } from "../Core/Constants";
-import SaveService, { MapGenerationState, SaveData } from "../Core/SaveService";
+import SaveService, { MapGenerationState, SaveData, MapEditorPlacementState } from "../Core/SaveService";
 import CameraRig from "../Core/CameraRig";
 
 const { ccclass, property } = cc._decorator;
@@ -21,6 +21,17 @@ interface PlacementBounds {
     y: number;
     width: number;
     height: number;
+}
+
+export interface MapGenerationRect {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+}
+
+export interface MapGenerationRectOptions {
+    clearExisting?: boolean;
 }
 
 interface RockPlacement {
@@ -330,6 +341,56 @@ export default class AutoMapGenerator extends cc.Component {
         }
     }
 
+    public generateInRect(rect: MapGenerationRect, options: MapGenerationRectOptions = {}): MapEditorPlacementState[] {
+        const root = this.getRoot();
+        if (!root) {
+            cc.warn("[AutoMapGenerator] targetRoot is missing.");
+            return [];
+        }
+
+        const safeRect = this.normalizeGenerationRect(rect);
+        if (safeRect.maxX - safeRect.minX < 64 || safeRect.maxY - safeRect.minY < 64) {
+            cc.warn("[AutoMapGenerator] Selection is too small for generation.");
+            return [];
+        }
+
+        if (options.clearExisting !== false) {
+            this.clearGeneratedInRect(root, safeRect);
+        }
+
+        const oldMinX = this.minX;
+        const oldMaxX = this.maxX;
+        const oldMinY = this.minY;
+        const oldMaxY = this.maxY;
+        const oldScatterCount = this.scatterCount;
+        this.minX = safeRect.minX;
+        this.maxX = safeRect.maxX;
+        this.minY = safeRect.minY;
+        this.maxY = safeRect.maxY;
+        this.scatterCount = Math.min(this.scatterCount, 1);
+
+        const states: MapEditorPlacementState[] = [];
+        const specs = this.createSpecs();
+        if (specs.length > 0) {
+            this.resetRandom();
+            const placements = this.createPlacements(specs);
+            for (let i = 0; i < placements.length; i++) {
+                states.push(this.spawnRock(root, placements[i], i, "EditorRock_", "box-generate"));
+                const resourceState = this.spawnResourceForPlacement(root, placements[i], i, "EditorResource_", "box-generate");
+                if (resourceState) {
+                    states.push(resourceState);
+                }
+            }
+        }
+
+        this.minX = oldMinX;
+        this.maxX = oldMaxX;
+        this.minY = oldMinY;
+        this.maxY = oldMaxY;
+        this.scatterCount = oldScatterCount;
+        return states;
+    }
+
     private getRoot(): cc.Node {
         return this.targetRoot || this.node;
     }
@@ -351,6 +412,33 @@ export default class AutoMapGenerator extends cc.Component {
                 child.destroy();
             }
         }
+    }
+
+    private clearGeneratedInRect(root: cc.Node, rect: MapGenerationRect): void {
+        this.clearGeneratedInRectFromRoot(root, rect);
+        const resourcesRoot = this.getResourceRoot(root);
+        if (resourcesRoot && resourcesRoot !== root) {
+            this.clearGeneratedInRectFromRoot(resourcesRoot, rect);
+        }
+    }
+
+    private clearGeneratedInRectFromRoot(root: cc.Node, rect: MapGenerationRect): void {
+        for (let i = root.childrenCount - 1; i >= 0; i--) {
+            const child = root.children[i];
+            if (!this.isGeneratedNode(child) || !this.isNodeInsideRootRect(child, root, rect)) {
+                continue;
+            }
+            child.destroy();
+        }
+    }
+
+    private isGeneratedNode(node: cc.Node): boolean {
+        return !!node && (
+            node.name.indexOf("AutoRock_") === 0
+            || node.name.indexOf("AutoResource_") === 0
+            || node.name.indexOf("EditorRock_") === 0
+            || node.name.indexOf("EditorResource_") === 0
+        );
     }
 
     private createSpecs(): RockSpec[] {
@@ -674,23 +762,36 @@ export default class AutoMapGenerator extends cc.Component {
             && bounds.y + bounds.height <= this.maxY;
     }
 
-    private spawnRock(root: cc.Node, placement: RockPlacement, index: number): void {
+    private spawnRock(
+        root: cc.Node,
+        placement: RockPlacement,
+        index: number,
+        prefix: string = "AutoRock_",
+        source: "manual" | "box-generate" = "box-generate"
+    ): MapEditorPlacementState {
         const node = cc.instantiate(placement.spec.prefab);
-        node.name = "AutoRock_" + index + "_" + placement.spec.key;
+        node.name = prefix + index + "_" + placement.spec.key;
         node.setScale(this.prefabScale, this.prefabScale);
         node.setPosition(placement.position);
         root.addChild(node);
+        return this.createPlacementState(node, "terrain", placement.spec.key, source, root);
     }
 
-    private spawnResourceForPlacement(root: cc.Node, placement: RockPlacement, index: number): void {
+    private spawnResourceForPlacement(
+        root: cc.Node,
+        placement: RockPlacement,
+        index: number,
+        prefix: string = "AutoResource_",
+        source: "manual" | "box-generate" = "box-generate"
+    ): MapEditorPlacementState {
         if (!this.spawnResourcesOnFlatPlatforms || placement.spec.slope !== "none") {
-            return;
+            return null;
         }
 
         const resourceSpec = this.pickResourceSpec();
         const chance = this.clamp(this.resourceSpawnChance, 0, 1);
         if (!resourceSpec || this.nextRandom() > chance) {
-            return;
+            return null;
         }
 
         const safePadding = Math.max(0, Math.min(this.resourceEdgePadding, placement.bounds.width * 0.45));
@@ -700,13 +801,14 @@ export default class AutoMapGenerator extends cc.Component {
         const y = placement.bounds.y + placement.bounds.height + this.resourceYOffset;
         const parent = this.getResourceRoot(root);
         const node = cc.instantiate(resourceSpec.prefab);
-        node.name = "AutoResource_" + index + "_" + resourceSpec.key;
+        node.name = prefix + index + "_" + resourceSpec.key;
         if (this.resourceScaleMultiplier > 0 && this.resourceScaleMultiplier !== 1) {
             node.scaleX *= this.resourceScaleMultiplier;
             node.scaleY *= this.resourceScaleMultiplier;
         }
         parent.addChild(node);
         this.setNodePositionFromRootLocal(node, parent, root, cc.v2(x, y));
+        return this.createPlacementState(node, "resource", resourceSpec.key, source, root);
     }
 
     private drawDebugBounds(root: cc.Node, placements: RockPlacement[]): void {
@@ -903,6 +1005,53 @@ export default class AutoMapGenerator extends cc.Component {
 
         const worldPosition = root.convertToWorldSpaceAR(rootLocalPosition);
         node.setPosition(parent.convertToNodeSpaceAR(worldPosition));
+    }
+
+    private createPlacementState(
+        node: cc.Node,
+        kind: "terrain" | "resource",
+        prefabKey: string,
+        source: "manual" | "box-generate",
+        root: cc.Node
+    ): MapEditorPlacementState {
+        const world = node.parent
+            ? node.parent.convertToWorldSpaceAR(node.position)
+            : cc.v2(node.x, node.y);
+        const local = root ? root.convertToNodeSpaceAR(world) : cc.v2(node.x, node.y);
+        return {
+            id: node.name,
+            kind,
+            prefabKey,
+            x: local.x,
+            y: local.y,
+            rotation: node.angle || 0,
+            scaleX: node.scaleX,
+            scaleY: node.scaleY,
+            source,
+            updatedAt: Date.now()
+        };
+    }
+
+    private normalizeGenerationRect(rect: MapGenerationRect): MapGenerationRect {
+        const safeRect = rect || { minX: this.minX, minY: this.minY, maxX: this.maxX, maxY: this.maxY };
+        return {
+            minX: Math.min(safeRect.minX, safeRect.maxX),
+            minY: Math.min(safeRect.minY, safeRect.maxY),
+            maxX: Math.max(safeRect.minX, safeRect.maxX),
+            maxY: Math.max(safeRect.minY, safeRect.maxY)
+        };
+    }
+
+    private isNodeInsideRootRect(node: cc.Node, root: cc.Node, rect: MapGenerationRect): boolean {
+        if (!node || !root) {
+            return false;
+        }
+
+        const world = node.parent
+            ? node.parent.convertToWorldSpaceAR(node.position)
+            : cc.v2(node.x, node.y);
+        const local = root.convertToNodeSpaceAR(world);
+        return local.x >= rect.minX && local.x <= rect.maxX && local.y >= rect.minY && local.y <= rect.maxY;
     }
 
     private expandBounds(bounds: PlacementBounds, amount: number): PlacementBounds {

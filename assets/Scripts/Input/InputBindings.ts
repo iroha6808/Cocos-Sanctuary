@@ -152,6 +152,14 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.CameraZoomIn:
         case InputAction.CameraZoomOut:
         case InputAction.GenerateMap:
+        case InputAction.ToggleMapEditor:
+        case InputAction.EditorTerrainTool:
+        case InputAction.EditorResourceTool:
+        case InputAction.EditorBoxGenerateTool:
+        case InputAction.EditorPreviousPrefab:
+        case InputAction.EditorNextPrefab:
+        case InputAction.EditorRotateLeft:
+        case InputAction.EditorRotateRight:
         case InputAction.DebugAddCoconut:
         case InputAction.DebugAddCraftItems:
             return true;
