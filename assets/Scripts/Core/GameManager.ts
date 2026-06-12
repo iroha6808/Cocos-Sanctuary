@@ -14,6 +14,7 @@ import PhysicsTagValidator from "./PhysicsTagValidator";
 import AutoMapGenerator, { MapGenerationRect } from "../Map/AutoMapGenerator";
 import SaveService2, { SaveData } from "./SaveService2";
 import MapEditorController from "../Map/MapEditorController";
+import EffectsManager from "./EffectsManager";
 
 declare const firebase: any;
 
@@ -117,6 +118,56 @@ export default class GameManager extends cc.Component {
     private lastBoundaryGenerationTime: number = 0;
     private lastMapEditorToggleTime: number = 0;
 
+
+    private playExpBurstEffectNearPlayer(): void {
+        if (!EffectsManager.instance) {
+            return;
+        }
+
+        const playerNode = this.findPlayerNode();
+        if (!playerNode || !cc.isValid(playerNode)) {
+            return;
+        }
+
+        const playerWorldPos = playerNode.parent
+            ? playerNode.parent.convertToWorldSpaceAR(cc.v2(playerNode.x, playerNode.y))
+            : cc.v2(playerNode.x, playerNode.y);
+
+        EffectsManager.playExpBurst(playerWorldPos);
+    }
+
+    private findPlayerNode(): cc.Node {
+        const byName = cc.find("Canvas/Player");
+        if (byName) {
+            return byName;
+        }
+
+        const canvas = cc.find("Canvas");
+        if (!canvas) {
+            return null;
+        }
+
+        return this.findPlayerNodeRecursive(canvas);
+    }
+
+    private findPlayerNodeRecursive(root: cc.Node): cc.Node {
+        if (!root) {
+            return null;
+        }
+
+        if (root.name === "Player") {
+            return root;
+        }
+
+        for (const child of root.children) {
+            const result = this.findPlayerNodeRecursive(child);
+            if (result) {
+                return result;
+            }
+        }
+
+        return null;
+    }
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
         if (GameManager.instance === null) {
@@ -310,6 +361,7 @@ export default class GameManager extends cc.Component {
             return;
         }
         this.exp += Math.floor(amount);
+        this.playExpBurstEffectNearPlayer();
         EventCenter.emit(GameEvent.PLAYER_EXP_CHANGED, this.exp);
     }
 

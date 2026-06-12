@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "4f3eb74b-482b-4fbc-8aa8-004cec8148f2",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 3000,
+  "height": 3000,
+  "platformSettings": {},
+  "subMetas": {
+    "ToonPoisonBall01_3x3": {
+      "ver": "1.0.6",
+      "uuid": "3f84fbc3-8e60-41a7-8351-f8cc1d90c03a",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "4f3eb74b-482b-4fbc-8aa8-004cec8148f2",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 9.5,
+      "offsetY": 6.5,
+      "trimX": 132,
+      "trimY": 143,
+      "width": 2755,
+      "height": 2701,
+      "rawWidth": 3000,
+      "rawHeight": 3000,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

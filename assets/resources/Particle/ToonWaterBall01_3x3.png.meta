@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "5c323d91-b405-4bc4-823d-8a2a5ab95b71",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 3000,
+  "height": 3000,
+  "platformSettings": {},
+  "subMetas": {
+    "ToonWaterBall01_3x3": {
+      "ver": "1.0.6",
+      "uuid": "e727d13a-66f6-4f47-bb08-6836a9b453e7",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "5c323d91-b405-4bc4-823d-8a2a5ab95b71",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -34.5,
+      "offsetY": 1,
+      "trimX": 131,
+      "trimY": 317,
+      "width": 2669,
+      "height": 2364,
+      "rawWidth": 3000,
+      "rawHeight": 3000,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

@@ -11,7 +11,10 @@ export enum EffectType {
     BOSS_TELEPORT = "boss_teleport",
     BOSS_SUMMON = "boss_summon",
     JETPACK_FLAME = "jetpack_flame",
-    GRAPPLE_ATTACH = "grapple_attach"
+    GRAPPLE_ATTACH = "grapple_attach",
+    RUN_TRAIL = "run_trail",
+    WATER_DRIP = "water_drip",
+    EXP_BURST = "exp_burst"
 }
 
 @ccclass
@@ -21,11 +24,101 @@ export default class EffectsManager extends cc.Component {
     @property(cc.Node)
     public effectRoot: cc.Node = null;
 
-    @property(cc.SpriteFrame)
+    @property({
+        type: cc.SpriteFrame,
+        tooltip: "Single particle sprite. Used if Particle Atlas Sprite Frame is empty."
+    })
     public particleSpriteFrame: cc.SpriteFrame = null;
+
+    @property({
+        type: cc.SpriteFrame,
+        tooltip: "Full atlas image, for example a 1500x1500 3x3 spritesheet."
+    })
+    public particleAtlasSpriteFrame: cc.SpriteFrame = null;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Atlas column count. 3 for a 3x3 image."
+    })
+    public atlasColumns: number = 3;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Atlas row count. 3 for a 3x3 image."
+    })
+    public atlasRows: number = 3;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Selected row. Top row is 0."
+    })
+    public atlasRow: number = 1;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Selected column. Left column is 0."
+    })
+    public atlasColumn: number = 1;
+
+    @property({
+        type: cc.SpriteFrame,
+        tooltip: "Water drip atlas image, for example a 3000x3000 3x3 spritesheet."
+    })
+    public waterDripAtlasSpriteFrame: cc.SpriteFrame = null;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Water drip atlas column count."
+    })
+    public waterDripAtlasColumns: number = 3;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Water drip atlas row count."
+    })
+    public waterDripAtlasRows: number = 3;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Water drip selected row. Top row is 0."
+    })
+    public waterDripAtlasRow: number = 1;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "Water drip selected column. Left column is 0."
+    })
+    public waterDripAtlasColumn: number = 1;
+
+    @property({
+        type: cc.SpriteFrame,
+        tooltip: "EXP burst atlas image, 3x3 spritesheet. All 9 frames will be played once."
+    })
+    public expBurstAtlasSpriteFrame: cc.SpriteFrame = null;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "EXP burst atlas column count."
+    })
+    public expBurstAtlasColumns: number = 3;
+
+    @property({
+        type: cc.Integer,
+        tooltip: "EXP burst atlas row count."
+    })
+    public expBurstAtlasRows: number = 3;
 
     @property(cc.Boolean)
     public debugLog: boolean = false;
+
+    private cachedAtlasFrame: cc.SpriteFrame = null;
+    private cachedAtlasKey: string = "";
+
+    private cachedWaterDripFrame: cc.SpriteFrame = null;
+    private cachedWaterDripKey: string = "";
+
+    private cachedExpBurstFrames: cc.SpriteFrame[] = [];
+    private cachedExpBurstKey: string = "";
 
     onLoad(): void {
         EffectsManager.instance = this;
@@ -43,6 +136,12 @@ export default class EffectsManager extends cc.Component {
     public static play(type: EffectType, worldPosition: cc.Vec2): void {
         if (EffectsManager.instance) {
             EffectsManager.instance.playEffect(type, worldPosition);
+        }
+    }
+
+    public static playExpBurst(worldPosition: cc.Vec2): void {
+        if (EffectsManager.instance) {
+            EffectsManager.instance.playExpBurstEffect(worldPosition);
         }
     }
 
@@ -70,9 +169,69 @@ export default class EffectsManager extends cc.Component {
         }
     }
 
+    private playExpBurstEffect(worldPosition: cc.Vec2): void {
+        if (!this.effectRoot || !cc.isValid(this.effectRoot)) {
+            return;
+        }
+
+        const offsets = [
+            cc.v2(-42, 18),
+            cc.v2(34, 42),
+            cc.v2(-12, 64),
+            cc.v2(56, -6),
+            cc.v2(-58, -18),
+            cc.v2(18, -46),
+            cc.v2(-30, 36),
+            cc.v2(46, 22),
+            cc.v2(2, 8)
+        ];
+
+        for (let i = 0; i < 9; i++) {
+            this.scheduleOnce(() => {
+                const jitterX = (Math.random() - 0.5) * 18;
+                const jitterY = (Math.random() - 0.5) * 18;
+                const spawnWorldPos = cc.v2(
+                    worldPosition.x + offsets[i].x + jitterX,
+                    worldPosition.y + offsets[i].y + jitterY
+                );
+
+                this.spawnExpBurstParticle(i, spawnWorldPos);
+            }, i * 0.07);
+        }
+
+        if (this.debugLog) {
+            cc.log(`[EffectsManager] EXP burst at (${worldPosition.x.toFixed(1)}, ${worldPosition.y.toFixed(1)})`);
+        }
+    }
+
+    private spawnExpBurstParticle(frameIndex: number, worldPosition: cc.Vec2): void {
+        const effectNode = new cc.Node(`Effect_exp_burst_${frameIndex}`);
+        effectNode.parent = this.effectRoot;
+        effectNode.setPosition(this.toLocalPosition(worldPosition));
+
+        const particle = effectNode.addComponent(cc.ParticleSystem);
+        this.configureParticle(particle, EffectType.EXP_BURST);
+
+        const frame = this.getExpBurstAtlasSubFrame(frameIndex);
+        if (frame) {
+            const anyParticle = particle as any;
+            anyParticle.spriteFrame = frame;
+            anyParticle.texture = frame.getTexture();
+        }
+
+        particle.resetSystem();
+
+        this.scheduleOnce(() => {
+            if (cc.isValid(effectNode)) {
+                effectNode.destroy();
+            }
+        }, 1.35);
+    }
+
     private configureParticle(particle: cc.ParticleSystem, type: EffectType): void {
         const config = this.getConfig(type);
         const anyParticle = particle as any;
+
         particle.duration = config.duration;
         particle.life = config.life;
         particle.lifeVar = config.lifeVar;
@@ -87,13 +246,179 @@ export default class EffectsManager extends cc.Component {
         particle.angleVar = config.angleVar;
         particle.startColor = config.startColor;
         particle.endColor = config.endColor;
+
         const positionType = (cc.ParticleSystem as any).PositionType;
         anyParticle.positionType = positionType ? positionType.FREE : 0;
         anyParticle.autoRemoveOnFinish = false;
 
-        if (this.particleSpriteFrame) {
-            anyParticle.texture = this.particleSpriteFrame.getTexture();
+        const selectedFrame = this.getSelectedParticleFrame(type);
+        if (selectedFrame) {
+            anyParticle.spriteFrame = selectedFrame;
+            anyParticle.texture = selectedFrame.getTexture();
         }
+    }
+
+    private getSelectedParticleFrame(type: EffectType): cc.SpriteFrame {
+        if (type === EffectType.WATER_DRIP && this.waterDripAtlasSpriteFrame) {
+            return this.getWaterDripAtlasSubFrame();
+        }
+
+        if (this.particleAtlasSpriteFrame) {
+            return this.getAtlasSubFrame();
+        }
+
+        return this.particleSpriteFrame;
+    }
+
+    private getAtlasSubFrame(): cc.SpriteFrame {
+        const texture = this.particleAtlasSpriteFrame.getTexture();
+        if (!texture) {
+            return null;
+        }
+
+        const textureWidth = (texture as any).width || 0;
+        const textureHeight = (texture as any).height || 0;
+
+        if (textureWidth <= 0 || textureHeight <= 0) {
+            return null;
+        }
+
+        const columns = Math.max(1, Math.floor(this.atlasColumns));
+        const rows = Math.max(1, Math.floor(this.atlasRows));
+        const safeColumn = Math.max(0, Math.min(columns - 1, Math.floor(this.atlasColumn)));
+        const safeRow = Math.max(0, Math.min(rows - 1, Math.floor(this.atlasRow)));
+
+        const cellWidth = Math.floor(textureWidth / columns);
+        const cellHeight = Math.floor(textureHeight / rows);
+
+        const x = safeColumn * cellWidth;
+        const y = (rows - 1 - safeRow) * cellHeight;
+
+        const key = `${textureWidth}x${textureHeight}_${columns}_${rows}_${safeRow}_${safeColumn}`;
+
+        if (this.cachedAtlasFrame && this.cachedAtlasKey === key) {
+            return this.cachedAtlasFrame;
+        }
+
+        const frame = new cc.SpriteFrame();
+        const rect = cc.rect(x, y, cellWidth, cellHeight);
+        const originalSize = cc.size(cellWidth, cellHeight);
+        const offset = cc.v2(0, 0);
+
+        (frame as any).setTexture(texture, rect, false, offset, originalSize);
+
+        this.cachedAtlasFrame = frame;
+        this.cachedAtlasKey = key;
+
+        if (this.debugLog) {
+            cc.log(`[EffectsManager] Atlas frame rect x=${x}, y=${y}, w=${cellWidth}, h=${cellHeight}`);
+        }
+
+        return frame;
+    }
+
+    private getWaterDripAtlasSubFrame(): cc.SpriteFrame {
+        const texture = this.waterDripAtlasSpriteFrame.getTexture();
+        if (!texture) {
+            return null;
+        }
+
+        const textureWidth = (texture as any).width || 0;
+        const textureHeight = (texture as any).height || 0;
+
+        if (textureWidth <= 0 || textureHeight <= 0) {
+            return null;
+        }
+
+        const columns = Math.max(1, Math.floor(this.waterDripAtlasColumns));
+        const rows = Math.max(1, Math.floor(this.waterDripAtlasRows));
+        const safeColumn = Math.max(0, Math.min(columns - 1, Math.floor(this.waterDripAtlasColumn)));
+        const safeRow = Math.max(0, Math.min(rows - 1, Math.floor(this.waterDripAtlasRow)));
+
+        const cellWidth = Math.floor(textureWidth / columns);
+        const cellHeight = Math.floor(textureHeight / rows);
+
+        const x = safeColumn * cellWidth;
+        const y = (rows - 1 - safeRow) * cellHeight;
+
+        const key = `${textureWidth}x${textureHeight}_${columns}_${rows}_${safeRow}_${safeColumn}`;
+
+        if (this.cachedWaterDripFrame && this.cachedWaterDripKey === key) {
+            return this.cachedWaterDripFrame;
+        }
+
+        const frame = new cc.SpriteFrame();
+        const rect = cc.rect(x, y, cellWidth, cellHeight);
+        const originalSize = cc.size(cellWidth, cellHeight);
+        const offset = cc.v2(0, 0);
+
+        (frame as any).setTexture(texture, rect, false, offset, originalSize);
+
+        this.cachedWaterDripFrame = frame;
+        this.cachedWaterDripKey = key;
+
+        if (this.debugLog) {
+            cc.log(`[EffectsManager] Water drip atlas frame rect x=${x}, y=${y}, w=${cellWidth}, h=${cellHeight}`);
+        }
+
+        return frame;
+    }
+
+    private getExpBurstAtlasSubFrame(frameIndex: number): cc.SpriteFrame {
+        if (!this.expBurstAtlasSpriteFrame) {
+            return null;
+        }
+
+        const texture = this.expBurstAtlasSpriteFrame.getTexture();
+        if (!texture) {
+            return null;
+        }
+
+        const textureWidth = (texture as any).width || 0;
+        const textureHeight = (texture as any).height || 0;
+
+        if (textureWidth <= 0 || textureHeight <= 0) {
+            return null;
+        }
+
+        const columns = Math.max(1, Math.floor(this.expBurstAtlasColumns));
+        const rows = Math.max(1, Math.floor(this.expBurstAtlasRows));
+        const totalFrames = columns * rows;
+        const safeIndex = Math.max(0, Math.min(totalFrames - 1, Math.floor(frameIndex)));
+
+        const key = `${textureWidth}x${textureHeight}_${columns}_${rows}`;
+        if (this.cachedExpBurstFrames[safeIndex] && this.cachedExpBurstKey === key) {
+            return this.cachedExpBurstFrames[safeIndex];
+        }
+
+        if (this.cachedExpBurstKey !== key) {
+            this.cachedExpBurstFrames = [];
+            this.cachedExpBurstKey = key;
+        }
+
+        const cellWidth = Math.floor(textureWidth / columns);
+        const cellHeight = Math.floor(textureHeight / rows);
+
+        const rowFromTop = Math.floor(safeIndex / columns);
+        const column = safeIndex % columns;
+
+        const x = column * cellWidth;
+        const y = (rows - 1 - rowFromTop) * cellHeight;
+
+        const frame = new cc.SpriteFrame();
+        const rect = cc.rect(x, y, cellWidth, cellHeight);
+        const originalSize = cc.size(cellWidth, cellHeight);
+        const offset = cc.v2(0, 0);
+
+        (frame as any).setTexture(texture, rect, false, offset, originalSize);
+
+        this.cachedExpBurstFrames[safeIndex] = frame;
+
+        if (this.debugLog) {
+            cc.log(`[EffectsManager] EXP frame ${safeIndex}, rect x=${x}, y=${y}, w=${cellWidth}, h=${cellHeight}`);
+        }
+
+        return frame;
     }
 
     private getConfig(type: EffectType) {
@@ -118,7 +443,12 @@ export default class EffectsManager extends cc.Component {
                 return this.config(0.08, 0.22, 12, 160, 115, 18, cc.color(255, 180, 40, 230), cc.color(255, 40, 0, 0), -90, 50);
             case EffectType.GRAPPLE_ATTACH:
                 return this.config(0.15, 0.32, 14, 110, 100, 13, cc.color(120, 220, 255, 230), cc.color(60, 120, 255, 0), 90, 180);
-            case EffectType.HIT:
+            case EffectType.RUN_TRAIL:
+                return this.config(0.08, 0.75, 8, 90, 28, 28, cc.color(210, 210, 210, 170), cc.color(210, 210, 210, 0), 90, 35);            case EffectType.HIT:
+            case EffectType.WATER_DRIP:
+                return this.config(0.12, 0.85, 10, 85, 45, 26, cc.color(120, 210, 255, 190), cc.color(120, 210, 255, 0), -90, 25);
+            case EffectType.EXP_BURST:
+                return this.config(0.16, 0.75, 6, 42, 36, 30, cc.color(255, 245, 120, 220), cc.color(255, 245, 120, 0), 90, 180);
             default:
                 return this.config(0.18, 0.35, 16, 95, 110, 20, cc.color(255, 255, 255, 240), cc.color(255, 80, 80, 0), 0, 180);
         }
@@ -158,6 +488,7 @@ export default class EffectsManager extends cc.Component {
         if (!this.effectRoot) {
             return worldPosition;
         }
+
         return this.effectRoot.convertToNodeSpaceAR(worldPosition);
     }
 }

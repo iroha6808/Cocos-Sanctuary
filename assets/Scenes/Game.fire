@@ -65007,7 +65007,26 @@
     "effectRoot": {
       "__id__": 392
     },
-    "particleSpriteFrame": null,
+    "particleSpriteFrame": {
+      "__uuid__": "2cca1964-5e4a-4bc4-972f-3c2513ccdfd2"
+    },
+    "particleAtlasSpriteFrame": null,
+    "atlasColumns": 3,
+    "atlasRows": 3,
+    "atlasRow": 1,
+    "atlasColumn": 1,
+    "waterDripAtlasSpriteFrame": {
+      "__uuid__": "e727d13a-66f6-4f47-bb08-6836a9b453e7"
+    },
+    "waterDripAtlasColumns": 3,
+    "waterDripAtlasRows": 3,
+    "waterDripAtlasRow": 1,
+    "waterDripAtlasColumn": 1,
+    "expBurstAtlasSpriteFrame": {
+      "__uuid__": "3f84fbc3-8e60-41a7-8351-f8cc1d90c03a"
+    },
+    "expBurstAtlasColumns": 3,
+    "expBurstAtlasRows": 3,
     "debugLog": false,
     "_id": "c6L9u+n+tGoroJod6krone"
   },
@@ -72040,6 +72059,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "a2FUlQRRBKP7WGlhJbbjyp"
   },
   {
@@ -72221,6 +72241,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "37QaulUmNAM6FmXKgdVErd"
   },
   {
@@ -72402,6 +72423,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "98yFWxce9JZJbUHC3cZivu"
   },
   {
@@ -72667,6 +72689,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "89dQQI0WRI2oeKrYiRT/Bl"
   },
   {
@@ -72848,6 +72871,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "a7fPW9vmdHkKGPKn23y8zU"
   },
   {
@@ -73029,6 +73053,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "097tajktNBhasL0hdGSqCV"
   },
   {
@@ -73210,6 +73235,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "4e22F9o1ZJvJSFZ6L9QDHB"
   },
   {
@@ -73478,6 +73504,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "a4jUxmQedMpK9dR2RGuPO5"
   },
   {
@@ -73659,6 +73686,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "c3S27pssBM56al645LLNU4"
   },
   {
@@ -73840,6 +73868,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "a93T5hbKxGCItICqSsxaJp"
   },
   {
@@ -74021,6 +74050,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "aeNHVk4hxGUZo0q5JX72r5"
   },
   {
@@ -74202,6 +74232,7 @@
     "horizontalDriftSpeed": 60,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": true,
     "_id": "39/ROM+UxMurqGneXrpsz9"
   },
   {
@@ -76980,6 +77011,7 @@
     "horizontalDriftSpeed": 120,
     "topOffset": 0,
     "bottomOffset": 0,
+    "snapToCenterOnEnter": false,
     "_id": "80qa4/qF9AKLj9qokZatwT"
   },
   {

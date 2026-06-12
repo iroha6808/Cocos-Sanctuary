@@ -14,6 +14,7 @@ import { PhysicsTag } from "../Core/PhysicsTags";
 import Rope from '../Entity/Resources/Rope';
 import AudioManager, { SfxType } from "../Core/AudioManager";
 import EquipmentManager from "../Core/EquipmentManager";
+import EffectsManager, { EffectType } from "../Core/EffectsManager";
 
 const { ccclass, property } = cc._decorator;
 
@@ -123,6 +124,12 @@ export default class PlayerController extends BaseEntity {
     private isClimbing: boolean = false;
     private currentRope: any = null;
     private nearbyRope: any = null;  
+    private runTrailTimer: number = 0;
+    private readonly runTrailInterval: number = 0.1;
+    private waterDripDurationTimer: number = 0;
+    private waterDripSpawnTimer: number = 0;
+    private readonly waterDripDuration: number = 1.2;
+    private readonly waterDripInterval: number = 0.08;
 
     onLoad() {
         super.onLoad();
@@ -756,6 +763,9 @@ export default class PlayerController extends BaseEntity {
                 this.playAnimation("PlayerIdle");
             }
         }
+
+        this.updateRunTrailEffect(dt, isMovingX);
+        this.updateWaterDripTrailEffect(dt);
         
     }
 
@@ -790,6 +800,8 @@ export default class PlayerController extends BaseEntity {
                 this.rb.linearVelocity.y * 0.95
             );
         }
+        this.waterDripDurationTimer = this.waterDripDuration;
+        this.waterDripSpawnTimer = 0;
     }
 
     private updateOceanMovement(dt: number) {
@@ -899,7 +911,87 @@ export default class PlayerController extends BaseEntity {
             this.keyStates[cc.macro.KEY.down]
         );
     }
+    private updateRunTrailEffect(dt: number, isMovingX: boolean): void {
+        if (!EffectsManager.instance) {
+            return;
+        }
 
+        if (!this.rb || !isMovingX || !this.isGrounded()) {
+            this.runTrailTimer = 0;
+            return;
+        }
+
+        if (Math.abs(this.rb.linearVelocity.x) < 20) {
+            this.runTrailTimer = 0;
+            return;
+        }
+
+        this.runTrailTimer -= dt;
+        if (this.runTrailTimer > 0) {
+            return;
+        }
+
+        this.runTrailTimer = this.runTrailInterval;
+
+        const worldPosition = this.getRunTrailWorldPosition();
+        EffectsManager.play(EffectType.RUN_TRAIL, worldPosition);
+    }
+
+    private updateWaterDripTrailEffect(dt: number): void {
+        if (this.waterDripDurationTimer <= 0) {
+            return;
+        }
+
+        this.waterDripDurationTimer -= dt;
+
+        if (!EffectsManager.instance || !this.rb) {
+            return;
+        }
+
+        if (this.isInOcean || this.isClimbing) {
+            return;
+        }
+
+        const velocity = this.rb.linearVelocity;
+        const isMoving = Math.abs(velocity.x) > 20 || Math.abs(velocity.y) > 20;
+        if (!isMoving) {
+            return;
+        }
+
+        this.waterDripSpawnTimer -= dt;
+        if (this.waterDripSpawnTimer > 0) {
+            return;
+        }
+
+        this.waterDripSpawnTimer = this.waterDripInterval;
+
+        const worldPosition = this.getWaterDripWorldPosition();
+        EffectsManager.play(EffectType.WATER_DRIP, worldPosition);
+    }
+
+    private getWaterDripWorldPosition(): cc.Vec2 {
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
+
+        const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
+        const backOffsetX = facingRight ? -18 : 18;
+        const bodyOffsetY = -8;
+
+        return cc.v2(playerWorldPos.x + backOffsetX, playerWorldPos.y + bodyOffsetY);
+    }
+
+    private getRunTrailWorldPosition(): cc.Vec2 {
+        const playerWorldPos = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+            : cc.v2(this.node.x, this.node.y);
+
+        const facingRight = !this.bodyNode || this.bodyNode.scaleX >= 0;
+        const backOffsetX = facingRight ? -30 : 30;
+        const footOffsetY = -20;
+
+        return cc.v2(playerWorldPos.x + backOffsetX, playerWorldPos.y + footOffsetY);
+    }
     private isGrounded(): boolean {
         if (!this.rb) {
             return false;
@@ -1587,9 +1679,12 @@ export default class PlayerController extends BaseEntity {
         cc.log(`[PlayerController] 獲得 Buff: 防禦力 +${amount}，持續 ${duration} 秒`);
     }
 
-    public takeDamage(damage: number): number {
-        if (this.isDead) return 0;
-        cc.log(`🛡️ [玩家受傷] CombatHitbox 傳來的最終實際扣血: ${damage}`);
-        return super.takeDamage(damage);
+    public takeDamage(damage: number): void {
+        if (this.isDead) {
+            return;
+        }
+
+        cc.log(`[PlayerController] Player damaged, final damage: ${damage}`);
+        super.takeDamage(damage);
     }
 }

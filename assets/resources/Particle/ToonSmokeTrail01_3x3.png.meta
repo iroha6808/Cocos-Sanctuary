@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "451a4b27-f8d2-457a-82c2-5433b6db946d",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 1500,
+  "height": 1500,
+  "platformSettings": {},
+  "subMetas": {
+    "ToonSmokeTrail01_3x3": {
+      "ver": "1.0.6",
+      "uuid": "2cca1964-5e4a-4bc4-972f-3c2513ccdfd2",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "451a4b27-f8d2-457a-82c2-5433b6db946d",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -17,
+      "offsetY": 11.5,
+      "trimX": 9,
+      "trimY": 203,
+      "width": 1448,
+      "height": 1071,
+      "rawWidth": 1500,
+      "rawHeight": 1500,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
