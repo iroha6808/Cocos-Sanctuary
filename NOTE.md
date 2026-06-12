@@ -151,6 +151,13 @@ Game 場景全域輸入仍由 `assets/Scripts/Input/InputManager.ts` 定義 acti
 | `C` | 開關合成工作臺 UI；合成開啟時 push `Crafting` context。 | `PlayerController.toggleCrafting()`、`CraftingUIController.handleInput()` |
 | `Enter` | 選擇對話選項；商店開啟時購買目前選取商品。 | `InputAction.Confirm`、`handleDialogueInput()`、`MerchantShopUIController.handleInput()` |
 | `Up` / `Down`、`W` / `S`、滑鼠滾輪 | Gameplay 水中上下；UI context 中改成對話 / 商店上下選擇。 | `InputManager.onMouseWheel()`、`PlayerController` context handlers |
+| 樹幹範圍內 `W` | 進入爬樹狀態；樹幹攀爬不會把玩家吸到中心，會從目前所在位置開始爬。 | `PlayerController.updateNearbyRope()` -> `enterClimb()`，`TreeClimbZone` 使用 `Rope.ts` |
+| 爬樹中 `W` / `S` | `W` 往上爬，`S` 往下爬；爬到樹幹頂端時會停住，不會自動站上平台。 | `PlayerController.updateClimb()`、`Rope.getClimbSpeed()` |
+| 爬樹中 `A` / `D` | 在樹幹上左右微移；超出 TreeClimbZone 允許範圍會離開攀爬狀態。 | `PlayerController.updateClimb()`、`Rope.getDriftSpeed()` |
+| 爬樹中 `Space` | 離開樹幹攀爬狀態；如果仍在樹幹範圍內，再按 `W` 可以重新爬樹。 | `PlayerController.update()` -> `exitClimb(true)` |
+| 樹幹頂端 `Space` | 從樹幹頂端往上跳，用來跳到上方樹頂平台；單純按住 `W` 只會停在頂端。 | `PlayerController.exitClimb(true)` |
+| 樹頂平台 `Space + S` | 往下穿過樹頂平台；此效果只適用於樹頂平台。 | 原平台穿越邏輯 / `OneWayPlatform.ts` |
+| 兩側樹枝平台 | 可站立與移動；不支援 `Space + S` 往下穿越。 | `BranchPlatform_*`、`OneWayPlatform.ts` |
 | 水域中 `W` / `Up` / `Space` | 上游。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
 | 水域中 `S` / `Down` | 下潛。 | `PlayerController.getOceanVerticalInput()`、`updateOceanMovement()` |
 | 空中 `S` / `Down` | 快速下墜。 | `PlayerController.tryFastFall()` |
