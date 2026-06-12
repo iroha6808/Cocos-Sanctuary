@@ -223,6 +223,9 @@ export default class AutoMapGenerator extends cc.Component {
     private timedGenerationOptions: TimedGenerationOptions = null;
     private generatedRockSerial: number = 0;
     private generatedResourceSerial: number = 0;
+    private realtimeStartTimer: any = null;
+    private realtimeStepTimer: any = null;
+    private realtimeReturnTimer: any = null;
 
     start(): void {
         if (!this.manualTriggerOnly && this.autoGenerateOnStart) {
@@ -335,10 +338,7 @@ export default class AutoMapGenerator extends cc.Component {
             this.finishTimedGeneration();
             return true;
         }
-        this.scheduleOnce(
-            this.startTimedPlacementSpawning,
-            Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay)
-        );
+        this.scheduleTimedStart(this.getTimedStartDelaySeconds());
         return true;
     }
 
@@ -838,10 +838,18 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         this.waitingToStartTimedGeneration = false;
-        this.schedule(
-            this.spawnNextTimedPlacement,
-            Math.max(0.01, this.generationStepInterval)
-        );
+        if (this.shouldUseRealtimeTimer()) {
+            this.clearRealtimeStartTimer();
+            this.clearRealtimeStepTimer();
+            this.realtimeStepTimer = setInterval(() => {
+                this.spawnNextTimedPlacement();
+            }, Math.max(0.01, this.generationStepInterval) * 1000);
+        } else {
+            this.schedule(
+                this.spawnNextTimedPlacement,
+                Math.max(0.01, this.generationStepInterval)
+            );
+        }
         this.spawnNextTimedPlacement();
     }
 
@@ -852,6 +860,8 @@ export default class AutoMapGenerator extends cc.Component {
 
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
+        this.clearRealtimeStartTimer();
+        this.clearRealtimeStepTimer();
         const placements = this.timedPlacements.slice();
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
@@ -868,7 +878,7 @@ export default class AutoMapGenerator extends cc.Component {
         }
         this.timedGenerationRect = null;
         this.timedGenerationOptions = null;
-        this.scheduleOnce(this.returnCameraToTargetAfterDelay, Math.max(0, this.returnAfterGenerationDelay));
+        this.scheduleTimedReturn(Math.max(0, this.returnAfterGenerationDelay), options);
     }
 
     private stopTimedGeneration(returnCamera: boolean): void {
@@ -876,9 +886,11 @@ export default class AutoMapGenerator extends cc.Component {
             return;
         }
 
+        const shouldReturnCamera = returnCamera && this.shouldFrameCameraForTimedGeneration();
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
         this.unschedule(this.returnCameraToTargetAfterDelay);
+        this.clearRealtimeTimers();
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
         this.waitingToReturnCamera = false;
@@ -887,8 +899,70 @@ export default class AutoMapGenerator extends cc.Component {
         this.timedSpawnIndex = 0;
         this.timedGenerationRect = null;
         this.timedGenerationOptions = null;
-        if (returnCamera) {
+        if (shouldReturnCamera) {
             this.returnCameraToTarget();
+        }
+    }
+
+    private scheduleTimedStart(delaySeconds: number): void {
+        this.clearRealtimeStartTimer();
+        if (this.shouldUseRealtimeTimer()) {
+            this.realtimeStartTimer = setTimeout(() => {
+                this.realtimeStartTimer = null;
+                this.startTimedPlacementSpawning();
+            }, delaySeconds * 1000);
+            return;
+        }
+
+        this.scheduleOnce(this.startTimedPlacementSpawning, delaySeconds);
+    }
+
+    private scheduleTimedReturn(delaySeconds: number, options: TimedGenerationOptions): void {
+        this.clearRealtimeReturnTimer();
+        if ((options && options.frameCamera === false) || !this.frameCameraDuringTimedGeneration) {
+            this.waitingToReturnCamera = false;
+            return;
+        }
+
+        if (options && options.useRealtimeTimer) {
+            this.realtimeReturnTimer = setTimeout(() => {
+                this.realtimeReturnTimer = null;
+                this.returnCameraToTargetAfterDelay();
+            }, delaySeconds * 1000);
+            return;
+        }
+
+        this.scheduleOnce(this.returnCameraToTargetAfterDelay, delaySeconds);
+    }
+
+    private shouldUseRealtimeTimer(): boolean {
+        return !!(this.timedGenerationOptions && this.timedGenerationOptions.useRealtimeTimer);
+    }
+
+    private clearRealtimeTimers(): void {
+        this.clearRealtimeStartTimer();
+        this.clearRealtimeStepTimer();
+        this.clearRealtimeReturnTimer();
+    }
+
+    private clearRealtimeStartTimer(): void {
+        if (this.realtimeStartTimer !== null) {
+            clearTimeout(this.realtimeStartTimer);
+            this.realtimeStartTimer = null;
+        }
+    }
+
+    private clearRealtimeStepTimer(): void {
+        if (this.realtimeStepTimer !== null) {
+            clearInterval(this.realtimeStepTimer);
+            this.realtimeStepTimer = null;
+        }
+    }
+
+    private clearRealtimeReturnTimer(): void {
+        if (this.realtimeReturnTimer !== null) {
+            clearTimeout(this.realtimeReturnTimer);
+            this.realtimeReturnTimer = null;
         }
     }
 
@@ -904,8 +978,7 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     private frameCameraForGeneration(): void {
-        const options = this.timedGenerationOptions || {};
-        if (options.frameCamera === false || !this.frameCameraDuringTimedGeneration) {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
             return;
         }
 
@@ -919,8 +992,7 @@ export default class AutoMapGenerator extends cc.Component {
     }
 
     private returnCameraToTarget(): void {
-        const options = this.timedGenerationOptions || {};
-        if (options.frameCamera === false || !this.frameCameraDuringTimedGeneration) {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
             return;
         }
 
@@ -928,6 +1000,21 @@ export default class AutoMapGenerator extends cc.Component {
         if (rig && cc.isValid(rig.node)) {
             rig.returnToTarget(this.cameraReturnDuration);
         }
+    }
+
+    private getTimedStartDelaySeconds(): number {
+        if (!this.shouldFrameCameraForTimedGeneration()) {
+            return 0;
+        }
+        if (this.shouldUseRealtimeTimer()) {
+            return Math.max(0, this.cameraFrameDuration);
+        }
+        return Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay);
+    }
+
+    private shouldFrameCameraForTimedGeneration(): boolean {
+        const options = this.timedGenerationOptions || {};
+        return options.frameCamera !== false && this.frameCameraDuringTimedGeneration;
     }
 
     private getGenerationWorldRect(bounds: MapGenerationRect): { minX: number; minY: number; maxX: number; maxY: number } {
