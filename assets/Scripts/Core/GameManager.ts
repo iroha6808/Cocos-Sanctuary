@@ -1,6 +1,5 @@
 import EventCenter from "./EventCenter";
 import { GameEvent } from "./Constants";
-import SaveService, { SaveData } from "./SaveService";
 import AudioManager, { SfxType } from "./AudioManager";
 import { InventoryManager } from "../Player/InventoryManager";
 import InputManager from "../Input/InputManager";
@@ -14,6 +13,7 @@ import MonsterSpawner from "../NPC/MonsterSpawner";
 import PhysicsTagValidator from "./PhysicsTagValidator";
 import AutoMapGenerator from "../Map/AutoMapGenerator";
 import SaveService2, { SaveData } from "./SaveService2";
+import MapEditorController from "../Map/MapEditorController";
 
 declare const firebase: any;
 
@@ -41,6 +41,9 @@ export default class GameManager extends cc.Component {
 
     @property(AutoMapGenerator)
     autoMapGenerator: AutoMapGenerator = null;
+
+    @property(MapEditorController)
+    mapEditorController: MapEditorController = null;
 
     @property
     menuSceneName: string = "MenuScene";
@@ -274,6 +277,24 @@ export default class GameManager extends cc.Component {
         return this.isPaused || this.isMapEditorFreezingGame;
     }
 
+    public enterMapEditorMode(): void {
+        const editor = this.getOrCreateMapEditorController();
+        if (!editor) {
+            cc.warn("[GameManager] MapEditorController is missing; assign mapEditorController or add AutoMapGenerator under Canvas/platform/auto generate.");
+            return;
+        }
+        editor.enterEditorMode();
+    }
+
+    public toggleMapEditorMode(): void {
+        const editor = this.getOrCreateMapEditorController();
+        if (!editor) {
+            cc.warn("[GameManager] MapEditorController is missing; cannot toggle map editor.");
+            return;
+        }
+        editor.toggleEditorMode();
+    }
+
     public getScore(): number {
         return this.score;
     }
@@ -412,6 +433,9 @@ export default class GameManager extends cc.Component {
             case InputAction.GenerateMap:
                 this.beginAutoMapGeneration();
                 return true;
+            case InputAction.ToggleMapEditor:
+                this.toggleMapEditorMode();
+                return true;
             default:
                 return false;
         }
@@ -447,6 +471,58 @@ export default class GameManager extends cc.Component {
         const generators = scene.getComponentsInChildren(AutoMapGenerator);
         this.autoMapGenerator = generators.length > 0 ? generators[0] : null;
         return this.autoMapGenerator;
+    }
+
+    private getOrCreateMapEditorController(): MapEditorController {
+        if (this.mapEditorController && cc.isValid(this.mapEditorController.node)) {
+            this.wireMapEditorController(this.mapEditorController);
+            return this.mapEditorController;
+        }
+
+        const scene = cc.director.getScene();
+        if (scene) {
+            const editors = scene.getComponentsInChildren(MapEditorController);
+            if (editors.length > 0) {
+                this.mapEditorController = editors[0];
+                this.wireMapEditorController(this.mapEditorController);
+                return this.mapEditorController;
+            }
+        }
+
+        const generator = this.getAutoMapGenerator();
+        const host = generator && cc.isValid(generator.node) ? generator.node : this.node;
+        let editor = host.getComponent(MapEditorController);
+        if (!editor) {
+            editor = host.addComponent(MapEditorController);
+        }
+        this.mapEditorController = editor;
+        this.wireMapEditorController(editor);
+        return editor;
+    }
+
+    private wireMapEditorController(editor: MapEditorController): void {
+        if (!editor) {
+            return;
+        }
+
+        const generator = this.getAutoMapGenerator();
+        if (!editor.autoMapGenerator && generator) {
+            editor.autoMapGenerator = generator;
+        }
+        if (!editor.playerNode && this.playerNode) {
+            editor.playerNode = this.playerNode;
+        }
+        if (!editor.cameraRig && this.cameraRig) {
+            editor.cameraRig = this.cameraRig;
+        }
+        if (generator) {
+            if (!editor.terrainRoot && generator.targetRoot) {
+                editor.terrainRoot = generator.targetRoot;
+            }
+            if (!editor.resourceRoot && generator.resourceRoot) {
+                editor.resourceRoot = generator.resourceRoot;
+            }
+        }
     }
 
     private getInputManager(): InputManager {
@@ -550,5 +626,11 @@ export default class GameManager extends cc.Component {
         }
         this.fadeOverlay.active = alpha > 0;
         this.fadeOverlay.opacity = alpha;
+    }
+
+    public async handlePlayerDeath() {
+        console.log("[DEBUG] 偵測到玩家死亡，準備存檔並返回主選單 - GameManager.ts:556");
+        await SaveService2.instance.saveToCloud(this.createSaveData());
+        cc.director.loadScene('MenuScene');
     }
 }
