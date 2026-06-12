@@ -17,7 +17,7 @@
 - [Git 流程](#git-流程)
 
 ## 下一步優先順序
-目前自動生成範圍改成按按鍵後才開始生成，鏡頭先慢慢拉至整個生成範圍，等 0.5 秒後每 0.25 秒顯示(或生成)一塊新地形，生成完再等 1 秒回到玩家
+edit3 卡住(可能因為被暫停)，edit1取消預覽框線然後正確顯示預覽地形
 1. 確認 Main Camera 使用 `CameraRig` 作為唯一跟隨腳本；`CameraFollow` 僅保留為 legacy 備用。
 2. 實測 `8b456ff` 後商人動畫：TravelingMerchant idle / talk clips、prefab 尺寸、Game scene 中商人顯示。
 3. 手動掛新功能節點：Car / Boat、PlayerToolController、MiniBossAI、BossArenaController、EnemyRespawner、DamageNumberManager。
