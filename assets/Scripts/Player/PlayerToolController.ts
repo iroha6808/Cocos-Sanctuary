@@ -182,12 +182,15 @@ export default class PlayerToolController extends cc.Component {
         }
 
         switch (event.keyCode) {
+            case cc.macro.KEY.num1:
             case KEY_1:
                 this.setMode(PlayerToolMode.Gun);
                 return;
+            case cc.macro.KEY.num2:
             case KEY_2:
                 this.setMode(PlayerToolMode.Jetpack);
                 return;
+            case cc.macro.KEY.num3:
             case KEY_3:
                 this.setMode(PlayerToolMode.Grapple);
                 return;

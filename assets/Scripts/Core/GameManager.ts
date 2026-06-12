@@ -115,6 +115,7 @@ export default class GameManager extends cc.Component {
     private generatedMapMaxX: number = 9000;
     private mapBoundaryInitialized: boolean = false;
     private lastBoundaryGenerationTime: number = 0;
+    private lastMapEditorToggleTime: number = 0;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
