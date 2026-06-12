@@ -29,13 +29,13 @@ export default class CameraRig extends cc.Component {
     public lookAheadMax: number = 70;
 
     @property(cc.Float)
-    public minZoomRatio: number = 0.01;
+    public minZoomRatio: number = 0.55;
 
     @property(cc.Float)
     public maxZoomRatio: number = 1.8;
 
     @property(cc.Float)
-    public zoomStep: number = 0.01;
+    public zoomStep: number = 0.1;
 
     @property(cc.Float)
     public overviewPadding: number = 220;
