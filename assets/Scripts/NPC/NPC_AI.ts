@@ -6,6 +6,7 @@ import CombatProjectile from "../Attack/CombatProjectile";
 import NPCPathAgent from "./NPCPathAgent";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
+import DropItem from "../Entity/Resources/DropItem";
 
 const { ccclass, property } = cc._decorator;
 
@@ -41,9 +42,6 @@ export class NPCDropEntry {
 
     @property(cc.Prefab)
     public prefab: cc.Prefab = null;
-
-    @property
-    public itemName: string = "Item";
 
     @property(cc.Integer)
     public minAmount: number = 1;
@@ -534,10 +532,19 @@ export default class NPC_AI extends BaseEntity {
                 continue;
             }
 
+            const amount = this.rollDropAmount(dropEntry.minAmount, dropEntry.maxAmount);
             const dropNode = cc.instantiate(dropEntry.prefab);
-            dropNode.parent = parent;
+            const dropScript = dropNode.getComponent(DropItem);
+            if (!dropScript) {
+                cc.error(`[NPC_AI] ${this.node.name} spawned ${dropNode.name} without DropItem.`);
+                dropNode.destroy();
+                continue;
+            }
+
+            dropScript.itemAmount = amount;
 
             const randomOffsetX = (Math.random() - 0.5) * 24;
+            dropNode.parent = parent;
             dropNode.setPosition(
                 this.node.x + randomOffsetX,
                 this.node.y + this.dropSpawnOffsetY
@@ -548,20 +555,11 @@ export default class NPC_AI extends BaseEntity {
                 this.debugDropLog
             );
 
-            const dropScript = dropNode.getComponent("DropItem") as any;
-            if (dropScript) {
-                dropScript.itemName = dropEntry.itemName;
-                dropScript.itemAmount = this.rollDropAmount(dropEntry.minAmount, dropEntry.maxAmount);
-                if (dropScript.launch) {
-                    dropScript.launch();
-                }
-            } else if (this.debugDropLog) {
-                cc.warn(`[NPC_AI] spawned drop ${dropNode.name}, but it has no DropItem component.`);
-            }
-
             if (this.debugDropLog) {
-                const amount = dropScript ? dropScript.itemAmount : "n/a";
-                cc.log(`[NPC_AI] ${this.node.name} dropped ${dropEntry.itemName} x${amount}`);
+                cc.log(
+                    `[NPC_AI] ${this.node.name} spawned drop prefab=${dropNode.name}, ` +
+                    `amount=${amount}`
+                );
             }
         }
     }

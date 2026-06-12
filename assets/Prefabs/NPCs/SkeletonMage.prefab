@@ -611,7 +611,6 @@
     "prefab": {
       "__uuid__": "2505aaf7-b97c-4f9e-9373-9b3bb0b94e4e"
     },
-    "itemName": "Item",
     "minAmount": 1,
     "maxAmount": 1,
     "dropChance": 1
@@ -652,18 +651,18 @@
     "tag": 0,
     "_density": 1,
     "_sensor": false,
-    "_friction": 0.2,
+    "_friction": 0,
     "_restitution": 0,
     "body": null,
     "_offset": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": -5
+      "x": -5,
+      "y": -10
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 50,
-      "height": 70
+      "width": 27,
+      "height": 60
     },
     "_id": ""
   },
