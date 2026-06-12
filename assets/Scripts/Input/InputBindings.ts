@@ -13,6 +13,9 @@ const KEY_R = 82;
 const KEY_1 = 49;
 const KEY_2 = 50;
 const KEY_3 = 51;
+const KEY_NUMPAD_1 = 97;
+const KEY_NUMPAD_2 = 98;
+const KEY_NUMPAD_3 = 99;
 const KEY_LEFT_BRACKET = 219;
 const KEY_RIGHT_BRACKET = 221;
 
@@ -63,10 +66,13 @@ export function getActionForKey(keyCode: number): InputAction {
         case KEY_E:
             return InputAction.ToggleMapEditor;
         case KEY_1:
+        case KEY_NUMPAD_1:
             return InputAction.EditorTerrainTool;
         case KEY_2:
+        case KEY_NUMPAD_2:
             return InputAction.EditorResourceTool;
         case KEY_3:
+        case KEY_NUMPAD_3:
             return InputAction.EditorBoxGenerateTool;
         case cc.macro.KEY.q:
         case KEY_Q:

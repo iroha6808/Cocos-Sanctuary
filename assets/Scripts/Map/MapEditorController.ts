@@ -22,6 +22,13 @@ interface EditorPrefabEntry {
     prefab: cc.Prefab;
 }
 
+const KEY_1 = 49;
+const KEY_2 = 50;
+const KEY_3 = 51;
+const KEY_NUMPAD_1 = 97;
+const KEY_NUMPAD_2 = 98;
+const KEY_NUMPAD_3 = 99;
+
 @ccclass
 export default class MapEditorController extends cc.Component {
     @property(cc.Node)
@@ -119,6 +126,7 @@ export default class MapEditorController extends cc.Component {
         if (this.inputManager) {
             this.inputManager.pushContext(InputContext.MapEditor, this.handleEditorInput, this);
         }
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
         this.setPlayerLocked(true);
         this.refreshStatus();
         EventCenter.emit(GameEvent.MAP_EDITOR_MODE_CHANGED, true);
@@ -132,6 +140,7 @@ export default class MapEditorController extends cc.Component {
         if (this.inputManager) {
             this.inputManager.popContext(InputContext.MapEditor, this);
         }
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
         this.setPlayerLocked(false);
         this.clearSelection();
         this.refreshStatus();
@@ -186,6 +195,37 @@ export default class MapEditorController extends cc.Component {
                 return false;
             default:
                 return true;
+        }
+    }
+
+    private onEditorKeyDownFallback(event: cc.Event.EventKeyboard): void {
+        if (!this.isEditing) {
+            return;
+        }
+
+        switch (event.keyCode) {
+            case KEY_1:
+            case KEY_NUMPAD_1:
+                this.setTool(MapEditorTool.Terrain);
+                this.stopEditorKeyEvent(event);
+                return;
+            case KEY_2:
+            case KEY_NUMPAD_2:
+                this.setTool(MapEditorTool.Resource);
+                this.stopEditorKeyEvent(event);
+                return;
+            case KEY_3:
+            case KEY_NUMPAD_3:
+                this.setTool(MapEditorTool.BoxGenerate);
+                this.stopEditorKeyEvent(event);
+                return;
+        }
+    }
+
+    private stopEditorKeyEvent(event: cc.Event.EventKeyboard): void {
+        const maybeEvent = event as any;
+        if (maybeEvent && typeof maybeEvent.stopPropagation === "function") {
+            maybeEvent.stopPropagation();
         }
     }
 

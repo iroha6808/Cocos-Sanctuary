@@ -84,6 +84,9 @@ export default class GameManager extends cc.Component {
     private hitFeelManager: HitFeelManager = null;
     private realtimeStateReporter: RealtimeStateReporter = null;
     private damageNumberManager: DamageNumberManager = null;
+    private isMapEditorFreezingGame: boolean = false;
+    private schedulerTimeScaleBeforeMapEditor: number = 1;
+    private physicsEnabledBeforeMapEditor: boolean = true;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -99,6 +102,7 @@ export default class GameManager extends cc.Component {
         EventCenter.on(GameEvent.NPC_DIED, this.onNpcDied, this);
         EventCenter.on(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
         EventCenter.on(GameEvent.MERCHANT_PURCHASED, this.onMerchantPurchased, this);
+        EventCenter.on(GameEvent.MAP_EDITOR_MODE_CHANGED, this.onMapEditorModeChanged, this);
         this.inputManager = InputManager.getOrCreate(this.node);
         if (this.inputManager) {
             this.inputManager.pushContext(InputContext.Gameplay, this.handleGameplayInput, this);
@@ -290,6 +294,7 @@ export default class GameManager extends cc.Component {
         EventCenter.off(GameEvent.NPC_DIED, this.onNpcDied, this);
         EventCenter.off(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
         EventCenter.off(GameEvent.MERCHANT_PURCHASED, this.onMerchantPurchased, this);
+        EventCenter.off(GameEvent.MAP_EDITOR_MODE_CHANGED, this.onMapEditorModeChanged, this);
         if (this.inputManager) {
             this.inputManager.clearOwner(this);
         }
@@ -313,6 +318,56 @@ export default class GameManager extends cc.Component {
         }
 
         physicsManager.enabled = this.physicsEnabledBeforePause;
+    }
+
+    private onMapEditorModeChanged(enabled: boolean): void {
+        if (enabled) {
+            this.freezeGameForMapEditor();
+        } else {
+            this.unfreezeGameForMapEditor();
+        }
+    }
+
+    private freezeGameForMapEditor(): void {
+        if (this.isMapEditorFreezingGame) {
+            return;
+        }
+
+        this.isMapEditorFreezingGame = true;
+        const scheduler = cc.director.getScheduler();
+        this.schedulerTimeScaleBeforeMapEditor = scheduler && typeof scheduler.getTimeScale === "function"
+            ? scheduler.getTimeScale()
+            : 1;
+        if (scheduler) {
+            scheduler.setTimeScale(0);
+        }
+
+        const physicsManager = cc.director.getPhysicsManager();
+        if (physicsManager) {
+            this.physicsEnabledBeforeMapEditor = physicsManager.enabled;
+            physicsManager.enabled = false;
+        }
+        EventCenter.emit(GameEvent.GAME_PAUSED);
+    }
+
+    private unfreezeGameForMapEditor(): void {
+        if (!this.isMapEditorFreezingGame) {
+            return;
+        }
+
+        this.isMapEditorFreezingGame = false;
+        const scheduler = cc.director.getScheduler();
+        if (scheduler) {
+            scheduler.setTimeScale(this.isPaused ? 0 : this.schedulerTimeScaleBeforeMapEditor || 1);
+        }
+
+        if (!this.isPaused) {
+            const physicsManager = cc.director.getPhysicsManager();
+            if (physicsManager) {
+                physicsManager.enabled = this.physicsEnabledBeforeMapEditor;
+            }
+            EventCenter.emit(GameEvent.GAME_RESUMED);
+        }
     }
 
     private handlePausedInput(payload: InputPayload): boolean {
