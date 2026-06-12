@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "2233a4ac-bd2a-43f8-a8e2-bf0ce1088a44",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 110,
+  "height": 105,
+  "platformSettings": {},
+  "subMetas": {
+    "starmetal_sword": {
+      "ver": "1.0.6",
+      "uuid": "d0094474-a7c6-45f8-8c86-30691c09a0af",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "2233a4ac-bd2a-43f8-a8e2-bf0ce1088a44",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 12.5,
+      "offsetY": -8,
+      "trimX": 27,
+      "trimY": 19,
+      "width": 81,
+      "height": 83,
+      "rawWidth": 110,
+      "rawHeight": 105,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
