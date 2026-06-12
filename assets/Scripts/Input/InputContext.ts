@@ -6,5 +6,6 @@ export enum InputContext {
     MerchantShop = "MerchantShop",
     MapEditor = "MapEditor",
     Vehicle = "Vehicle",
+    MapEditor = "MapEditor",
     Paused = "Paused"
 }

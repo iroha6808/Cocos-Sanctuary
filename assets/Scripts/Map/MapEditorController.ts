@@ -113,6 +113,8 @@ export default class MapEditorController extends cc.Component {
     private preventContextMenuHandler: any = null;
     private placedDuringCurrentClick: boolean = false;
     private runtimePlacementDebugNode: cc.Node = null;
+    private lastEditorToggleTime: number = 0;
+    private lastEditorActionTimes: { [action: string]: number } = {};
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -171,10 +173,73 @@ export default class MapEditorController extends cc.Component {
     }
 
     public toggleEditorMode(): void {
+        const now = Date.now();
+        if (now - this.lastEditorToggleTime < 160) {
+            return;
+        }
+        this.lastEditorToggleTime = now;
+
         if (this.isEditing) {
             this.exitEditorMode();
         } else {
             this.enterEditorMode();
+        }
+    }
+
+    public isEditorModeActive(): boolean {
+        return this.isEditing;
+    }
+
+    public handleEditorKeyboardEvent(event: cc.Event.EventKeyboard): boolean {
+        if (!this.isEditing) {
+            return false;
+        }
+
+        const action = this.getEditorActionFromEvent(event);
+        if (this.shouldIgnoreRepeatedEditorAction(action)) {
+            this.stopEditorKeyEvent(event);
+            return true;
+        }
+
+        switch (action) {
+            case InputAction.ToggleMapEditor:
+            case InputAction.Cancel:
+                this.toggleEditorMode();
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorTerrainTool:
+                this.setTool(MapEditorTool.Terrain);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorResourceTool:
+                this.setTool(MapEditorTool.Resource);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorBoxGenerateTool:
+                this.setTool(MapEditorTool.BoxGenerate);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorPreviousPrefab:
+                this.selectPrefab(-1);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorNextPrefab:
+                this.selectPrefab(1);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorRotateLeft:
+                this.adjustRotation(-1);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.EditorRotateRight:
+                this.adjustRotation(1);
+                this.stopEditorKeyEvent(event);
+                return true;
+            case InputAction.CameraZoomIn:
+            case InputAction.CameraZoomOut:
+                return false;
+            default:
+                return false;
         }
     }
 
@@ -183,7 +248,14 @@ export default class MapEditorController extends cc.Component {
             return true;
         }
 
-        switch (payload.action) {
+        const action = payload.action || (payload.originalEvent
+            ? this.getEditorActionFromEvent(payload.originalEvent)
+            : null);
+        if (this.shouldIgnoreRepeatedEditorAction(action)) {
+            return true;
+        }
+
+        switch (action) {
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
@@ -222,24 +294,127 @@ export default class MapEditorController extends cc.Component {
     }
 
     private onEditorKeyDownFallback(event: cc.Event.EventKeyboard): void {
-        if (!this.isEditing) {
-            return;
+        this.handleEditorKeyboardEvent(event);
+    }
+
+    private getEditorActionFromEvent(event: cc.Event.EventKeyboard): InputAction {
+        const keyCode = event ? event.keyCode : 0;
+        return this.getEditorActionFromRaw(
+            this.getKeyboardString(event, "key"),
+            this.getKeyboardString(event, "code"),
+            keyCode
+        ) || getActionForKeyboardEvent(event);
+    }
+
+    private getEditorActionFromRaw(key: string, code: string, keyCode: number): InputAction {
+        key = (key || "").toLowerCase();
+        code = (code || "").toLowerCase();
+
+        switch (key) {
+            case "escape":
+            case "esc":
+                return InputAction.Cancel;
+            case "e":
+                return InputAction.ToggleMapEditor;
+            case "1":
+                return InputAction.EditorTerrainTool;
+            case "2":
+                return InputAction.EditorResourceTool;
+            case "3":
+                return InputAction.EditorBoxGenerateTool;
+            case "q":
+                return InputAction.EditorPreviousPrefab;
+            case "r":
+                return InputAction.EditorNextPrefab;
+            case "[":
+                return InputAction.EditorRotateLeft;
+            case "]":
+                return InputAction.EditorRotateRight;
         }
 
-        switch (getActionForKeyboardEvent(event)) {
-            case InputAction.EditorTerrainTool:
-                this.setTool(MapEditorTool.Terrain);
-                this.stopEditorKeyEvent(event);
-                return;
-            case InputAction.EditorResourceTool:
-                this.setTool(MapEditorTool.Resource);
-                this.stopEditorKeyEvent(event);
-                return;
-            case InputAction.EditorBoxGenerateTool:
-                this.setTool(MapEditorTool.BoxGenerate);
-                this.stopEditorKeyEvent(event);
-                return;
+        switch (code) {
+            case "escape":
+                return InputAction.Cancel;
+            case "keye":
+                return InputAction.ToggleMapEditor;
+            case "digit1":
+            case "numpad1":
+                return InputAction.EditorTerrainTool;
+            case "digit2":
+            case "numpad2":
+                return InputAction.EditorResourceTool;
+            case "digit3":
+            case "numpad3":
+                return InputAction.EditorBoxGenerateTool;
+            case "keyq":
+                return InputAction.EditorPreviousPrefab;
+            case "keyr":
+                return InputAction.EditorNextPrefab;
+            case "bracketleft":
+                return InputAction.EditorRotateLeft;
+            case "bracketright":
+                return InputAction.EditorRotateRight;
         }
+
+        if (keyCode === 27) {
+            return InputAction.Cancel;
+        }
+        if (keyCode === cc.macro.KEY.e || keyCode === 69) {
+            return InputAction.ToggleMapEditor;
+        }
+        if (keyCode === cc.macro.KEY.num1 || keyCode === 49 || keyCode === 97) {
+            return InputAction.EditorTerrainTool;
+        }
+        if (keyCode === cc.macro.KEY.num2 || keyCode === 50 || keyCode === 98) {
+            return InputAction.EditorResourceTool;
+        }
+        if (keyCode === cc.macro.KEY.num3 || keyCode === 51 || keyCode === 99) {
+            return InputAction.EditorBoxGenerateTool;
+        }
+        if (keyCode === 81) {
+            return InputAction.EditorPreviousPrefab;
+        }
+        if (keyCode === 82) {
+            return InputAction.EditorNextPrefab;
+        }
+        if (keyCode === 219) {
+            return InputAction.EditorRotateLeft;
+        }
+        if (keyCode === 221) {
+            return InputAction.EditorRotateRight;
+        }
+
+        return null!;
+    }
+
+    private getKeyboardString(event: cc.Event.EventKeyboard, field: string): string {
+        const anyEvent = event as any;
+        const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
+        const value = anyEvent && typeof anyEvent[field] === "string"
+            ? anyEvent[field]
+            : nativeEvent && typeof nativeEvent[field] === "string"
+                ? nativeEvent[field]
+                : "";
+        return value.toLowerCase();
+    }
+
+    private shouldIgnoreRepeatedEditorAction(action: InputAction): boolean {
+        if (!action) {
+            return false;
+        }
+
+        if (action === InputAction.CameraZoomIn || action === InputAction.CameraZoomOut) {
+            return false;
+        }
+
+        const now = Date.now();
+        const lastTime = this.lastEditorActionTimes[action] || 0;
+        if (now - lastTime < 80) {
+            return true;
+        }
+
+        this.lastEditorActionTimes[action] = now;
+        return false;
     }
 
     private stopEditorKeyEvent(event: cc.Event.EventKeyboard): void {
@@ -650,7 +825,10 @@ export default class MapEditorController extends cc.Component {
     }
 
     private syncPhysicsPosition(): void {
-        this.syncPhysicsPosition();
+        const physicsManager = cc.director.getPhysicsManager() as any;
+        if (physicsManager && typeof physicsManager.syncPosition === "function") {
+            physicsManager.syncPosition();
+        }
     }
 
     private onSaveLoaded(_saveData: SaveData): void {

@@ -11,7 +11,7 @@ import RealtimeStateReporter from "./RealtimeStateReporter";
 import DamageNumberManager from "./DamageNumberManager";
 import MonsterSpawner from "../NPC/MonsterSpawner";
 import PhysicsTagValidator from "./PhysicsTagValidator";
-import AutoMapGenerator from "../Map/AutoMapGenerator";
+import AutoMapGenerator, { MapGenerationRect } from "../Map/AutoMapGenerator";
 import SaveService2, { SaveData } from "./SaveService2";
 import MapEditorController from "../Map/MapEditorController";
 
@@ -41,6 +41,27 @@ export default class GameManager extends cc.Component {
 
     @property(AutoMapGenerator)
     autoMapGenerator: AutoMapGenerator = null;
+
+    @property(cc.Boolean)
+    autoGenerateMapChunksAtBoundary: boolean = true;
+
+    @property
+    initialMapMinX: number = 0;
+
+    @property
+    initialMapMaxX: number = 9000;
+
+    @property
+    boundaryMapChunkWidth: number = 5000;
+
+    @property
+    boundaryMapMinY: number = -3000;
+
+    @property
+    boundaryMapMaxY: number = 0;
+
+    @property
+    boundaryMapTriggerMargin: number = 600;
 
     @property(MapEditorController)
     mapEditorController: MapEditorController = null;
@@ -90,6 +111,11 @@ export default class GameManager extends cc.Component {
     private schedulerTimeScaleBeforeMapEditor: number = 1;
     private physicsEnabledBeforeMapEditor: boolean = true;
     private isLoadingSave: boolean = false;
+    private generatedMapMinX: number = 0;
+    private generatedMapMaxX: number = 9000;
+    private mapBoundaryInitialized: boolean = false;
+    private lastBoundaryGenerationTime: number = 0;
+    private lastMapEditorToggleTime: number = 0;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -101,6 +127,7 @@ export default class GameManager extends cc.Component {
         }
 
         cc.systemEvent.on("INVENTORY_CHANGED", this.saveCurrentGame, this);
+        cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onGlobalKeyDown, this);
         EventCenter.on(GameEvent.PLAYER_DIED, this.onGameOver, this);
         EventCenter.on(GameEvent.NPC_DIED, this.onNpcDied, this);
         EventCenter.on(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
@@ -146,7 +173,12 @@ export default class GameManager extends cc.Component {
 
     async start() {
         console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:145");
+        this.initializeBoundaryMapRange();
         await this.loadCurrentUserSave();
+    }
+
+    update(_dt: number): void {
+        this.checkBoundaryMapGeneration();
     }
 
     async onGameOver() {
@@ -287,6 +319,12 @@ export default class GameManager extends cc.Component {
     }
 
     public toggleMapEditorMode(): void {
+        const now = Date.now();
+        if (now - this.lastMapEditorToggleTime < 160) {
+            return;
+        }
+        this.lastMapEditorToggleTime = now;
+
         const editor = this.getOrCreateMapEditorController();
         if (!editor) {
             cc.warn("[GameManager] MapEditorController is missing; cannot toggle map editor.");
@@ -314,6 +352,7 @@ export default class GameManager extends cc.Component {
         EventCenter.off(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
         EventCenter.off(GameEvent.MERCHANT_PURCHASED, this.onMerchantPurchased, this);
         EventCenter.off(GameEvent.MAP_EDITOR_MODE_CHANGED, this.onMapEditorModeChanged, this);
+        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onGlobalKeyDown, this);
         if (this.inputManager) {
             this.inputManager.clearOwner(this);
         }
@@ -444,6 +483,28 @@ export default class GameManager extends cc.Component {
         }
     }
 
+    private onGlobalKeyDown(event: cc.Event.EventKeyboard): void {
+        if (!event) {
+            return;
+        }
+
+        if (this.mapEditorController && cc.isValid(this.mapEditorController.node)
+            && this.mapEditorController.isEditorModeActive()
+            && this.mapEditorController.handleEditorKeyboardEvent(event)) {
+            return;
+        }
+
+        if (event.keyCode !== cc.macro.KEY.e && event.keyCode !== 69) {
+            return;
+        }
+
+        this.toggleMapEditorMode();
+        const maybeEvent = event as any;
+        if (maybeEvent && typeof maybeEvent.stopPropagation === "function") {
+            maybeEvent.stopPropagation();
+        }
+    }
+
     private adjustCameraZoom(direction: number): void {
         const rig = this.cameraRig || CameraRig.instance;
         if (!rig || !cc.isValid(rig.node)) {
@@ -460,6 +521,89 @@ export default class GameManager extends cc.Component {
             return;
         }
         generator.beginTimedGeneration();
+    }
+
+    private checkBoundaryMapGeneration(): void {
+        if (!this.autoGenerateMapChunksAtBoundary || this.isPaused || this.isMapEditorFreezingGame) {
+            return;
+        }
+
+        const generator = this.getAutoMapGenerator();
+        const player = this.playerNode;
+        if (!generator || !cc.isValid(generator.node) || !player || !cc.isValid(player)) {
+            return;
+        }
+
+        this.initializeBoundaryMapRange();
+        const playerX = this.getPlayerXInMapRoot(player, generator);
+        const margin = Math.max(0, this.boundaryMapTriggerMargin || 0);
+
+        if (playerX >= this.generatedMapMaxX - margin) {
+            this.generateBoundaryChunk(1, generator);
+        } else if (playerX <= this.generatedMapMinX + margin) {
+            this.generateBoundaryChunk(-1, generator);
+        }
+    }
+
+    private generateBoundaryChunk(direction: number, generator: AutoMapGenerator): void {
+        const now = Date.now();
+        if (now - this.lastBoundaryGenerationTime < 500) {
+            return;
+        }
+
+        const width = Math.max(1000, this.boundaryMapChunkWidth || 5000);
+        const rect: MapGenerationRect = direction > 0
+            ? {
+                minX: this.generatedMapMaxX,
+                maxX: this.generatedMapMaxX + width,
+                minY: this.boundaryMapMinY,
+                maxY: this.boundaryMapMaxY
+            }
+            : {
+                minX: this.generatedMapMinX - width,
+                maxX: this.generatedMapMinX,
+                minY: this.boundaryMapMinY,
+                maxY: this.boundaryMapMaxY
+            };
+
+        const started = generator.beginTimedGenerationInRect(rect, {
+            clearExisting: false,
+            frameCamera: true,
+            publishState: true
+        });
+        if (!started) {
+            return;
+        }
+
+        this.lastBoundaryGenerationTime = now;
+        if (direction > 0) {
+            this.generatedMapMaxX = rect.maxX;
+        } else {
+            this.generatedMapMinX = rect.minX;
+        }
+        cc.log(`[GameManager] Auto generated boundary map chunk: x=${rect.minX}~${rect.maxX}, y=${rect.minY}~${rect.maxY}`);
+    }
+
+    private initializeBoundaryMapRange(): void {
+        if (this.mapBoundaryInitialized) {
+            return;
+        }
+        this.generatedMapMinX = Math.min(this.initialMapMinX, this.initialMapMaxX);
+        this.generatedMapMaxX = Math.max(this.initialMapMinX, this.initialMapMaxX);
+        this.mapBoundaryInitialized = true;
+    }
+
+    private getPlayerXInMapRoot(player: cc.Node, generator: AutoMapGenerator): number {
+        const root = generator.targetRoot && cc.isValid(generator.targetRoot)
+            ? generator.targetRoot
+            : generator.node;
+        const world = player.parent
+            ? player.parent.convertToWorldSpaceAR(player.position)
+            : cc.v2(player.x, player.y);
+        const local = root && cc.isValid(root)
+            ? root.convertToNodeSpaceAR(world)
+            : world;
+        return local.x;
     }
 
     private getAutoMapGenerator(): AutoMapGenerator {

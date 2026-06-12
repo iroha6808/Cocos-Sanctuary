@@ -36,6 +36,18 @@ export default class GameOverScene extends cc.Component {
     onLoad(): void {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         this.setFadeAlpha(0);
+        this.scheduleOnce(() => {
+            if (AudioManager.instance) {
+                if (AudioManager.instance.gameOverBgm) {
+                    cc.log("播放 GameOver 音樂");
+                    AudioManager.instance.playManualBgm(AudioManager.instance.gameOverBgm);
+                } else {
+                    cc.warn("⚠️ AudioManager 裡的 gameOverBgm 為空，請檢查編輯器欄位！");
+                }
+            } else {
+                cc.error("❌ 找不到 AudioManager 實例，請檢查 AudioManager 是否有掛載並設為 PersistRootNode");
+            }
+        }, 0.2);
     }
 
     start(): void {
