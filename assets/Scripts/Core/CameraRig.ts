@@ -53,7 +53,7 @@ export default class CameraRig extends cc.Component {
     public screenFixedZoomScaledNodes: cc.Node[] = [];
 
     @property(cc.Float)
-    public minZoomNodeScale: number = 0.1;
+    public minZoomNodeScale: number = 0.01;
 
     @property(cc.Float)
     public maxZoomNodeScale: number = 5;

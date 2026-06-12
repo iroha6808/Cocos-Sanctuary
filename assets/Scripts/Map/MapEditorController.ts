@@ -101,6 +101,10 @@ export default class MapEditorController extends cc.Component {
     private previewNode: cc.Node = null;
     private previewKey: string = "";
     private lastMouseRootLocal: cc.Vec2 = null;
+    private browserMouseDownHandler: any = null;
+    private browserMouseMoveHandler: any = null;
+    private browserMouseUpHandler: any = null;
+    private preventContextMenuHandler: any = null;
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -148,9 +152,11 @@ export default class MapEditorController extends cc.Component {
         this.setPlayerLocked(false);
         this.destroyPlacementPreview();
         this.clearSelection();
+        this.commitEditorChangesToScene();
         this.refreshStatus();
         cc.log("[MapEditor] Exit editor mode.");
         EventCenter.emit(GameEvent.MAP_EDITOR_MODE_CHANGED, false);
+        this.scheduleOnce(this.refreshEditedPhysics, 0);
     }
 
     public toggleEditorMode(): void {
@@ -233,6 +239,12 @@ export default class MapEditorController extends cc.Component {
     }
 
     private bindMouseEvents(): void {
+        const gameCanvas = (cc.game as any).canvas;
+        if (gameCanvas && gameCanvas.addEventListener) {
+            this.bindBrowserMouseEvents(gameCanvas);
+            return;
+        }
+
         if (!this.canvasNode) {
             return;
         }
@@ -242,6 +254,22 @@ export default class MapEditorController extends cc.Component {
     }
 
     private unbindMouseEvents(): void {
+        const gameCanvas = (cc.game as any).canvas;
+        if (gameCanvas && gameCanvas.removeEventListener) {
+            if (this.browserMouseDownHandler) {
+                gameCanvas.removeEventListener("mousedown", this.browserMouseDownHandler, false);
+            }
+            if (this.browserMouseMoveHandler) {
+                gameCanvas.removeEventListener("mousemove", this.browserMouseMoveHandler, false);
+            }
+            if (this.browserMouseUpHandler) {
+                gameCanvas.removeEventListener("mouseup", this.browserMouseUpHandler, false);
+            }
+            if (this.preventContextMenuHandler) {
+                gameCanvas.removeEventListener("contextmenu", this.preventContextMenuHandler, false);
+            }
+        }
+
         if (!this.canvasNode || !cc.isValid(this.canvasNode)) {
             return;
         }
@@ -250,22 +278,77 @@ export default class MapEditorController extends cc.Component {
         this.canvasNode.off(cc.Node.EventType.MOUSE_UP, this.onMouseUp, this);
     }
 
+    private bindBrowserMouseEvents(gameCanvas: any): void {
+        this.browserMouseDownHandler = (event: any) => {
+            if (!this.isEditing) {
+                return;
+            }
+            const input = this.getBrowserMouseInput(event);
+            this.handleEditorMouseDown(event.button, input.rootLocal, input.world);
+            this.preventBrowserMouseDefault(event);
+        };
+        this.browserMouseMoveHandler = (event: any) => {
+            if (!this.isEditing) {
+                return;
+            }
+            const input = this.getBrowserMouseInput(event);
+            this.handleEditorMouseMove(input.rootLocal);
+            this.preventBrowserMouseDefault(event);
+        };
+        this.browserMouseUpHandler = (event: any) => {
+            if (!this.isEditing) {
+                return;
+            }
+            const input = this.getBrowserMouseInput(event);
+            this.handleEditorMouseUp(event.button, input.rootLocal);
+            this.preventBrowserMouseDefault(event);
+        };
+        this.preventContextMenuHandler = (event: any) => {
+            if (this.isEditing) {
+                this.preventBrowserMouseDefault(event);
+            }
+        };
+
+        gameCanvas.addEventListener("mousedown", this.browserMouseDownHandler, false);
+        gameCanvas.addEventListener("mousemove", this.browserMouseMoveHandler, false);
+        gameCanvas.addEventListener("mouseup", this.browserMouseUpHandler, false);
+        gameCanvas.addEventListener("contextmenu", this.preventContextMenuHandler, false);
+    }
+
     private onMouseDown(event: cc.Event.EventMouse): void {
         if (!this.isEditing) {
             return;
         }
         const rootLocal = this.getMouseRootLocal(event);
+        this.handleEditorMouseDown(event.getButton(), rootLocal, this.getMouseWorld(event));
+    }
+
+    private onMouseMove(event: cc.Event.EventMouse): void {
+        if (!this.isEditing) {
+            return;
+        }
+        this.handleEditorMouseMove(this.getMouseRootLocal(event));
+    }
+
+    private onMouseUp(event: cc.Event.EventMouse): void {
+        if (!this.isEditing) {
+            return;
+        }
+        this.handleEditorMouseUp(event.getButton(), this.getMouseRootLocal(event));
+    }
+
+    private handleEditorMouseDown(button: number, rootLocal: cc.Vec2, world: cc.Vec2): void {
         if (!rootLocal) {
             return;
         }
         this.lastMouseRootLocal = rootLocal.clone();
 
-        if (event.getButton() === cc.Event.EventMouse.BUTTON_RIGHT) {
-            this.deleteAt(event);
+        if (button === cc.Event.EventMouse.BUTTON_RIGHT) {
+            this.deleteAtWorld(world);
             return;
         }
 
-        if (event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
+        if (button !== cc.Event.EventMouse.BUTTON_LEFT) {
             return;
         }
 
@@ -280,11 +363,7 @@ export default class MapEditorController extends cc.Component {
         this.placeAt(rootLocal);
     }
 
-    private onMouseMove(event: cc.Event.EventMouse): void {
-        if (!this.isEditing) {
-            return;
-        }
-        const rootLocal = this.getMouseRootLocal(event);
+    private handleEditorMouseMove(rootLocal: cc.Vec2): void {
         if (!rootLocal) {
             return;
         }
@@ -302,11 +381,11 @@ export default class MapEditorController extends cc.Component {
         this.updatePlacementPreview(rootLocal);
     }
 
-    private onMouseUp(event: cc.Event.EventMouse): void {
-        if (!this.isEditing || !this.selectionStart || event.getButton() !== cc.Event.EventMouse.BUTTON_LEFT) {
+    private handleEditorMouseUp(button: number, rootLocal: cc.Vec2): void {
+        if (!this.selectionStart || button !== cc.Event.EventMouse.BUTTON_LEFT || !rootLocal) {
             return;
         }
-        this.selectionCurrent = this.getMouseRootLocal(event);
+        this.selectionCurrent = rootLocal;
         this.generateInSelection();
         this.clearSelection();
     }
@@ -333,12 +412,11 @@ export default class MapEditorController extends cc.Component {
         this.setEditorNodePosition(node, parent, rootLocal);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
-        this.persistState();
+        this.commitEditorChangesToScene();
     }
 
-    private deleteAt(event: cc.Event.EventMouse): void {
+    private deleteAtWorld(world: cc.Vec2): void {
         const root = this.getTerrainRoot();
-        const world = this.getMouseWorld(event);
         if (!root || !world) {
             return;
         }
@@ -350,7 +428,7 @@ export default class MapEditorController extends cc.Component {
 
         this.removePlacement(target.name);
         target.destroy();
-        this.persistState();
+        this.commitEditorChangesToScene();
     }
 
     private generateInSelection(): void {
@@ -372,7 +450,7 @@ export default class MapEditorController extends cc.Component {
         for (let i = 0; i < states.length; i++) {
             this.upsertPlacement(states[i]);
         }
-        this.persistState();
+        this.commitEditorChangesToScene();
     }
 
     private setTool(tool: MapEditorTool): void {
@@ -456,6 +534,68 @@ export default class MapEditorController extends cc.Component {
             EventCenter.emit(GameEvent.MAP_EDITOR_STATE_CHANGED, state);
         }
         this.refreshStatus();
+    }
+
+    private commitEditorChangesToScene(): void {
+        this.persistState(true);
+        this.setGeneratedNodesVisible(this.getTerrainRoot());
+        const resourceRoot = this.getResourceRoot();
+        if (resourceRoot !== this.getTerrainRoot()) {
+            this.setGeneratedNodesVisible(resourceRoot);
+        }
+    }
+
+    private setGeneratedNodesVisible(root: cc.Node): void {
+        if (!root) {
+            return;
+        }
+
+        for (let i = 0; i < root.childrenCount; i++) {
+            const child = root.children[i];
+            if (this.isEditorOwnedNode(child) || this.isAutoGeneratedNode(child)) {
+                child.active = true;
+            }
+        }
+    }
+
+    private refreshEditedPhysics(): void {
+        this.applyPhysicsColliders(this.getTerrainRoot());
+        const resourceRoot = this.getResourceRoot();
+        if (resourceRoot !== this.getTerrainRoot()) {
+            this.applyPhysicsColliders(resourceRoot);
+        }
+
+        const physicsManager = cc.director.getPhysicsManager() as any;
+        if (physicsManager && typeof physicsManager.syncPosition === "function") {
+            physicsManager.syncPosition();
+        }
+    }
+
+    private applyPhysicsColliders(root: cc.Node): void {
+        if (!root) {
+            return;
+        }
+
+        for (let i = 0; i < root.childrenCount; i++) {
+            const child = root.children[i];
+            if (this.isEditorOwnedNode(child) || this.isAutoGeneratedNode(child)) {
+                this.applyNodePhysicsColliders(child);
+            }
+        }
+    }
+
+    private applyNodePhysicsColliders(node: cc.Node): void {
+        const colliders = node.getComponents(cc.PhysicsCollider);
+        for (let i = 0; i < colliders.length; i++) {
+            const collider = colliders[i] as any;
+            if (collider && collider.enabled && typeof collider.apply === "function") {
+                collider.apply();
+            }
+        }
+
+        for (let i = 0; i < node.childrenCount; i++) {
+            this.applyNodePhysicsColliders(node.children[i]);
+        }
     }
 
     private onSaveLoaded(saveData: SaveData): void {
@@ -552,7 +692,24 @@ export default class MapEditorController extends cc.Component {
     }
 
     private getMouseWorld(event: cc.Event.EventMouse): cc.Vec2 {
-        const screenLocation = this.getMouseScreenLocation(event);
+        return this.getWorldFromScreenLocation(this.getMouseScreenLocation(event));
+    }
+
+    private getBrowserMouseInput(event: any): { rootLocal: cc.Vec2, world: cc.Vec2 } {
+        if (!event || typeof event.clientX !== "number" || typeof event.clientY !== "number") {
+            return { rootLocal: null, world: null };
+        }
+
+        const screenLocation = this.getScreenLocationFromClient(event.clientX, event.clientY);
+        const world = this.getWorldFromScreenLocation(screenLocation);
+        const root = this.getTerrainRoot();
+        return {
+            rootLocal: root && world ? root.convertToNodeSpaceAR(world) : null,
+            world
+        };
+    }
+
+    private getWorldFromScreenLocation(screenLocation: cc.Vec2): cc.Vec2 {
         const camera = this.getCamera();
         if (camera) {
             return this.screenToWorld(camera, screenLocation);
@@ -564,15 +721,19 @@ export default class MapEditorController extends cc.Component {
         const anyEvent = event as any;
         const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
         if (nativeEvent && typeof nativeEvent.clientX === "number" && typeof nativeEvent.clientY === "number") {
-            const canvas = (cc.game as any).canvas;
-            const rect = canvas && canvas.getBoundingClientRect
-                ? canvas.getBoundingClientRect()
-                : { left: 0, top: 0 };
-            const location = cc.v2();
-            cc.view.convertToLocationInView(nativeEvent.clientX, nativeEvent.clientY, rect, location);
-            return location;
+            return this.getScreenLocationFromClient(nativeEvent.clientX, nativeEvent.clientY);
         }
         return event.getLocation();
+    }
+
+    private getScreenLocationFromClient(clientX: number, clientY: number): cc.Vec2 {
+        const canvas = (cc.game as any).canvas;
+        const rect = canvas && canvas.getBoundingClientRect
+            ? canvas.getBoundingClientRect()
+            : { left: 0, top: 0 };
+        const location = cc.v2();
+        cc.view.convertToLocationInView(clientX, clientY, rect, location);
+        return location;
     }
 
     private screenToWorld(camera: cc.Camera, screenLocation: cc.Vec2): cc.Vec2 {
@@ -586,6 +747,18 @@ export default class MapEditorController extends cc.Component {
             cameraWorld.x + (screenLocation.x - visibleSize.width * 0.5) / zoom,
             cameraWorld.y + (screenLocation.y - visibleSize.height * 0.5) / zoom
         );
+    }
+
+    private preventBrowserMouseDefault(event: any): void {
+        if (!event) {
+            return;
+        }
+        if (typeof event.preventDefault === "function") {
+            event.preventDefault();
+        }
+        if (typeof event.stopPropagation === "function") {
+            event.stopPropagation();
+        }
     }
 
     private getCamera(): cc.Camera {
@@ -732,6 +905,13 @@ export default class MapEditorController extends cc.Component {
         return !!node && (
             node.name.indexOf("EditorRock_") === 0
             || node.name.indexOf("EditorResource_") === 0
+        );
+    }
+
+    private isAutoGeneratedNode(node: cc.Node): boolean {
+        return !!node && (
+            node.name.indexOf("AutoRock_") === 0
+            || node.name.indexOf("AutoResource_") === 0
         );
     }
 

@@ -149,8 +149,6 @@ export function isOneShotAction(action: InputAction): boolean {
         case InputAction.Confirm:
         case InputAction.Cancel:
         case InputAction.ToggleMute:
-        case InputAction.CameraZoomIn:
-        case InputAction.CameraZoomOut:
         case InputAction.GenerateMap:
         case InputAction.ToggleMapEditor:
         case InputAction.EditorTerrainTool:
