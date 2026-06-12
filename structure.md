@@ -456,6 +456,9 @@ Canvas
   - path missing 時由 `NPC_AI` fallback 直接追擊。
 - `Scene/MenuScene.ts`
   - 選單場景用腳本，支援開始遊戲、讀檔進遊戲、註冊、登入、登出、設定、排行榜、靜音與 fade。
+- `Scene/MenuRollingSpawner.ts`
+  - Menu 裝飾特效腳本，從畫面邊界外生成 prefab / spriteFrame，讓物件帶速度與旋轉滾到另一側後消失。
+  - 可掛在 Canvas 或獨立 `MenuEffectsRoot`；生成物會停用 RigidBody / PhysicsCollider，避免干擾 UI。
 - `Scene/GameOverScene.ts`
   - 死亡結算場景腳本，讀取最後一局結果，顯示玩家、Score、EXP，支援 Retry、Main Menu、Submit Score。
 
