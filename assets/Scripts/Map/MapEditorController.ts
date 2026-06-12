@@ -86,13 +86,13 @@ export default class MapEditorController extends cc.Component {
     deleteRadius: number = 120;
 
     @property(cc.Integer)
-    previewOpacity: number = 255;
+    previewOpacity: number = 120;
 
     @property(cc.Boolean)
-    alignPlacementCenterToCursor: boolean = false;
+    alignPlacementCenterToCursor: boolean = true;
 
     @property(cc.Boolean)
-    showPlacementDebug: boolean = false;
+    showPlacementDebug: boolean = true;
 
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
@@ -113,8 +113,6 @@ export default class MapEditorController extends cc.Component {
     private preventContextMenuHandler: any = null;
     private placedDuringCurrentClick: boolean = false;
     private runtimePlacementDebugNode: cc.Node = null;
-    private lastEditorToggleTime: number = 0;
-    private lastEditorActionTimes: { [action: string]: number } = {};
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -173,12 +171,6 @@ export default class MapEditorController extends cc.Component {
     }
 
     public toggleEditorMode(): void {
-        const now = Date.now();
-        if (now - this.lastEditorToggleTime < 160) {
-            return;
-        }
-        this.lastEditorToggleTime = now;
-
         if (this.isEditing) {
             this.exitEditorMode();
         } else {
@@ -186,22 +178,12 @@ export default class MapEditorController extends cc.Component {
         }
     }
 
-    public isEditorModeActive(): boolean {
-        return this.isEditing;
-    }
-
     public handleEditorKeyboardEvent(event: cc.Event.EventKeyboard): boolean {
         if (!this.isEditing) {
             return false;
         }
 
-        const action = this.getEditorActionFromEvent(event);
-        if (this.shouldIgnoreRepeatedEditorAction(action)) {
-            this.stopEditorKeyEvent(event);
-            return true;
-        }
-
-        switch (action) {
+        switch (getActionForKeyboardEvent(event)) {
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
@@ -220,10 +202,12 @@ export default class MapEditorController extends cc.Component {
                 this.stopEditorKeyEvent(event);
                 return true;
             case InputAction.EditorPreviousPrefab:
+            case InputAction.NavigateUp:
                 this.selectPrefab(-1);
                 this.stopEditorKeyEvent(event);
                 return true;
             case InputAction.EditorNextPrefab:
+            case InputAction.NavigateDown:
                 this.selectPrefab(1);
                 this.stopEditorKeyEvent(event);
                 return true;
@@ -248,42 +232,44 @@ export default class MapEditorController extends cc.Component {
             return true;
         }
 
-        const action = payload.action || (payload.originalEvent
-            ? this.getEditorActionFromEvent(payload.originalEvent)
-            : null);
-        if (this.shouldIgnoreRepeatedEditorAction(action)) {
-            return true;
-        }
-
-        switch (action) {
+        switch (payload.action) {
             case InputAction.ToggleMapEditor:
             case InputAction.Cancel:
                 this.toggleEditorMode();
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorTerrainTool:
                 this.setTool(MapEditorTool.Terrain);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorResourceTool:
                 this.setTool(MapEditorTool.Resource);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorBoxGenerateTool:
                 this.setTool(MapEditorTool.BoxGenerate);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorPreviousPrefab:
                 this.selectPrefab(-1);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorNextPrefab:
             case InputAction.NavigateDown:
                 this.selectPrefab(1);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.NavigateUp:
                 this.selectPrefab(-1);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorRotateLeft:
                 this.adjustRotation(-1);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.EditorRotateRight:
                 this.adjustRotation(1);
+                this.stopEditorKeyEvent(payload.originalEvent);
                 return true;
             case InputAction.CameraZoomIn:
             case InputAction.CameraZoomOut:
@@ -294,133 +280,36 @@ export default class MapEditorController extends cc.Component {
     }
 
     private onEditorKeyDownFallback(event: cc.Event.EventKeyboard): void {
-        this.handleEditorKeyboardEvent(event);
+        if (!this.isEditing) {
+            return;
+        }
+
+        switch (getActionForKeyboardEvent(event)) {
+            case InputAction.EditorTerrainTool:
+                this.setTool(MapEditorTool.Terrain);
+                this.stopEditorKeyEvent(event);
+                return;
+            case InputAction.EditorResourceTool:
+                this.setTool(MapEditorTool.Resource);
+                this.stopEditorKeyEvent(event);
+                return;
+            case InputAction.EditorBoxGenerateTool:
+                this.setTool(MapEditorTool.BoxGenerate);
+                this.stopEditorKeyEvent(event);
+                return;
+        }
     }
 
-    private getEditorActionFromEvent(event: cc.Event.EventKeyboard): InputAction {
-        const keyCode = event ? event.keyCode : 0;
-        return this.getEditorActionFromRaw(
-            this.getKeyboardString(event, "key"),
-            this.getKeyboardString(event, "code"),
-            keyCode
-        ) || getActionForKeyboardEvent(event);
-    }
-
-    private getEditorActionFromRaw(key: string, code: string, keyCode: number): InputAction {
-        key = (key || "").toLowerCase();
-        code = (code || "").toLowerCase();
-
-        switch (key) {
-            case "escape":
-            case "esc":
-                return InputAction.Cancel;
-            case "e":
-                return InputAction.ToggleMapEditor;
-            case "1":
-                return InputAction.EditorTerrainTool;
-            case "2":
-                return InputAction.EditorResourceTool;
-            case "3":
-                return InputAction.EditorBoxGenerateTool;
-            case "q":
-                return InputAction.EditorPreviousPrefab;
-            case "r":
-                return InputAction.EditorNextPrefab;
-            case "[":
-                return InputAction.EditorRotateLeft;
-            case "]":
-                return InputAction.EditorRotateRight;
-        }
-
-        switch (code) {
-            case "escape":
-                return InputAction.Cancel;
-            case "keye":
-                return InputAction.ToggleMapEditor;
-            case "digit1":
-            case "numpad1":
-                return InputAction.EditorTerrainTool;
-            case "digit2":
-            case "numpad2":
-                return InputAction.EditorResourceTool;
-            case "digit3":
-            case "numpad3":
-                return InputAction.EditorBoxGenerateTool;
-            case "keyq":
-                return InputAction.EditorPreviousPrefab;
-            case "keyr":
-                return InputAction.EditorNextPrefab;
-            case "bracketleft":
-                return InputAction.EditorRotateLeft;
-            case "bracketright":
-                return InputAction.EditorRotateRight;
-        }
-
-        if (keyCode === 27) {
-            return InputAction.Cancel;
-        }
-        if (keyCode === cc.macro.KEY.e || keyCode === 69) {
-            return InputAction.ToggleMapEditor;
-        }
-        if (keyCode === cc.macro.KEY.num1 || keyCode === 49 || keyCode === 97) {
-            return InputAction.EditorTerrainTool;
-        }
-        if (keyCode === cc.macro.KEY.num2 || keyCode === 50 || keyCode === 98) {
-            return InputAction.EditorResourceTool;
-        }
-        if (keyCode === cc.macro.KEY.num3 || keyCode === 51 || keyCode === 99) {
-            return InputAction.EditorBoxGenerateTool;
-        }
-        if (keyCode === 81) {
-            return InputAction.EditorPreviousPrefab;
-        }
-        if (keyCode === 82) {
-            return InputAction.EditorNextPrefab;
-        }
-        if (keyCode === 219) {
-            return InputAction.EditorRotateLeft;
-        }
-        if (keyCode === 221) {
-            return InputAction.EditorRotateRight;
-        }
-
-        return null!;
-    }
-
-    private getKeyboardString(event: cc.Event.EventKeyboard, field: string): string {
-        const anyEvent = event as any;
-        const nativeEvent = anyEvent && (anyEvent._event || anyEvent.event || anyEvent.nativeEvent);
-        const value = anyEvent && typeof anyEvent[field] === "string"
-            ? anyEvent[field]
-            : nativeEvent && typeof nativeEvent[field] === "string"
-                ? nativeEvent[field]
-                : "";
-        return value.toLowerCase();
-    }
-
-    private shouldIgnoreRepeatedEditorAction(action: InputAction): boolean {
-        if (!action) {
-            return false;
-        }
-
-        if (action === InputAction.CameraZoomIn || action === InputAction.CameraZoomOut) {
-            return false;
-        }
-
-        const now = Date.now();
-        const lastTime = this.lastEditorActionTimes[action] || 0;
-        if (now - lastTime < 80) {
-            return true;
-        }
-
-        this.lastEditorActionTimes[action] = now;
-        return false;
-    }
-
-    private stopEditorKeyEvent(event: cc.Event.EventKeyboard): void {
+    private stopEditorKeyEvent(event: any): void {
         const maybeEvent = event as any;
+        if (maybeEvent) {
+            maybeEvent.__mapEditorHandled = true;
+        }
         if (maybeEvent && typeof maybeEvent.stopPropagation === "function") {
             maybeEvent.stopPropagation();
+        }
+        if (maybeEvent && typeof maybeEvent.preventDefault === "function") {
+            maybeEvent.preventDefault();
         }
     }
 
@@ -443,16 +332,16 @@ export default class MapEditorController extends cc.Component {
         const gameCanvas = (cc.game as any).canvas;
         if (gameCanvas && gameCanvas.removeEventListener) {
             if (this.browserMouseDownHandler) {
-                gameCanvas.removeEventListener("mousedown", this.browserMouseDownHandler, false);
+                gameCanvas.removeEventListener("mousedown", this.browserMouseDownHandler, true);
             }
             if (this.browserMouseMoveHandler) {
-                gameCanvas.removeEventListener("mousemove", this.browserMouseMoveHandler, false);
+                gameCanvas.removeEventListener("mousemove", this.browserMouseMoveHandler, true);
             }
             if (this.browserMouseUpHandler) {
-                gameCanvas.removeEventListener("mouseup", this.browserMouseUpHandler, false);
+                gameCanvas.removeEventListener("mouseup", this.browserMouseUpHandler, true);
             }
             if (this.preventContextMenuHandler) {
-                gameCanvas.removeEventListener("contextmenu", this.preventContextMenuHandler, false);
+                gameCanvas.removeEventListener("contextmenu", this.preventContextMenuHandler, true);
             }
         }
 
@@ -469,25 +358,25 @@ export default class MapEditorController extends cc.Component {
             if (!this.isEditing) {
                 return;
             }
+            this.preventBrowserMouseDefault(event);
             const input = this.getBrowserMouseInput(event);
             this.handleEditorMouseDown(event.button, input.rootLocal, input.world);
-            this.preventBrowserMouseDefault(event);
         };
         this.browserMouseMoveHandler = (event: any) => {
             if (!this.isEditing) {
                 return;
             }
+            this.preventBrowserMouseDefault(event);
             const input = this.getBrowserMouseInput(event);
             this.handleEditorMouseMove(input.rootLocal);
-            this.preventBrowserMouseDefault(event);
         };
         this.browserMouseUpHandler = (event: any) => {
             if (!this.isEditing) {
                 return;
             }
+            this.preventBrowserMouseDefault(event);
             const input = this.getBrowserMouseInput(event);
             this.handleEditorMouseUp(event.button, input.rootLocal);
-            this.preventBrowserMouseDefault(event);
         };
         this.preventContextMenuHandler = (event: any) => {
             if (this.isEditing) {
@@ -495,10 +384,10 @@ export default class MapEditorController extends cc.Component {
             }
         };
 
-        gameCanvas.addEventListener("mousedown", this.browserMouseDownHandler, false);
-        gameCanvas.addEventListener("mousemove", this.browserMouseMoveHandler, false);
-        gameCanvas.addEventListener("mouseup", this.browserMouseUpHandler, false);
-        gameCanvas.addEventListener("contextmenu", this.preventContextMenuHandler, false);
+        gameCanvas.addEventListener("mousedown", this.browserMouseDownHandler, true);
+        gameCanvas.addEventListener("mousemove", this.browserMouseMoveHandler, true);
+        gameCanvas.addEventListener("mouseup", this.browserMouseUpHandler, true);
+        gameCanvas.addEventListener("contextmenu", this.preventContextMenuHandler, true);
     }
 
     private onMouseDown(event: cc.Event.EventMouse): void {
@@ -582,6 +471,9 @@ export default class MapEditorController extends cc.Component {
             return;
         }
 
+        if (!this.placedDuringCurrentClick && this.tool !== MapEditorTool.BoxGenerate) {
+            this.placeAt(rootLocal);
+        }
         this.placedDuringCurrentClick = false;
     }
 
@@ -651,9 +543,7 @@ export default class MapEditorController extends cc.Component {
         }
         const started = generator.beginTimedGenerationInRect(rect, {
             clearExisting: true,
-            frameCamera: true,
             useRealtimeTimer: true,
-            fitSmallRect: true,
             onPlacementSpawned: (state: MapEditorPlacementState) => {
                 this.upsertPlacement(state);
                 this.commitEditorChangesToScene();
@@ -824,10 +714,7 @@ export default class MapEditorController extends cc.Component {
     }
 
     private syncPhysicsPosition(): void {
-        const physicsManager = cc.director.getPhysicsManager() as any;
-        if (physicsManager && typeof physicsManager.syncPosition === "function") {
-            physicsManager.syncPosition();
-        }
+        this.syncPhysicsPosition();
     }
 
     private onSaveLoaded(_saveData: SaveData): void {
@@ -1210,26 +1097,19 @@ export default class MapEditorController extends cc.Component {
             this.previewNode = cc.instantiate(entry.prefab);
             this.previewNode.name = `EditorPreview_${entry.key}`;
             this.previewNode.setScale(scale, scale);
-            if (entry.kind === "terrain") {
-                this.previewNode.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
-                parent.addChild(this.previewNode);
-                this.previewNode.setSiblingIndex(parent.childrenCount - 1);
-            } else {
-                parent.addChild(this.previewNode);
-            }
+            parent.addChild(this.previewNode);
             this.disablePreviewPhysics(this.previewNode);
+            this.setPreviewOpacity(this.previewNode, this.previewOpacity);
             this.previewKey = key;
         }
 
         this.previewNode.angle = this.rotation;
+        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry);
         if (entry.kind === "terrain") {
-            this.previewNode.active = true;
-            this.previewNode.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
+            this.drawTerrainPlacementDebug(rootLocal, this.previewNode);
         } else {
-            this.setPreviewNodePosition(this.previewNode, parent, rootLocal, entry);
-            this.setPreviewVisualState(this.previewNode, Math.max(220, this.previewOpacity || 255));
+            this.clearPlacementDebug();
         }
-        this.clearPlacementDebug();
     }
 
     private destroyPlacementPreview(): void {
@@ -1341,34 +1221,7 @@ export default class MapEditorController extends cc.Component {
 
         node.opacity = Math.max(0, Math.min(255, opacity));
         for (let i = 0; i < node.childrenCount; i++) {
-            node.children[i].opacity = 255;
-        }
-    }
-
-    private setPreviewNodePosition(
-        node: cc.Node,
-        parent: cc.Node,
-        rootLocal: cc.Vec2,
-        entry: EditorPrefabEntry
-    ): void {
-        if (entry.kind === "terrain") {
-            this.setTerrainNodePosition(node, parent, rootLocal, entry.key);
-            return;
-        }
-
-        this.setNodePositionFromRootLocal(node, parent, rootLocal);
-    }
-
-    private setPreviewVisualState(node: cc.Node, opacity: number): void {
-        if (!node) {
-            return;
-        }
-
-        node.active = true;
-        node.zIndex = 9998;
-        node.opacity = Math.max(0, Math.min(255, opacity));
-        for (let i = 0; i < node.childrenCount; i++) {
-            this.setPreviewVisualState(node.children[i], 255);
+            this.setPreviewOpacity(node.children[i], opacity);
         }
     }
 

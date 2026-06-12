@@ -499,6 +499,11 @@ export default class GameManager extends cc.Component {
             return;
         }
 
+        const maybeEvent = event as any;
+        if (maybeEvent && maybeEvent.__mapEditorHandled) {
+            return;
+        }
+
         if (this.mapEditorController && cc.isValid(this.mapEditorController.node)
             && this.mapEditorController.isEditorModeActive()
             && this.mapEditorController.handleEditorKeyboardEvent(event)) {
@@ -510,7 +515,6 @@ export default class GameManager extends cc.Component {
         }
 
         this.toggleMapEditorMode();
-        const maybeEvent = event as any;
         if (maybeEvent && typeof maybeEvent.stopPropagation === "function") {
             maybeEvent.stopPropagation();
         }
