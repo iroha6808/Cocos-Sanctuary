@@ -3,6 +3,7 @@ const { ccclass, property } = cc._decorator;
 import { InventoryManager } from "../Player/InventoryManager";
 import { getItemDefinition } from "../Data/ItemData";
 import ItemIconLoader from "./ItemIconLoader";
+import EquipmentManager from "../Core/EquipmentManager";
 
 @ccclass
 export default class InventoryUIController extends cc.Component {
@@ -181,46 +182,45 @@ export default class InventoryUIController extends cc.Component {
         if (!item) return;
 
         const def = getItemDefinition(item.id);
-        
-        const healAmount = def ? (def.hpRestore || 0) : 0;
-        const staminaAmount = def ? (def.staminaRestore || 0) : 0;
-        const attackAmount = def ? (def.attackBoost || 0) : 0; 
-        const defAmount = def ? (def.defBoost || 0) : 0;
-        const isConsumable = healAmount !== 0 || staminaAmount !== 0 || attackAmount !== 0 || defAmount !== 0;
-
-        if (isConsumable) {
-            cc.log(`[InventoryUI] 成功使用 ${def.name}，HP變化:${healAmount}, Stamina變化:${staminaAmount}, 攻擊變化:${attackAmount}`);
-
-            const playerNode = cc.find("Canvas/Player");
-            if (playerNode) {
-                const playerStats = playerNode.getComponent("PlayerController") as any; 
-                
-                if (playerStats) {
-                    if (healAmount !== 0 && playerStats.heal) {
-                        playerStats.heal(healAmount);
-                    }
-                    if (staminaAmount !== 0 && playerStats.restoreStamina) {
-                        playerStats.restoreStamina(staminaAmount);
-                    }
-                    if (attackAmount !== 0 && playerStats.addAttackBuff) {
-                        playerStats.addAttackBuff(attackAmount, 60); 
-                    }
-                    if (defAmount !== 0 && playerStats.addDefenseBuff) {
-                        playerStats.addDefenseBuff(defAmount, 60);
-                    }
-                } else {
-                    cc.warn(`[InventoryUI] 找不到 PlayerController 腳本！`);
-                }
-            } else {
-                cc.warn(`[InventoryUI] 找不到 Canvas/Player 節點！`);
+        if (!def) return; 
+        if (def.equipmentSlot !== undefined) {
+            const currentEquipped = EquipmentManager.Instance.getEquipment(def.equipmentSlot);
+            if (currentEquipped && currentEquipped.id === def.id) {
+                cc.log(`[InventoryUI] 脫下了 ${def.name}`);
+                EquipmentManager.Instance.unequip(def.equipmentSlot);
+            } 
+            else {
+                cc.log(`[InventoryUI] 穿上了 ${def.name}`);
+                EquipmentManager.Instance.equip(def.equipmentSlot, def);
             }
 
-            InventoryManager.instance.removeItem(item.id, 1);
-
         } else {
-            cc.log(`[InventoryUI] 這個物品 (${def ? def.name : item.id}) 無法使用或沒有效果！`);
-        }
+            const healAmount = def.hpRestore || 0;
+            const staminaAmount = def.staminaRestore || 0;
+            const attackAmount = def.attackBoost || 0; 
+            const defAmount = def.defBoost || 0;
+            const isConsumable = healAmount !== 0 || staminaAmount !== 0 || attackAmount !== 0 || defAmount !== 0;
 
+            if (isConsumable) {
+                cc.log(`[InventoryUI] 成功使用消耗品 ${def.name}`);
+
+                const playerNode = cc.find("Canvas/Player");
+                if (playerNode) {
+                    const playerStats = playerNode.getComponent("PlayerController") as any; 
+                    
+                    if (playerStats) {
+                        if (healAmount !== 0 && playerStats.heal) playerStats.heal(healAmount);
+                        if (staminaAmount !== 0 && playerStats.restoreStamina) playerStats.restoreStamina(staminaAmount);
+                        if (attackAmount !== 0 && playerStats.addAttackBuff) playerStats.addAttackBuff(attackAmount, 60); 
+                        if (defAmount !== 0 && playerStats.addDefenseBuff) playerStats.addDefenseBuff(defAmount, 60);
+                    }
+                }
+                InventoryManager.instance.removeItem(item.id, 1);
+
+            } else {
+                cc.log(`[InventoryUI] 這個物品 (${def.name}) 無法使用或沒有效果！`);
+            }
+        }
         this.hideActionMenu();
         this.hideTooltip();
         this.refreshUI();
