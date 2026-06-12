@@ -13,7 +13,9 @@ import DamageNumberManager from "./DamageNumberManager";
 import MonsterSpawner from "../NPC/MonsterSpawner";
 import PhysicsTagValidator from "./PhysicsTagValidator";
 import AutoMapGenerator from "../Map/AutoMapGenerator";
-import MapEditorController from "../Map/MapEditorController";
+import SaveService2, { SaveData } from "./SaveService2";
+
+declare const firebase: any;
 
 const { ccclass, property } = cc._decorator;
 
@@ -39,9 +41,6 @@ export default class GameManager extends cc.Component {
 
     @property(AutoMapGenerator)
     autoMapGenerator: AutoMapGenerator = null;
-
-    @property(MapEditorController)
-    mapEditorController: MapEditorController = null;
 
     @property
     menuSceneName: string = "MenuScene";
@@ -87,6 +86,7 @@ export default class GameManager extends cc.Component {
     private isMapEditorFreezingGame: boolean = false;
     private schedulerTimeScaleBeforeMapEditor: number = 1;
     private physicsEnabledBeforeMapEditor: boolean = true;
+    private isLoadingSave: boolean = false;
 
     onLoad() {
         // 單例模式 (Singleton)，方便其他腳本直接抓取 GameManager.instance
@@ -97,7 +97,7 @@ export default class GameManager extends cc.Component {
             return;
         }
 
-        // 註冊全域事件
+        cc.systemEvent.on("INVENTORY_CHANGED", this.saveCurrentGame, this);
         EventCenter.on(GameEvent.PLAYER_DIED, this.onGameOver, this);
         EventCenter.on(GameEvent.NPC_DIED, this.onNpcDied, this);
         EventCenter.on(GameEvent.ITEM_COLLECTED, this.onItemCollected, this);
@@ -141,34 +141,21 @@ export default class GameManager extends cc.Component {
         this.setFadeAlpha(0);
     }
 
-    start() {
-        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:28");
-        // TODO: 在這裡呼叫 MapManager 生成初始地圖
-        const openMapEditor = SaveService.consumeMapEditorOnNextGame();
-        if (this.autoLoadRequestedSave && SaveService.consumeLoadOnNextGame()) {
-            this.loadCurrentUserSave();
-        } else {
-            this.emitScoreState();
-        }
-        if (openMapEditor) {
-            this.scheduleOnce(this.enterMapEditorMode, 0);
-        }
+    async start() {
+        console.log("遊戲初始化完成，準備進入 Cocos Sanctuary! - GameManager.ts:145");
+        await this.loadCurrentUserSave();
     }
 
-    onGameOver() {
-        console.log("玩家死亡，結算分數... - GameManager.ts:33");
+    async onGameOver() {
+        console.log("玩家死亡，結算分數... - GameManager.ts:150");
         this.resumeGame(false);
-        const username = SaveService.getCurrentUsername() || "guest";
-        SaveService.setLastRun({
-            username,
-            score: this.score,
-            exp: this.exp,
-            updatedAt: Date.now()
-        });
-        if (SaveService.isLoggedIn()) {
-            SaveService.saveGame(this.createSaveData(username));
-            const leaderboard = SaveService.submitScore(username, this.score);
-            EventCenter.emit(GameEvent.LEADERBOARD_UPDATED, leaderboard);
+        const user = firebase.auth().currentUser;
+        if (user) {
+            const displayName = user.email ? user.email.split('@')[0] : "Player";
+            await this.saveCurrentGame();
+            await SaveService2.submitScoreToCloud(user.uid, displayName, this.score);
+            const top10 = await SaveService2.getTopLeaderboard();
+            EventCenter.emit(GameEvent.LEADERBOARD_UPDATED, top10);
         }
     }
 
@@ -231,28 +218,39 @@ export default class GameManager extends cc.Component {
         this.loadSceneWithFade(this.menuSceneName);
     }
 
-    public saveCurrentGame(): boolean {
-        if (!SaveService.isLoggedIn()) {
-            cc.warn("[GameManager] Save failed: login required.");
+    public async saveCurrentGame(): Promise<boolean> {
+        if (this.isLoadingSave) {
             return false;
         }
-        return SaveService.saveGame(this.createSaveData(SaveService.getCurrentUsername()));
+        if (!SaveService2) return false;
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            cc.warn("[GameManager] 存檔失敗：未登入 Firebase。");
+            return false;
+        }
+        const saveData = this.createSaveData(user.uid);
+        return await SaveService2.saveToCloud(user.uid, saveData);
     }
 
-    public loadCurrentUserSave(): boolean {
-        const saveData = SaveService.loadGame();
-        if (!saveData) {
-            cc.warn("[GameManager] Load failed: no save data.");
+    public async loadCurrentUserSave(): Promise<boolean> {
+        const user = firebase.auth().currentUser;
+        if (!user) return false;
+        this.isLoadingSave = true;
+        const saveData = await SaveService2.loadFromCloud(user.uid);
+        
+        if (saveData) {
+            cc.log(`[DEBUG] 從雲端拿到的存檔資料 -> HP: ${saveData.hp}, EXP: ${saveData.exp}`);
+            this.score = saveData.score || 0;
+            this.exp = saveData.exp || 0;
+            InventoryManager.instance.setItemsFromSave(saveData.inventory || []);
+            this.restorePlayerHp(saveData);
+
             this.emitScoreState();
-            return false;
+            EventCenter.emit(GameEvent.SAVE_LOADED, saveData);
+            cc.log(`[GameManager] ✅ 讀檔完成：EXP=${this.exp}, HP=${saveData.hp}`);
         }
 
-        this.score = Math.max(0, saveData.score || 0);
-        this.exp = Math.max(0, saveData.exp || 0);
-        InventoryManager.instance.setItemsFromSave(saveData.inventory || []);
-        this.restorePlayerHp(saveData);
-        this.emitScoreState();
-        EventCenter.emit(GameEvent.SAVE_LOADED, saveData);
+        this.isLoadingSave = false; // 解鎖
         return true;
     }
 
@@ -414,9 +412,6 @@ export default class GameManager extends cc.Component {
             case InputAction.GenerateMap:
                 this.beginAutoMapGeneration();
                 return true;
-            case InputAction.ToggleMapEditor:
-                this.enterMapEditorMode();
-                return true;
             default:
                 return false;
         }
@@ -489,61 +484,36 @@ export default class GameManager extends cc.Component {
         EventCenter.emit(GameEvent.PLAYER_EXP_CHANGED, this.exp);
     }
 
-    private createSaveData(username: string): SaveData {
+    private createSaveData(uid: string): Partial<SaveData> {
         const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
-        const hp = playerEntity && typeof playerEntity.currentHp === "number" ? playerEntity.currentHp : 0;
-        const maxHp = playerEntity && typeof playerEntity.maxHp === "number" ? playerEntity.maxHp : 1;
+        if (playerEntity) {
+            cc.log(`[DEBUG] 發現玩家元件，當前 HP=${playerEntity.currentHp}, MAX=${playerEntity.maxHp}`);
+        } else {
+            cc.error("[DEBUG] ❌ 找不到 PlayerController 元件！");
+        }
+
         return {
-            username,
+            uid: uid,
             score: this.score,
             exp: this.exp,
-            hp,
-            maxHp,
+            hp: playerEntity ? playerEntity.currentHp : 100,
+            maxHp: playerEntity ? playerEntity.maxHp : 100,
             inventory: InventoryManager.instance.getSaveSnapshot(),
-            mapState: SaveService.getCurrentMapGenerationState(),
-            mapEditorState: SaveService.getCurrentMapEditorState(),
             updatedAt: Date.now()
         };
-    }
-
-    private enterMapEditorMode(): void {
-        const editor = this.getOrCreateMapEditorController();
-        if (editor) {
-            editor.enterEditorMode();
-        }
-    }
-
-    private getOrCreateMapEditorController(): MapEditorController {
-        if (this.mapEditorController && cc.isValid(this.mapEditorController.node)) {
-            return this.mapEditorController;
-        }
-
-        const host = this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)
-            ? this.autoMapGenerator.node
-            : this.node;
-        let editor = host.getComponent(MapEditorController);
-        if (!editor) {
-            editor = host.addComponent(MapEditorController);
-        }
-        editor.terrainRoot = editor.terrainRoot || (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node) ? this.autoMapGenerator.node : host);
-        editor.resourceRoot = editor.resourceRoot || editor.terrainRoot;
-        editor.autoMapGenerator = editor.autoMapGenerator || this.autoMapGenerator;
-        editor.cameraRig = editor.cameraRig || this.cameraRig;
-        editor.playerNode = editor.playerNode || this.playerNode;
-        this.mapEditorController = editor;
-        return editor;
     }
 
     private restorePlayerHp(saveData: SaveData): void {
         const player = this.getPlayerNode();
         const playerEntity = player ? (player.getComponent("PlayerController") as any) : null;
         if (!playerEntity) {
+            cc.error("❌ 找不到 PlayerController！");
             return;
         }
-
-        playerEntity.maxHp = Math.max(1, saveData.maxHp || playerEntity.maxHp || 1);
-        playerEntity.currentHp = Math.max(0, Math.min(saveData.hp || playerEntity.maxHp, playerEntity.maxHp));
+        playerEntity.maxHp = saveData.maxHp;
+        playerEntity.currentHp = saveData.hp;
+        cc.log(`[DEBUG] 強制寫入 HP: ${playerEntity.currentHp} / ${playerEntity.maxHp}`);
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, playerEntity.currentHp, playerEntity.maxHp);
     }
 

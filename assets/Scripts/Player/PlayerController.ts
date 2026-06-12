@@ -8,7 +8,6 @@ import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDia
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
-import InventoryUIController from "../UI/InventoryUIController";
 import VehicleInteractable from "../Vehicle/VehicleInteractable";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
@@ -160,7 +159,7 @@ export default class PlayerController extends BaseEntity {
             }
         }
 
-        this.currentHp = this.maxHp;
+        // this.currentHp = this.maxHp;
         this.rb = this.getComponent(cc.RigidBody) || null!;
 
         if (this.rb) {
@@ -293,8 +292,11 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
+        if (this.inventoryUI && this.inventoryUI.active) {
+            if (isDown && keyCode === cc.macro.KEY.b) {
+                this.toggleInventory();
+            }
+
             this.blockPlayerControlForUI();
             return;
         }
@@ -399,8 +401,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
+        if (this.inventoryUI && this.inventoryUI.active) {
             return;
         }
 
@@ -438,16 +439,11 @@ export default class PlayerController extends BaseEntity {
     }
 
     private toggleInventory() {
-        const inventoryController = this.getInventoryUIController();
-        if (!inventoryController) return;
+        if (!this.inventoryUI) return;
         if (this.isCraftingUIOpen()) return;
 
-        const nextActive = !inventoryController.isOpen();
-        if (nextActive) {
-            inventoryController.open();
-        } else {
-            inventoryController.close();
-        }
+        const nextActive = !this.inventoryUI.active;
+        this.inventoryUI.active = nextActive;
 
         if (nextActive && this.dialogueUI && !this.isMerchantUIOpen()) {
             this.dialogueUI.hide();
@@ -463,9 +459,8 @@ export default class PlayerController extends BaseEntity {
         if (!this.craftingUI) return;
         if (this.isMerchantUIOpen()) return;
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
-            inventoryController.close();
+        if (this.inventoryUI && this.inventoryUI.active) {
+            this.inventoryUI.active = false;
         }
 
         if (this.isCraftingUIOpen()) {
@@ -553,8 +548,7 @@ export default class PlayerController extends BaseEntity {
             return false;
         }
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
+        if (this.inventoryUI && this.inventoryUI.active) {
             return false;
         }
 
@@ -720,8 +714,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
+        if (this.inventoryUI && this.inventoryUI.active) {
             this.blockPlayerControlForUI();
             return;
         }
@@ -740,14 +733,6 @@ export default class PlayerController extends BaseEntity {
         }
 
         if (this.isClimbing) {
-            const isTreeClimbZone =
-                this.currentRope && this.currentRope.snapToCenterOnEnter === false;
-
-            if (isTreeClimbZone && this.keyStates[cc.macro.KEY.space]) {
-                this.exitClimb(true);
-                return;
-            }
-
             this.updateClimb(dt);
             return;
         }
@@ -1144,8 +1129,7 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        const inventoryController = this.getInventoryUIController();
-        if (inventoryController && inventoryController.isOpen()) {
+        if (this.inventoryUI && this.inventoryUI.active) {
             return;
         }
 
@@ -1380,41 +1364,19 @@ export default class PlayerController extends BaseEntity {
         const canvas = cc.find('Canvas');
         if (!canvas) return;
 
-        const playerWorldPos = this.node.parent
-            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
-            : cc.v2(this.node.x, this.node.y);
-
+        // 找場景裡所有 Rope
         let closest: any = null;
-        let closestXDistance = 999999;
+        let closestDist = 80; // 判定距離（px）
 
         this.findRopes(canvas, (rope: any) => {
-            const ropeCenterX = rope.getCenterWorldX();
-            const ropeTopY = rope.getTopWorldY();
-            const ropeBottomY = rope.getBottomWorldY();
-
-            const xDistance = Math.abs(playerWorldPos.x - ropeCenterX);
-
-            let allowedXDistance = 80;
-
-            const shouldSnapToCenter = rope.snapToCenterOnEnter !== false;
-
-            if (!shouldSnapToCenter) {
-                const ropeCollider = rope.node.getComponent(cc.PhysicsCollider) as any;
-
-                if (ropeCollider && ropeCollider.size) {
-                    allowedXDistance = Math.max(
-                        allowedXDistance,
-                        ropeCollider.size.width / 2 + 20
-                    );
-                }
-            }
-
-            const withinX = xDistance <= allowedXDistance;
-            const withinY = playerWorldPos.y >= ropeBottomY - 80 && playerWorldPos.y <= ropeTopY + 80;
-
-            if (withinX && withinY && xDistance < closestXDistance) {
+            const ropeWorldPos = rope.node.convertToWorldSpaceAR(cc.Vec2.ZERO);
+            const playerWorldPos = this.node.parent
+                ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
+                : cc.v2(this.node.x, this.node.y);
+            const dist = ropeWorldPos.sub(playerWorldPos).mag();
+            if (dist < closestDist) {
                 closest = rope;
-                closestXDistance = xDistance;
+                closestDist = dist;
             }
         });
 
@@ -1445,7 +1407,7 @@ export default class PlayerController extends BaseEntity {
     private enterClimb(rope: any) {
         if (this.isDead || this.isHurting) return;
 
-        this.isClimbing = true;
+        this.isClimbing  = true;
         this.currentRope = rope;
 
         if (this.rb) {
@@ -1454,30 +1416,26 @@ export default class PlayerController extends BaseEntity {
             this.rb.type = cc.RigidBodyType.Kinematic;
         }
 
-        const shouldSnapToCenter = rope.snapToCenterOnEnter !== false;
-
-        if (shouldSnapToCenter) {
-            const ropeWorldX = rope.getCenterWorldX();
-
-            if (this.node && this.node.parent) {
-                const localX = this.node.parent.convertToNodeSpaceAR(cc.v2(ropeWorldX, 0)).x;
-                this.node.setPosition(localX, this.node.y);
-            }
+        // ★ 加 null 檢查
+        const ropeWorldX = rope.getCenterWorldX();
+        if (this.node && this.node.parent) {
+            const localX = this.node.parent.convertToNodeSpaceAR(cc.v2(ropeWorldX, 0)).x;
+            this.node.setPosition(localX, this.node.y);
         }
 
         this.playAnimation('PlayerClimb');
-        cc.log('[PlayerController] 開始攀爬');
+        cc.log('[PlayerController] 開始爬藤蔓');
     }
     
     // 離開爬行
     private exitClimb(jumpOff: boolean) {
         if (!this.isClimbing) return;
 
-        this.isClimbing = false;
+        this.isClimbing  = false;
         this.currentRope = null;
-        this.nearbyRope = null;
 
         if (this.rb) {
+            // ★ 先切回 Dynamic，再設速度
             this.rb.type = cc.RigidBodyType.Dynamic;
             (this.rb as any).gravityScale = this.originalGravityScale;
 
@@ -1486,98 +1444,83 @@ export default class PlayerController extends BaseEntity {
                     this.moveDir.x * this.moveSpeed * 0.6,
                     this.jumpForce * 0.7
                 );
-                cc.log('[PlayerController] 跳離攀爬物');
+                cc.log('[PlayerController] 跳離藤蔓');
             } else {
-                this.rb.linearVelocity = cc.v2(0, -30);
+                // ★ 不要設成 0,0，讓重力自然接管
+                this.rb.linearVelocity = cc.v2(0, this.rb.linearVelocity.y);
             }
-
-            this.rb.awake = true;
         }
 
         this.currentAnimName = '';
-        this.playAnimation('PlayerIdle');
-
-        cc.log('[PlayerController] 離開攀爬狀態');
+        cc.log('[PlayerController] 離開爬行狀態');
     }
     
     private updateClimb(dt: number) {
         if (!this.currentRope || !this.rb) return;
-
-        const climbSpeed = this.currentRope.getClimbSpeed();
-        const driftSpeed = this.currentRope.getDriftSpeed();
-        const topY = this.currentRope.getTopWorldY();
-        const bottomY = this.currentRope.getBottomWorldY();
-
+    
+        const climbSpeed   = this.currentRope.getClimbSpeed();
+        const driftSpeed   = this.currentRope.getDriftSpeed();
+        const topY         = this.currentRope.getTopWorldY();
+        const bottomY      = this.currentRope.getBottomWorldY();
+    
+        // 取得玩家目前世界 Y
         const playerWorldPos = this.node.parent
             ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y))
             : cc.v2(this.node.x, this.node.y);
-
+    
+        // 上下移動
         let velY = 0;
         if (this.keyStates[cc.macro.KEY.w] || this.keyStates[cc.macro.KEY.up]) {
             velY = climbSpeed;
         } else if (this.keyStates[cc.macro.KEY.s] || this.keyStates[cc.macro.KEY.down]) {
             velY = -climbSpeed;
         }
-
+    
+        // 左右微移
         let velX = this.moveDir.x * driftSpeed;
         if (this.bodyNode && this.moveDir.x !== 0) {
             this.bodyNode.scaleX = this.moveDir.x > 0 ? 1 : -1;
         }
 
+        this.rb.linearVelocity = cc.v2(velX, velY);
+
+        // ★ 檢查水平偏移是否超過閾值
         const ropeWorldX = this.currentRope.getCenterWorldX();
-        const playerWorldX = playerWorldPos.x;
+        const playerWorldX = this.node.parent
+            ? this.node.parent.convertToWorldSpaceAR(cc.v2(this.node.x, this.node.y)).x
+            : this.node.x;
         const offsetX = Math.abs(playerWorldX - ropeWorldX);
 
-        let allowedOffsetX = this.climbFallOffDistance;
-        const shouldSnapToCenter = this.currentRope.snapToCenterOnEnter !== false;
-
-        if (!shouldSnapToCenter) {
-            const ropeCollider = this.currentRope.node.getComponent(cc.PhysicsCollider) as any;
-            if (ropeCollider && ropeCollider.size) {
-                allowedOffsetX = Math.max(
-                    this.climbFallOffDistance,
-                    ropeCollider.size.width / 2 + 20
-                );
-            }
-        }
-
-        if (offsetX > allowedOffsetX) {
-            cc.log(`[PlayerController] 水平偏移 ${offsetX.toFixed(0)}px，離開攀爬區`);
+        if (offsetX > this.climbFallOffDistance) {
+            cc.log(`[PlayerController] 水平偏移 ${offsetX.toFixed(0)}px，從藤蔓掉落`);
             this.exitClimb(false);
             return;
         }
-
+    
+        // 頂端邊界：到頂自動離開
         if (playerWorldPos.y >= topY && velY > 0) {
-            const isTreeClimbZone =
-                this.currentRope && this.currentRope.snapToCenterOnEnter === false;
-
-            if (isTreeClimbZone) {
-                velY = 0;
-                this.rb.linearVelocity = cc.v2(velX, 0);
-                cc.log('[PlayerController] 到達樹幹頂端，停止上爬');
-                return;
-            }
-
+            // 先看 nearbyRope 有沒有更高的藤蔓可以接
             if (this.nearbyRope && this.nearbyRope !== this.currentRope) {
-                cc.log('[PlayerController] 切換到下一段攀爬物');
+                cc.log('[PlayerController] 切換到下一段藤蔓');
                 this.isClimbing = false;
                 this.currentRope = null;
                 this.enterClimb(this.nearbyRope);
                 return;
             }
-
-            cc.log('[PlayerController] 到達攀爬物頂端，自動離開');
+            cc.log('[PlayerController] 到達藤蔓頂端，自動離開');
             this.exitClimb(false);
             return;
         }
-
+    
+        // 底端邊界：到底停住（不自動離開，讓玩家自己走開）
         if (playerWorldPos.y <= bottomY && velY < 0) {
             velY = 0;
-            cc.log('[PlayerController] 到達攀爬物底端');
+            cc.log('[PlayerController] 到達藤蔓底端');
         }
-
+    
         this.rb.linearVelocity = cc.v2(velX, velY);
-
+    
+        // 爬行動畫：有移動才播，靜止就 Idle
         if (velY !== 0 || velX !== 0) {
             this.playAnimation('PlayerClimb');
         } else {
@@ -1585,29 +1528,18 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    public heal(amount: number): number {
-        if (this.isDead) {
-            return 0;
-        }
-
+    public heal(amount: number) {
+        if (this.isDead) return;
         if (this.currentHp >= this.maxHp) {
             cc.log(`[PlayerController] HP 已滿 (${this.currentHp}/${this.maxHp})，無法再補血。`);
-            return 0;
+            return;
         }
-
-        const beforeHp = this.currentHp;
-
         this.currentHp += amount;
         if (this.currentHp > this.maxHp) {
             this.currentHp = this.maxHp;
         }
-
-        const healedAmount = this.currentHp - beforeHp;
-
-        cc.log(`[PlayerController] 補血 +${healedAmount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
+        cc.log(`[PlayerController] 補血 +${amount}！目前 HP: ${this.currentHp}/${this.maxHp}`);
         EventCenter.emit(GameEvent.PLAYER_HP_CHANGED, this.currentHp, this.maxHp);
-
-        return healedAmount;
     }
 
     public addAttackBuff(amount: number, duration: number = 60) {

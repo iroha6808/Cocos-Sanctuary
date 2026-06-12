@@ -27,7 +27,7 @@ export function markInputEventHandled(event: any): void {
 
 @ccclass
 export default class InputManager extends cc.Component {
-    public static instance: InputManager | null = null;
+    public static instance: InputManager = null;
 
     private contextStack: InputContextEntry[] = [];
     private lastActionTimes: { [action: string]: number } = {};
@@ -46,7 +46,7 @@ export default class InputManager extends cc.Component {
 
         const targetNode = hostNode || cc.find("Canvas") || cc.director.getScene();
         if (!targetNode) {
-            return null!;
+            return null;
         }
 
         let manager = targetNode.getComponent(InputManager);
@@ -59,7 +59,7 @@ export default class InputManager extends cc.Component {
     private static findInCurrentScene(): InputManager {
         const scene = cc.director.getScene();
         if (!scene) {
-            return null!;
+            return null;
         }
 
         const managers = scene.getComponentsInChildren(InputManager);
@@ -68,7 +68,7 @@ export default class InputManager extends cc.Component {
                 return manager;
             }
         }
-        return null!;
+        return null;
     }
 
     onLoad(): void {
@@ -165,7 +165,7 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action,
             isDown: true,
             source: InputSource.Keyboard,
@@ -218,16 +218,12 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action: InputAction.Attack,
             isDown: true,
             source: InputSource.Mouse,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private onMouseWheel(event: cc.Event.EventMouse): void {
@@ -236,17 +232,13 @@ export default class InputManager extends cc.Component {
             return;
         }
 
-        const handled = this.dispatch({
+        this.dispatch({
             action: wheelY < 0 ? InputAction.NavigateDown : InputAction.NavigateUp,
             isDown: true,
             source: InputSource.Wheel,
             wheelY,
             originalEvent: event
         });
-
-        if (handled && event && typeof event.stopPropagation === "function") {
-            event.stopPropagation();
-        }
     }
 
     private dispatch(payload: InputPayload): boolean {

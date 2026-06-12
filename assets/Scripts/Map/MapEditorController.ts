@@ -46,6 +46,9 @@ export default class MapEditorController extends cc.Component {
     @property(cc.Graphics)
     selectionGraphics: cc.Graphics = null;
 
+    @property(cc.Graphics)
+    placementDebugGraphics: cc.Graphics = null;
+
     @property(cc.Prefab)
     rockLeftPrefab: cc.Prefab = null;
 
@@ -88,6 +91,9 @@ export default class MapEditorController extends cc.Component {
     @property(cc.Boolean)
     alignPlacementCenterToCursor: boolean = true;
 
+    @property(cc.Boolean)
+    showPlacementDebug: boolean = true;
+
     private inputManager: InputManager = null;
     private canvasNode: cc.Node = null;
     private isEditing: boolean = false;
@@ -106,6 +112,7 @@ export default class MapEditorController extends cc.Component {
     private browserMouseUpHandler: any = null;
     private preventContextMenuHandler: any = null;
     private placedDuringCurrentClick: boolean = false;
+    private runtimePlacementDebugNode: cc.Node = null;
 
     onLoad(): void {
         this.inputManager = InputManager.getOrCreate(this.node);
@@ -123,6 +130,7 @@ export default class MapEditorController extends cc.Component {
     onDestroy(): void {
         this.exitEditorMode();
         this.unbindMouseEvents();
+        this.destroyRuntimePlacementDebug();
         EventCenter.off(GameEvent.SAVE_LOADED, this.onSaveLoaded, this);
     }
 
@@ -153,6 +161,7 @@ export default class MapEditorController extends cc.Component {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onEditorKeyDownFallback, this);
         this.setPlayerLocked(false);
         this.destroyPlacementPreview();
+        this.clearPlacementDebug();
         this.clearSelection();
         this.commitEditorChangesToScene();
         this.refreshStatus();
@@ -422,8 +431,14 @@ export default class MapEditorController extends cc.Component {
         const scale = entry.kind === "resource" ? this.resourceScale : this.terrainScale;
         node.setScale(scale, scale);
         node.angle = this.rotation;
-        parent.addChild(node);
-        this.setPlacementNodePosition(node, parent, rootLocal, entry.kind);
+
+        if (entry.kind === "terrain") {
+            node.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
+            parent.addChild(node);
+        } else {
+            parent.addChild(node);
+            this.setPlacementNodePosition(node, parent, rootLocal, entry);
+        }
         this.finalizePlacedNode(node, entry.kind);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
@@ -482,6 +497,7 @@ export default class MapEditorController extends cc.Component {
         this.tool = tool;
         if (this.tool === MapEditorTool.BoxGenerate) {
             this.destroyPlacementPreview();
+            this.clearPlacementDebug();
         } else {
             this.clearSelection();
             this.previewKey = "";
@@ -826,13 +842,7 @@ export default class MapEditorController extends cc.Component {
     }
 
     private setNodePositionFromRootLocal(node: cc.Node, parent: cc.Node, rootLocal: cc.Vec2): void {
-        const root = this.getTerrainRoot();
-        if (!root || parent === root) {
-            node.setPosition(rootLocal);
-            return;
-        }
-        const world = root.convertToWorldSpaceAR(rootLocal);
-        node.setPosition(parent.convertToNodeSpaceAR(world));
+        node.setPosition(this.convertRootLocalToParentLocal(parent, rootLocal));
     }
 
     private setEditorNodePosition(node: cc.Node, parent: cc.Node, rootLocal: cc.Vec2): void {
@@ -858,9 +868,26 @@ export default class MapEditorController extends cc.Component {
         node: cc.Node,
         parent: cc.Node,
         rootLocal: cc.Vec2,
-        _kind: "terrain" | "resource"
+        entry: EditorPrefabEntry
     ): void {
+        if (entry.kind === "terrain") {
+            this.setTerrainNodePosition(node, parent, rootLocal, entry.key);
+            return;
+        }
         this.setEditorNodePosition(node, parent, rootLocal);
+    }
+
+    private setTerrainNodePosition(node: cc.Node, parent: cc.Node, cursorRootLocal: cc.Vec2, _prefabKey: string): void {
+        node.setPosition(this.convertRootLocalToParentLocal(parent, cursorRootLocal));
+    }
+
+    private convertRootLocalToParentLocal(parent: cc.Node, rootLocal: cc.Vec2): cc.Vec2 {
+        const root = this.getTerrainRoot();
+        if (!root || parent === root) {
+            return rootLocal;
+        }
+        const world = root.convertToWorldSpaceAR(rootLocal);
+        return parent.convertToNodeSpaceAR(world);
     }
 
     private createPlacementState(
@@ -1013,7 +1040,12 @@ export default class MapEditorController extends cc.Component {
         }
 
         this.previewNode.angle = this.rotation;
-        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry.kind);
+        this.setPlacementNodePosition(this.previewNode, parent, rootLocal, entry);
+        if (entry.kind === "terrain") {
+            this.drawTerrainPlacementDebug(rootLocal, this.previewNode);
+        } else {
+            this.clearPlacementDebug();
+        }
     }
 
     private destroyPlacementPreview(): void {
@@ -1022,6 +1054,80 @@ export default class MapEditorController extends cc.Component {
         }
         this.previewNode = null;
         this.previewKey = "";
+    }
+
+    private drawTerrainPlacementDebug(cursorRootLocal: cc.Vec2, previewNode: cc.Node): void {
+        if (!this.showPlacementDebug) {
+            this.clearPlacementDebug();
+            return;
+        }
+
+        const graphics = this.getOrCreatePlacementDebugGraphics();
+        if (!graphics) {
+            this.clearPlacementDebug();
+            return;
+        }
+
+        graphics.clear();
+        graphics.lineWidth = 3;
+
+        const root = this.getTerrainRoot();
+        if (previewNode && root) {
+            const worldBox = previewNode.getBoundingBoxToWorld();
+            if (worldBox && worldBox.width > 0 && worldBox.height > 0) {
+                const min = root.convertToNodeSpaceAR(cc.v2(worldBox.x, worldBox.y));
+                const max = root.convertToNodeSpaceAR(cc.v2(worldBox.x + worldBox.width, worldBox.y + worldBox.height));
+                graphics.strokeColor = cc.Color.MAGENTA;
+                graphics.rect(min.x, min.y, max.x - min.x, max.y - min.y);
+                graphics.stroke();
+            }
+        }
+
+        this.drawDebugCross(graphics, cursorRootLocal, 26, cc.Color.YELLOW);
+        this.drawDebugCross(graphics, cursorRootLocal, 18, cc.Color.CYAN);
+    }
+
+    private drawDebugCross(graphics: cc.Graphics, point: cc.Vec2, size: number, color: cc.Color): void {
+        graphics.strokeColor = color;
+        graphics.moveTo(point.x - size, point.y);
+        graphics.lineTo(point.x + size, point.y);
+        graphics.moveTo(point.x, point.y - size);
+        graphics.lineTo(point.x, point.y + size);
+        graphics.stroke();
+    }
+
+    private getOrCreatePlacementDebugGraphics(): cc.Graphics {
+        if (this.placementDebugGraphics && cc.isValid(this.placementDebugGraphics.node)) {
+            this.placementDebugGraphics.node.active = true;
+            return this.placementDebugGraphics;
+        }
+
+        const root = this.getTerrainRoot() || this.node;
+        if (!this.runtimePlacementDebugNode || !cc.isValid(this.runtimePlacementDebugNode)) {
+            this.runtimePlacementDebugNode = new cc.Node("MapEditorPlacementDebug");
+            this.runtimePlacementDebugNode.zIndex = 9999;
+            root.addChild(this.runtimePlacementDebugNode);
+            this.placementDebugGraphics = this.runtimePlacementDebugNode.addComponent(cc.Graphics);
+        } else if (this.runtimePlacementDebugNode.parent !== root) {
+            this.runtimePlacementDebugNode.removeFromParent(false);
+            root.addChild(this.runtimePlacementDebugNode);
+        }
+
+        this.runtimePlacementDebugNode.active = true;
+        return this.placementDebugGraphics;
+    }
+
+    private clearPlacementDebug(): void {
+        if (this.placementDebugGraphics && cc.isValid(this.placementDebugGraphics.node)) {
+            this.placementDebugGraphics.clear();
+        }
+    }
+
+    private destroyRuntimePlacementDebug(): void {
+        if (this.runtimePlacementDebugNode && cc.isValid(this.runtimePlacementDebugNode)) {
+            this.runtimePlacementDebugNode.destroy();
+        }
+        this.runtimePlacementDebugNode = null;
     }
 
     private disablePreviewPhysics(node: cc.Node): void {
