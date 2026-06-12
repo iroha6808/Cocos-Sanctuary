@@ -8,9 +8,32 @@ export interface ItemDefinition {
     rottenTime?: number;
     attackBoost?: number;
     defBoost?: number;
+    equipmentSlot?: EquipmentSlot;
+}
+
+export enum EquipmentSlot {
+    WEAPON = 0,
+    ARMOR = 1,
+    ACCESSORY = 2
 }
 
 export const ITEM_DATA: { [id: string]: ItemDefinition } = {
+    iron_sword: {
+        id: "iron_sword",
+        name: "Iron Sword",
+        description: "A basic iron sword.",
+        iconPath: "Equipment/iron_sword.png", 
+        attackBoost: 10,
+        equipmentSlot: EquipmentSlot.WEAPON
+    },
+    leather_armor: {
+        id: "leather_armor",
+        name: "Leather Armor",
+        description: "Simple armor made of leather.",
+        iconPath: "Equipment/leather_armor.png",
+        defBoost: 5,
+        equipmentSlot: EquipmentSlot.ARMOR
+    }
     acorn: {
         id: "acorn",
         name: "Acorn",
