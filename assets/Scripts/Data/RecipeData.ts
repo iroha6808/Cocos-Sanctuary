@@ -187,15 +187,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
         outputItemId: "grape_wine", outputCount: 1, stationType: "crafting_table" 
     },
     { 
-        id: "pistachio_butter", type: RecipeType.SHAPED, 
-        pattern: [
-            ["pistachio", "pistachio", "pistachio"],
-            [null, null, null],
-            [null, null, null]
-        ], 
-        outputItemId: "pistachio_butter", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
         id: "plum_pudding", type: RecipeType.SHAPED, 
         pattern: [
             ["plum", "plum", "mulberry"],
@@ -402,24 +393,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
         outputItemId: "copper_pickaxe", outputCount: 1, stationType: "crafting_table" 
     },
     { 
-        id: "copper_axe", type: RecipeType.SHAPED, 
-        pattern: [
-            ["coppercluster", "coppercluster", null],
-            ["coppercluster", "wood_plank", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "copper_axe", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "iron_pickaxe", type: RecipeType.SHAPED, 
-        pattern: [
-            ["ironore", "ironore", "ironore"],
-            [null, "wood_plank", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "iron_pickaxe", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
         id: "iron_axe", type: RecipeType.SHAPED, 
         pattern: [
             ["ironore", "ironore", null],
@@ -438,15 +411,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
         outputItemId: "silver_pickaxe", outputCount: 1, stationType: "crafting_table" 
     },
     { 
-        id: "silver_axe", type: RecipeType.SHAPED, 
-        pattern: [
-            ["silverbar", "silverbar", null],
-            ["silverbar", "wood_plank", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "silver_axe", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
         id: "gold_pickaxe", type: RecipeType.SHAPED, 
         pattern: [
             ["rawgold", "rawgold", "rawgold"],
@@ -463,24 +427,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
             [null, "wood_plank", null]
         ], 
         outputItemId: "gold_axe", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "cobalt_pickaxe", type: RecipeType.SHAPED, 
-        pattern: [
-            ["cobaltore", "meteoritechunk", "cobaltore"],
-            [null, "wood_plank", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "cobalt_pickaxe", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "cobalt_axe", type: RecipeType.SHAPED, 
-        pattern: [
-            ["cobaltore", "meteoritechunk", null],
-            ["cobaltore", "wood_plank", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "cobalt_axe", outputCount: 1, stationType: "crafting_table" 
     },
     { 
         id: "starmetal_pickaxe", type: RecipeType.SHAPED, 
@@ -559,15 +505,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
         outputItemId: "silver_sword", outputCount: 1, stationType: "crafting_table" 
     },
     { 
-        id: "golden_rapier", type: RecipeType.SHAPED, 
-        pattern: [
-            ["rawgold", null, null],
-            ["rawgold", null, null],
-            ["citrinegeode", null, null]
-        ], 
-        outputItemId: "golden_rapier", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
         id: "ruby_flameblade", type: RecipeType.SHAPED, 
         pattern: [
             ["rubycrystal", "firestone", "rubycrystal"],
@@ -602,24 +539,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
             ["wood_plank", null, null]
         ], 
         outputItemId: "frost_spear", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "ocean_mace", type: RecipeType.SHAPED, 
-        pattern: [
-            ["tealprism", "fossilizedshell", "tealprism"],
-            [null, "ironore", null],
-            [null, "wood_plank", null]
-        ], 
-        outputItemId: "ocean_mace", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "nature_staff", type: RecipeType.SHAPED, 
-        pattern: [
-            ["mossagate", null, null],
-            ["wood_plank", null, null],
-            ["rosequartz", null, null]
-        ], 
-        outputItemId: "nature_staff", outputCount: 1, stationType: "crafting_table" 
     },
     { 
         id: "meteor_bullet", type: RecipeType.SHAPED, 
@@ -670,15 +589,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
     // ==========================================
     // CATEGORY 6: 防具與護盾防禦線 (71-85)
     // ==========================================
-    { 
-        id: "iron_shield", type: RecipeType.SHAPED, 
-        pattern: [
-            ["ironore", "coallump", "ironore"],
-            ["ironore", "wood_plank", "ironore"],
-            [null, "ironore", null]
-        ], 
-        outputItemId: "iron_shield", outputCount: 1, stationType: "crafting_table" 
-    },
     { 
         id: "copper_helmet", type: RecipeType.SHAPED, 
         pattern: [
@@ -743,15 +653,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
         outputItemId: "gilded_breastplate", outputCount: 1, stationType: "crafting_table" 
     },
     { 
-        id: "cobalt_shield", type: RecipeType.SHAPED, 
-        pattern: [
-            ["cobaltore", "meteoritechunk", "cobaltore"],
-            ["cobaltore", "ironore", "cobaltore"],
-            [null, null, null]
-        ], 
-        outputItemId: "cobalt_shield", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
         id: "starmetal_helmet", type: RecipeType.SHAPED, 
         pattern: [
             ["starmetalshard", "lapislazuli", "starmetalshard"],
@@ -768,15 +669,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
             ["starmetalshard", "starmetalshard", "starmetalshard"]
         ], 
         outputItemId: "starmetal_chestplate", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "void_armor", type: RecipeType.SHAPED, 
-        pattern: [
-            ["voidnugget", null, "voidnugget"],
-            ["voidnugget", "radslimechunk", "voidnugget"],
-            ["voidnugget", "voidnugget", "voidnugget"]
-        ], 
-        outputItemId: "void_armor", outputCount: 1, stationType: "crafting_table" 
     },
     { 
         id: "fire_ring", type: RecipeType.SHAPED, 
@@ -920,15 +812,6 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
             [null, null, null]
         ], 
         outputItemId: "display_stand", outputCount: 1, stationType: "crafting_table" 
-    },
-    { 
-        id: "alchemy_brewing_stand", type: RecipeType.SHAPED, 
-        pattern: [
-            ["calcitecluster", "calcitecluster", "calcitecluster"],
-            [null, "ironore", null],
-            ["ironore", "ironore", "ironore"]
-        ], 
-        outputItemId: "crafting_table", outputCount: 1, stationType: "crafting_table" 
     },
     { 
         id: "teleporter_core", type: RecipeType.SHAPED, 

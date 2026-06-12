@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "2d520352-6514-4d6e-af6b-0269e9a2f297",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 113,
+  "height": 97,
+  "platformSettings": {},
+  "subMetas": {
+    "starmetal_chestplate": {
+      "ver": "1.0.6",
+      "uuid": "9bc5472e-cd8a-48ab-9b48-2519f2ce27f8",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "2d520352-6514-4d6e-af6b-0269e9a2f297",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -2,
+      "offsetY": 0,
+      "trimX": 10,
+      "trimY": 9,
+      "width": 89,
+      "height": 79,
+      "rawWidth": 113,
+      "rawHeight": 97,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
