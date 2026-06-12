@@ -32,6 +32,9 @@ export interface MapGenerationRect {
 
 export interface MapGenerationRectOptions {
     clearExisting?: boolean;
+    useRealtimeTimer?: boolean;
+    onPlacementSpawned?: (state: MapEditorPlacementState) => void;
+    onComplete?: (states: MapEditorPlacementState[]) => void;
 }
 
 interface RockPlacement {
@@ -213,6 +216,17 @@ export default class AutoMapGenerator extends cc.Component {
     private isTimedGenerationRunning: boolean = false;
     private waitingToStartTimedGeneration: boolean = false;
     private waitingToReturnCamera: boolean = false;
+    private timedGeneratedStates: MapEditorPlacementState[] = [];
+    private timedRockPrefix: string = "AutoRock_";
+    private timedResourcePrefix: string = "AutoResource_";
+    private timedSource: "manual" | "box-generate" = "box-generate";
+    private timedPublishMapState: boolean = true;
+    private timedUseRealtimeTimer: boolean = false;
+    private timedStartTimer: any = null;
+    private timedStepTimer: any = null;
+    private timedReturnTimer: any = null;
+    private timedPlacementCallback: (state: MapEditorPlacementState) => void = null;
+    private timedCompleteCallback: (states: MapEditorPlacementState[]) => void = null;
 
     start(): void {
         if (!this.manualTriggerOnly && this.autoGenerateOnStart) {
@@ -296,6 +310,14 @@ export default class AutoMapGenerator extends cc.Component {
         this.isTimedGenerationRunning = true;
         this.waitingToStartTimedGeneration = true;
         this.waitingToReturnCamera = false;
+        this.timedGeneratedStates = [];
+        this.timedRockPrefix = "AutoRock_";
+        this.timedResourcePrefix = "AutoResource_";
+        this.timedSource = "box-generate";
+        this.timedPublishMapState = true;
+        this.timedUseRealtimeTimer = false;
+        this.timedPlacementCallback = null;
+        this.timedCompleteCallback = null;
 
         if (this.showDebugBounds) {
             this.drawDebugBounds(root, placements);
@@ -305,10 +327,7 @@ export default class AutoMapGenerator extends cc.Component {
             this.finishTimedGeneration();
             return true;
         }
-        this.scheduleOnce(
-            this.startTimedPlacementSpawning,
-            Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay)
-        );
+        this.scheduleTimedStart(Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay));
         return true;
     }
 
@@ -389,6 +408,90 @@ export default class AutoMapGenerator extends cc.Component {
         this.maxY = oldMaxY;
         this.scatterCount = oldScatterCount;
         return states;
+    }
+
+    public beginTimedGenerationInRect(rect: MapGenerationRect, options: MapGenerationRectOptions = {}): boolean {
+        if (this.waitingToReturnCamera) {
+            this.stopTimedGeneration(false);
+        }
+        if (this.isTimedGenerationRunning) {
+            if (!this.cancelCurrentGenerationBeforeRestart) {
+                cc.warn("[AutoMapGenerator] Timed generation is already running.");
+                return false;
+            }
+            this.stopTimedGeneration(false);
+        }
+
+        const root = this.getRoot();
+        if (!root) {
+            cc.warn("[AutoMapGenerator] targetRoot is missing.");
+            return false;
+        }
+
+        const safeRect = this.normalizeGenerationRect(rect);
+        if (safeRect.maxX - safeRect.minX < 64 || safeRect.maxY - safeRect.minY < 64) {
+            cc.warn("[AutoMapGenerator] Selection is too small for generation.");
+            return false;
+        }
+
+        if (options.clearExisting !== false) {
+            this.clearGeneratedInRect(root, safeRect);
+        }
+
+        const oldMinX = this.minX;
+        const oldMaxX = this.maxX;
+        const oldMinY = this.minY;
+        const oldMaxY = this.maxY;
+        const oldScatterCount = this.scatterCount;
+        this.minX = safeRect.minX;
+        this.maxX = safeRect.maxX;
+        this.minY = safeRect.minY;
+        this.maxY = safeRect.maxY;
+        this.scatterCount = Math.min(this.scatterCount, 1);
+
+        const specs = this.createSpecs();
+        const placements: RockPlacement[] = [];
+        if (specs.length > 0) {
+            this.resetRandom();
+            placements.push(...this.createPlacements(specs));
+        }
+
+        this.minX = oldMinX;
+        this.maxX = oldMaxX;
+        this.minY = oldMinY;
+        this.maxY = oldMaxY;
+        this.scatterCount = oldScatterCount;
+
+        if (specs.length === 0) {
+            cc.warn("[AutoMapGenerator] No rock prefabs assigned.");
+            return false;
+        }
+
+        this.timedRoot = root;
+        this.timedPlacements = placements;
+        this.timedSpawnIndex = 0;
+        this.isTimedGenerationRunning = true;
+        this.waitingToStartTimedGeneration = true;
+        this.waitingToReturnCamera = false;
+        this.timedGeneratedStates = [];
+        this.timedRockPrefix = "EditorRock_";
+        this.timedResourcePrefix = "EditorResource_";
+        this.timedSource = "box-generate";
+        this.timedPublishMapState = false;
+        this.timedUseRealtimeTimer = !!options.useRealtimeTimer;
+        this.timedPlacementCallback = options.onPlacementSpawned || null;
+        this.timedCompleteCallback = options.onComplete || null;
+
+        if (this.showDebugBounds) {
+            this.drawDebugBounds(root, placements);
+        }
+        this.frameCameraForGeneration(safeRect);
+        if (placements.length === 0) {
+            this.finishTimedGeneration();
+            return true;
+        }
+        this.scheduleTimedStart(Math.max(0, this.cameraFrameDuration + this.startAfterCameraDelay));
+        return true;
     }
 
     private getRoot(): cc.Node {
@@ -845,14 +948,31 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         const index = this.timedSpawnIndex;
-        this.spawnRock(this.timedRoot, this.timedPlacements[index], index);
-        this.spawnResourceForPlacement(this.timedRoot, this.timedPlacements[index], index);
+        this.recordTimedPlacementState(this.spawnRock(
+            this.timedRoot,
+            this.timedPlacements[index],
+            index,
+            this.timedRockPrefix,
+            this.timedSource
+        ));
+        this.recordTimedPlacementState(this.spawnResourceForPlacement(
+            this.timedRoot,
+            this.timedPlacements[index],
+            index,
+            this.timedResourcePrefix,
+            this.timedSource
+        ));
         this.shakeCameraForSpawn();
         this.timedSpawnIndex++;
         EventCenter.emit(GameEvent.MAP_GENERATION_PROGRESS, this.timedSpawnIndex, this.timedPlacements.length);
 
         if (this.timedSpawnIndex >= this.timedPlacements.length) {
             this.finishTimedGeneration();
+        } else if (this.timedUseRealtimeTimer) {
+            this.timedStepTimer = this.scheduleRealtime(
+                () => this.spawnNextTimedPlacement(),
+                Math.max(0.01, this.generationStepInterval)
+            );
         }
     }
 
@@ -862,10 +982,12 @@ export default class AutoMapGenerator extends cc.Component {
         }
 
         this.waitingToStartTimedGeneration = false;
-        this.schedule(
-            this.spawnNextTimedPlacement,
-            Math.max(0.01, this.generationStepInterval)
-        );
+        if (!this.timedUseRealtimeTimer) {
+            this.schedule(
+                this.spawnNextTimedPlacement,
+                Math.max(0.01, this.generationStepInterval)
+            );
+        }
         this.spawnNextTimedPlacement();
     }
 
@@ -876,15 +998,30 @@ export default class AutoMapGenerator extends cc.Component {
 
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
+        this.clearRealtimeTimers();
         const placements = this.timedPlacements.slice();
+        const generatedStates = this.timedGeneratedStates.slice();
+        const shouldPublishMapState = this.timedPublishMapState;
+        const shouldUseRealtimeTimer = this.timedUseRealtimeTimer;
+        const completeCallback = this.timedCompleteCallback;
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
         this.waitingToReturnCamera = true;
         this.timedRoot = null;
         this.timedPlacements = [];
         this.timedSpawnIndex = 0;
-        this.publishMapGenerationState(placements);
-        this.scheduleOnce(this.returnCameraToTargetAfterDelay, Math.max(0, this.returnAfterGenerationDelay));
+        this.timedGeneratedStates = [];
+        this.timedPlacementCallback = null;
+        this.timedCompleteCallback = null;
+        if (shouldPublishMapState) {
+            this.publishMapGenerationState(placements);
+        }
+        if (completeCallback) {
+            completeCallback(generatedStates);
+        }
+        this.timedUseRealtimeTimer = shouldUseRealtimeTimer;
+        this.scheduleTimedCameraReturn(Math.max(0, this.returnAfterGenerationDelay));
+        this.timedUseRealtimeTimer = false;
     }
 
     private stopTimedGeneration(returnCamera: boolean): void {
@@ -895,14 +1032,29 @@ export default class AutoMapGenerator extends cc.Component {
         this.unschedule(this.spawnNextTimedPlacement);
         this.unschedule(this.startTimedPlacementSpawning);
         this.unschedule(this.returnCameraToTargetAfterDelay);
+        this.clearRealtimeTimers();
         this.isTimedGenerationRunning = false;
         this.waitingToStartTimedGeneration = false;
         this.waitingToReturnCamera = false;
         this.timedRoot = null;
         this.timedPlacements = [];
         this.timedSpawnIndex = 0;
+        this.timedGeneratedStates = [];
+        this.timedPlacementCallback = null;
+        this.timedCompleteCallback = null;
+        this.timedUseRealtimeTimer = false;
         if (returnCamera) {
             this.returnCameraToTarget();
+        }
+    }
+
+    private recordTimedPlacementState(state: MapEditorPlacementState): void {
+        if (!state) {
+            return;
+        }
+        this.timedGeneratedStates.push(state);
+        if (this.timedPlacementCallback) {
+            this.timedPlacementCallback(state);
         }
     }
 
@@ -917,7 +1069,7 @@ export default class AutoMapGenerator extends cc.Component {
         }
     }
 
-    private frameCameraForGeneration(): void {
+    private frameCameraForGeneration(rectOverride: MapGenerationRect = null): void {
         if (!this.frameCameraDuringTimedGeneration) {
             return;
         }
@@ -927,7 +1079,9 @@ export default class AutoMapGenerator extends cc.Component {
             return;
         }
 
-        const rect = this.getGenerationWorldRect();
+        const rect = rectOverride
+            ? this.getWorldRectFromRootRect(rectOverride)
+            : this.getGenerationWorldRect();
         rig.frameWorldRect(rect.minX, rect.minY, rect.maxX, rect.maxY, this.cameraFrameDuration);
     }
 
@@ -944,8 +1098,18 @@ export default class AutoMapGenerator extends cc.Component {
 
     private getGenerationWorldRect(): { minX: number; minY: number; maxX: number; maxY: number } {
         const root = this.getRoot();
-        const bottomLeft = cc.v2(this.minX, this.minY);
-        const topRight = cc.v2(this.maxX, this.maxY);
+        return this.getWorldRectFromRootRect({
+            minX: this.minX,
+            minY: this.minY,
+            maxX: this.maxX,
+            maxY: this.maxY
+        });
+    }
+
+    private getWorldRectFromRootRect(rect: MapGenerationRect): { minX: number; minY: number; maxX: number; maxY: number } {
+        const root = this.getRoot();
+        const bottomLeft = cc.v2(rect.minX, rect.minY);
+        const topRight = cc.v2(rect.maxX, rect.maxY);
         const worldBottomLeft = root && cc.isValid(root)
             ? root.convertToWorldSpaceAR(bottomLeft)
             : bottomLeft;
@@ -958,6 +1122,47 @@ export default class AutoMapGenerator extends cc.Component {
             maxX: Math.max(worldBottomLeft.x, worldTopRight.x),
             maxY: Math.max(worldBottomLeft.y, worldTopRight.y)
         };
+    }
+
+    private scheduleTimedStart(delay: number): void {
+        if (this.timedUseRealtimeTimer) {
+            this.timedStartTimer = this.scheduleRealtime(
+                () => this.startTimedPlacementSpawning(),
+                delay
+            );
+            return;
+        }
+        this.scheduleOnce(this.startTimedPlacementSpawning, delay);
+    }
+
+    private scheduleTimedCameraReturn(delay: number): void {
+        if (this.timedUseRealtimeTimer) {
+            this.timedReturnTimer = this.scheduleRealtime(
+                () => this.returnCameraToTargetAfterDelay(),
+                delay
+            );
+            return;
+        }
+        this.scheduleOnce(this.returnCameraToTargetAfterDelay, delay);
+    }
+
+    private scheduleRealtime(callback: () => void, delay: number): any {
+        return setTimeout(callback, Math.max(0, delay) * 1000);
+    }
+
+    private clearRealtimeTimers(): void {
+        if (this.timedStartTimer !== null) {
+            clearTimeout(this.timedStartTimer);
+            this.timedStartTimer = null;
+        }
+        if (this.timedStepTimer !== null) {
+            clearTimeout(this.timedStepTimer);
+            this.timedStepTimer = null;
+        }
+        if (this.timedReturnTimer !== null) {
+            clearTimeout(this.timedReturnTimer);
+            this.timedReturnTimer = null;
+        }
     }
 
     private pickSpec(specs: RockSpec[]): RockSpec {
