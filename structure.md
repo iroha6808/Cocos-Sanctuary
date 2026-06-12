@@ -269,6 +269,7 @@ Canvas
 - `CameraRig.ts`
   - Main Camera runtime 依 `distance * distanceSpeedK * (1 - exp(-distance / distanceResponseScale))` 取得 follow speed，再用 `1 - exp(-followSpeed * dt)` 算追趕比例；支援 look-ahead、shake、impulse、zoom kick、`+/-` 手動 zoom。
   - `frameWorldRect()` / `returnToTarget()` 可暫時切到 overview framing，用於自動地圖逐塊生成展示；overview 期間仍可疊加 `addShake()`。
+  - `zoomScaledNodes` / `inverseZoomScaledNodes` 給背景層跟 camera zoom 同步縮放或反向補償；`screenFixedZoomScaledNodes` 給 HP bar、EXP label 這類 HUD，在縮放時保留節點 local position，只做原地縮放。
 - `CameraFollow.ts`
   - Legacy 備用 smooth follow；PlayerController 已不再 runtime 補掛，正式相機跟隨以 `CameraRig` 為主。
 - `HitFeelManager.ts`
@@ -422,6 +423,7 @@ Canvas
   - 預設直接在 local `x = -5000 ~ 0`、`y = -2000 ~ 0` 生成，無整體偏移；只清 `AutoRock_` prefix 節點。
   - `manualTriggerOnly` 預設開啟；開場 / 讀檔只套參數不生成，Gameplay 按 `G` 後逐塊生成，每 `generationStepInterval` 秒 spawn 一塊。
   - 逐塊生成前透過 `CameraRig.frameWorldRect()` 看完整生成範圍，等 `startAfterCameraDelay` 後開始鋪地形；每塊生成可觸發 `spawnShakeDuration/spawnShakeAmplitude` 小震動，完成後等 `returnAfterGenerationDelay` 再 `returnToTarget()` 回玩家。
+  - `appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab` 可在平坦平台頂面生成 `AutoResource_*`，斜坡不放資源。
   - 生成後呼叫 `SaveService.setCurrentMapGenerationState()` 並 emit `MAP_GENERATION_UPDATED`。
   - 讀到 `SAVE_LOADED` 且存檔有 `mapState` 時，只套用 seed / range / settings；玩家按 `G` 後才重生同一張地圖。
   - 使用 seeded random、拼接式 pattern、AABB separation、平台頂面 / 斜坡地面線 offset，讓部分地形連通且避免不同組互相卡住。
@@ -584,8 +586,10 @@ Canvas
   - `Canvas/platform/auto generate` 掛 `AutoMapGenerator.ts`，拖入 `assets/Prefabs/Map/` 五個 Rock prefab。
   - AutoMapGenerator 預設 local 範圍 `(-5000,-2000)` 到 `(0,0)`，無整體偏移；使用 FlatRun / RampUp / RampDown / Hill / Valley pattern 拼接平台，`slopePatternChance` 可提高斜坡組比例。
   - `manualTriggerOnly` 預設開啟；GameManager 可拖 `autoMapGenerator`，Gameplay 按 `G` 逐塊生成，`generationStepInterval` 預設 0.25，`cameraFrameDuration/cameraReturnDuration` 預設 1.6。
+  - 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；fruitore prefab 未建立時留空即可。
 - UI Root
   - `UIManager.expLabel`、`UIManager.scoreLabel`、`UIManager.hpBar`
+  - Background 若要跟 zoom 變大變小，拖到 Main Camera 的 `CameraRig.zoomScaledNodes`；HP bar、EXP label 拖 `screenFixedZoomScaledNodes`，讓 HUD 原地縮放，避免以螢幕中心當支點跑位。
   - `DialogueUIController` prompt / panel / option labels
   - `MerchantShopUIController` root / labels / itemListRoot / buyButton
   - `DialogueUIController` / `InventoryUIController` / `MerchantShopUIController` / `CraftingUIController` 可接 `mainCameraNode`，讓 panel 跟鏡頭並 clamp。

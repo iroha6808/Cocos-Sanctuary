@@ -43,6 +43,21 @@ export default class CameraRig extends cc.Component {
     @property(cc.Float)
     public overviewMinZoomRatio: number = 0.08;
 
+    @property([cc.Node])
+    public zoomScaledNodes: cc.Node[] = [];
+
+    @property([cc.Node])
+    public inverseZoomScaledNodes: cc.Node[] = [];
+
+    @property([cc.Node])
+    public screenFixedZoomScaledNodes: cc.Node[] = [];
+
+    @property(cc.Float)
+    public minZoomNodeScale: number = 0.1;
+
+    @property(cc.Float)
+    public maxZoomNodeScale: number = 5;
+
     private lastTargetPosition: cc.Vec2 = null;
     private shakeTime: number = 0;
     private shakeDuration: number = 0;
@@ -63,6 +78,11 @@ export default class CameraRig extends cc.Component {
     private overviewTargetZoom: number = 1;
     private overviewTime: number = 0;
     private overviewDuration: number = 0;
+    private zoomScaleReference: number = 1;
+    private zoomScaledBaseScales: cc.Vec2[] = [];
+    private inverseZoomScaledBaseScales: cc.Vec2[] = [];
+    private screenFixedZoomScaledBaseScales: cc.Vec2[] = [];
+    private screenFixedZoomScaledBasePositions: cc.Vec2[] = [];
 
     public static getOrCreate(cameraNode?: cc.Node): CameraRig {
         if (CameraRig.instance && cc.isValid(CameraRig.instance.node)) {
@@ -90,6 +110,7 @@ export default class CameraRig extends cc.Component {
         CameraRig.instance = this;
         this.camera = this.getComponent(cc.Camera);
         this.baseZoom = this.camera ? this.camera.zoomRatio : 1;
+        this.zoomScaleReference = Math.max(0.01, this.baseZoom);
         EventCenter.on(GameEvent.GAME_PAUSED, this.onGamePaused, this);
         EventCenter.on(GameEvent.GAME_RESUMED, this.onGameResumed, this);
     }
@@ -98,6 +119,8 @@ export default class CameraRig extends cc.Component {
         if (this.target) {
             this.lastTargetPosition = this.getTargetWorldPosition();
         }
+        this.captureZoomScaleBaselines();
+        this.applyZoomScaleToNodes();
     }
 
     lateUpdate(dt: number): void {
@@ -130,6 +153,7 @@ export default class CameraRig extends cc.Component {
         nextWorld = nextWorld.add(this.getShakeOffset(dt));
 
         this.setNodeWorldPosition(this.node, nextWorld);
+        this.applyZoomScaleToNodes();
         this.updateZoom(dt);
     }
 
@@ -164,6 +188,7 @@ export default class CameraRig extends cc.Component {
         this.baseZoom = this.clamp(this.baseZoom + this.zoomStep * direction, minZoom, maxZoom);
         if (this.zoomKickTime <= 0 && !this.overviewActive) {
             this.camera.zoomRatio = this.baseZoom;
+            this.applyZoomScaleToNodes();
         }
     }
 
@@ -205,6 +230,7 @@ export default class CameraRig extends cc.Component {
         EventCenter.off(GameEvent.GAME_RESUMED, this.onGameResumed, this);
         if (this.camera) {
             this.camera.zoomRatio = this.baseZoom;
+            this.applyZoomScaleToNodes();
         }
         if (CameraRig.instance === this) {
             CameraRig.instance = null;
@@ -275,12 +301,14 @@ export default class CameraRig extends cc.Component {
         if (this.zoomKickTime <= 0) {
             this.camera.zoomRatio += (this.baseZoom - this.camera.zoomRatio) * Math.min(1, dt * 12);
             this.zoomKick = 0;
+            this.applyZoomScaleToNodes();
             return;
         }
 
         this.zoomKickTime = Math.max(0, this.zoomKickTime - dt);
         const progress = this.zoomKickDuration > 0 ? this.zoomKickTime / this.zoomKickDuration : 0;
         this.camera.zoomRatio = this.baseZoom + this.zoomKick * progress;
+        this.applyZoomScaleToNodes();
     }
 
     private beginOverviewMove(targetWorld: cc.Vec2, targetZoom: number, duration: number, returning: boolean): void {
@@ -313,11 +341,13 @@ export default class CameraRig extends cc.Component {
             .add(this.getShakeOffset(dt));
         this.setNodeWorldPosition(this.node, nextWorld);
         this.camera.zoomRatio = this.lerp(this.overviewStartZoom, this.overviewTargetZoom, t);
+        this.applyZoomScaleToNodes();
 
         if (rawT >= 1 && this.overviewReturning) {
             this.overviewActive = false;
             this.overviewReturning = false;
             this.camera.zoomRatio = this.baseZoom;
+            this.applyZoomScaleToNodes();
             this.lastTargetPosition = this.target && cc.isValid(this.target)
                 ? this.getTargetWorldPosition()
                 : null;
@@ -384,5 +414,75 @@ export default class CameraRig extends cc.Component {
     private smoothStep(t: number): number {
         const value = this.clamp(t, 0, 1);
         return value * value * (3 - 2 * value);
+    }
+
+    private captureZoomScaleBaselines(): void {
+        this.zoomScaledBaseScales = this.captureNodeScales(this.zoomScaledNodes);
+        this.inverseZoomScaledBaseScales = this.captureNodeScales(this.inverseZoomScaledNodes);
+        this.screenFixedZoomScaledBaseScales = this.captureNodeScales(this.screenFixedZoomScaledNodes);
+        this.screenFixedZoomScaledBasePositions = this.captureNodeLocalPositions(this.screenFixedZoomScaledNodes);
+    }
+
+    private captureNodeScales(nodes: cc.Node[]): cc.Vec2[] {
+        const scales: cc.Vec2[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            scales.push(node && cc.isValid(node) ? cc.v2(node.scaleX, node.scaleY) : cc.v2(1, 1));
+        }
+        return scales;
+    }
+
+    private applyZoomScaleToNodes(): void {
+        if (!this.camera) {
+            return;
+        }
+
+        const safeZoom = Math.max(0.01, this.camera.zoomRatio || 1);
+        const directFactor = this.clamp(safeZoom / this.zoomScaleReference, this.minZoomNodeScale, this.maxZoomNodeScale);
+        const inverseFactor = this.clamp(this.zoomScaleReference / safeZoom, this.minZoomNodeScale, this.maxZoomNodeScale);
+        this.applyScaleList(this.zoomScaledNodes, this.zoomScaledBaseScales, directFactor);
+        this.applyScaleList(this.inverseZoomScaledNodes, this.inverseZoomScaledBaseScales, inverseFactor);
+        this.applyScreenFixedScaleList(this.screenFixedZoomScaledNodes, this.screenFixedZoomScaledBaseScales, this.screenFixedZoomScaledBasePositions, directFactor);
+    }
+
+    private applyScaleList(nodes: cc.Node[], baseScales: cc.Vec2[], factor: number): void {
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            if (!node || !cc.isValid(node)) {
+                continue;
+            }
+            if (!baseScales[i]) {
+                baseScales[i] = cc.v2(node.scaleX, node.scaleY);
+            }
+            node.scaleX = baseScales[i].x * factor;
+            node.scaleY = baseScales[i].y * factor;
+        }
+    }
+
+    private captureNodeLocalPositions(nodes: cc.Node[]): cc.Vec2[] {
+        const positions: cc.Vec2[] = [];
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            positions.push(node && cc.isValid(node) ? cc.v2(node.x, node.y) : cc.v2(0, 0));
+        }
+        return positions;
+    }
+
+    private applyScreenFixedScaleList(nodes: cc.Node[], baseScales: cc.Vec2[], basePositions: cc.Vec2[], factor: number): void {
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+            if (!node || !cc.isValid(node)) {
+                continue;
+            }
+            if (!baseScales[i]) {
+                baseScales[i] = cc.v2(node.scaleX, node.scaleY);
+            }
+            if (!basePositions[i]) {
+                basePositions[i] = cc.v2(node.x, node.y);
+            }
+            node.scaleX = baseScales[i].x * factor;
+            node.scaleY = baseScales[i].y * factor;
+            node.setPosition(basePositions[i]);
+        }
     }
 }
