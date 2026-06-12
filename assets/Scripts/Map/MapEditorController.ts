@@ -424,6 +424,7 @@ export default class MapEditorController extends cc.Component {
         node.angle = this.rotation;
         parent.addChild(node);
         this.setPlacementNodePosition(node, parent, rootLocal, entry.kind);
+        this.finalizePlacedNode(node, entry.kind);
 
         this.upsertPlacement(this.createPlacementState(node, entry.kind, entry.key, "manual"));
         this.commitEditorChangesToScene();
@@ -622,6 +623,20 @@ export default class MapEditorController extends cc.Component {
         }
     }
 
+    private finalizePlacedNode(node: cc.Node, kind: "terrain" | "resource"): void {
+        if (!node || kind !== "terrain") {
+            return;
+        }
+
+        // Manual terrain should become live terrain immediately, like AutoMapGenerator output.
+        this.applyNodePhysicsColliders(node);
+        this.syncPhysicsPosition();
+    }
+
+    private syncPhysicsPosition(): void {
+        this.syncPhysicsPosition();
+    }
+
     private onSaveLoaded(_saveData: SaveData): void {
         // Intentionally ignore backend/editor save data for now. Manual terrain
         // edits should stay in the live scene until the editor save flow is stable.
@@ -683,15 +698,27 @@ export default class MapEditorController extends cc.Component {
         if (this.terrainRoot && cc.isValid(this.terrainRoot)) {
             return this.terrainRoot;
         }
-        return this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)
-            ? this.autoMapGenerator.node
-            : this.node;
+        if (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)) {
+            const generatorRoot = this.autoMapGenerator.targetRoot;
+            if (generatorRoot && cc.isValid(generatorRoot)) {
+                return generatorRoot;
+            }
+            return this.autoMapGenerator.node;
+        }
+        return this.node;
     }
 
     private getResourceRoot(): cc.Node {
-        return this.resourceRoot && cc.isValid(this.resourceRoot)
-            ? this.resourceRoot
-            : this.getTerrainRoot();
+        if (this.resourceRoot && cc.isValid(this.resourceRoot)) {
+            return this.resourceRoot;
+        }
+        if (this.autoMapGenerator && cc.isValid(this.autoMapGenerator.node)) {
+            const generatorResourceRoot = this.autoMapGenerator.resourceRoot;
+            if (generatorResourceRoot && cc.isValid(generatorResourceRoot)) {
+                return generatorResourceRoot;
+            }
+        }
+        return this.getTerrainRoot();
     }
 
     private getAutoMapGenerator(): AutoMapGenerator {
@@ -831,12 +858,8 @@ export default class MapEditorController extends cc.Component {
         node: cc.Node,
         parent: cc.Node,
         rootLocal: cc.Vec2,
-        kind: "terrain" | "resource"
+        _kind: "terrain" | "resource"
     ): void {
-        if (kind === "terrain") {
-            this.setNodePositionFromRootLocal(node, parent, rootLocal);
-            return;
-        }
         this.setEditorNodePosition(node, parent, rootLocal);
     }
 
