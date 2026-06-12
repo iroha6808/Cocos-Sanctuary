@@ -21,6 +21,9 @@ export default class MenuScene extends cc.Component {
     loginPanel: cc.Node = null;
 
     @property(cc.Node)
+    helpPanel: cc.Node = null;
+
+    @property(cc.Node)
     settingsPanel: cc.Node = null;
 
     @property(cc.Node)
@@ -69,7 +72,6 @@ export default class MenuScene extends cc.Component {
 
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
-            cc.log("[Firebase] 椰子聖地連線成功！");
         }
     }
 
@@ -101,7 +103,6 @@ export default class MenuScene extends cc.Component {
             .then((userCredential: any) => {
                 this.setStatus("註冊成功！");
                 cc.log("註冊成功 UID:", userCredential.user.uid);
-                // 註冊成功後直接載入場景 (帶有你原本的淡出特效！)
                 this.goToGameScene(); 
             })
             .catch((error: any) => {
@@ -147,11 +148,23 @@ export default class MenuScene extends cc.Component {
     }
 
     public showLogin(): void {
-        cc.log("👉 成功觸發 showLogin！正在切換面板..."); 
         this.setPanel(this.mainPanel, false);
         this.setPanel(this.loginPanel, true);
         this.setPanel(this.settingsPanel, false);
         this.setPanel(this.leaderboardPanel, false);
+    }
+
+    public showHelp(): void {
+        this.setPanel(this.mainPanel, false);
+        this.setPanel(this.loginPanel, false);
+        this.setPanel(this.settingsPanel, false);
+        this.setPanel(this.leaderboardPanel, false);
+        this.setPanel(this.helpPanel, true);
+    }
+
+    public hideHelp(): void {
+        this.setPanel(this.helpPanel, false);
+        this.setPanel(this.mainPanel, true);
     }
 
     public showSettings(): void {
@@ -179,7 +192,6 @@ export default class MenuScene extends cc.Component {
     }
 
     private refreshAuthState(): void {
-        // Firebase 抓取當前使用者的狀態
         firebase.auth().onAuthStateChanged((user: any) => {
             if (this.currentUserLabel) {
                 this.currentUserLabel.string = user ? `User: ${user.email}` : "User: guest";
