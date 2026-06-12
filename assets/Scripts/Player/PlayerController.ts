@@ -522,13 +522,10 @@ export default class PlayerController extends BaseEntity {
         }
     }
 
-    public receiveAttack(amount: number, attackerNode: cc.Node = null!, hitInfo?: CombatHitInfo) {
-        if (this.isDead) {
-            return;
-        }
-
+    public receiveAttack(amount: number, attackerNode: cc.Node = null!, hitInfo?: CombatHitInfo): number {
+        if (this.isDead) return 0;
         this.applyKnockback(attackerNode, hitInfo);
-        this.takeDamage(amount);
+        return this.takeDamage(amount);
     }
 
     public canUseGameplayAction(): boolean {
@@ -1589,7 +1586,12 @@ export default class PlayerController extends BaseEntity {
 
     public takeDamage(damage: number): number {
         if (this.isDead) return 0;
-        cc.log(`🛡️ [玩家受傷] CombatHitbox 傳來的最終實際扣血: ${damage}`);
-        return super.takeDamage(damage);
+        const baseDef = Number(this.defense) || 0;
+        const equipDef = EquipmentManager.Instance.getTotalDefenseBonus();
+        const totalDefense = baseDef + equipDef;
+        const finalDamage = Math.max(1, damage - totalDefense);
+        cc.log(`🛡️ [玩家受傷] 來源傷害: ${damage}, 基礎防禦: ${baseDef}, 裝備防禦: ${equipDef}, 實際扣血: ${finalDamage}`);
+        super.takeDamage(finalDamage);
+        return finalDamage;
     }
 }
