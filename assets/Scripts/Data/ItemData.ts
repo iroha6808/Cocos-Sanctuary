@@ -40,7 +40,7 @@ export const ITEM_DATA: { [id: string]: ItemDefinition } = {
         iconPath: "Equipment/leather_armor.png",
         defBoost: 5,
         equipmentSlot: EquipmentSlot.ARMOR
-    }
+    },
     acorn: {
         id: "acorn",
         name: "Acorn",
