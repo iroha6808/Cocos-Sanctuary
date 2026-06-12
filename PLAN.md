@@ -232,8 +232,8 @@
 - [ x] AutoMapGenerator 可拖 `resourceRoot`、`appleBushPrefab`、`oreRockPrefab`、`fruitOrePrefab`；資源只生成在平坦平台頂面，fruitore prefab 尚未建立時可先留空。
 - [ x] Map Editor 入口：Menu 新增按鈕綁 `MenuScene.startMapEditor()`；進 Game 後會切 `InputContext.MapEditor` 並鎖住 Player 控制。
 - [ x] MapEditorController 可掛 `Canvas/platform/auto generate` 或由 GameManager runtime 補；拖 `terrainRoot`、`resourceRoot`、`cameraRig`、`playerNode`、可選 `editorStatusLabel` / `selectionGraphics`，prefab 欄位沒拖時會 fallback AutoMapGenerator。
-- [ ] Map Editor 操作：`E` 進出、`1/2/3` 地形 / 資源 / 框選生成、左鍵放置或拖框、右鍵刪 editor-owned 節點、`Q/R` 換 prefab、`[` / `]` 旋轉；框選生成只清框內 `Auto*` / `Editor*` 節點。
-- [ ] Map Editor 存檔：`SaveData.mapEditorState` 保存實際 placements，讀檔後重建 `EditorRock_*` / `EditorResource_*`；一般 AutoMap 的 seed / 範圍仍由 `mapState` 保存。
+- [ x] Map Editor 操作：`E` / `Esc` 進出、`1/2/3` 地形 / 資源 / 框選生成、左鍵放置或拖框、右鍵刪 editor-owned 節點、`Q/R` 換 prefab、`[` / `]` 旋轉；支援 Cocos `num1/num2/num3` 與瀏覽器 key/code fallback，框選生成只清框內 `Auto*` / `Editor*` 節點。
+- [ x] Map Editor 暫存：放置 / 刪除 / 框選生成後會更新 live scene 與 `SaveService.currentMapEditor`；目前讀檔先不重建 editor placements，避免假後端舊資料蓋掉場景。
 - [ ] Tree 接 `depletedSpriteFrame` / `targetSprite`
 - [ ] UIManager 接 `expLabel`、`hpBar`
 - [ ] UIManager 接 `scoreLabel`
