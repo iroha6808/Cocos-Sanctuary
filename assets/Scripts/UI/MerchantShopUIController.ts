@@ -1,6 +1,8 @@
 import { getItemDefinition, ItemDefinition } from "../Data/ItemData";
 import { MerchantStockItem } from "../Data/MerchantPool";
 import { InputAction } from "../Input/InputAction";
+import InputManager from "../Input/InputManager";
+import { InputContext } from "../Input/InputContext";
 import MerchantNPC from "../NPC/MerchantNPC";
 import { InventoryManager } from "../Player/InventoryManager";
 import ItemIconLoader from "./ItemIconLoader";
@@ -94,6 +96,7 @@ export default class MerchantShopUIController extends cc.Component {
     private readonly textColor = cc.color(236, 239, 224, 255);
     private readonly mutedTextColor = cc.color(175, 184, 190, 255);
     private readonly accentColor = cc.color(232, 151, 77, 255);
+    private inputManager: InputManager = null!;
 
     onLoad(): void {
         // Old scene data serialized these colors as bright green/gray.
@@ -102,6 +105,7 @@ export default class MerchantShopUIController extends cc.Component {
         this.cannotBuyColor = cc.color(91, 94, 98, 255);
         this.setupReferences();
         this.ensureUIBuilt();
+        this.inputManager = InputManager.getOrCreate(this.node);
         this.close();
     }
 
@@ -122,6 +126,9 @@ export default class MerchantShopUIController extends cc.Component {
 
     onDestroy(): void {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
         this.clearItemRows();
         this.merchant = null!;
     }
@@ -147,6 +154,10 @@ export default class MerchantShopUIController extends cc.Component {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refresh, this);
 
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.MerchantShop, this.handleInput, this);
+        }
+
         this.updatePanelPosition();
         this.refresh();
     }
@@ -156,6 +167,10 @@ export default class MerchantShopUIController extends cc.Component {
         this.selectedIndex = 0;
         this.buyAmount = 1;
         this.closeRequested = false;
+
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.MerchantShop, this);
+        }
 
         cc.systemEvent.off("INVENTORY_CHANGED", this.refresh, this);
         const panel = this.getDisplayRoot();

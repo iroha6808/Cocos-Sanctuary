@@ -197,6 +197,10 @@ export default class CraftingUIController extends cc.Component {
             return false;
         }
 
+        if (action === InputAction.Inventory) {
+            return true;
+        }
+
         if (action === InputAction.Cancel || action === InputAction.Crafting) {
             this.close();
             return true;

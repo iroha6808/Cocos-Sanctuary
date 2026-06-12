@@ -8,10 +8,12 @@ import { DialogueContent, DialogueOption, DialogueOptionId } from "../NPC/NPCDia
 import DialogueUIController from "../UI/DialogueUIController";
 import MerchantShopUIController from "../UI/MerchantShopUIController";
 import CraftingUIController from "../UI/CraftingUIController";
+import InventoryUIController from "../UI/InventoryUIController";
 import VehicleInteractable from "../Vehicle/VehicleInteractable";
 import PhysicsContactFilter from "../Core/PhysicsContactFilter";
 import { PhysicsTag } from "../Core/PhysicsTags";
 import Rope from '../Entity/Resources/Rope';
+import { InputAction, InputSource } from "../Input/InputAction";
 
 const { ccclass, property } = cc._decorator;
 
@@ -135,6 +137,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.on("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.on("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.on("DIALOGUE_CLOSE_REQUESTED", this.onDialogueCloseRequested, this);
         cc.systemEvent.on("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         this.canvasNode = cc.find("Canvas") || null!;
@@ -235,6 +238,10 @@ export default class PlayerController extends BaseEntity {
     }
 
     onKeyDown(event: cc.Event.EventKeyboard) {
+        if (this.handleFocusedUIInput(event.keyCode)) {
+            return;
+        }
+
         if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
             if (this.merchantShopKeyStates[event.keyCode]) {
                 return;
@@ -279,11 +286,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (this.inventoryUI && this.inventoryUI.active) {
-            if (isDown && keyCode === cc.macro.KEY.b) {
-                this.toggleInventory();
-            }
-
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
             this.blockPlayerControlForUI();
             return;
         }
@@ -388,7 +392,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (this.inventoryUI && this.inventoryUI.active) {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
             return;
         }
 
@@ -426,11 +431,16 @@ export default class PlayerController extends BaseEntity {
     }
 
     private toggleInventory() {
-        if (!this.inventoryUI) return;
+        const inventoryController = this.getInventoryUIController();
+        if (!inventoryController) return;
         if (this.isCraftingUIOpen()) return;
 
-        const nextActive = !this.inventoryUI.active;
-        this.inventoryUI.active = nextActive;
+        const nextActive = !inventoryController.isOpen();
+        if (nextActive) {
+            inventoryController.open();
+        } else {
+            inventoryController.close();
+        }
 
         if (nextActive && this.dialogueUI && !this.isMerchantUIOpen()) {
             this.dialogueUI.hide();
@@ -446,8 +456,9 @@ export default class PlayerController extends BaseEntity {
         if (!this.craftingUI) return;
         if (this.isMerchantUIOpen()) return;
 
-        if (this.inventoryUI && this.inventoryUI.active) {
-            this.inventoryUI.active = false;
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
+            inventoryController.close();
         }
 
         if (this.isCraftingUIOpen()) {
@@ -535,7 +546,8 @@ export default class PlayerController extends BaseEntity {
             return false;
         }
 
-        if (this.inventoryUI && this.inventoryUI.active) {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
             return false;
         }
 
@@ -701,7 +713,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (this.inventoryUI && this.inventoryUI.active) {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
             this.blockPlayerControlForUI();
             return;
         }
@@ -1076,6 +1089,7 @@ export default class PlayerController extends BaseEntity {
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
         cc.systemEvent.off("CRAFTING_UI_OPENED", this.onCraftingUIOpened, this);
         cc.systemEvent.off("CRAFTING_UI_CLOSED", this.onCraftingUIClosed, this);
+        cc.systemEvent.off("DIALOGUE_CLOSE_REQUESTED", this.onDialogueCloseRequested, this);
         cc.systemEvent.off("MERCHANT_SHOP_CLOSE_REQUESTED", this.closeMerchantFlow, this);
 
         const gameCanvas = (cc.game as any).canvas;
@@ -1114,7 +1128,8 @@ export default class PlayerController extends BaseEntity {
             return;
         }
 
-        if (this.inventoryUI && this.inventoryUI.active) {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
             return;
         }
 
@@ -1202,6 +1217,92 @@ export default class PlayerController extends BaseEntity {
         this.currentMerchant = null!;
         this.promptMerchant = null!;
         this.currentDialogueOptions = [];
+    }
+
+    private onDialogueCloseRequested(): void {
+        this.closeMerchantFlow();
+    }
+
+    private handleFocusedUIInput(keyCode: number): boolean {
+        const inventoryController = this.getInventoryUIController();
+        if (inventoryController && inventoryController.isOpen()) {
+            if (keyCode === cc.macro.KEY.b || keyCode === cc.macro.KEY.escape) {
+                this.keyStates[keyCode] = true;
+                inventoryController.handleInventoryInput({
+                    action: keyCode === cc.macro.KEY.b ? InputAction.Inventory : InputAction.Cancel,
+                    isDown: true,
+                    source: InputSource.Keyboard
+                });
+            }
+            return true;
+        }
+
+        if (this.isCraftingUIOpen()) {
+            if (keyCode === cc.macro.KEY.c) {
+                this.keyStates[keyCode] = true;
+                this.craftingUI.handleInput(InputAction.Crafting);
+                return true;
+            }
+            if (keyCode === cc.macro.KEY.b) {
+                this.keyStates[keyCode] = true;
+                this.craftingUI.handleInput(InputAction.Inventory);
+                return true;
+            }
+            if (keyCode === cc.macro.KEY.escape) {
+                this.keyStates[keyCode] = true;
+                this.craftingUI.handleInput(InputAction.Cancel);
+                return true;
+            }
+            return true;
+        }
+
+        if (this.dialogueUI && this.dialogueUI.isOptionsVisible()) {
+            switch (keyCode) {
+                case cc.macro.KEY.escape:
+                    this.keyStates[keyCode] = true;
+                    this.onDialogueCloseRequested();
+                    return true;
+                case cc.macro.KEY.w:
+                case cc.macro.KEY.up:
+                case cc.macro.KEY.s:
+                case cc.macro.KEY.down:
+                case cc.macro.KEY.f:
+                case cc.macro.KEY.enter:
+                    this.keyStates[keyCode] = true;
+                    return true;
+            }
+        }
+
+        if (this.merchantShopUI && this.merchantShopUI.isOpen()) {
+            switch (keyCode) {
+                case cc.macro.KEY.escape:
+                    this.keyStates[keyCode] = true;
+                    this.closeMerchantFlow();
+                    return true;
+                case cc.macro.KEY.w:
+                case cc.macro.KEY.up:
+                case cc.macro.KEY.s:
+                case cc.macro.KEY.down:
+                case cc.macro.KEY.a:
+                case cc.macro.KEY.left:
+                case cc.macro.KEY.d:
+                case cc.macro.KEY.right:
+                case cc.macro.KEY.f:
+                case cc.macro.KEY.enter:
+                    this.keyStates[keyCode] = true;
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    private getInventoryUIController(): InventoryUIController | null {
+        if (!this.inventoryUI || !cc.isValid(this.inventoryUI)) {
+            return null;
+        }
+
+        return this.inventoryUI.getComponent(InventoryUIController) || null;
     }
 
     private blockPlayerControlForUI(): void {

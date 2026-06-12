@@ -1,3 +1,7 @@
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
+
 const { ccclass, property } = cc._decorator;
 
 export enum DialogueUIState {
@@ -56,6 +60,7 @@ export default class DialogueUIController extends cc.Component {
     private anchorTarget: cc.Node = null!;
     private mainCamera: cc.Camera = null!;
     private isDestroying: boolean = false;
+    private inputManager: InputManager = null!;
 
     onLoad() {
         if (!this.floatingRoot) {
@@ -73,6 +78,8 @@ export default class DialogueUIController extends cc.Component {
         if (this.mainCameraNode) {
             this.mainCamera = this.mainCameraNode.getComponent(cc.Camera) || null!;
         }
+
+        this.inputManager = InputManager.getOrCreate(this.node);
 
         this.bindOptionInput();
         this.hide();
@@ -147,6 +154,10 @@ export default class DialogueUIController extends cc.Component {
             this.dialogueLabel.string = line || "";
         }
 
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Dialogue, this.handleDialogueInput, this);
+        }
+
         this.refreshOptions();
         this.updateFloatingPosition();
     }
@@ -191,6 +202,10 @@ export default class DialogueUIController extends cc.Component {
     }
 
     public hide(): void {
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.Dialogue, this);
+        }
+
         this.clearState();
 
         if (this.isDestroying || !this.node || !cc.isValid(this.node)) {
@@ -214,6 +229,9 @@ export default class DialogueUIController extends cc.Component {
 
     onDestroy() {
         this.isDestroying = true;
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
         this.clearState();
         this.optionLabels = [];
         this.floatingRoot = null!;
@@ -240,6 +258,36 @@ export default class DialogueUIController extends cc.Component {
 
     public clearAnchorTarget(): void {
         this.anchorTarget = null!;
+    }
+
+    public handleDialogueInput(payload: InputPayload): boolean {
+        if (!this.isOptionsVisible()) {
+            return false;
+        }
+
+        if (!payload.isDown) {
+            return true;
+        }
+
+        switch (payload.action) {
+            case InputAction.Cancel:
+                cc.systemEvent.emit("DIALOGUE_CLOSE_REQUESTED");
+                return true;
+            case InputAction.MoveUp:
+            case InputAction.NavigateUp:
+                this.selectPrev();
+                return true;
+            case InputAction.MoveDown:
+            case InputAction.NavigateDown:
+                this.selectNext();
+                return true;
+            case InputAction.Confirm:
+            case InputAction.Interact:
+                this.confirmOption(this.selectedIndex);
+                return true;
+            default:
+                return true;
+        }
     }
 
     private refreshOptions(): void {

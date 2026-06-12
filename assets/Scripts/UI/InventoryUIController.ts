@@ -1,5 +1,8 @@
 const { ccclass, property } = cc._decorator;
 
+import InputManager from "../Input/InputManager";
+import { InputAction, InputPayload } from "../Input/InputAction";
+import { InputContext } from "../Input/InputContext";
 import { InventoryManager } from "../Player/InventoryManager";
 import { getItemDefinition } from "../Data/ItemData";
 import ItemIconLoader from "./ItemIconLoader";
@@ -47,9 +50,12 @@ export default class InventoryUIController extends cc.Component {
     private spriteCache: { [id: string]: cc.SpriteFrame } = {};
     private selectedIndex: number = -1;
     private mainCamera: cc.Camera = null!;
+    private inputManager: InputManager = null!;
+    private opened: boolean = false;
 
     onLoad() {
         this.setupReferences();
+        this.inputManager = InputManager.getOrCreate(this.node);
         cc.systemEvent.on("INVENTORY_CHANGED", this.refreshUI, this);
     }
 
@@ -102,6 +108,77 @@ export default class InventoryUIController extends cc.Component {
 
     onDestroy() {
         cc.systemEvent.off("INVENTORY_CHANGED", this.refreshUI, this);
+        if (this.inputManager) {
+            this.inputManager.clearOwner(this);
+        }
+    }
+
+    public open(): boolean {
+        if (this.isOpen()) {
+            return true;
+        }
+
+        this.setupReferences();
+        this.opened = true;
+
+        if (this.node) {
+            this.node.active = true;
+        }
+
+        this.hideActionMenu();
+        this.hideTooltip();
+        this.refreshUI();
+        this.updatePanelPosition();
+
+        if (this.inputManager) {
+            this.inputManager.pushContext(InputContext.Inventory, this.handleInventoryInput, this);
+        }
+
+        return true;
+    }
+
+    public close(): boolean {
+        this.hideActionMenu();
+        this.hideTooltip();
+        this.selectedIndex = -1;
+        this.opened = false;
+
+        if (this.inputManager) {
+            this.inputManager.popContext(InputContext.Inventory, this);
+        }
+
+        if (this.node) {
+            this.node.active = false;
+        }
+
+        return true;
+    }
+
+    public toggle(): boolean {
+        return this.isOpen() ? this.close() : this.open();
+    }
+
+    public isOpen(): boolean {
+        return this.opened && !!this.node && cc.isValid(this.node) && this.node.activeInHierarchy;
+    }
+
+    public handleInventoryInput(payload: InputPayload): boolean {
+        if (!this.isOpen()) {
+            return false;
+        }
+
+        if (!payload.isDown) {
+            return true;
+        }
+
+        switch (payload.action) {
+            case InputAction.Inventory:
+            case InputAction.Cancel:
+                this.close();
+                return true;
+            default:
+                return true;
+        }
     }
 
     onSlotMouseUp(index: number, event: cc.Event.EventMouse) {
