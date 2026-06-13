@@ -123,16 +123,16 @@ export default class MonsterSpawner extends cc.Component {
     public autoLoadDefaultPool: boolean = true;
 
     @property(cc.Float)
-    public spawnInterval: number = 4;
+    public spawnInterval: number = 1;
 
     @property(cc.Boolean)
     public spawnOnStart: boolean = true;
 
     @property(cc.Integer)
-    public maxAliveTotal: number = 8;
+    public maxAliveTotal: number = 80;
 
     @property(cc.Integer)
-    public maxSpawnBudget: number = 8;
+    public maxSpawnBudget: number = 80;
 
     @property(cc.Float)
     public despawnDistance: number = 1400;
